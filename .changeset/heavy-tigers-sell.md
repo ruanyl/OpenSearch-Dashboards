@@ -2,7 +2,7 @@
 'opensearch-dashboards': minor
 ---
 
-## This is an example of using changeset
+This is an example of using changeset
 
 In this example, there are some changes to `opensearch-dashboards`. But this is
 just for demo, there is no changes to the actual files.
