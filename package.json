@@ -99,6 +99,7 @@
   },
   "workspaces": {
     "packages": [
+      ".",
       "packages/*",
       "examples/*",
       "test/plugin_functional/plugins/*",
@@ -116,6 +117,7 @@
   },
   "dependencies": {
     "@aws-crypto/client-node": "^3.1.1",
+    "@changesets/cli": "^2.26.0",
     "@elastic/datemath": "5.0.3",
     "@elastic/eui": "npm:@opensearch-project/oui@1.0.0",
     "@elastic/good": "^9.0.1-kibana3",
