@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": true,
-  "version": "3.0.0",
+  "version": "3.1.0",
   "branch": "main",
   "types": "./opensearch_dashboards.d.ts",
   "tsdocMetadata": "./build/tsdoc-metadata.json",
@@ -241,7 +241,7 @@
     "@osd/eslint-import-resolver-opensearch-dashboards": "2.0.0",
     "@osd/eslint-plugin-eslint": "1.0.0",
     "@osd/expect": "1.0.0",
-    "@osd/opensearch": "1.0.0",
+    "@osd/opensearch": "1.0.1",
     "@osd/opensearch-archiver": "1.0.0",
     "@osd/optimizer": "1.0.0",
     "@osd/plugin-generator": "1.0.0",

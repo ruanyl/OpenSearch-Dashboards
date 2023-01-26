@@ -1,7 +1,7 @@
 {
   "name": "@osd/opensearch",
   "main": "./target/index.js",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "license": "Apache-2.0",
   "private": true,
   "opensearchDashboards": {

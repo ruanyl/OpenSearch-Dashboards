@@ -1,5 +1,23 @@
 # CHANGELOG
 
+## 3.1.0
+
+### Minor Changes
+
+- [#2](https://github.com/ruanyl/OpenSearch-Dashboards/pull/2) [`643e516873`](https://github.com/ruanyl/OpenSearch-Dashboards/commit/643e516873d36c39c77a30c817c0c7ded1c2463d) Thanks [@ruanyl](https://github.com/ruanyl)! - This is an example of using changeset
+
+  In this example, there are some changes to `opensearch-dashboards`. But this is
+  just for demo, there is no changes to the actual files.
+
+  This is a example to demonstrate the idea of using changeset to manage
+  changelog without tears.
+
+  The changeset file is a regular markdown file, we can use markdown syntax:
+
+  ```
+  yarn changeset add
+  ```
+
 Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ## [Unreleased]
