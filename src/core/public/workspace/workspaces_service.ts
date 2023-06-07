@@ -7,6 +7,7 @@ import { WorkspacesClient, WorkspacesClientContract } from './workspaces_client'
 import type { WorkspaceAttribute } from '../../server/types';
 import { HttpSetup } from '../http';
 import { IUiSettingsClient } from '../ui_settings';
+import { HttpStart } from '..';
 
 /**
  * @public

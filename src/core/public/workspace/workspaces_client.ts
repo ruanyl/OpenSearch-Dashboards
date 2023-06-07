@@ -6,15 +6,20 @@ import type { PublicContract } from '@osd/utility-types';
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { isEqual } from 'lodash';
 import { HttpFetchError, HttpFetchOptions, HttpSetup } from '../http';
-import { WorkspaceAttribute, WorkspaceFindOptions } from '.';
 import { WORKSPACES_API_BASE_URL, WORKSPACE_ERROR_REASON_MAP } from './consts';
+import { resolve as resolveUrl } from 'url';
+import type { PublicMethodsOf } from '@osd/utility-types';
+import { HttpStart } from '../http';
+import { WorkspaceAttribute, WorkspaceFindOptions } from '.';
 
 /**
  * WorkspacesClientContract as implemented by the {@link WorkspacesClient}
  *
  * @public
  */
-export type WorkspacesClientContract = PublicContract<WorkspacesClient>;
+export type WorkspacesClientContract = PublicMethodsOf<WorkspacesClient>;
+
+const API_BASE_URL = '/api/workspaces/';
 
 const join = (...uriComponents: Array<string | undefined>) =>
   uriComponents
@@ -185,30 +190,38 @@ export class WorkspacesClient {
     }
   }
 
+  private async performBulkGet(objects: Array<{ id: string }>): Promise<WorkspaceAttribute[]> {
+    const path = this.getPath(['_bulk_get']);
+    return this.http.fetch(path, {
+      method: 'POST',
+      body: JSON.stringify(objects),
+    });
+  }
+
+  private getPath(path: Array<string | undefined>): string {
+    return resolveUrl(API_BASE_URL, join(...path));
+  }
+
   /**
    * Persists an workspace
    *
    * @param attributes
    * @returns
    */
-  public async create(
-    attributes: Omit<WorkspaceAttribute, 'id'>
-  ): Promise<IResponse<WorkspaceAttribute>> {
+  public create = (attributes: Omit<WorkspaceAttribute, 'id'>): Promise<WorkspaceAttribute> => {
+    if (!attributes) {
+      return Promise.reject(new Error('requires attributes'));
+    }
+
     const path = this.getPath([]);
 
-    const result = await this.safeFetch<WorkspaceAttribute>(path, {
+    return this.http.fetch(path, {
       method: 'POST',
       body: JSON.stringify({
         attributes,
       }),
     });
-
-    if (result.success) {
-      this.updateWorkspaceListAndNotify();
-    }
-
-    return result;
-  }
+  };
 
   /**
    * Deletes a workspace
@@ -216,15 +229,13 @@ export class WorkspacesClient {
    * @param id
    * @returns
    */
-  public async delete(id: string): Promise<IResponse<null>> {
-    const result = await this.safeFetch<null>(this.getPath([id]), { method: 'DELETE' });
-
-    if (result.success) {
-      this.updateWorkspaceListAndNotify();
+  public delete = (id: string): Promise<{ success: boolean }> => {
+    if (!id) {
+      return Promise.reject(new Error('requires id'));
     }
 
-    return result;
-  }
+    return this.http.delete(this.getPath([id]), { method: 'DELETE' });
+  };
 
   /**
    * Search for workspaces
@@ -241,17 +252,16 @@ export class WorkspacesClient {
   public list = (
     options?: WorkspaceFindOptions
   ): Promise<
-    IResponse<{
-      workspaces: WorkspaceAttribute[];
+    WorkspaceAttribute & {
       total: number;
-      per_page: number;
+      perPage: number;
       page: number;
-    }>
+    }
   > => {
     const path = this.getPath(['_list']);
-    return this.safeFetch(path, {
-      method: 'POST',
-      body: JSON.stringify(options || {}),
+    return this.http.fetch(path, {
+      method: 'GET',
+      query: options,
     });
   };
 
@@ -261,43 +271,52 @@ export class WorkspacesClient {
    * @param {string} id
    * @returns The workspace for the given id.
    */
-  public async get(id: string): Promise<IResponse<WorkspaceAttribute>> {
-    const path = this.getPath([id]);
-    return this.safeFetch(path, {
-      method: 'GET',
+  public get = (id: string): Promise<WorkspaceAttribute> => {
+    if (!id) {
+      return Promise.reject(new Error('requires id'));
+    }
+
+    return this.performBulkGet([{ id }]).then((res) => {
+      if (res.length) {
+        return res[0];
+      }
+
+      return Promise.reject('No workspace can be found');
     });
-  }
+  };
 
   /**
    * Updates a workspace
    *
+   * @param {string} type
    * @param {string} id
    * @param {object} attributes
    * @returns
    */
-  public async update(
+  public update(
     id: string,
     attributes: Partial<WorkspaceAttribute>
-  ): Promise<IResponse<boolean>> {
+  ): Promise<{
+    success: boolean;
+  }> {
+    if (!id || !attributes) {
+      return Promise.reject(new Error('requires id and attributes'));
+    }
+
     const path = this.getPath([id]);
     const body = {
       attributes,
     };
 
-    const result = await this.safeFetch(path, {
-      method: 'PUT',
-      body: JSON.stringify(body),
-    });
-
-    if (result.success) {
-      this.updateWorkspaceListAndNotify();
-    }
-
-    return result;
-  }
-
-  public stop() {
-    this.workspaceList$.unsubscribe();
-    this.currentWorkspaceId$.unsubscribe();
+    return this.http
+      .fetch(path, {
+        method: 'PUT',
+        body: JSON.stringify(body),
+      })
+      .then((resp: WorkspaceAttribute) => {
+        return {
+          success: true,
+        };
+      });
   }
 }
