@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useState, FormEventHandler, useRef } from 'react';
+import React, { useCallback, useState, FormEventHandler, useRef, useMemo } from 'react';
+import { groupBy } from 'lodash';
 import {
   EuiPanel,
   EuiSpacer,
@@ -27,18 +28,15 @@ import {
   EuiCheckboxProps,
   EuiFieldTextProps,
 } from '@elastic/eui';
+import { ApplicationStart } from 'opensearch-dashboards/public';
 
-interface WorkspaceTemplate {
-  name: string;
-  image: string;
-  description: string;
-  keyFeatures: string[];
-}
+import { WorkspaceTemplate } from '../../../../../core/types';
+import { useApplications, useWorkspaceTemplate } from '../../hooks';
 
 interface WorkspaceFeature {
   id: string;
   name: string;
-  template: string[];
+  templates: WorkspaceTemplate[];
 }
 
 interface WorkspaceFeatureGroup {
@@ -61,22 +59,21 @@ const isWorkspaceFeatureGroup = (
 const workspaceHtmlIdGenerator = htmlIdGenerator();
 
 interface WorkspaceFormProps {
-  templates: WorkspaceTemplate[];
-  featureOrGroups: Array<WorkspaceFeature | WorkspaceFeatureGroup>;
+  application: ApplicationStart;
   onSubmit?: (formData: WorkspaceFormData) => void;
   defaultValues?: WorkspaceFormData;
 }
-export const WorkspaceForm = ({
-  templates,
-  featureOrGroups,
-  onSubmit,
-  defaultValues,
-}: WorkspaceFormProps) => {
+export const WorkspaceForm = ({ application, onSubmit, defaultValues }: WorkspaceFormProps) => {
+  const { workspaceTemplates, templateFeatureMap } = useWorkspaceTemplate(application);
+  const applications = useApplications(application);
+
   const [name, setName] = useState(defaultValues?.name);
   const [description, setDescription] = useState(defaultValues?.description);
-  const [selectedTemplateName, setSelectedTemplateName] = useState<string>();
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>();
   const [selectedFeatureIds, setSelectedFeatureIds] = useState(defaultValues?.features || []);
-  const selectedTemplate = templates.find((template) => template.name === selectedTemplateName);
+  const selectedTemplate = workspaceTemplates.find(
+    (template) => template.id === selectedTemplateId
+  );
   const [formErrors, setFormErrors] = useState<WorkspaceFormErrors>({});
   const formIdRef = useRef<string>();
   const getFormData = () => ({
@@ -87,20 +84,47 @@ export const WorkspaceForm = ({
   const getFormDataRef = useRef(getFormData);
   getFormDataRef.current = getFormData;
 
+  const featureOrGroups = useMemo(() => {
+    const category2Applications = groupBy(applications, 'category.label');
+    return Object.keys(category2Applications).reduce<
+      Array<WorkspaceFeature | WorkspaceFeatureGroup>
+    >((previousValue, currentKey) => {
+      if (currentKey === 'undefined') {
+        return previousValue;
+      }
+      const apps = category2Applications[currentKey];
+      const features = apps.map(({ id, title, workspaceTemplate }) => ({
+        id,
+        name: title,
+        templates: workspaceTemplate || [],
+      }));
+      if (features.length === 1) {
+        return [...previousValue, features[0]];
+      }
+      return [
+        ...previousValue,
+        {
+          name: apps[0].category?.label || '',
+          features,
+        },
+      ];
+    }, []);
+  }, [applications]);
+
   if (!formIdRef.current) {
     formIdRef.current = workspaceHtmlIdGenerator();
   }
 
   const handleTemplateCardChange = useCallback<EuiCheckableCardProps['onChange']>(
     (e) => {
-      const templateName = e.target.value;
-      setSelectedTemplateName(templateName);
+      const templateId = e.target.value;
+      setSelectedTemplateId(templateId);
       setSelectedFeatureIds(
         featureOrGroups.reduce<string[]>(
           (previousData, currentData) => [
             ...previousData,
             ...(isWorkspaceFeatureGroup(currentData) ? currentData.features : [currentData])
-              .filter(({ template }) => template.includes(templateName))
+              .filter(({ templates }) => !!templates.find((template) => template.id === templateId))
               .map((feature) => feature.id),
           ],
           []
@@ -192,14 +216,14 @@ export const WorkspaceForm = ({
         </EuiTitle>
         <EuiSpacer />
         <EuiFlexGrid columns={2}>
-          {templates.map((template) => (
-            <EuiFlexItem key={template.name}>
+          {workspaceTemplates.map((template) => (
+            <EuiFlexItem key={template.label}>
               <EuiCheckableCard
                 id={workspaceHtmlIdGenerator()}
-                title={template.name}
-                label={template.name}
-                value={template.name}
-                checked={template.name === selectedTemplateName}
+                title={template.label}
+                label={template.label}
+                value={template.id}
+                checked={template.id === selectedTemplateId}
                 onChange={handleTemplateCardChange}
               />
             </EuiFlexItem>
@@ -214,7 +238,9 @@ export const WorkspaceForm = ({
             <EuiSpacer />
             <EuiFlexGroup>
               <EuiFlexItem>
-                <EuiImage src={selectedTemplate.image} alt={selectedTemplate.name} />
+                {selectedTemplate.coverImage && (
+                  <EuiImage src={selectedTemplate.coverImage} alt={selectedTemplate.label} />
+                )}
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText>{selectedTemplate.description}</EuiText>
@@ -223,8 +249,8 @@ export const WorkspaceForm = ({
                 </EuiTitle>
                 <EuiSpacer />
                 <EuiFlexGrid style={{ paddingLeft: 20, paddingRight: 100 }} columns={2}>
-                  {selectedTemplate.keyFeatures.map((feature) => (
-                    <EuiFlexItem key={feature}>• {feature}</EuiFlexItem>
+                  {templateFeatureMap.get(selectedTemplate.id)?.map((feature) => (
+                    <EuiFlexItem key={feature.id}>• {feature.title}</EuiFlexItem>
                   ))}
                 </EuiFlexGrid>
               </EuiFlexItem>
