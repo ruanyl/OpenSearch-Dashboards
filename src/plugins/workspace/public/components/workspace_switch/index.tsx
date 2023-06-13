@@ -19,6 +19,7 @@ export const WorkspaceSwitch = ({ workspaces }: Props) => {
     const id = e.target.value;
     setCurrentWorkspaceId(id);
     client.enterWorkspace(id);
+    // TODO: call jump
   };
 
   const getOptions = useCallback(async () => {
