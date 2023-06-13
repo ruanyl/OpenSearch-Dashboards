@@ -11,10 +11,11 @@ import { Route, Switch, useLocation } from 'react-router-dom';
 import { ROUTES } from './routes';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
 import { createBreadcrumbsFromPath } from './utils/breadcrumbs';
+import { WorkspaceSwitch } from './workspace_switch';
 
 export const WorkspaceApp = ({ appBasePath }: { appBasePath: string }) => {
   const {
-    services: { chrome },
+    services: { chrome, workspaces },
   } = useOpenSearchDashboards();
   const location = useLocation();
 
@@ -30,6 +31,7 @@ export const WorkspaceApp = ({ appBasePath }: { appBasePath: string }) => {
     <I18nProvider>
       <EuiPage>
         <EuiPageBody component="main">
+          <WorkspaceSwitch workspaces={workspaces!} />
           <Switch>
             {ROUTES.map(({ path, Component, exact }) => (
               <Route key={path} path={path} render={() => <Component />} exact={exact ?? false} />
