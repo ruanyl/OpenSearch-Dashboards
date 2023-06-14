@@ -28,9 +28,9 @@ import {
   EuiCheckboxProps,
   EuiFieldTextProps,
 } from '@elastic/eui';
-import { ApplicationStart } from 'opensearch-dashboards/public';
 
 import { WorkspaceTemplate } from '../../../../../core/types';
+import { AppNavLinkStatus, ApplicationStart } from '../../../../../core/public';
 import { useApplications, useWorkspaceTemplate } from '../../hooks';
 
 interface WorkspaceFeature {
@@ -89,17 +89,19 @@ export const WorkspaceForm = ({ application, onSubmit, defaultValues }: Workspac
     return Object.keys(category2Applications).reduce<
       Array<WorkspaceFeature | WorkspaceFeatureGroup>
     >((previousValue, currentKey) => {
-      if (currentKey === 'undefined') {
-        return previousValue;
-      }
       const apps = category2Applications[currentKey];
-      const features = apps.map(({ id, title, workspaceTemplate }) => ({
-        id,
-        name: title,
-        templates: workspaceTemplate || [],
-      }));
-      if (features.length === 1) {
-        return [...previousValue, features[0]];
+      const features = apps
+        .filter(
+          ({ navLinkStatus, chromeless }) =>
+            navLinkStatus !== AppNavLinkStatus.hidden && !chromeless
+        )
+        .map(({ id, title, workspaceTemplate }) => ({
+          id,
+          name: title,
+          templates: workspaceTemplate || [],
+        }));
+      if (features.length === 1 || currentKey === 'undefined') {
+        return [...previousValue, ...features];
       }
       return [
         ...previousValue,
