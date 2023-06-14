@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import React, { useCallback } from 'react';
+import { EuiPage, EuiPageBody, EuiPageHeader, EuiPageContent } from '@elastic/eui';
 
 import { useOpenSearchDashboards } from '../../../../../plugins/opensearch_dashboards_react/public';
 
@@ -14,13 +14,26 @@ export const WorkspaceCreator = () => {
   const {
     services: { application },
   } = useOpenSearchDashboards();
+
+  const handleWorkspaceFormSubmit = useCallback(() => {}, []);
+
   return (
-    <div>
-      <EuiTitle>
-        <h1>Create Workspace</h1>
-      </EuiTitle>
-      <EuiSpacer />
-      {application && <WorkspaceForm application={application} />}
-    </div>
+    <EuiPage paddingSize="none">
+      <EuiPageBody panelled>
+        <EuiPageHeader restrictWidth pageTitle="Create Workspace" />
+        <EuiPageContent
+          verticalPosition="center"
+          horizontalPosition="center"
+          paddingSize="none"
+          color="subdued"
+          hasShadow={false}
+          style={{ width: '100%', maxWidth: 1000 }}
+        >
+          {application && (
+            <WorkspaceForm application={application} onSubmit={handleWorkspaceFormSubmit} />
+          )}
+        </EuiPageContent>
+      </EuiPageBody>
+    </EuiPage>
   );
 };

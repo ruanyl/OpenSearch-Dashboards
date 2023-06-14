@@ -237,11 +237,11 @@ export const WorkspaceForm = ({ application, onSubmit, defaultValues }: Workspac
             </EuiTitle>
             <EuiSpacer />
             <EuiFlexGroup>
-              <EuiFlexItem>
-                {selectedTemplate.coverImage && (
+              {selectedTemplate.coverImage && (
+                <EuiFlexItem>
                   <EuiImage src={selectedTemplate.coverImage} alt={selectedTemplate.label} />
-                )}
-              </EuiFlexItem>
+                </EuiFlexItem>
+              )}
               <EuiFlexItem>
                 <EuiText>{selectedTemplate.description}</EuiText>
                 <EuiTitle size="xs">
