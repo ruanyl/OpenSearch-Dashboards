@@ -42,14 +42,14 @@ import type { IUiSettingsClient } from '../ui_settings';
 import type { InjectedMetadataSetup } from '../injected_metadata';
 import { renderApp as renderErrorApp, setupUrlOverflowDetection } from './errors';
 import { renderApp as renderStatusApp } from './status';
-import { WorkspaceSetup } from '../workspace/workspaces_service';
+import { WorkspacesSetup } from '../workspace';
 
 interface SetupDeps {
   application: InternalApplicationSetup;
   http: HttpSetup;
   injectedMetadata: InjectedMetadataSetup;
   notifications: NotificationsSetup;
-  workspaces: WorkspaceSetup;
+  workspaces: WorkspacesSetup;
 }
 
 interface StartDeps {

@@ -16,7 +16,7 @@ export interface WorkspacesStart {
   formatUrlWithWorkspaceId: (url: string, id: WorkspaceAttribute['id']) => string;
 }
 
-export type WorkspaceSetup = WorkspacesStart;
+export type WorkspacesSetup = WorkspacesStart;
 
 function setQuerystring(url: string, params: Record<string, string>): string {
   const urlObj = new URL(url);
@@ -33,7 +33,7 @@ function setQuerystring(url: string, params: Record<string, string>): string {
   return urlObj.toString();
 }
 
-export class WorkspacesService implements CoreService<WorkspaceSetup, WorkspacesStart> {
+export class WorkspacesService implements CoreService<WorkspacesSetup, WorkspacesStart> {
   private client?: WorkspacesClientContract;
   private formatUrlWithWorkspaceId(url: string, id: string) {
     return setQuerystring(url, {

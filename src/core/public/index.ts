@@ -88,8 +88,7 @@ import {
   HandlerParameters,
 } from './context';
 import { Branding } from '../types';
-import { WorkspacesStart } from './workspace';
-import { WorkspaceSetup } from './workspace/workspaces_service';
+import { WorkspacesStart, WorkspacesSetup } from './workspace';
 
 export { PackageInfo, EnvironmentMode } from '../server/types';
 /** @interal */
@@ -242,8 +241,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   };
   /** {@link StartServicesAccessor} */
   getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
-  /** {@link WorkspaceSetup} */
-  workspaces: WorkspaceSetup;
+  /** {@link WorkspacesSetup} */
+  workspaces: WorkspacesSetup;
 }
 
 /**
