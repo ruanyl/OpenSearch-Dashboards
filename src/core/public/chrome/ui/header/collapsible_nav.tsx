@@ -51,6 +51,7 @@ import { HttpStart } from '../../../http';
 import { OnIsLockedUpdate } from './';
 import { createEuiListItem, createRecentNavLink, isModifiedOrPrevented } from './nav_link';
 import { ChromeBranding } from '../../chrome_service';
+import { WorkspacesStart } from '../../../workspace';
 
 function getAllCategories(allCategorizedLinks: Record<string, ChromeNavLink[]>) {
   const allCategories = {} as Record<string, AppCategory | undefined>;
@@ -102,6 +103,7 @@ interface Props {
   navigateToUrl: InternalApplicationStart['navigateToUrl'];
   customNavLink$: Rx.Observable<ChromeNavLink | undefined>;
   branding: ChromeBranding;
+  workspaces: WorkspacesStart;
 }
 
 export function CollapsibleNav({
@@ -116,6 +118,7 @@ export function CollapsibleNav({
   navigateToApp,
   navigateToUrl,
   branding,
+  workspaces,
   ...observables
 }: Props) {
   const navLinks = useObservable(observables.navLinks$, []).filter((link) => !link.hidden);
@@ -125,8 +128,9 @@ export function CollapsibleNav({
   const lockRef = useRef<HTMLButtonElement>(null);
   const groupedNavLinks = groupBy(navLinks, (link) => link?.category?.id);
   const { undefined: unknowns = [], ...allCategorizedLinks } = groupedNavLinks;
-  const categoryDictionary = getAllCategories(allCategorizedLinks);
-  const orderedCategories = getOrderedCategories(allCategorizedLinks, categoryDictionary);
+  const filterdLinks = filterLinks(allCategorizedLinks);
+  const categoryDictionary = getAllCategories(filterdLinks);
+  const orderedCategories = getOrderedCategories(filterdLinks, categoryDictionary);
   const readyForEUI = (link: ChromeNavLink, needsIcon: boolean = false) => {
     return createEuiListItem({
       link,
@@ -144,6 +148,15 @@ export function CollapsibleNav({
   const darkMode = branding.darkMode;
   const markDefault = branding.mark?.defaultUrl;
   const markDarkMode = branding.mark?.darkModeUrl;
+
+  function filterLinks(links: Record<string, ChromeNavLink[]>) {
+    return links;
+    // TODO: features is an array of string, wait specific and real data to do integration
+    // const data = await workspaces.client.getCurrentWorkspace();
+    // if (data.success) {
+    //   const result = data.result.features;
+    // }
+  }
 
   /**
    * Use branding configurations to check which URL to use for rendering

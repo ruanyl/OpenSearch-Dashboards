@@ -63,6 +63,7 @@ import { HomeLoader } from './home_loader';
 import { HeaderNavControls } from './header_nav_controls';
 import { HeaderActionMenu } from './header_action_menu';
 import { HeaderLogo } from './header_logo';
+import { WorkspacesStart } from '../../../workspace';
 
 export interface HeaderProps {
   opensearchDashboardsVersion: string;
@@ -90,6 +91,7 @@ export interface HeaderProps {
   onIsLockedUpdate: OnIsLockedUpdate;
   branding: ChromeBranding;
   survey: string | undefined;
+  workspaces: WorkspacesStart;
 }
 
 export function Header({
@@ -255,6 +257,7 @@ export function Header({
           }}
           customNavLink$={observables.customNavLink$}
           branding={branding}
+          workspaces={observables.workspaces}
         />
       </header>
     </>
