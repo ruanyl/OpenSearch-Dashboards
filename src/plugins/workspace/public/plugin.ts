@@ -53,9 +53,18 @@ export class WorkspacesPlugin implements Plugin<{}, {}> {
   }
   public async setup(core: CoreSetup) {
     this.core = core;
+    /**
+     * register a listener
+     */
     this.addWorkspaceListener();
+
+    /**
+     * Retrive workspace id from url or sessionstorage
+     * url > sessionstorage
+     */
     const workspaceId =
       this.getWorkpsaceIdFromQueryString() || this.getWorkpsaceIdFromSessionStorage();
+
     if (workspaceId) {
       const result = await core.workspaces.client.enterWorkspace(workspaceId);
       if (!result.success) {
