@@ -30,7 +30,7 @@ export const workspace: SavedObjectsType = {
     dynamic: false,
     properties: {
       name: {
-        type: 'text',
+        type: 'keyword',
       },
       description: {
         type: 'text',
