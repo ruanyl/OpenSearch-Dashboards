@@ -12,6 +12,7 @@ import {
   AppNavLinkStatus,
 } from '../../../core/public';
 import { WORKSPACE_APP_ID } from '../common/constants';
+import { mountDropdownList } from './mount';
 
 export class WorkspacesPlugin implements Plugin<{}, {}> {
   public setup(core: CoreSetup) {
@@ -38,6 +39,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}> {
   }
 
   public start(core: CoreStart) {
+    mountDropdownList(core);
     return {};
   }
 }
