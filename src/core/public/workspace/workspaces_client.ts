@@ -4,7 +4,7 @@
  */
 import { resolve as resolveUrl } from 'url';
 import type { PublicContract } from '@osd/utility-types';
-import { Observable, Subscriber } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { HttpFetchError, HttpFetchOptions, HttpSetup } from '../http';
 import { WorkspaceAttribute, WorkspaceFindOptions } from '.';
 import { WORKSPACES_API_BASE_URL } from './consts';
@@ -40,35 +40,23 @@ type IResponse<T> =
  */
 export class WorkspacesClient {
   private http: HttpSetup;
-  private workspaceIdSubscriber: Subscriber<string> = new Subscriber<string>();
-  private workspaceListSubscriber: Subscriber<WorkspaceAttribute[]> = new Subscriber<
-    WorkspaceAttribute[]
-  >();
-  private currentWorkspaceId: string = '';
-  public currentWorkspaceId$: Observable<string> = new Observable((subscriber) => {
-    this.workspaceIdSubscriber = subscriber;
-  });
-  public workspaceList$: Observable<WorkspaceAttribute[]> = new Observable(
-    (subscriber) => (this.workspaceListSubscriber = subscriber)
-  );
+  public currentWorkspaceId$ = new BehaviorSubject<string>('');
+  public workspaceList$ = new Subject<WorkspaceAttribute[]>();
   constructor(http: HttpSetup) {
     this.http = http;
-    this.currentWorkspaceId$.subscribe((currentWorkspaceId) => {
-      this.currentWorkspaceId = currentWorkspaceId;
-    });
     /**
      * Add logic to check if current workspace id is still valid
      * If not, remove the current workspace id and notify other subscribers
      */
     this.workspaceList$.subscribe(async (workspaceList) => {
-      const currentWorkspaceId = this.currentWorkspaceId;
+      const currentWorkspaceId = await this.currentWorkspaceId$.getValue();
       if (currentWorkspaceId) {
         const findItem = workspaceList.find((item) => item.id === currentWorkspaceId);
         if (!findItem) {
           /**
            * Current workspace is staled
            */
-          this.workspaceIdSubscriber.next('');
+          this.currentWorkspaceId$.next('');
         }
       }
     });
@@ -110,14 +98,14 @@ export class WorkspacesClient {
     });
 
     if (result.success) {
-      this.workspaceListSubscriber.next(result.result.workspaces);
+      this.workspaceList$.next(result.result.workspaces);
     }
   }
 
   public async enterWorkspace(id: string): Promise<IResponse<null>> {
     const workspaceResp = await this.get(id);
     if (workspaceResp.success) {
-      this.workspaceIdSubscriber.next(id);
+      this.currentWorkspaceId$.next(id);
       return {
         success: true,
         result: null,
@@ -128,7 +116,7 @@ export class WorkspacesClient {
   }
 
   public async exitWorkspace(): Promise<IResponse<null>> {
-    this.workspaceIdSubscriber.next('');
+    this.currentWorkspaceId$.next('');
     return {
       success: true,
       result: null,
@@ -136,7 +124,7 @@ export class WorkspacesClient {
   }
 
   public async getCurrentWorkspaceId(): Promise<IResponse<WorkspaceAttribute['id']>> {
-    const currentWorkspaceId = this.currentWorkspaceId;
+    const currentWorkspaceId = this.currentWorkspaceId$.getValue();
     if (!currentWorkspaceId) {
       return {
         success: false,
@@ -300,6 +288,7 @@ export class WorkspacesClient {
   }
 
   public stop() {
-    this.workspaceIdSubscriber.complete();
+    this.workspaceList$.unsubscribe();
+    this.currentWorkspaceId$.unsubscribe();
   }
 }

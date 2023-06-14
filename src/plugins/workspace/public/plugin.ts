@@ -52,6 +52,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}> {
     }
   }
   public async setup(core: CoreSetup) {
+    this.core = core;
     this.addWorkspaceListener();
     const workspaceId =
       this.getWorkpsaceIdFromQueryString() || this.getWorkpsaceIdFromSessionStorage();
