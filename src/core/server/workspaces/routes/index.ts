@@ -23,15 +23,17 @@ export function registerRoutes({
   http: InternalHttpServiceSetup;
 }) {
   const router = http.createRouter(WORKSPACES_API_BASE_URL);
-  router.get(
+  router.post(
     {
       path: '/_list',
       validate: {
-        query: schema.object({
-          per_page: schema.number({ min: 0, defaultValue: 20 }),
+        body: schema.object({
+          search: schema.maybe(schema.string()),
+          sortOrder: schema.maybe(schema.string()),
+          perPage: schema.number({ min: 0, defaultValue: 20 }),
           page: schema.number({ min: 0, defaultValue: 1 }),
-          sort_field: schema.maybe(schema.string()),
-          fields: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+          sortField: schema.maybe(schema.string()),
+          searchFields: schema.maybe(schema.arrayOf(schema.string())),
         }),
       },
     },
@@ -42,7 +44,7 @@ export function registerRoutes({
           request: req,
           logger,
         },
-        req.query
+        req.body
       );
       return res.ok({ body: result });
     })
@@ -71,12 +73,13 @@ export function registerRoutes({
   );
   router.post(
     {
-      path: '/{id?}',
+      path: '/',
       validate: {
         body: schema.object({
           attributes: schema.object({
             description: schema.maybe(schema.string()),
             name: schema.string(),
+            features: schema.maybe(schema.arrayOf(schema.string())),
           }),
         }),
       },
@@ -106,6 +109,7 @@ export function registerRoutes({
           attributes: schema.object({
             description: schema.maybe(schema.string()),
             name: schema.string(),
+            features: schema.maybe(schema.arrayOf(schema.string())),
           }),
         }),
       },
