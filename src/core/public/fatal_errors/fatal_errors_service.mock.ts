@@ -58,3 +58,25 @@ export const fatalErrorsServiceMock = {
   createSetupContract: createSetupContractMock,
   createStartContract: createStartContractMock,
 };
+
+const createWorkspacesSetupContractMock = () => ({
+  client: {
+    enterWorkspace: jest.fn(),
+    exitWorkspace: jest.fn(),
+    create: jest.fn(),
+    delete: jest.fn(),
+    list: jest.fn(),
+    getCurrentWorkspace: jest.fn(),
+    getCurrentWorkspaceId: jest.fn(),
+    get: jest.fn(),
+    update: jest.fn(),
+  },
+  formatUrlWithWorkspaceId: jest.fn(),
+});
+
+const createWorkspacesStartContractMock = createWorkspacesSetupContractMock;
+
+export const workspacesServiceMock = {
+  createSetupContractMock: createWorkspacesStartContractMock,
+  createStartContract: createWorkspacesStartContractMock,
+};

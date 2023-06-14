@@ -67,7 +67,3 @@ export type IResponse<T> =
       success: false;
       error?: string;
     };
-
-export const WORKSPACES_API_BASE_URL = '/api/workspaces';
-
-export const WORKSPACE_ID_COOKIE_NAME = 'trinity_workspace_id';

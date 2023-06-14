@@ -89,6 +89,7 @@ import {
 } from './context';
 import { Branding } from '../types';
 import { WorkspacesStart } from './workspace';
+import { WorkspaceSetup } from './workspace/workspaces_service';
 
 export { PackageInfo, EnvironmentMode } from '../server/types';
 /** @interal */
@@ -241,6 +242,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   };
   /** {@link StartServicesAccessor} */
   getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
+  /** {@link WorkspaceSetup} */
+  workspaces: WorkspaceSetup;
 }
 
 /**
@@ -354,4 +357,5 @@ export {
   WorkspacesService,
   WorkspaceAttribute,
   WorkspaceFindOptions,
+  WORKSPACE_ID_QUERYSTRING_NAME,
 } from './workspace';

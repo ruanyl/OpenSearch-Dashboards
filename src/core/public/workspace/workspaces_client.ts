@@ -4,9 +4,10 @@
  */
 import { resolve as resolveUrl } from 'url';
 import type { PublicMethodsOf } from '@osd/utility-types';
-import { WORKSPACES_API_BASE_URL } from '../../server/types';
-import { HttpStart } from '../http';
+import { Observable, Subscriber } from 'rxjs';
+import { HttpSetup } from '../http';
 import { WorkspaceAttribute, WorkspaceFindOptions } from '.';
+import { WORKSPACES_API_BASE_URL } from './consts';
 
 /**
  * WorkspacesClientContract as implemented by the {@link WorkspacesClient}
@@ -38,8 +39,12 @@ type IResponse<T> =
  * @public
  */
 export class WorkspacesClient {
-  private http: HttpStart;
-  constructor(http: HttpStart) {
+  private http: HttpSetup;
+  private workspaceIdSubscriber: Subscriber<string> = new Subscriber<string>();
+  private workspaceId$: Observable<string> = new Observable(
+    (subscriber) => (this.workspaceIdSubscriber = subscriber)
+  );
+  constructor(http: HttpSetup) {
     this.http = http;
   }
 
@@ -47,24 +52,46 @@ export class WorkspacesClient {
     return resolveUrl(`${WORKSPACES_API_BASE_URL}/`, join(...path));
   }
 
+  public listenToWorkspaceChange(fn: (newWorkspace: string) => void) {
+    this.workspaceId$.subscribe({
+      next: fn,
+    });
+  }
+
   public async enterWorkspace(id: string): Promise<IResponse<null>> {
-    return this.http.post(this.getPath(['_enter', id]));
+    const workspaceResp = await this.get(id);
+    if (workspaceResp.success) {
+      this.workspaceIdSubscriber.next(id);
+      return {
+        success: true,
+        result: null,
+      };
+    } else {
+      return workspaceResp;
+    }
   }
 
   public async exitWorkspace(): Promise<IResponse<null>> {
-    return this.http.post(this.getPath(['_exit']));
+    this.workspaceIdSubscriber.next('');
+    return {
+      success: true,
+      result: null,
+    };
   }
 
   public async getCurrentWorkspaceId(): Promise<IResponse<WorkspaceAttribute['id']>> {
-    const currentWorkspaceIdResp = await this.http.get(this.getPath(['_current']));
-    if (currentWorkspaceIdResp.success && !currentWorkspaceIdResp.result) {
+    const currentWorkspaceId = await this.workspaceId$.toPromise();
+    if (!currentWorkspaceId) {
       return {
         success: false,
         error: 'You are not in any workspace yet.',
       };
     }
 
-    return currentWorkspaceIdResp;
+    return {
+      success: true,
+      result: currentWorkspaceId,
+    };
   }
 
   public async getCurrentWorkspace(): Promise<IResponse<WorkspaceAttribute>> {
@@ -181,5 +208,9 @@ export class WorkspacesClient {
       method: 'PUT',
       body: JSON.stringify(body),
     });
+  }
+
+  public stop() {
+    this.workspaceIdSubscriber.complete();
   }
 }

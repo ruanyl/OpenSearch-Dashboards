@@ -39,7 +39,7 @@ export class WorkspacesService
   implements CoreService<WorkspacesServiceSetup, WorkspacesServiceStart> {
   private logger: Logger;
   private client?: IWorkspaceDBImpl;
-  constructor(private readonly coreContext: CoreContext) {
+  constructor(coreContext: CoreContext) {
     this.logger = coreContext.logger.get('workspaces-service');
   }
 
