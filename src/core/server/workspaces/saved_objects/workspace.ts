@@ -29,7 +29,7 @@ export const workspace: SavedObjectsType = {
   mappings: {
     dynamic: false,
     properties: {
-      title: {
+      name: {
         type: 'text',
       },
       description: {
