@@ -138,8 +138,8 @@ export class WorkspacesClient {
   > => {
     const path = this.getPath(['_list']);
     return this.http.fetch(path, {
-      method: 'GET',
-      query: options,
+      method: 'POST',
+      body: JSON.stringify(options || {}),
     });
   };
 

@@ -19,11 +19,11 @@ export interface WorkspaceAttribute {
 
 export interface WorkspaceFindOptions {
   page?: number;
-  per_page?: number;
+  perPage?: number;
   search?: string;
-  search_fields?: string[];
-  sort_field?: string;
-  sort_order?: string;
+  searchFields?: string[];
+  sortField?: string;
+  sortOrder?: string;
 }
 
 export interface IRequestDetail {
