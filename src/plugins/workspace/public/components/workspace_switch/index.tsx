@@ -6,42 +6,38 @@
 import React, { useState, useEffect } from 'react';
 import { EuiSelect, EuiTitle } from '@elastic/eui';
 import { useCallback } from 'react';
-import { WorkspacesStart } from '../../../../../core/public';
+import { useOpenSearchDashboards } from '../../../../../plugins/opensearch_dashboards_react/public';
 
-interface Props {
-  workspaces: WorkspacesStart;
-}
-
-export const WorkspaceSwitch = ({ workspaces }: Props) => {
-  const client = workspaces.client;
+export const WorkspaceSwitch = () => {
+  const {
+    services: { workspaces },
+  } = useOpenSearchDashboards();
 
   const onWorkspaceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const id = e.target.value;
     setCurrentWorkspaceId(id);
-    client.enterWorkspace(id);
+    workspaces?.client.enterWorkspace(id);
     // TODO: call jump
   };
 
   const getOptions = useCallback(async () => {
-    const { result } = await client.list();
-    if (result) {
-      const list = result.workspaces;
-      const options = list.map((item) => ({ value: item.id, name: item.name }));
+    const data = await workspaces?.client.list();
+    if (data?.success) {
+      const list = data.result.workspaces;
+      const options = list.map((item) => ({ value: item.id, text: item.name }));
       setOptions(options);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [workspaces]);
 
   const getCurrentWorkspace = useCallback(async () => {
-    const { result } = await client.getCurrentWorkspaceId();
-    if (result) {
-      setCurrentWorkspaceId(result);
+    const data = await workspaces?.client.getCurrentWorkspaceId();
+    if (data?.success) {
+      setCurrentWorkspaceId(data.result);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [workspaces]);
 
   const [currentWorkspaceId, setCurrentWorkspaceId] = useState('');
-  const [options, setOptions] = useState([]);
+  const [options, setOptions] = useState<Array<{ value: string; text: string }>>([]);
 
   useEffect(() => {
     getOptions();
@@ -51,7 +47,7 @@ export const WorkspaceSwitch = ({ workspaces }: Props) => {
   return (
     <>
       <EuiTitle size="xs">
-        <h4>Switch Workspace</h4>
+        <h4>Switch Workspaces</h4>
       </EuiTitle>
       <EuiSelect options={options} value={currentWorkspaceId} onChange={onWorkspaceChange} />
     </>
