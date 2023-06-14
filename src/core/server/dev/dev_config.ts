@@ -34,7 +34,7 @@ export const config = {
   path: 'dev',
   schema: schema.object({
     basePathProxyTarget: schema.number({
-      defaultValue: 6603,
+      defaultValue: 5603,
     }),
   }),
 };
