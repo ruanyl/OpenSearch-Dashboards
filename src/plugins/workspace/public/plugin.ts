@@ -18,7 +18,7 @@ import { WORKSPACE_ID_QUERYSTRING_NAME } from '../../../core/public';
 export class WorkspacesPlugin implements Plugin<{}, {}> {
   private core?: CoreSetup;
   private addWorkspaceListener() {
-    this.core?.workspaces.client.listenToWorkspaceChange((newWorkspaceId) => {
+    this.core?.workspaces.client.currentWorkspaceId$.subscribe((newWorkspaceId) => {
       try {
         sessionStorage.setItem(WORKSPACE_ID_IN_SESSION_STORAGE, newWorkspaceId);
       } catch (e) {

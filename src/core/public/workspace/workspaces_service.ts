@@ -5,7 +5,7 @@
 import { CoreService } from 'src/core/types';
 import { WorkspacesClient, WorkspacesClientContract } from './workspaces_client';
 import type { WorkspaceAttribute } from '../../server/types';
-import { WORKSPACE_ID_QUERYSTRING_NAME } from './workspaces_client';
+import { WORKSPACE_ID_QUERYSTRING_NAME } from './consts';
 import { HttpSetup } from '../http';
 
 /**
