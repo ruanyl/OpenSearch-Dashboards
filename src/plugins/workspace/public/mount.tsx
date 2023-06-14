@@ -6,7 +6,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { CoreStart } from '../../../core/public';
-import { WorkspaceDropdownList } from './containers/WorkspaceDropdownList';
+import { WorkspaceDropdownList } from './containers/workspace_dropdown_list';
 
 export const mountDropdownList = (core: CoreStart) => {
   core.chrome.navControls.registerLeft({

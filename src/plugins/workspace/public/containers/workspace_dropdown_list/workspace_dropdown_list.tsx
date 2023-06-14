@@ -27,28 +27,31 @@ export function WorkspaceDropdownList(props: WorkspaceDropdownListProps) {
   const [currentWorkspace, setCurrentWorkspace] = useState([] as WorkspaceOption[]);
   const [workspaceOptions, setWorkspaceOptions] = useState([] as WorkspaceOption[]);
 
-  const onSearchChange = useCallback(
-    async (searchValue: string) => {
-      setLoading(true);
-      const response = await coreStart.workspaces.client.list({
-        // sort_field: 'name',
-        search: searchValue,
-        per_page: 999,
-      });
-      if (response.success) {
-        const searchedWorkspaceOptions = response.result.workspaces.map(workspaceToOption);
-        setWorkspaceOptions(searchedWorkspaceOptions);
-      } else {
-        coreStart.notifications.toasts.addDanger({
-          title: 'Failed to list workspaces',
-          text: response.error,
-        });
-        setWorkspaceOptions([]);
-      }
-      setLoading(false);
-    },
-    [coreStart]
-  );
+  // use front-end filter for now, waiting for a new solution
+  // const onSearchChange = useCallback(
+  //   async (searchValue: string) => {
+  //     setLoading(true);
+  //     const response = await coreStart.workspaces.client.list({
+  //       // sort_field: 'name',
+  //       search: `${searchValue.trim()}*`,
+  //       perPage: 999,
+  //       searchFields: ['name'],
+  //     });
+  //     console.log(JSON.stringify(response), `${searchValue.trim()}*`);
+  //     if (response.success) {
+  //       const searchedWorkspaceOptions = response.result.workspaces.map(workspaceToOption);
+  //       setWorkspaceOptions(searchedWorkspaceOptions);
+  //     } else {
+  //       coreStart.notifications.toasts.addDanger({
+  //         title: 'Failed to list workspaces',
+  //         text: response.error,
+  //       });
+  //       setWorkspaceOptions([]);
+  //     }
+  //     setLoading(false);
+  //   },
+  //   [coreStart]
+  // );
 
   useEffect(() => {
     (async () => {
@@ -62,11 +65,25 @@ export function WorkspaceDropdownList(props: WorkspaceDropdownListProps) {
           text: response.error,
         });
         setCurrentWorkspace([]);
-        await onSearchChange('');
+
+        // pull data, to be deprecated
+        const listResponse = await coreStart.workspaces.client.list({
+          perPage: 999,
+        });
+        if (listResponse.success) {
+          const searchedWorkspaceOptions = listResponse.result.workspaces.map(workspaceToOption);
+          setWorkspaceOptions(searchedWorkspaceOptions);
+        } else {
+          coreStart.notifications.toasts.addDanger({
+            title: 'Failed to list workspaces',
+            text: listResponse.error,
+          });
+          setWorkspaceOptions([]);
+        }
       }
       setLoading(false);
     })();
-  }, [coreStart, onSearchChange]);
+  }, [coreStart]);
 
   const onChange = (workspaceOption: WorkspaceOption[]) => {
     /** switch the workspace */
@@ -81,7 +98,7 @@ export function WorkspaceDropdownList(props: WorkspaceDropdownListProps) {
         async
         options={workspaceOptions}
         isLoading={loading}
-        onSearchChange={onSearchChange}
+        // onSearchChange={onSearchChange}
         onChange={onChange}
         selectedOptions={currentWorkspace}
         singleSelection={{ asPlainText: true }}
