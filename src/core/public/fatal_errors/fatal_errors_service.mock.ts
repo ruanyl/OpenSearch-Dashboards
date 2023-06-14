@@ -30,6 +30,8 @@
 
 import type { PublicMethodsOf } from '@osd/utility-types';
 import { FatalErrorsService, FatalErrorsSetup } from './fatal_errors_service';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { WorkspaceAttribute } from '../workspace';
 
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<FatalErrorsSetup> = {
@@ -59,8 +61,14 @@ export const fatalErrorsServiceMock = {
   createStartContract: createStartContractMock,
 };
 
+const currentWorkspaceId$ = new BehaviorSubject<string>('');
+const workspaceList$ = new Subject<WorkspaceAttribute[]>();
+
 const createWorkspacesSetupContractMock = () => ({
   client: {
+    currentWorkspaceId$,
+    workspaceList$,
+    stop: jest.fn(),
     enterWorkspace: jest.fn(),
     exitWorkspace: jest.fn(),
     create: jest.fn(),
