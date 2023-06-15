@@ -28,13 +28,19 @@ export function WorkspaceDropdownList(props: WorkspaceDropdownListProps) {
   const [currentWorkspace, setCurrentWorkspace] = useState([] as WorkspaceOption[]);
   // const [workspaceOptions, setWorkspaceOptions] = useState([] as WorkspaceOption[]);
   const workspaceList = useObservable(coreStart.workspaces.client.workspaceList$, []);
-  // const currentWorkspaceId = useObservable(coreStart.workspaces.client.currentWorkspaceId$);
+  const currentWorkspaceId = useObservable(coreStart.workspaces.client.currentWorkspaceId$, '');
 
   const workspaceOptions = workspaceList.map(workspaceToOption);
 
   useEffect(() => {
     (async () => {
-      const response = await coreStart.workspaces.client.getCurrentWorkspace();
+      if (!currentWorkspaceId) {
+        setCurrentWorkspace([]);
+        setLoading(false);
+        return;
+      }
+      setLoading(true);
+      const response = await coreStart.workspaces.client.get(currentWorkspaceId);
       if (response.success) {
         const currentWorkspaceOption = workspaceToOption(response.result);
         setCurrentWorkspace([currentWorkspaceOption]);
@@ -47,7 +53,7 @@ export function WorkspaceDropdownList(props: WorkspaceDropdownListProps) {
       }
       setLoading(false);
     })();
-  }, [coreStart]);
+  }, [coreStart, currentWorkspaceId]);
 
   const onChange = (workspaceOption: WorkspaceOption[]) => {
     /** switch the workspace */
