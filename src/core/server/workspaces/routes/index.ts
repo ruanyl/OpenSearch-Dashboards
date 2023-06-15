@@ -5,13 +5,11 @@
 import { schema } from '@osd/config-schema';
 import { InternalHttpServiceSetup } from '../../http';
 import { Logger } from '../../logging';
-import { IWorkspaceDBImpl, WORKSPACES_API_BASE_URL, WORKSPACE_ID_COOKIE_NAME } from '../types';
+import { IWorkspaceDBImpl } from '../types';
 
-function getCookieValue(cookieString: string, cookieName: string): string | null {
-  const regex = new RegExp(`(?:(?:^|.*;\\s*)${cookieName}\\s*\\=\\s*([^;]*).*$)|^.*$`);
-  const match = cookieString.match(regex);
-  return match ? match[1] : null;
-}
+export const WORKSPACES_API_BASE_URL = '/api/workspaces';
+
+export const WORKSPACE_ID_QUERYSTRING_NAME = '_workspace_id_';
 
 export function registerRoutes({
   client,
@@ -151,74 +149,6 @@ export function registerRoutes({
         id
       );
       return res.ok({ body: result });
-    })
-  );
-  router.post(
-    {
-      path: '/_enter/{id}',
-      validate: {
-        params: schema.object({
-          id: schema.string(),
-        }),
-      },
-    },
-    router.handleLegacyErrors(async (context, req, res) => {
-      const { id } = req.params;
-
-      const result = await client.get(
-        {
-          context,
-          request: req,
-          logger,
-        },
-        id
-      );
-      if (result.success) {
-        return res.custom({
-          body: {
-            success: true,
-          },
-          statusCode: 200,
-          headers: {
-            'set-cookie': `${WORKSPACE_ID_COOKIE_NAME}=${id}; Path=/`,
-          },
-        });
-      } else {
-        return res.ok({ body: result });
-      }
-    })
-  );
-
-  router.post(
-    {
-      path: '/_exit',
-      validate: {},
-    },
-    router.handleLegacyErrors(async (context, req, res) => {
-      return res.custom({
-        body: {
-          success: true,
-        },
-        statusCode: 200,
-        headers: {
-          'set-cookie': `${WORKSPACE_ID_COOKIE_NAME}=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/`,
-        },
-      });
-    })
-  );
-
-  router.get(
-    {
-      path: '/_current',
-      validate: {},
-    },
-    router.handleLegacyErrors(async (context, req, res) => {
-      return res.ok({
-        body: {
-          success: true,
-          result: getCookieValue(req.headers.cookie as string, WORKSPACE_ID_COOKIE_NAME),
-        },
-      });
     })
   );
 }
