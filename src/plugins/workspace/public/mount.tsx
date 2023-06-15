@@ -16,7 +16,11 @@ export const mountDropdownList = (core: CoreStart) => {
         <WorkspaceDropdownList
           coreStart={core}
           onCreateWorkspace={() => alert('create')}
-          onSwitchWorkspace={(id: string) => alert(`switch to workspace ${id}`)}
+          onSwitchWorkspace={async (id: string) => {
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+            alert(`switch to workspace ${id}`);
+          }}
+          // onSwitchWorkspace={(id: string) => alert(`switch to workspace ${id}`)}
         />,
         element
       );
