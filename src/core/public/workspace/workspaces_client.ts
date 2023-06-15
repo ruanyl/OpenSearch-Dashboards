@@ -97,7 +97,7 @@ export class WorkspacesClient {
       perPage: 999,
     });
 
-    if (result.success) {
+    if (result?.success) {
       this.workspaceList$.next(result.result.workspaces);
     }
   }
