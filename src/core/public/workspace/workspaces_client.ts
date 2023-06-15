@@ -4,7 +4,7 @@
  */
 import { resolve as resolveUrl } from 'url';
 import type { PublicContract } from '@osd/utility-types';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { HttpFetchError, HttpFetchOptions, HttpSetup } from '../http';
 import { WorkspaceAttribute, WorkspaceFindOptions } from '.';
 import { WORKSPACES_API_BASE_URL } from './consts';
@@ -40,16 +40,20 @@ type IResponse<T> =
  */
 export class WorkspacesClient {
   private http: HttpSetup;
-  public currentWorkspaceId$ = new BehaviorSubject<string>('');
+  private currentWorkspaceId = '';
+  public currentWorkspaceId$ = new Subject<string>();
   public workspaceList$ = new Subject<WorkspaceAttribute[]>();
   constructor(http: HttpSetup) {
     this.http = http;
+    this.currentWorkspaceId$.subscribe(
+      (currentWorkspaceId) => (this.currentWorkspaceId = currentWorkspaceId)
+    );
     /**
      * Add logic to check if current workspace id is still valid
      * If not, remove the current workspace id and notify other subscribers
      */
     this.workspaceList$.subscribe(async (workspaceList) => {
-      const currentWorkspaceId = await this.currentWorkspaceId$.getValue();
+      const currentWorkspaceId = this.currentWorkspaceId;
       if (currentWorkspaceId) {
         const findItem = workspaceList.find((item) => item.id === currentWorkspaceId);
         if (!findItem) {
@@ -124,7 +128,7 @@ export class WorkspacesClient {
   }
 
   public async getCurrentWorkspaceId(): Promise<IResponse<WorkspaceAttribute['id']>> {
-    const currentWorkspaceId = this.currentWorkspaceId$.getValue();
+    const currentWorkspaceId = this.currentWorkspaceId;
     if (!currentWorkspaceId) {
       return {
         success: false,
