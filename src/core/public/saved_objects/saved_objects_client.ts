@@ -42,6 +42,7 @@ import {
 
 import { SimpleSavedObject } from './simple_saved_object';
 import { HttpFetchOptions, HttpSetup } from '../http';
+import { WorkspacesStart } from '../workspace';
 
 type SavedObjectsFindOptions = Omit<
   SavedObjectFindOptionsServer,
@@ -61,6 +62,7 @@ export interface SavedObjectsCreateOptions {
   /** {@inheritDoc SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
   references?: SavedObjectReference[];
+  initialNamespaces?: string[];
 }
 
 /**
@@ -182,6 +184,7 @@ const getObjectsToFetch = (queue: BatchQueueEntry[]): ObjectTypeAndId[] => {
  */
 export class SavedObjectsClient {
   private http: HttpSetup;
+  private workspaces: WorkspacesStart;
   private batchQueue: BatchQueueEntry[];
 
   /**
@@ -222,9 +225,19 @@ export class SavedObjectsClient {
   );
 
   /** @internal */
-  constructor(http: HttpSetup) {
+  constructor(http: HttpSetup, workspaces: WorkspacesStart) {
     this.http = http;
+    this.workspaces = workspaces;
     this.batchQueue = [];
+  }
+
+  private async _getCurrentWorkspace(): Promise<string> {
+    const currentWorkspaceIdResp = await this.workspaces.client.getCurrentWorkspaceId();
+    if (currentWorkspaceIdResp.success && currentWorkspaceIdResp.result) {
+      return currentWorkspaceIdResp.result;
+    }
+
+    return 'default';
   }
 
   /**
@@ -235,7 +248,7 @@ export class SavedObjectsClient {
    * @param options
    * @returns
    */
-  public create = <T = unknown>(
+  public create = async <T = unknown>(
     type: string,
     attributes: T,
     options: SavedObjectsCreateOptions = {}
@@ -248,6 +261,7 @@ export class SavedObjectsClient {
     const query = {
       overwrite: options.overwrite,
     };
+    const currentWorkspaceId = await this._getCurrentWorkspace();
 
     const createRequest: Promise<SavedObject<T>> = this.savedObjectsFetch(path, {
       method: 'POST',
@@ -256,6 +270,7 @@ export class SavedObjectsClient {
         attributes,
         migrationVersion: options.migrationVersion,
         references: options.references,
+        initialNamespaces: options.initialNamespaces || [currentWorkspaceId],
       }),
     });
 
