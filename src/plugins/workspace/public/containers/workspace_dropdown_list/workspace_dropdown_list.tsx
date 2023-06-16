@@ -7,7 +7,7 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react';
 
 import { EuiButton, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
-import { i18n } from 'packages/osd-i18n/target/types';
+import { i18n } from '@osd/i18n';
 import { CoreStart, WorkspaceAttribute } from '../../../../../core/public';
 
 type WorkspaceOption = EuiComboBoxOptionOption<WorkspaceAttribute>;
