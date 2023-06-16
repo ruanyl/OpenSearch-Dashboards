@@ -8,13 +8,13 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { EuiButton, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import { CoreStart, WorkspaceAttribute } from '../../../../../core/public';
+import { useOpenSearchDashboards } from '../../../../../plugins/opensearch_dashboards_react/public';
 
 type WorkspaceOption = EuiComboBoxOptionOption<WorkspaceAttribute>;
 
 interface WorkspaceDropdownListProps {
   coreStart: CoreStart;
   onCreateWorkspace: () => void;
-  onSwitchWorkspace: (workspaceId: string) => Promise<void>;
 }
 
 function workspaceToOption(workspace: WorkspaceAttribute): WorkspaceOption {
@@ -22,9 +22,12 @@ function workspaceToOption(workspace: WorkspaceAttribute): WorkspaceOption {
 }
 
 export function WorkspaceDropdownList(props: WorkspaceDropdownListProps) {
-  const { coreStart, onCreateWorkspace, onSwitchWorkspace } = props;
+  const { coreStart, onCreateWorkspace } = props;
   const workspaceList = useObservable(coreStart.workspaces.client.workspaceList$, []);
   const currentWorkspaceId = useObservable(coreStart.workspaces.client.currentWorkspaceId$, '');
+  const {
+    services: { workspaces },
+  } = useOpenSearchDashboards();
 
   const [loading, setLoading] = useState(false);
   const [workspaceOptions, setWorkspaceOptions] = useState([] as WorkspaceOption[]);
@@ -50,17 +53,17 @@ export function WorkspaceDropdownList(props: WorkspaceDropdownListProps) {
     [allWorkspaceOptions]
   );
 
-  const onChange = (workspaceOption: WorkspaceOption[]) => {
-    /** switch the workspace */
-    setLoading(true);
-    onSwitchWorkspace(workspaceOption[0].key!)
-      .catch((err) =>
-        coreStart.notifications.toasts.addDanger('some error happens in workspace service')
-      )
-      .finally(() => {
-        setLoading(false);
-      });
-  };
+  const onChange = useCallback(
+    (workspaceOption: WorkspaceOption[]) => {
+      /** switch the workspace */
+      setLoading(true);
+      const id = workspaceOption[0].key!;
+      workspaces?.client.enterWorkspace(id);
+      workspaces?.formatUrlWithWorkspaceId(window.location.href, id);
+      setLoading(false);
+    },
+    [workspaces]
+  );
 
   useEffect(() => {
     onSearchChange('');
