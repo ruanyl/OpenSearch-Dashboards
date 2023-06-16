@@ -8,7 +8,6 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { EuiButton, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import { CoreStart, WorkspaceAttribute } from '../../../../../core/public';
-import { useOpenSearchDashboards } from '../../../../../plugins/opensearch_dashboards_react/public';
 
 type WorkspaceOption = EuiComboBoxOptionOption<WorkspaceAttribute>;
 
@@ -25,9 +24,6 @@ export function WorkspaceDropdownList(props: WorkspaceDropdownListProps) {
   const { coreStart, onCreateWorkspace } = props;
   const workspaceList = useObservable(coreStart.workspaces.client.workspaceList$, []);
   const currentWorkspaceId = useObservable(coreStart.workspaces.client.currentWorkspaceId$, '');
-  const {
-    services: { workspaces },
-  } = useOpenSearchDashboards();
 
   const [loading, setLoading] = useState(false);
   const [workspaceOptions, setWorkspaceOptions] = useState([] as WorkspaceOption[]);
@@ -58,11 +54,13 @@ export function WorkspaceDropdownList(props: WorkspaceDropdownListProps) {
       /** switch the workspace */
       setLoading(true);
       const id = workspaceOption[0].key!;
-      workspaces?.client.enterWorkspace(id);
-      workspaces?.formatUrlWithWorkspaceId(window.location.href, id);
+      const newUrl = coreStart.workspaces?.formatUrlWithWorkspaceId(window.location.href, id);
+      if (newUrl) {
+        window.location.href = newUrl;
+      }
       setLoading(false);
     },
-    [workspaces]
+    [coreStart.workspaces]
   );
 
   useEffect(() => {
