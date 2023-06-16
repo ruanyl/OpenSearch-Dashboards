@@ -89,6 +89,7 @@ import {
   DiscoverUrlGenerator,
 } from './url_generator';
 import { SearchEmbeddableFactory } from './application/embeddable';
+import { DEFAULT_WORKSPACE_TEMPLATES } from '../../../core/public';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {

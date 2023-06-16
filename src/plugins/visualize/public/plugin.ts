@@ -69,6 +69,7 @@ import {
 } from './services';
 import { visualizeFieldAction } from './actions/visualize_field_action';
 import { createVisualizeUrlGenerator } from './url_generator';
+import { DEFAULT_WORKSPACE_TEMPLATES } from '../../../core/public';
 
 export interface VisualizePluginStartDependencies {
   data: DataPublicPluginStart;
