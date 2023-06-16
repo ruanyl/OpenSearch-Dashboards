@@ -42,8 +42,14 @@ export interface SavedObjectsStart {
 
 export class SavedObjectsService implements CoreService<void, SavedObjectsStart> {
   public async setup() {}
-  public async start({ http }: { http: CoreStart['http'] }): Promise<SavedObjectsStart> {
-    return { client: new SavedObjectsClient(http) };
+  public async start({
+    http,
+    workspaces,
+  }: {
+    http: CoreStart['http'];
+    workspaces: CoreStart['workspaces'];
+  }): Promise<SavedObjectsStart> {
+    return { client: new SavedObjectsClient(http, workspaces) };
   }
   public async stop() {}
 }

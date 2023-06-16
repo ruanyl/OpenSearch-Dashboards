@@ -183,6 +183,7 @@ const getObjectsToFetch = (queue: BatchQueueEntry[]): ObjectTypeAndId[] => {
  */
 export class SavedObjectsClient {
   private http: HttpSetup;
+  private workspaces: WorkspacesStart;
   private batchQueue: BatchQueueEntry[];
   private currentWorkspaceId?: string;
 
@@ -224,8 +225,9 @@ export class SavedObjectsClient {
   );
 
   /** @internal */
-  constructor(http: HttpSetup) {
+  constructor(http: HttpSetup, workspaces: WorkspacesStart) {
     this.http = http;
+    this.workspaces = workspaces;
     this.batchQueue = [];
   }
 
