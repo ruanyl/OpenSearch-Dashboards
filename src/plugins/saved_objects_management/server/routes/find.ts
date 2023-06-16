@@ -64,6 +64,9 @@ export const registerFindRoute = (
           fields: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
             defaultValue: [],
           }),
+          workspaces: schema.maybe(
+            schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
+          ),
         }),
       },
     },
@@ -94,6 +97,16 @@ export const registerFindRoute = (
         ...req.query,
         fields: undefined,
         searchFields: [...searchFields],
+        namespaces: req.query.namespaces
+          ? Array.isArray(req.query.namespaces)
+            ? req.query.namespaces
+            : [req.query.namespaces]
+          : undefined,
+        workspaces: req.query.workspaces
+          ? Array.isArray(req.query.workspaces)
+            ? req.query.workspaces
+            : [req.query.workspaces]
+          : undefined,
       });
 
       const savedObjects = await Promise.all(
