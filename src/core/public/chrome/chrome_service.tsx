@@ -264,7 +264,7 @@ export class ChromeService {
           isLocked$={getIsNavDrawerLocked$}
           branding={injectedMetadata.getBranding()}
           survey={injectedMetadata.getSurvey()}
-          workspaces={workspaces}
+          currentWorkspace$={workspaces.client.currentWorkspace$}
         />
       ),
 
