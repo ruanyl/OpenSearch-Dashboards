@@ -64,6 +64,9 @@ export class WorkspacesClient {
           this.currentWorkspaceId$.error({
             reason: WORKSPACE_ERROR_REASON_MAP.WORKSPACE_STALED,
           });
+          this.currentWorkspace$.error({
+            reason: WORKSPACE_ERROR_REASON_MAP.WORKSPACE_STALED,
+          });
         }
       }
     );
