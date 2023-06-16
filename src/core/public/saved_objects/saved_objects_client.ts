@@ -62,7 +62,7 @@ export interface SavedObjectsCreateOptions {
   /** {@inheritDoc SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
   references?: SavedObjectReference[];
-  initialNamespaces?: string[];
+  workspaces?: string[];
 }
 
 /**
@@ -231,13 +231,13 @@ export class SavedObjectsClient {
     this.batchQueue = [];
   }
 
-  private async _getCurrentWorkspace(): Promise<string> {
+  private async _getCurrentWorkspace(): Promise<string | null> {
     const currentWorkspaceIdResp = await this.workspaces.client.getCurrentWorkspaceId();
     if (currentWorkspaceIdResp.success && currentWorkspaceIdResp.result) {
       return currentWorkspaceIdResp.result;
     }
 
-    return 'default';
+    return null;
   }
 
   /**
@@ -270,7 +270,11 @@ export class SavedObjectsClient {
         attributes,
         migrationVersion: options.migrationVersion,
         references: options.references,
-        initialNamespaces: options.initialNamespaces || [currentWorkspaceId],
+        ...(options.workspaces || currentWorkspaceId
+          ? {
+              workspaces: options.workspaces || [currentWorkspaceId],
+            }
+          : {}),
       }),
     });
 
@@ -343,7 +347,7 @@ export class SavedObjectsClient {
    * @property {object} [options.hasReference] - { type, id }
    * @returns A find result with objects matching the specified search.
    */
-  public find = <T = unknown>(
+  public find = async <T = unknown>(
     options: SavedObjectsFindOptions
   ): Promise<SavedObjectsFindResponsePublic<T>> => {
     const path = this.getPath(['_find']);
@@ -360,9 +364,15 @@ export class SavedObjectsClient {
       filter: 'filter',
       namespaces: 'namespaces',
       preference: 'preference',
+      workspaces: 'workspaces',
     };
 
-    const renamedQuery = renameKeys<SavedObjectsFindOptions, any>(renameMap, options);
+    const workspaces = [...(options.workspaces || [await this._getCurrentWorkspace()]), 'public'];
+
+    const renamedQuery = renameKeys<SavedObjectsFindOptions, any>(renameMap, {
+      ...options,
+      workspaces,
+    });
     const query = pick.apply(null, [renamedQuery, ...Object.values<string>(renameMap)]);
 
     const request: ReturnType<SavedObjectsApi['find']> = this.savedObjectsFetch(path, {

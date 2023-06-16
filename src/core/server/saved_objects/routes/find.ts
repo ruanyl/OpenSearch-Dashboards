@@ -59,6 +59,9 @@ export const registerFindRoute = (router: IRouter) => {
           namespaces: schema.maybe(
             schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
           ),
+          workspaces: schema.maybe(
+            schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
+          ),
         }),
       },
     },
@@ -81,6 +84,9 @@ export const registerFindRoute = (router: IRouter) => {
         fields: typeof query.fields === 'string' ? [query.fields] : query.fields,
         filter: query.filter,
         namespaces,
+        workspaces: Array.isArray(query.workspaces)
+          ? query.workspaces
+          : [query.workspaces || ''].filter((item) => item),
       });
 
       return res.ok({ body: result });

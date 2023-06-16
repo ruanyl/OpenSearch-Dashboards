@@ -243,6 +243,7 @@ export class SavedObjectsRepository {
       originId,
       initialNamespaces,
       version,
+      workspaces,
     } = options;
     const namespace = normalizeNamespace(options.namespace);
 
@@ -289,6 +290,7 @@ export class SavedObjectsRepository {
       migrationVersion,
       updated_at: time,
       ...(Array.isArray(references) && { references }),
+      ...(Array.isArray(workspaces) && { workspaces }),
     });
 
     const raw = this._serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc);
@@ -736,6 +738,7 @@ export class SavedObjectsRepository {
       typeToNamespacesMap,
       filter,
       preference,
+      workspaces,
     } = options;
 
     if (!type && !typeToNamespacesMap) {
@@ -809,6 +812,7 @@ export class SavedObjectsRepository {
           typeToNamespacesMap,
           hasReference,
           kueryNode,
+          workspaces,
         }),
       },
     };
