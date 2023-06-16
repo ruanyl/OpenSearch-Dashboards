@@ -3,33 +3,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiPageHeader, EuiButton, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { useObservable } from 'react-use';
-import { switchMap } from 'rxjs/operators';
 import { of } from 'rxjs';
 
 import { useOpenSearchDashboards } from '../../../../../src/plugins/opensearch_dashboards_react/public';
 
-export const useCurrentWorkspace = () => {
+export const WorkspaceOverview = () => {
   const {
     services: { workspaces },
   } = useOpenSearchDashboards();
-  const workspaceObservable = useMemo(
-    () =>
-      workspaces
-        ? workspaces.client.currentWorkspaceId$
-            .pipe(switchMap((id) => workspaces.client.get(id)))
-            .pipe(switchMap((response) => (response.success ? of(response.result) : of(null))))
-        : of(null),
-    [workspaces]
+
+  const currentWorkspace = useObservable(
+    workspaces ? workspaces.client.currentWorkspace$ : of(null)
   );
 
-  return useObservable(workspaceObservable);
-};
-
-export const WorkspaceOverview = () => {
-  const currentWorkspace = useCurrentWorkspace();
   return (
     <>
       <EuiPageHeader
