@@ -65,7 +65,6 @@ import {
   OverlayStart,
   NotificationsStart,
   ApplicationStart,
-  WorkspacesStart,
 } from 'src/core/public';
 import { RedirectAppLinks } from '../../../../opensearch_dashboards_react/public';
 import { IndexPatternsContract } from '../../../../data/public';
@@ -115,7 +114,6 @@ export interface SavedObjectsTableProps {
   goInspectObject: (obj: SavedObjectWithMetadata) => void;
   canGoInApp: (obj: SavedObjectWithMetadata) => boolean;
   dateFormat: string;
-  workspaces: WorkspacesStart;
 }
 
 export interface SavedObjectsTableState {
@@ -252,11 +250,9 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
   debouncedFetchObjects = debounce(async () => {
     const { activeQuery: query, page, perPage } = this.state;
-    const { notifications, http, allowedTypes, namespaceRegistry, workspaces } = this.props;
+    const { notifications, http, allowedTypes, namespaceRegistry } = this.props;
     const { queryText, visibleTypes, visibleNamespaces } = parseQuery(query);
     const filteredTypes = filterQuery(allowedTypes, visibleTypes);
-    const currentWorkspaceIdResp = await workspaces.client.getCurrentWorkspaceId();
-    const currentWorkspaceId = currentWorkspaceIdResp.success ? currentWorkspaceIdResp.result : '';
     // "searchFields" is missing from the "findOptions" but gets injected via the API.
     // The API extracts the fields from each uiExports.savedObjectsManagement "defaultSearchField" attribute
     const findOptions: SavedObjectsFindOptions = {
@@ -265,7 +261,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       page: page + 1,
       fields: ['id'],
       type: filteredTypes,
-      workspaces: ['public', ...(currentWorkspaceId ? [currentWorkspaceId] : [])],
     };
 
     const availableNamespaces = namespaceRegistry.getAll()?.map((ns) => ns.id) || [];
