@@ -92,7 +92,6 @@ const SavedObjectsTablePage = ({
       overlays={coreStart.overlays}
       notifications={coreStart.notifications}
       applications={coreStart.application}
-      workspaces={coreStart.workspaces}
       perPageConfig={itemsPerPage}
       goInspectObject={(savedObject) => {
         const { editUrl } = savedObject.meta;
