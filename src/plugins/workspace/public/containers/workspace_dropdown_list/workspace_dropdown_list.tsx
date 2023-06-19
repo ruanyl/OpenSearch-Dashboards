@@ -8,12 +8,12 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { EuiButton, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import { CoreStart, WorkspaceAttribute } from '../../../../../core/public';
+import { WORKSPACE_APP_ID, PATHS } from '../../../common/constants';
 
 type WorkspaceOption = EuiComboBoxOptionOption<WorkspaceAttribute>;
 
 interface WorkspaceDropdownListProps {
   coreStart: CoreStart;
-  onCreateWorkspace: () => void;
 }
 
 function workspaceToOption(workspace: WorkspaceAttribute): WorkspaceOption {
@@ -21,7 +21,8 @@ function workspaceToOption(workspace: WorkspaceAttribute): WorkspaceOption {
 }
 
 export function WorkspaceDropdownList(props: WorkspaceDropdownListProps) {
-  const { coreStart, onCreateWorkspace } = props;
+  const { coreStart } = props;
+
   const workspaceList = useObservable(coreStart.workspaces.client.workspaceList$, []);
   const currentWorkspaceId = useObservable(coreStart.workspaces.client.currentWorkspaceId$, '');
 
@@ -63,6 +64,10 @@ export function WorkspaceDropdownList(props: WorkspaceDropdownListProps) {
     [coreStart.workspaces]
   );
 
+  const onCreateWorkspaceClick = () => {
+    coreStart.application.navigateToApp(WORKSPACE_APP_ID, { path: PATHS.create });
+  };
+
   useEffect(() => {
     onSearchChange('');
   }, [onSearchChange]);
@@ -77,7 +82,7 @@ export function WorkspaceDropdownList(props: WorkspaceDropdownListProps) {
         selectedOptions={currentWorkspaceOption}
         singleSelection={{ asPlainText: true }}
         onSearchChange={onSearchChange}
-        append={<EuiButton onClick={onCreateWorkspace}>Create workspace</EuiButton>}
+        append={<EuiButton onClick={onCreateWorkspaceClick}>Create workspace</EuiButton>}
       />
     </>
   );

@@ -13,7 +13,7 @@ export const mountDropdownList = (core: CoreStart) => {
     order: 0,
     mount: (element) => {
       ReactDOM.render(
-        <WorkspaceDropdownList coreStart={core} onCreateWorkspace={() => alert('create')} />,
+        <WorkspaceDropdownList coreStart={core}/>,
         element
       );
       return () => {
