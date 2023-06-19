@@ -404,6 +404,12 @@ export class SavedObjectsRepository {
         object: { initialNamespaces, version, ...object },
         method,
       } = expectedBulkGetResult.value;
+      let savedObjectWorkspaces: string[] | undefined;
+      if (object.workspaces) {
+        savedObjectWorkspaces = Array.from(
+          new Set([...object.workspaces, ...(options.workspaces || [])])
+        );
+      }
       if (opensearchRequestIndex !== undefined) {
         const indexFound = bulkGetResponse?.statusCode !== 404;
         const actualResult = indexFound
@@ -454,6 +460,7 @@ export class SavedObjectsRepository {
             updated_at: time,
             references: object.references || [],
             originId: object.originId,
+            workspaces: savedObjectWorkspaces,
           }) as SavedObjectSanitizedDoc
         ),
       };
@@ -980,7 +987,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    const { originId, updated_at: updatedAt } = body._source;
+    const { originId, updated_at: updatedAt, workspaces } = body._source;
 
     let namespaces: string[] = [];
     if (!this._registry.isNamespaceAgnostic(type)) {
@@ -995,6 +1002,7 @@ export class SavedObjectsRepository {
       namespaces,
       ...(originId && { originId }),
       ...(updatedAt && { updated_at: updatedAt }),
+      ...(workspaces && { workspaces }),
       version: encodeHitVersion(body),
       attributes: body._source[type],
       references: body._source.references || [],
@@ -1059,7 +1067,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    const { originId } = body.get?._source ?? {};
+    const { originId, workspaces } = body.get?._source ?? {};
     let namespaces: string[] = [];
     if (!this._registry.isNamespaceAgnostic(type)) {
       namespaces = body.get?._source.namespaces ?? [
@@ -1074,6 +1082,7 @@ export class SavedObjectsRepository {
       version: encodeHitVersion(body),
       namespaces,
       ...(originId && { originId }),
+      ...(workspaces && { workspaces }),
       references,
       attributes,
     };
@@ -1456,12 +1465,13 @@ export class SavedObjectsRepository {
           };
         }
 
-        const { originId } = get._source;
+        const { originId, workspaces } = get._source;
         return {
           id,
           type,
           ...(namespaces && { namespaces }),
           ...(originId && { originId }),
+          ...(workspaces && { workspaces }),
           updated_at,
           version: encodeVersion(seqNo, primaryTerm),
           attributes,
@@ -1758,7 +1768,7 @@ function getSavedObjectFromSource<T>(
   id: string,
   doc: { _seq_no?: number; _primary_term?: number; _source: SavedObjectsRawDocSource }
 ): SavedObject<T> {
-  const { originId, updated_at: updatedAt } = doc._source;
+  const { originId, updated_at: updatedAt, workspaces } = doc._source;
 
   let namespaces: string[] = [];
   if (!registry.isNamespaceAgnostic(type)) {
@@ -1773,6 +1783,7 @@ function getSavedObjectFromSource<T>(
     namespaces,
     ...(originId && { originId }),
     ...(updatedAt && { updated_at: updatedAt }),
+    ...(workspaces && { workspaces }),
     version: encodeHitVersion(doc),
     attributes: doc._source[type],
     references: doc._source.references || [],
