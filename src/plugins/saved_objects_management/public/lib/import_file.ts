@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { HttpStart, SavedObjectsImportError } from 'src/core/public';
+import { HttpStart, SavedObjectsImportError, WorkspacesStart } from 'src/core/public';
 import { ImportMode } from '../management_section/objects_table/components/import_mode_control';
 
 interface ImportResponse {
@@ -40,11 +40,11 @@ interface ImportResponse {
 export async function importFile(
   http: HttpStart,
   file: File,
-  { createNewCopies, overwrite }: ImportMode
+  { createNewCopies, overwrite, workspaces }: ImportMode
 ) {
   const formData = new FormData();
   formData.append('file', file);
-  const query = createNewCopies ? { createNewCopies } : { overwrite };
+  const query = createNewCopies ? { createNewCopies, workspaces } : { overwrite, workspaces };
   return await http.post<ImportResponse>('/api/saved_objects/_import', {
     body: formData,
     headers: {
