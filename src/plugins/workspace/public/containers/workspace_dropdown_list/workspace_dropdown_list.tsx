@@ -18,12 +18,8 @@ interface WorkspaceDropdownListProps {
   onSwitchWorkspace: (workspaceId: string) => Promise<void>;
 }
 
-function workspaceToOption(workspace: WorkspaceAttribute | null): WorkspaceOption {
-  if (workspace) {
-    return { label: workspace.name, key: workspace.id, value: workspace };
-  } else {
-    return { label: '', key: '' };
-  }
+function workspaceToOption(workspace: WorkspaceAttribute): WorkspaceOption {
+  return { label: workspace.name, key: workspace.id, value: workspace };
 }
 
 export function getErrorMessage(err: any) {
@@ -40,7 +36,11 @@ export function WorkspaceDropdownList(props: WorkspaceDropdownListProps) {
   const [workspaceOptions, setWorkspaceOptions] = useState([] as WorkspaceOption[]);
 
   const currentWorkspaceOption = useMemo(() => {
-    return [workspaceToOption(currentWorkspace)];
+    if (!currentWorkspace) {
+      return [];
+    } else {
+      return [workspaceToOption(currentWorkspace)];
+    }
   }, [currentWorkspace]);
   const allWorkspaceOptions = useMemo(() => {
     return workspaceList.map(workspaceToOption);
