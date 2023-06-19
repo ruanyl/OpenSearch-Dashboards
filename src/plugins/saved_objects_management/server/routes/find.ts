@@ -64,6 +64,9 @@ export const registerFindRoute = (
           fields: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
             defaultValue: [],
           }),
+          workspaces: schema.maybe(
+            schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
+          ),
         }),
       },
     },
