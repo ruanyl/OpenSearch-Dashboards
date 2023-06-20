@@ -24,8 +24,7 @@ interface DeleteWorkspaceModalProps {
   onConfirm: () => void;
 }
 
-// eslint-disable-next-line import/no-default-export
-export default function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
+export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
   const [value, setValue] = useState('');
   const { onClose, onConfirm, visible, selectedItems } = props;
   useEffect(() => {
