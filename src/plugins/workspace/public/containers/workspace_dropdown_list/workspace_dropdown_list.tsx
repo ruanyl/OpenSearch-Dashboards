@@ -7,7 +7,6 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react';
 
 import { EuiButton, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
-import { i18n } from '@osd/i18n';
 import { CoreStart, WorkspaceAttribute } from '../../../../../core/public';
 import { WORKSPACE_APP_ID, PATHS } from '../../../common/constants';
 
