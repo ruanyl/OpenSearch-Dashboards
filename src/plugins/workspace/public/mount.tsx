@@ -12,10 +12,7 @@ export const mountDropdownList = (core: CoreStart) => {
   core.chrome.navControls.registerLeft({
     order: 0,
     mount: (element) => {
-      ReactDOM.render(
-        <WorkspaceDropdownList coreStart={core}/>,
-        element
-      );
+      ReactDOM.render(<WorkspaceDropdownList coreStart={core} />, element);
       return () => {
         ReactDOM.unmountComponentAtNode(element);
       };
