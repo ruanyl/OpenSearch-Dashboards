@@ -7,13 +7,14 @@ import React, { useState } from 'react';
 import { EuiPageHeader, EuiButton, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { useObservable } from 'react-use';
 import { of } from 'rxjs';
+import { i18n } from '@osd/i18n';
 import { ApplicationStart } from '../../../../core/public';
-import { useOpenSearchDashboards } from '../../../../../src/plugins/opensearch_dashboards_react/public';
-import DeleteWorkspaceModal from './delete_workspace_modal';
+import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
+import { DeleteWorkspaceModal } from './delete_workspace_modal';
 
 export const WorkspaceOverview = () => {
   const {
-    services: { workspaces, application },
+    services: { workspaces, application, notifications },
   } = useOpenSearchDashboards<{ application: ApplicationStart }>();
 
   const currentWorkspace = useObservable(
@@ -24,12 +25,37 @@ export const WorkspaceOverview = () => {
   const workspaceName = currentWorkspace?.name;
   const [deleteWorkspaceModalVisible, setDeleteWorkspaceModalVisible] = useState(false);
 
-  const deleteWorkspace = () => {
+  const deleteWorkspace = async () => {
     if (workspaceId) {
-      workspaces?.client.delete(workspaceId);
-      application.navigateToApp('home');
+      let result;
+      try {
+        result = await workspaces?.client.delete(workspaceId);
+      } catch (error) {
+        notifications?.toasts.addDanger({
+          title: i18n.translate('workspace.delete.failed', {
+            defaultMessage: 'Failed to delete workspace',
+          }),
+          text: error instanceof Error ? error.message : JSON.stringify(error),
+        });
+        return setDeleteWorkspaceModalVisible(false);
+      }
+      if (result?.success) {
+        notifications?.toasts.addSuccess({
+          title: i18n.translate('workspace.delete.success', {
+            defaultMessage: 'Delete workspace successfully',
+          }),
+        });
+      } else {
+        notifications?.toasts.addDanger({
+          title: i18n.translate('workspace.delete.failed', {
+            defaultMessage: 'Failed to delete workspace',
+          }),
+          text: result?.error,
+        });
+      }
     }
     setDeleteWorkspaceModalVisible(false);
+    await application.navigateToApp('home');
   };
 
   return (
@@ -45,10 +71,10 @@ export const WorkspaceOverview = () => {
       />
       <EuiPanel>
         <DeleteWorkspaceModal
-          onConfirm={() => deleteWorkspace()}
+          onConfirm={deleteWorkspace}
           onClose={() => setDeleteWorkspaceModalVisible(false)}
           visible={deleteWorkspaceModalVisible}
-          selectedItems={[workspaceName ?? 'null']}
+          selectedItems={workspaceName ? [workspaceName] : []}
         />
         <EuiTitle size="m">
           <h3>Workspace</h3>
