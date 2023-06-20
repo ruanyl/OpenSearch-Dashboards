@@ -92,7 +92,6 @@ function mockProps() {
         darkModeUrl: '/darkModeLogo',
       },
     },
-    currentWorkspace$: workspacesServiceMock.createStartContract().client.currentWorkspace$,
   };
 }
 
