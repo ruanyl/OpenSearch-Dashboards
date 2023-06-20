@@ -70,12 +70,13 @@ export const WorkspaceOverview = () => {
         ]}
       />
       <EuiPanel>
-        <DeleteWorkspaceModal
-          onConfirm={deleteWorkspace}
-          onClose={() => setDeleteWorkspaceModalVisible(false)}
-          visible={deleteWorkspaceModalVisible}
-          selectedItems={workspaceName ? [workspaceName] : []}
-        />
+        {deleteWorkspaceModalVisible && (
+          <DeleteWorkspaceModal
+            onConfirm={deleteWorkspace}
+            onClose={() => setDeleteWorkspaceModalVisible(false)}
+            selectedItems={workspaceName ? [workspaceName] : []}
+          />
+        )}
         <EuiTitle size="m">
           <h3>Workspace</h3>
         </EuiTitle>

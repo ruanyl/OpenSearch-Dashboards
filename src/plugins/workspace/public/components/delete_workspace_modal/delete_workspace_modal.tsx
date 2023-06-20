@@ -19,22 +19,13 @@ import {
 
 interface DeleteWorkspaceModalProps {
   selectedItems: string[];
-  visible: boolean;
   onClose: () => void;
   onConfirm: () => void;
 }
 
 export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
   const [value, setValue] = useState('');
-  const { onClose, onConfirm, visible, selectedItems } = props;
-  useEffect(() => {
-    if (visible) {
-      setValue('');
-    }
-  }, [visible]);
-  if (!visible) {
-    return null;
-  }
+  const { onClose, onConfirm, selectedItems } = props;
 
   return (
     <EuiModal onClose={onClose}>
