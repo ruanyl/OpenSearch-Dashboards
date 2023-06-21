@@ -11,6 +11,8 @@ import { i18n } from '@osd/i18n';
 import { ApplicationStart } from '../../../../core/public';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
 import { DeleteWorkspaceModal } from './delete_workspace_modal';
+import { PATHS } from '../../common/constants';
+import { WORKSPACE_APP_ID, WORKSPACE_ID_IN_SESSION_STORAGE } from '../../common/constants';
 
 export const WorkspaceOverview = () => {
   const {
@@ -58,6 +60,20 @@ export const WorkspaceOverview = () => {
     await application.navigateToApp('home');
   };
 
+  const onUpdateWorkspaceClick = () => {
+    if (!currentWorkspace || !currentWorkspace.id) {
+      notifications?.toasts.addDanger({
+        title: i18n.translate('Cannot find current workspace', {
+          defaultMessage: 'Cannot update workspace',
+        }),
+      });
+      return;
+    }
+    application.navigateToApp(WORKSPACE_APP_ID, {
+      path: PATHS.update + '?' + WORKSPACE_ID_IN_SESSION_STORAGE + '=' + currentWorkspace.id,
+    });
+  };
+
   return (
     <>
       <EuiPageHeader
@@ -67,6 +83,8 @@ export const WorkspaceOverview = () => {
             Delete
           </EuiButton>,
           <EuiButton>Update</EuiButton>,
+          <EuiButton color="danger">Delete</EuiButton>,
+          <EuiButton onClick={onUpdateWorkspaceClick}>Update</EuiButton>,
         ]}
       />
       <EuiPanel>
