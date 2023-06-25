@@ -30,6 +30,7 @@
 
 import { schema } from '@osd/config-schema';
 import { IRouter } from '../../http';
+import { formatWorkspaces, workspacesValidator } from './utils';
 
 export const registerFindRoute = (router: IRouter) => {
   router.get(
@@ -59,9 +60,7 @@ export const registerFindRoute = (router: IRouter) => {
           namespaces: schema.maybe(
             schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
           ),
-          workspaces: schema.maybe(
-            schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
-          ),
+          workspaces: workspacesValidator,
         }),
       },
     },
@@ -70,6 +69,7 @@ export const registerFindRoute = (router: IRouter) => {
 
       const namespaces =
         typeof req.query.namespaces === 'string' ? [req.query.namespaces] : req.query.namespaces;
+      const workspaces = formatWorkspaces(query.workspaces);
 
       const result = await context.core.savedObjects.client.find({
         perPage: query.per_page,
@@ -84,9 +84,7 @@ export const registerFindRoute = (router: IRouter) => {
         fields: typeof query.fields === 'string' ? [query.fields] : query.fields,
         filter: query.filter,
         namespaces,
-        workspaces: Array.isArray(query.workspaces)
-          ? query.workspaces
-          : [query.workspaces || ''].filter((item) => item),
+        workspaces,
       });
 
       return res.ok({ body: result });
