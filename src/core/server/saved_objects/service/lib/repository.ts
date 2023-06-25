@@ -406,7 +406,9 @@ export class SavedObjectsRepository {
       } = expectedBulkGetResult.value;
       let savedObjectWorkspaces: string[] | undefined;
       if (expectedBulkGetResult.value.method === 'create') {
-        savedObjectWorkspaces = Array.from(new Set([...(options.workspaces || [])]));
+        if (options.workspaces) {
+          savedObjectWorkspaces = Array.from(new Set([...(options.workspaces || [])]));
+        }
       } else if (object.workspaces) {
         savedObjectWorkspaces = Array.from(
           new Set([...object.workspaces, ...(options.workspaces || [])])
