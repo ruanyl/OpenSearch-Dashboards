@@ -24,7 +24,7 @@ export const ROUTES: RouteConfig[] = [
   },
   {
     path: PATHS.overview,
-    Component: WorkspaceUpdater,
+    Component: WorkspaceOverview,
     label: 'Overview',
   },
   {
