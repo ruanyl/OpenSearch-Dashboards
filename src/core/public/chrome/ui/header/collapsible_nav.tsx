@@ -154,17 +154,18 @@ export function CollapsibleNav({
     workspace: WorkspaceAttribute | null | undefined,
     categorizedLinks: Record<string, ChromeNavLink[]>
   ) {
-    // plugins are in this dictionary
-    const pluginsDictionary = categorizedLinks.opensearch;
-    if (!pluginsDictionary) return categorizedLinks;
-
     const features = workspace?.features ?? [];
-    const newPluginsDictionary = pluginsDictionary.filter((item) => features.indexOf(item.id) > -1);
-    if (newPluginsDictionary.length === 0) {
-      delete categorizedLinks.opensearch;
-    } else {
-      categorizedLinks.opensearch = newPluginsDictionary;
-    }
+
+    Object.keys(categorizedLinks).forEach((category) => {
+      const dictionary = categorizedLinks[category];
+      const newDictionary = dictionary.filter((item) => features.indexOf(item.id) > -1);
+      if (newDictionary.length === 0) {
+        delete categorizedLinks[category];
+      } else {
+        categorizedLinks[category] = newDictionary;
+      }
+    });
+
     return categorizedLinks;
   }
 
