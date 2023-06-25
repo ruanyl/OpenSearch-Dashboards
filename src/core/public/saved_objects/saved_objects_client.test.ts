@@ -31,7 +31,6 @@
 import { SavedObjectsClient } from './saved_objects_client';
 import { SimpleSavedObject } from './simple_saved_object';
 import { httpServiceMock } from '../http/http_service.mock';
-import { workspacesServiceMock } from '../fatal_errors/fatal_errors_service.mock';
 
 describe('SavedObjectsClient', () => {
   const updatedAt = new Date().toISOString();
@@ -44,11 +43,10 @@ describe('SavedObjectsClient', () => {
   };
 
   const http = httpServiceMock.createStartContract();
-  const workspaces = workspacesServiceMock.createStartContract();
   let savedObjectsClient: SavedObjectsClient;
 
   beforeEach(() => {
-    savedObjectsClient = new SavedObjectsClient(http, workspaces);
+    savedObjectsClient = new SavedObjectsClient(http);
     http.fetch.mockClear();
   });
 
