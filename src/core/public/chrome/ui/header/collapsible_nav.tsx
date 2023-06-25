@@ -126,11 +126,11 @@ export function CollapsibleNav({
   const appId = useObservable(observables.appId$, '');
   const currentWorkspace = useObservable(observables.currentWorkspace$);
   const lockRef = useRef<HTMLButtonElement>(null);
-  const groupedNavLinks = groupBy(navLinks, (link) => link?.category?.id);
+  const filterdLinks = getFilterLinks(currentWorkspace, navLinks);
+  const groupedNavLinks = groupBy(filterdLinks, (link) => link?.category?.id);
   const { undefined: unknowns = [], ...allCategorizedLinks } = groupedNavLinks;
-  const filterdLinks = getFilterLinks(currentWorkspace, allCategorizedLinks);
-  const categoryDictionary = getAllCategories(filterdLinks);
-  const orderedCategories = getOrderedCategories(filterdLinks, categoryDictionary);
+  const categoryDictionary = getAllCategories(allCategorizedLinks);
+  const orderedCategories = getOrderedCategories(allCategorizedLinks, categoryDictionary);
 
   const readyForEUI = (link: ChromeNavLink, needsIcon: boolean = false) => {
     return createEuiListItem({
@@ -152,21 +152,13 @@ export function CollapsibleNav({
 
   function getFilterLinks(
     workspace: WorkspaceAttribute | null | undefined,
-    categorizedLinks: Record<string, ChromeNavLink[]>
+    allNavLinks: ChromeNavLink[]
   ) {
-    const features = workspace?.features ?? [];
+    if (!workspace) return allNavLinks;
 
-    Object.keys(categorizedLinks).forEach((category) => {
-      const dictionary = categorizedLinks[category];
-      const newDictionary = dictionary.filter((item) => features.indexOf(item.id) > -1);
-      if (newDictionary.length === 0) {
-        delete categorizedLinks[category];
-      } else {
-        categorizedLinks[category] = newDictionary;
-      }
-    });
-
-    return categorizedLinks;
+    const features = workspace.features ?? [];
+    const links = allNavLinks.filter((item) => features.indexOf(item.id) > -1);
+    return links;
   }
 
   /**
