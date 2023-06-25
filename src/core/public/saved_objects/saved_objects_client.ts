@@ -184,8 +184,8 @@ const getObjectsToFetch = (queue: BatchQueueEntry[]): ObjectTypeAndId[] => {
  */
 export class SavedObjectsClient {
   private http: HttpSetup;
-  private workspaces: WorkspacesStart;
   private batchQueue: BatchQueueEntry[];
+  private currentWorkspaceId?: string;
 
   /**
    * Throttled processing of get requests into bulk requests at 100ms interval
@@ -225,19 +225,18 @@ export class SavedObjectsClient {
   );
 
   /** @internal */
-  constructor(http: HttpSetup, workspaces: WorkspacesStart) {
+  constructor(http: HttpSetup) {
     this.http = http;
-    this.workspaces = workspaces;
     this.batchQueue = [];
   }
 
   private async _getCurrentWorkspace(): Promise<string | null> {
-    const currentWorkspaceIdResp = await this.workspaces.client.getCurrentWorkspaceId();
-    if (currentWorkspaceIdResp.success && currentWorkspaceIdResp.result) {
-      return currentWorkspaceIdResp.result;
-    }
+    return this.currentWorkspaceId || null;
+  }
 
-    return null;
+  public async setCurrentWorkspace(workspaceId: string): Promise<boolean> {
+    this.currentWorkspaceId = workspaceId;
+    return true;
   }
 
   /**
@@ -367,7 +366,10 @@ export class SavedObjectsClient {
       workspaces: 'workspaces',
     };
 
-    const workspaces = [...(options.workspaces || [await this._getCurrentWorkspace()]), 'public'];
+    const workspaces = [
+      ...(options.workspaces || [await this._getCurrentWorkspace()]),
+      'public',
+    ].filter((item) => item);
 
     const renamedQuery = renameKeys<SavedObjectsFindOptions, any>(renameMap, {
       ...options,
