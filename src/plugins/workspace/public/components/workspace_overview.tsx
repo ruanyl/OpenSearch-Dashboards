@@ -38,10 +38,7 @@ export const WorkspaceOverview = () => {
 
   return (
     <>
-      <EuiPageHeader
-        pageTitle="Overview"
-        rightSideItems={[<EuiButton onClick={onUpdateWorkspaceClick}>Update</EuiButton>]}
-      />
+      <EuiPageHeader pageTitle="Overview" />
       <EuiPanel>
         <EuiTitle size="m">
           <h3>Workspace</h3>
