@@ -33,6 +33,7 @@ import { SavedObjectsService, SavedObjectsStart } from './saved_objects_service'
 const createStartContractMock = () => {
   const mock: jest.Mocked<SavedObjectsStart> = {
     client: {
+      setCurrentWorkspace: jest.fn(),
       create: jest.fn(),
       bulkCreate: jest.fn(),
       bulkUpdate: jest.fn(),
