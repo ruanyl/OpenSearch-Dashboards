@@ -8,10 +8,10 @@ import { EuiPageHeader, EuiButton, EuiPanel, EuiSpacer, EuiTitle } from '@elasti
 import { useObservable } from 'react-use';
 import { of } from 'rxjs';
 import { i18n } from '@osd/i18n';
-import { ApplicationStart } from '../../../../core/public';
+import { ApplicationStart, WORKSPACE_ID_QUERYSTRING_NAME } from '../../../../core/public';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
 import { PATHS } from '../../common/constants';
-import { WORKSPACE_APP_ID, WORKSPACE_ID_IN_SESSION_STORAGE } from '../../common/constants';
+import { WORKSPACE_APP_ID } from '../../common/constants';
 
 export const WorkspaceOverview = () => {
   const {
@@ -32,7 +32,7 @@ export const WorkspaceOverview = () => {
       return;
     }
     application.navigateToApp(WORKSPACE_APP_ID, {
-      path: PATHS.update + '?' + WORKSPACE_ID_IN_SESSION_STORAGE + '=' + currentWorkspace.id,
+      path: PATHS.update + '?' + WORKSPACE_ID_QUERYSTRING_NAME + '=' + currentWorkspace.id,
     });
   };
 
