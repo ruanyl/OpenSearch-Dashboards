@@ -332,60 +332,62 @@ export function CollapsibleNav({
           </EuiCollapsibleNavGroup>
         ))}
 
-        {/* Docking button only for larger screens that can support it*/}
-        <EuiShowFor sizes={['l', 'xl']}>
-          <EuiCollapsibleNavGroup>
-            <EuiListGroup flush>
-              {/* Exit workspace button only within a workspace*/}
-              {currentWorkspace && (
-                <EuiListGroupItem
-                  data-test-subj="collapsible-nav-exit"
-                  size="xs"
-                  color="subdued"
-                  label={i18n.translate('core.ui.primaryNavSection.exitWorkspaceLabel', {
-                    defaultMessage: 'Exit workspace',
-                  })}
-                  aria-label={i18n.translate('core.ui.primaryNavSection.exitWorkspaceLabel', {
-                    defaultMessage: 'Exit workspace',
-                  })}
-                  onClick={exitWorkspace}
-                  iconType={'exit'}
-                />
-              )}
+        <EuiCollapsibleNavGroup>
+          <EuiListGroup flush>
+            {/* Exit workspace button only within a workspace*/}
+            {currentWorkspace && (
               <EuiListGroupItem
-                data-test-subj="collapsible-nav-lock"
-                buttonRef={lockRef}
+                data-test-subj="collapsible-nav-exit"
                 size="xs"
                 color="subdued"
-                label={
-                  isLocked
-                    ? i18n.translate('core.ui.primaryNavSection.undockLabel', {
-                        defaultMessage: 'Undock navigation',
-                      })
-                    : i18n.translate('core.ui.primaryNavSection.dockLabel', {
-                        defaultMessage: 'Dock navigation',
-                      })
-                }
-                aria-label={
-                  isLocked
-                    ? i18n.translate('core.ui.primaryNavSection.undockAriaLabel', {
-                        defaultMessage: 'Undock primary navigation',
-                      })
-                    : i18n.translate('core.ui.primaryNavSection.dockAriaLabel', {
-                        defaultMessage: 'Dock primary navigation',
-                      })
-                }
-                onClick={() => {
-                  onIsLockedUpdate(!isLocked);
-                  if (lockRef.current) {
-                    lockRef.current.focus();
-                  }
-                }}
-                iconType={isLocked ? 'lock' : 'lockOpen'}
+                label={i18n.translate('core.ui.primaryNavSection.exitWorkspaceLabel', {
+                  defaultMessage: 'Exit workspace',
+                })}
+                aria-label={i18n.translate('core.ui.primaryNavSection.exitWorkspaceLabel', {
+                  defaultMessage: 'Exit workspace',
+                })}
+                onClick={exitWorkspace}
+                iconType={'exit'}
               />
-            </EuiListGroup>
-          </EuiCollapsibleNavGroup>
-        </EuiShowFor>
+            )}
+            {/* Docking button only for larger screens that can support it*/}
+            {
+              <EuiShowFor sizes={['l', 'xl']}>
+                <EuiListGroupItem
+                  data-test-subj="collapsible-nav-lock"
+                  buttonRef={lockRef}
+                  size="xs"
+                  color="subdued"
+                  label={
+                    isLocked
+                      ? i18n.translate('core.ui.primaryNavSection.undockLabel', {
+                          defaultMessage: 'Undock navigation',
+                        })
+                      : i18n.translate('core.ui.primaryNavSection.dockLabel', {
+                          defaultMessage: 'Dock navigation',
+                        })
+                  }
+                  aria-label={
+                    isLocked
+                      ? i18n.translate('core.ui.primaryNavSection.undockAriaLabel', {
+                          defaultMessage: 'Undock primary navigation',
+                        })
+                      : i18n.translate('core.ui.primaryNavSection.dockAriaLabel', {
+                          defaultMessage: 'Dock primary navigation',
+                        })
+                  }
+                  onClick={() => {
+                    onIsLockedUpdate(!isLocked);
+                    if (lockRef.current) {
+                      lockRef.current.focus();
+                    }
+                  }}
+                  iconType={isLocked ? 'lock' : 'lockOpen'}
+                />
+              </EuiShowFor>
+            }
+          </EuiListGroup>
+        </EuiCollapsibleNavGroup>
       </EuiFlexItem>
     </EuiCollapsibleNav>
   );
