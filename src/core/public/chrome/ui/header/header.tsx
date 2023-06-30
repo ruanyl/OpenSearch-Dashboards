@@ -89,6 +89,7 @@ export interface HeaderProps {
   isLocked$: Observable<boolean>;
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
   onIsLockedUpdate: OnIsLockedUpdate;
+  exitWorkspace: () => void;
   branding: ChromeBranding;
   survey: string | undefined;
   currentWorkspace$: BehaviorSubject<WorkspaceAttribute | null>;
@@ -100,6 +101,7 @@ export function Header({
   application,
   basePath,
   onIsLockedUpdate,
+  exitWorkspace,
   homeHref,
   branding,
   survey,
@@ -249,6 +251,7 @@ export function Header({
           navigateToApp={application.navigateToApp}
           navigateToUrl={application.navigateToUrl}
           onIsLockedUpdate={onIsLockedUpdate}
+          exitWorkspace={exitWorkspace}
           closeNav={() => {
             setIsNavOpen(false);
             if (toggleCollapsibleNavRef.current) {

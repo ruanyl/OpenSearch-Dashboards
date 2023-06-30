@@ -103,6 +103,7 @@ interface Props {
   navigateToUrl: InternalApplicationStart['navigateToUrl'];
   customNavLink$: Rx.Observable<ChromeNavLink | undefined>;
   branding: ChromeBranding;
+  exitWorkspace: () => void;
   currentWorkspace$: Rx.BehaviorSubject<WorkspaceAttribute | null>;
 }
 
@@ -114,6 +115,7 @@ export function CollapsibleNav({
   homeHref,
   storage = window.localStorage,
   onIsLockedUpdate,
+  exitWorkspace,
   closeNav,
   navigateToApp,
   navigateToUrl,
@@ -126,8 +128,8 @@ export function CollapsibleNav({
   const appId = useObservable(observables.appId$, '');
   const currentWorkspace = useObservable(observables.currentWorkspace$);
   const lockRef = useRef<HTMLButtonElement>(null);
-  const filterdLinks = getFilterLinks(currentWorkspace, navLinks);
-  const groupedNavLinks = groupBy(filterdLinks, (link) => link?.category?.id);
+  const filteredLinks = getFilterLinks(currentWorkspace, navLinks);
+  const groupedNavLinks = groupBy(filteredLinks, (link) => link?.category?.id);
   const { undefined: unknowns = [], ...allCategorizedLinks } = groupedNavLinks;
   const categoryDictionary = getAllCategories(allCategorizedLinks);
   const orderedCategories = getOrderedCategories(allCategorizedLinks, categoryDictionary);
@@ -334,6 +336,22 @@ export function CollapsibleNav({
         <EuiShowFor sizes={['l', 'xl']}>
           <EuiCollapsibleNavGroup>
             <EuiListGroup flush>
+              {/* Exit workspace button only within a workspace*/}
+              {currentWorkspace && (
+                <EuiListGroupItem
+                  data-test-subj="collapsible-nav-exit"
+                  size="xs"
+                  color="subdued"
+                  label={i18n.translate('core.ui.primaryNavSection.exitWorkspaceLabel', {
+                    defaultMessage: 'Exit workspace',
+                  })}
+                  aria-label={i18n.translate('core.ui.primaryNavSection.exitWorkspaceLabel', {
+                    defaultMessage: 'Exit workspace',
+                  })}
+                  onClick={exitWorkspace}
+                  iconType={'exit'}
+                />
+              )}
               <EuiListGroupItem
                 data-test-subj="collapsible-nav-lock"
                 buttonRef={lockRef}
