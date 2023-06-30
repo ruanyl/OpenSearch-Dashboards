@@ -181,20 +181,10 @@ export class ChromeService {
       docTitle.reset();
     });
 
-    const getWorkspaceUrl = (id: string) => {
-      return workspaces.formatUrlWithWorkspaceId(
-        application.getUrlForApp(WORKSPACE_APP_ID, {
-          path: '/',
-          absolute: true,
-        }),
-        id
-      );
-    };
-
     const exitWorkspace = async () => {
       let result;
       try {
-        result = await workspaces.client.exitWorkspace();
+        result = await workspaces?.client.exitWorkspace();
       } catch (error) {
         notifications?.toasts.addDanger({
           title: i18n.translate('workspace.exit.failed', {
@@ -211,7 +201,6 @@ export class ChromeService {
           }),
           text: result?.error,
         });
-        return;
       }
       await application.navigateToApp('home');
     };
@@ -298,7 +287,6 @@ export class ChromeService {
           navControlsExpandedRight$={navControls.getExpandedRight$()}
           onIsLockedUpdate={setIsNavDrawerLocked}
           exitWorkspace={exitWorkspace}
-          getWorkspaceUrl={getWorkspaceUrl}
           isLocked$={getIsNavDrawerLocked$}
           branding={injectedMetadata.getBranding()}
           survey={injectedMetadata.getSurvey()}

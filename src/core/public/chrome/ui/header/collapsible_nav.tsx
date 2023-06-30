@@ -104,7 +104,6 @@ interface Props {
   customNavLink$: Rx.Observable<ChromeNavLink | undefined>;
   branding: ChromeBranding;
   exitWorkspace: () => void;
-  getWorkspaceUrl: (id: string) => string;
   currentWorkspace$: Rx.BehaviorSubject<WorkspaceAttribute | null>;
   workspaceList$: Rx.BehaviorSubject<WorkspaceAttribute[]>;
 }
@@ -118,7 +117,6 @@ export function CollapsibleNav({
   storage = window.localStorage,
   onIsLockedUpdate,
   exitWorkspace,
-  getWorkspaceUrl,
   closeNav,
   navigateToApp,
   navigateToUrl,
@@ -334,55 +332,26 @@ export function CollapsibleNav({
           </>
         )}
 
-        {/* OpenSearchDashboards, Observability, Security, and Management sections inside workspace */}
-        {currentWorkspace &&
-          orderedCategories.map((categoryName) => {
-            const category = categoryDictionary[categoryName]!;
-            const opensearchLinkLogo =
-              category.id === 'opensearchDashboards' ? customSideMenuLogo() : category.euiIconType;
-
-            return (
-              <EuiCollapsibleNavGroup
-                key={category.id}
-                iconType={opensearchLinkLogo}
-                title={category.label}
-                isCollapsible={true}
-                initialIsOpen={getIsCategoryOpen(category.id, storage)}
-                onToggle={(isCategoryOpen) =>
-                  setIsCategoryOpen(category.id, isCategoryOpen, storage)
-                }
-                data-test-subj={`collapsibleNavGroup-${category.id}`}
-                data-test-opensearch-logo={opensearchLinkLogo}
-              >
-                <EuiListGroup
-                  aria-label={i18n.translate('core.ui.primaryNavSection.screenReaderLabel', {
-                    defaultMessage: 'Primary navigation links, {category}',
-                    values: { category: category.label },
-                  })}
-                  listItems={allCategorizedLinks[categoryName].map((link) => readyForEUI(link))}
-                  maxWidth="none"
+        {/* Docking button only for larger screens that can support it*/}
+        <EuiShowFor sizes={['l', 'xl']}>
+          <EuiCollapsibleNavGroup>
+            <EuiListGroup flush>
+              {/* Exit workspace button only within a workspace*/}
+              {currentWorkspace && (
+                <EuiListGroupItem
+                  data-test-subj="collapsible-nav-exit"
+                  size="xs"
                   color="subdued"
-                  gutterSize="none"
-                  size="s"
+                  label={i18n.translate('core.ui.primaryNavSection.exitWorkspaceLabel', {
+                    defaultMessage: 'Exit workspace',
+                  })}
+                  aria-label={i18n.translate('core.ui.primaryNavSection.exitWorkspaceLabel', {
+                    defaultMessage: 'Exit workspace',
+                  })}
+                  onClick={exitWorkspace}
+                  iconType={'exit'}
                 />
-              </EuiCollapsibleNavGroup>
-            );
-          })}
-
-        {/* Things with no category (largely for custom plugins) inside workspace */}
-        {currentWorkspace &&
-          unknowns.map((link, i) => (
-            <EuiCollapsibleNavGroup data-test-subj={`collapsibleNavGroup-noCategory`} key={i}>
-              <EuiListGroup flush>
-                <EuiListGroupItem color="text" size="s" {...readyForEUI(link, true)} />
-              </EuiListGroup>
-            </EuiCollapsibleNavGroup>
-          ))}
-
-        <EuiCollapsibleNavGroup>
-          <EuiListGroup flush>
-            {/* Exit workspace button only within a workspace*/}
-            {currentWorkspace && (
+              )}
               <EuiListGroupItem
                 data-test-subj="collapsible-nav-exit"
                 size="xs"
