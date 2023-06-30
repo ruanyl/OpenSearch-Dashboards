@@ -332,26 +332,10 @@ export function CollapsibleNav({
           </>
         )}
 
-        {/* Docking button only for larger screens that can support it*/}
-        <EuiShowFor sizes={['l', 'xl']}>
-          <EuiCollapsibleNavGroup>
-            <EuiListGroup flush>
-              {/* Exit workspace button only within a workspace*/}
-              {currentWorkspace && (
-                <EuiListGroupItem
-                  data-test-subj="collapsible-nav-exit"
-                  size="xs"
-                  color="subdued"
-                  label={i18n.translate('core.ui.primaryNavSection.exitWorkspaceLabel', {
-                    defaultMessage: 'Exit workspace',
-                  })}
-                  aria-label={i18n.translate('core.ui.primaryNavSection.exitWorkspaceLabel', {
-                    defaultMessage: 'Exit workspace',
-                  })}
-                  onClick={exitWorkspace}
-                  iconType={'exit'}
-                />
-              )}
+        <EuiCollapsibleNavGroup>
+          <EuiListGroup flush>
+            {/* Exit workspace button only within a workspace*/}
+            {currentWorkspace && (
               <EuiListGroupItem
                 data-test-subj="collapsible-nav-exit"
                 size="xs"
