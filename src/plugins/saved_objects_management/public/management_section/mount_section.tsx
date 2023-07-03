@@ -32,10 +32,8 @@ import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Switch, Route } from 'react-router-dom';
 import { I18nProvider } from '@osd/i18n/react';
-import { i18n } from '@osd/i18n';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { CoreSetup } from 'src/core/public';
-import { ManagementAppMountParams } from '../../../management/public';
+import { AppMountParameters, CoreSetup } from 'src/core/public';
 import { StartDependencies, SavedObjectsManagementPluginStart } from '../plugin';
 import { ISavedObjectsManagementServiceRegistry } from '../services';
 import { getAllowedTypes } from './../lib';
@@ -43,14 +41,10 @@ import { getAllowedTypes } from './../lib';
 interface MountParams {
   core: CoreSetup<StartDependencies, SavedObjectsManagementPluginStart>;
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
-  mountParams: ManagementAppMountParams;
+  mountParams: AppMountParameters;
+  title: string;
+  allowedObjectTypes?: string[];
 }
-
-let allowedObjectTypes: string[] | undefined;
-
-const title = i18n.translate('savedObjectsManagement.objects.savedObjectsTitle', {
-  defaultMessage: 'Saved Objects',
-});
 
 const SavedObjectsEditionPage = lazy(() => import('./saved_objects_edition_page'));
 const SavedObjectsTablePage = lazy(() => import('./saved_objects_table_page'));
@@ -58,11 +52,16 @@ export const mountManagementSection = async ({
   core,
   mountParams,
   serviceRegistry,
+  title,
+  allowedObjectTypes,
 }: MountParams) => {
   const [coreStart, { data }, pluginStart] = await core.getStartServices();
-  const { element, history, setBreadcrumbs } = mountParams;
-  if (allowedObjectTypes === undefined) {
-    allowedObjectTypes = await getAllowedTypes(coreStart.http);
+  const { element, history } = mountParams;
+  const { chrome } = coreStart;
+  const setBreadcrumbs = chrome.setBreadcrumbs;
+  let finalAllowedObjectTypes = allowedObjectTypes;
+  if (finalAllowedObjectTypes === undefined) {
+    finalAllowedObjectTypes = await getAllowedTypes(coreStart.http);
   }
 
   coreStart.chrome.docTitle.change(title);
@@ -105,8 +104,9 @@ export const mountManagementSection = async ({
                   actionRegistry={pluginStart.actions}
                   columnRegistry={pluginStart.columns}
                   namespaceRegistry={pluginStart.namespaces}
-                  allowedTypes={allowedObjectTypes}
+                  allowedTypes={finalAllowedObjectTypes}
                   setBreadcrumbs={setBreadcrumbs}
+                  title={title}
                 />
               </Suspense>
             </RedirectToHomeIfUnauthorized>
