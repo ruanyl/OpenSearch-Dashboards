@@ -36,19 +36,18 @@ import {
   EuiListGroup,
   EuiListGroupItem,
   EuiShowFor,
-  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { groupBy, sortBy } from 'lodash';
 import React, { useRef } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import * as Rx from 'rxjs';
-import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '../..';
+import { ChromeNavLink } from '../..';
 import { AppCategory } from '../../../../types';
 import { InternalApplicationStart } from '../../../application';
 import { HttpStart } from '../../../http';
 import { OnIsLockedUpdate } from './';
-import { createEuiListItem, isModifiedOrPrevented, createWorkspaceNavLink } from './nav_link';
+import { createEuiListItem } from './nav_link';
 import { ChromeBranding } from '../../chrome_service';
 import { WorkspaceAttribute } from '../../../workspace';
 import { WORKSPACE_APP_ID, PATHS } from '../../constants';
@@ -95,13 +94,11 @@ interface Props {
   isNavOpen: boolean;
   homeHref: string;
   navLinks$: Rx.Observable<ChromeNavLink[]>;
-  recentlyAccessed$: Rx.Observable<ChromeRecentlyAccessedHistoryItem[]>;
   storage?: Storage;
   onIsLockedUpdate: OnIsLockedUpdate;
   closeNav: () => void;
   navigateToApp: InternalApplicationStart['navigateToApp'];
   navigateToUrl: InternalApplicationStart['navigateToUrl'];
-  customNavLink$: Rx.Observable<ChromeNavLink | undefined>;
   branding: ChromeBranding;
   exitWorkspace: () => void;
   currentWorkspace$: Rx.BehaviorSubject<WorkspaceAttribute | null>;
@@ -208,111 +205,15 @@ export function CollapsibleNav({
         {/* Home, Alerts, Favorites, Projects and Admin outside workspace */}
         {!currentWorkspace && (
           <>
-            <EuiCollapsibleNavGroup
-              onClick={async () => {
-                closeNav();
-                await navigateToApp('home');
-              }}
-              iconType={'logoOpenSearch'}
-              title={i18n.translate('core.ui.primaryNavSection.home', {
-                defaultMessage: 'Home',
-              })}
-            />
+            <EuiCollapsibleNavGroup onClick={closeNav} iconType={'logoOpenSearch'} title={'Home'} />
+            <EuiCollapsibleNavGroup onClick={closeNav} iconType={'bell'} title={'Alerts'} />
+            <EuiCollapsibleNavGroup onClick={closeNav} iconType={'starEmpty'} title={'Favorites'} />
             <EuiCollapsibleNavGroup
               onClick={closeNav}
-              iconType={'bell'}
-              title={i18n.translate('core.ui.primaryNavSection.alerts', {
-                defaultMessage: 'Alerts',
-              })}
-            />
-            <EuiCollapsibleNavGroup
-              iconType={'starEmpty'}
-              title={i18n.translate('core.ui.primaryNavSection.favorites', {
-                defaultMessage: 'Favorites',
-              })}
-              isCollapsible={true}
-              initialIsOpen={true}
-            >
-              <EuiText size="s" color="subdued" style={{ padding: '0 8px 8px' }}>
-                <p>
-                  {i18n.translate('core.ui.EmptyFavoriteList', {
-                    defaultMessage: 'No Favorites',
-                  })}
-                </p>
-              </EuiText>
-              <EuiText size="s" color="subdued" style={{ padding: '0 8px 8px' }}>
-                <p>
-                  {i18n.translate('core.ui.SeeMoreFavorite', {
-                    defaultMessage: 'SEE MORE',
-                  })}
-                </p>
-              </EuiText>
-            </EuiCollapsibleNavGroup>
-            <EuiCollapsibleNavGroup
               iconType={'folderClosed'}
-              title={i18n.translate('core.ui.primaryNavSection.workspaces', {
-                defaultMessage: 'Workspaces',
-              })}
-              isCollapsible={true}
-              initialIsOpen={true}
-            >
-              {workspaceList?.length > 0 ? (
-                <EuiListGroup
-                  aria-label={i18n.translate('core.ui.WorkspaceList', {
-                    defaultMessage: 'Workspace list links',
-                  })}
-                  listItems={workspaceList.map((workspace) => {
-                    const href = getWorkspaceUrl(workspace.id);
-                    const hydratedLink = createWorkspaceNavLink(href, workspace, navLinks);
-                    return {
-                      href,
-                      ...hydratedLink,
-                      'data-test-subj': 'collapsibleNavAppLink--workspace',
-                      onClick: async (event) => {
-                        if (!isModifiedOrPrevented(event)) {
-                          closeNav();
-                        }
-                      },
-                    };
-                  })}
-                  maxWidth="none"
-                  color="subdued"
-                  gutterSize="none"
-                  size="s"
-                />
-              ) : (
-                <EuiText size="s" color="subdued" style={{ padding: '0 8px 8px' }}>
-                  <p>
-                    {i18n.translate('core.ui.EmptyWorkspaceList', {
-                      defaultMessage: 'No Workspaces',
-                    })}
-                  </p>
-                </EuiText>
-              )}
-              <EuiText
-                size="s"
-                color="subdued"
-                style={{ padding: '0 8px 8px' }}
-                onClick={async () => {
-                  await navigateToApp(WORKSPACE_APP_ID, {
-                    path: PATHS.list,
-                  });
-                }}
-              >
-                <p>
-                  {i18n.translate('core.ui.SeeMoreWorkspace', {
-                    defaultMessage: 'SEE MORE',
-                  })}
-                </p>
-              </EuiText>
-            </EuiCollapsibleNavGroup>
-            <EuiCollapsibleNavGroup
-              onClick={closeNav}
-              iconType={'managementApp'}
-              title={i18n.translate('core.ui.primaryNavSection.admin', {
-                defaultMessage: 'Admin',
-              })}
+              title={'Projects'}
             />
+            <EuiCollapsibleNavGroup onClick={closeNav} iconType={'managementApp'} title={'Admin'} />
           </>
         )}
 
@@ -320,17 +221,54 @@ export function CollapsibleNav({
         {currentWorkspace && (
           <>
             <EuiCollapsibleNavGroup iconType={'folderClosed'} title={currentWorkspace.name} />
-            <EuiCollapsibleNavGroup
-              onClick={() => {
-                window.location.href = getWorkspaceUrl(currentWorkspace.id);
-              }}
-              iconType={'grid'}
-              title={i18n.translate('core.ui.primaryNavSection.overview', {
-                defaultMessage: 'Overview',
-              })}
-            />
+            <EuiCollapsibleNavGroup onClick={closeNav} iconType={'grid'} title={'Overview'} />
           </>
         )}
+
+        {/* OpenSearchDashboards, Observability, Security, and Management sections inside workspace */}
+        {currentWorkspace &&
+          orderedCategories.map((categoryName) => {
+            const category = categoryDictionary[categoryName]!;
+            const opensearchLinkLogo =
+              category.id === 'opensearchDashboards' ? customSideMenuLogo() : category.euiIconType;
+
+            return (
+              <EuiCollapsibleNavGroup
+                key={category.id}
+                iconType={opensearchLinkLogo}
+                title={category.label}
+                isCollapsible={true}
+                initialIsOpen={getIsCategoryOpen(category.id, storage)}
+                onToggle={(isCategoryOpen) =>
+                  setIsCategoryOpen(category.id, isCategoryOpen, storage)
+                }
+                data-test-subj={`collapsibleNavGroup-${category.id}`}
+                data-test-opensearch-logo={opensearchLinkLogo}
+              >
+                <EuiListGroup
+                  aria-label={i18n.translate('core.ui.primaryNavSection.screenReaderLabel', {
+                    defaultMessage: 'Primary navigation links, {category}',
+                    values: { category: category.label },
+                  })}
+                  listItems={allCategorizedLinks[categoryName].map((link) => readyForEUI(link))}
+                  maxWidth="none"
+                  color="subdued"
+                  gutterSize="none"
+                  size="s"
+                />
+              </EuiCollapsibleNavGroup>
+            );
+          })}
+
+        {/* Things with no category (largely for custom plugins) inside workspace */}
+        {currentWorkspace &&
+          unknowns.map((link, i) => (
+            <EuiCollapsibleNavGroup data-test-subj={`collapsibleNavGroup-noCategory`} key={i}>
+              <EuiListGroup flush>
+                <EuiListGroupItem color="text" size="s" {...readyForEUI(link, true)} />
+              </EuiListGroup>
+            </EuiCollapsibleNavGroup>
+          ))}
 
         <EuiCollapsibleNavGroup>
           <EuiListGroup flush>
