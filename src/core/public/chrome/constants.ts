@@ -31,3 +31,15 @@
 export const OPENSEARCH_DASHBOARDS_ASK_OPENSEARCH_LINK = 'https://forum.opensearch.org/';
 export const GITHUB_CREATE_ISSUE_LINK =
   'https://github.com/opensearch-project/OpenSearch-Dashboards/issues/new/choose';
+
+export const WORKSPACE_APP_ID = 'workspace';
+
+export const WORKSPACE_ID_IN_SESSION_STORAGE = '_workspace_id_';
+
+export const PATHS = {
+  create: '/create',
+  overview: '/overview',
+  update: '/update',
+};
+export const WORKSPACE_OP_TYPE_CREATE = 'create';
+export const WORKSPACE_OP_TYPE_UPDATE = 'update';
