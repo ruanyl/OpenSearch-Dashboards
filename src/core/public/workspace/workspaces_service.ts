@@ -18,7 +18,7 @@ export interface WorkspacesStart {
     options?: {
       jumpable?: boolean;
     }
-  ) => Promise<string>;
+  ) => string;
   setFormatUrlWithWorkspaceId: (formatFn: WorkspacesStart['formatUrlWithWorkspaceId']) => void;
 }
 
@@ -26,7 +26,7 @@ export type WorkspacesSetup = WorkspacesStart;
 
 export class WorkspacesService implements CoreService<WorkspacesSetup, WorkspacesStart> {
   private client?: WorkspacesClientContract;
-  private async formatUrlWithWorkspaceId(url: string, id: string) {
+  private formatUrlWithWorkspaceId(url: string, id: string) {
     return url;
   }
   private setFormatUrlWithWorkspaceId(formatFn: typeof this.formatUrlWithWorkspaceId) {
