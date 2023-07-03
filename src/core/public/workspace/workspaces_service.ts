@@ -29,7 +29,7 @@ export class WorkspacesService implements CoreService<WorkspacesSetup, Workspace
   private formatUrlWithWorkspaceId(url: string, id: string) {
     return url;
   }
-  private setFormatUrlWithWorkspaceId(formatFn: typeof this.formatUrlWithWorkspaceId) {
+  private setFormatUrlWithWorkspaceId(formatFn: WorkspacesStart['formatUrlWithWorkspaceId']) {
     this.formatUrlWithWorkspaceId = formatFn;
   }
   public async setup({ http }: { http: HttpSetup }) {
