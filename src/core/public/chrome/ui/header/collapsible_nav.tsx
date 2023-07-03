@@ -205,7 +205,14 @@ export function CollapsibleNav({
         {/* Home, Alerts, Favorites, Projects and Admin outside workspace */}
         {!currentWorkspace && (
           <>
-            <EuiCollapsibleNavGroup onClick={closeNav} iconType={'logoOpenSearch'} title={'Home'} />
+            <EuiCollapsibleNavGroup
+              onClick={async () => {
+                closeNav();
+                await navigateToApp('home');
+              }}
+              iconType={'logoOpenSearch'}
+              title={'Home'}
+            />
             <EuiCollapsibleNavGroup onClick={closeNav} iconType={'bell'} title={'Alerts'} />
             <EuiCollapsibleNavGroup onClick={closeNav} iconType={'starEmpty'} title={'Favorites'} />
             <EuiCollapsibleNavGroup
@@ -221,7 +228,21 @@ export function CollapsibleNav({
         {currentWorkspace && (
           <>
             <EuiCollapsibleNavGroup iconType={'folderClosed'} title={currentWorkspace.name} />
-            <EuiCollapsibleNavGroup onClick={closeNav} iconType={'grid'} title={'Overview'} />
+            <EuiCollapsibleNavGroup
+              onClick={async () => {
+                closeNav();
+                await navigateToApp(WORKSPACE_APP_ID, {
+                  path:
+                    PATHS.update +
+                    '?' +
+                    WORKSPACE_ID_IN_SESSION_STORAGE +
+                    '=' +
+                    currentWorkspace.id,
+                });
+              }}
+              iconType={'grid'}
+              title={'Overview'}
+            />
           </>
         )}
 
