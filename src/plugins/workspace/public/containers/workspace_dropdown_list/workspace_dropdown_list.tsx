@@ -53,16 +53,19 @@ export function WorkspaceDropdownList(props: WorkspaceDropdownListProps) {
   );
 
   const onChange = useCallback(
-    (workspaceOption: WorkspaceOption[]) => {
+    async (workspaceOption: WorkspaceOption[]) => {
       /** switch the workspace */
       setLoading(true);
       const id = workspaceOption[0].key!;
-      const newUrl = coreStart.workspaces?.formatUrlWithWorkspaceId(
+      const newUrl = await coreStart.workspaces?.formatUrlWithWorkspaceId(
         coreStart.application.getUrlForApp(WORKSPACE_APP_ID, {
           path: PATHS.update,
           absolute: true,
         }),
-        id
+        id,
+        {
+          jumpable: true,
+        }
       );
       if (newUrl) {
         window.location.href = newUrl;
