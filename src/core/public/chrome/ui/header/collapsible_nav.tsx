@@ -36,19 +36,18 @@ import {
   EuiListGroup,
   EuiListGroupItem,
   EuiShowFor,
-  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { groupBy, sortBy } from 'lodash';
 import React, { useRef } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import * as Rx from 'rxjs';
-import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '../..';
+import { ChromeNavLink } from '../..';
 import { AppCategory } from '../../../../types';
 import { InternalApplicationStart } from '../../../application';
 import { HttpStart } from '../../../http';
 import { OnIsLockedUpdate } from './';
-import { createEuiListItem, isModifiedOrPrevented, createWorkspaceNavLink } from './nav_link';
+import { createEuiListItem } from './nav_link';
 import { ChromeBranding } from '../../chrome_service';
 import { WorkspaceAttribute } from '../../../workspace';
 import { WORKSPACE_APP_ID, PATHS } from '../../constants';
@@ -95,13 +94,11 @@ interface Props {
   isNavOpen: boolean;
   homeHref: string;
   navLinks$: Rx.Observable<ChromeNavLink[]>;
-  recentlyAccessed$: Rx.Observable<ChromeRecentlyAccessedHistoryItem[]>;
   storage?: Storage;
   onIsLockedUpdate: OnIsLockedUpdate;
   closeNav: () => void;
   navigateToApp: InternalApplicationStart['navigateToApp'];
   navigateToUrl: InternalApplicationStart['navigateToUrl'];
-  customNavLink$: Rx.Observable<ChromeNavLink | undefined>;
   branding: ChromeBranding;
   exitWorkspace: () => void;
   currentWorkspace$: Rx.BehaviorSubject<WorkspaceAttribute | null>;
@@ -205,15 +202,73 @@ export function CollapsibleNav({
       outsideClickCloses={false}
     >
       <EuiFlexItem className="eui-yScroll">
+        {/* Home, Alerts, Favorites, Projects and Admin outside workspace */}
+        {!currentWorkspace && (
+          <>
+            <EuiCollapsibleNavGroup onClick={closeNav} iconType={'logoOpenSearch'} title={'Home'} />
+            <EuiCollapsibleNavGroup onClick={closeNav} iconType={'bell'} title={'Alerts'} />
+            <EuiCollapsibleNavGroup onClick={closeNav} iconType={'starEmpty'} title={'Favorites'} />
+            <EuiCollapsibleNavGroup
+              onClick={closeNav}
+              iconType={'folderClosed'}
+              title={'Projects'}
+            />
+            <EuiCollapsibleNavGroup onClick={closeNav} iconType={'managementApp'} title={'Admin'} />
+          </>
+        )}
 
-        {/* Things with no category (largely for custom plugins) */}
-        {unknowns.map((link, i) => (
-          <EuiCollapsibleNavGroup data-test-subj={`collapsibleNavGroup-noCategory`} key={i}>
-            <EuiListGroup flush>
-              <EuiListGroupItem color="text" size="s" {...readyForEUI(link, true)} />
-            </EuiListGroup>
-          </EuiCollapsibleNavGroup>
-        ))}
+        {/* Workspace name and Overview inside workspace */}
+        {currentWorkspace && (
+          <>
+            <EuiCollapsibleNavGroup iconType={'folderClosed'} title={currentWorkspace.name} />
+            <EuiCollapsibleNavGroup onClick={closeNav} iconType={'grid'} title={'Overview'} />
+          </>
+        )}
+
+        {/* OpenSearchDashboards, Observability, Security, and Management sections inside workspace */}
+        {currentWorkspace &&
+          orderedCategories.map((categoryName) => {
+            const category = categoryDictionary[categoryName]!;
+            const opensearchLinkLogo =
+              category.id === 'opensearchDashboards' ? customSideMenuLogo() : category.euiIconType;
+
+            return (
+              <EuiCollapsibleNavGroup
+                key={category.id}
+                iconType={opensearchLinkLogo}
+                title={category.label}
+                isCollapsible={true}
+                initialIsOpen={getIsCategoryOpen(category.id, storage)}
+                onToggle={(isCategoryOpen) =>
+                  setIsCategoryOpen(category.id, isCategoryOpen, storage)
+                }
+                data-test-subj={`collapsibleNavGroup-${category.id}`}
+                data-test-opensearch-logo={opensearchLinkLogo}
+              >
+                <EuiListGroup
+                  aria-label={i18n.translate('core.ui.primaryNavSection.screenReaderLabel', {
+                    defaultMessage: 'Primary navigation links, {category}',
+                    values: { category: category.label },
+                  })}
+                  listItems={allCategorizedLinks[categoryName].map((link) => readyForEUI(link))}
+                  maxWidth="none"
+                  color="subdued"
+                  gutterSize="none"
+                  size="s"
+                />
+              </EuiCollapsibleNavGroup>
+            );
+          })}
+
+        {/* Things with no category (largely for custom plugins) inside workspace */}
+        {currentWorkspace &&
+          unknowns.map((link, i) => (
+            <EuiCollapsibleNavGroup data-test-subj={`collapsibleNavGroup-noCategory`} key={i}>
+              <EuiListGroup flush>
+                <EuiListGroupItem color="text" size="s" {...readyForEUI(link, true)} />
+              </EuiListGroup>
+            </EuiCollapsibleNavGroup>
+          ))}
 
         <EuiCollapsibleNavGroup>
           <EuiListGroup flush>
