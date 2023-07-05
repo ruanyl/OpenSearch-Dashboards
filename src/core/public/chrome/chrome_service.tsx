@@ -42,7 +42,11 @@ import { HttpStart } from '../http';
 import { InjectedMetadataStart } from '../injected_metadata';
 import { NotificationsStart } from '../notifications';
 import { IUiSettingsClient } from '../ui_settings';
+<<<<<<< HEAD
 import { OPENSEARCH_DASHBOARDS_ASK_OPENSEARCH_LINK, WORKSPACE_APP_ID } from './constants';
+=======
+import { OPENSEARCH_DASHBOARDS_ASK_OPENSEARCH_LINK, PATHS, WORKSPACE_APP_ID } from './constants';
+>>>>>>> 81b351ba56 (Implement workspace dropdown list in left menu)
 import { ChromeDocTitle, DocTitleService } from './doc_title';
 import { ChromeNavControls, NavControlsService } from './nav_controls';
 import { ChromeNavLinks, NavLinksService, ChromeNavLink } from './nav_links';
@@ -182,9 +186,9 @@ export class ChromeService {
     });
 
     const getWorkspaceUrl = (id: string) => {
-      return workspaces.formatUrlWithWorkspaceId(
+      return workspaces?.formatUrlWithWorkspaceId(
         application.getUrlForApp(WORKSPACE_APP_ID, {
-          path: '/',
+          path: PATHS.update,
           absolute: true,
         }),
         id
