@@ -44,7 +44,13 @@ import React, { createRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { LoadingIndicator } from '../';
-import { ChromeBadge, ChromeBreadcrumb, ChromeNavControl, ChromeNavLink } from '../..';
+import {
+  ChromeBadge,
+  ChromeBreadcrumb,
+  ChromeNavControl,
+  ChromeNavLink,
+  ChromeRecentlyAccessedHistoryItem,
+} from '../..';
 import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
 import { ChromeHelpExtension, ChromeBranding } from '../../chrome_service';
@@ -65,10 +71,12 @@ export interface HeaderProps {
   appTitle$: Observable<string>;
   badge$: Observable<ChromeBadge | undefined>;
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
+  customNavLink$: Observable<ChromeNavLink | undefined>;
   homeHref: string;
   isVisible$: Observable<boolean>;
   opensearchDashboardsDocLink: string;
   navLinks$: Observable<ChromeNavLink[]>;
+  recentlyAccessed$: Observable<ChromeRecentlyAccessedHistoryItem[]>;
   forceAppSwitcherNavigation$: Observable<boolean>;
   helpExtension$: Observable<ChromeHelpExtension | undefined>;
   helpSupportUrl$: Observable<string>;
@@ -239,6 +247,7 @@ export function Header({
           id={navId}
           isLocked={isLocked}
           navLinks$={observables.navLinks$}
+          recentlyAccessed$={observables.recentlyAccessed$}
           isNavOpen={isNavOpen}
           homeHref={homeHref}
           basePath={basePath}
@@ -253,6 +262,7 @@ export function Header({
               toggleCollapsibleNavRef.current.focus();
             }
           }}
+          customNavLink$={observables.customNavLink$}
           branding={branding}
           currentWorkspace$={observables.currentWorkspace$}
           workspaceList$={observables.workspaceList$}
