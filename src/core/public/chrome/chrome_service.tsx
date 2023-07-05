@@ -42,7 +42,7 @@ import { HttpStart } from '../http';
 import { InjectedMetadataStart } from '../injected_metadata';
 import { NotificationsStart } from '../notifications';
 import { IUiSettingsClient } from '../ui_settings';
-import { OPENSEARCH_DASHBOARDS_ASK_OPENSEARCH_LINK } from './constants';
+import { OPENSEARCH_DASHBOARDS_ASK_OPENSEARCH_LINK, PATHS, WORKSPACE_APP_ID } from './constants';
 import { ChromeDocTitle, DocTitleService } from './doc_title';
 import { ChromeNavControls, NavControlsService } from './nav_controls';
 import { ChromeNavLinks, NavLinksService, ChromeNavLink } from './nav_links';
@@ -181,6 +181,16 @@ export class ChromeService {
       docTitle.reset();
     });
 
+    const getWorkspaceUrl = (id: string) => {
+      return workspaces?.formatUrlWithWorkspaceId(
+        application.getUrlForApp(WORKSPACE_APP_ID, {
+          path: PATHS.update,
+          absolute: true,
+        }),
+        id
+      );
+    };
+
     const exitWorkspace = async () => {
       let result;
       try {
@@ -201,6 +211,7 @@ export class ChromeService {
           }),
           text: result?.error,
         });
+        return;
       }
       await application.navigateToApp('home');
     };
@@ -285,10 +296,12 @@ export class ChromeService {
           navControlsExpandedRight$={navControls.getExpandedRight$()}
           onIsLockedUpdate={setIsNavDrawerLocked}
           exitWorkspace={exitWorkspace}
+          getWorkspaceUrl={getWorkspaceUrl}
           isLocked$={getIsNavDrawerLocked$}
           branding={injectedMetadata.getBranding()}
           survey={injectedMetadata.getSurvey()}
           currentWorkspace$={workspaces.client.currentWorkspace$}
+          workspaceList$={workspaces.client.workspaceList$}
         />
       ),
 

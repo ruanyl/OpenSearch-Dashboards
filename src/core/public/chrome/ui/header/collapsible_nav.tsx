@@ -36,6 +36,7 @@ import {
   EuiListGroup,
   EuiListGroupItem,
   EuiShowFor,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { groupBy, sortBy } from 'lodash';
@@ -47,7 +48,7 @@ import { AppCategory } from '../../../../types';
 import { InternalApplicationStart } from '../../../application';
 import { HttpStart } from '../../../http';
 import { OnIsLockedUpdate } from './';
-import { createEuiListItem } from './nav_link';
+import { createEuiListItem, isModifiedOrPrevented, createWorkspaceNavLink } from './nav_link';
 import { ChromeBranding } from '../../chrome_service';
 import { WorkspaceAttribute } from '../../../workspace';
 import { PATHS, WORKSPACE_APP_ID, WORKSPACE_ID_IN_SESSION_STORAGE } from '../../constants';
@@ -101,7 +102,9 @@ interface Props {
   navigateToUrl: InternalApplicationStart['navigateToUrl'];
   branding: ChromeBranding;
   exitWorkspace: () => void;
+  getWorkspaceUrl: (id: string) => string;
   currentWorkspace$: Rx.BehaviorSubject<WorkspaceAttribute | null>;
+  workspaceList$: Rx.BehaviorSubject<WorkspaceAttribute[]>;
 }
 
 export function CollapsibleNav({
@@ -113,6 +116,7 @@ export function CollapsibleNav({
   storage = window.localStorage,
   onIsLockedUpdate,
   exitWorkspace,
+  getWorkspaceUrl,
   closeNav,
   navigateToApp,
   navigateToUrl,
@@ -122,6 +126,7 @@ export function CollapsibleNav({
   const navLinks = useObservable(observables.navLinks$, []).filter((link) => !link.hidden);
   const appId = useObservable(observables.appId$, '');
   const currentWorkspace = useObservable(observables.currentWorkspace$);
+  const workspaceList = useObservable(observables.workspaceList$, []).slice(0, 5);
   const lockRef = useRef<HTMLButtonElement>(null);
   const filteredLinks = getFilterLinks(currentWorkspace, navLinks);
   const groupedNavLinks = groupBy(filteredLinks, (link) => link?.category?.id);
@@ -212,12 +217,74 @@ export function CollapsibleNav({
               title={'Home'}
             />
             <EuiCollapsibleNavGroup onClick={closeNav} iconType={'bell'} title={'Alerts'} />
-            <EuiCollapsibleNavGroup onClick={closeNav} iconType={'starEmpty'} title={'Favorites'} />
             <EuiCollapsibleNavGroup
-              onClick={closeNav}
+              iconType={'starEmpty'}
+              title={'Favorites'}
+              isCollapsible={true}
+              initialIsOpen={true}
+            >
+              <EuiText size="s" color="subdued" style={{ padding: '0 8px 8px' }}>
+                <p>
+                  {i18n.translate('core.ui.EmptyFavoriteList', {
+                    defaultMessage: 'No Favorites',
+                  })}
+                </p>
+              </EuiText>
+              <EuiText size="s" color="subdued" style={{ padding: '0 8px 8px' }}>
+                <p>
+                  {i18n.translate('core.ui.SeeMoreFavorite', {
+                    defaultMessage: 'SEE MORE',
+                  })}
+                </p>
+              </EuiText>
+            </EuiCollapsibleNavGroup>
+            <EuiCollapsibleNavGroup
               iconType={'folderClosed'}
-              title={'Projects'}
-            />
+              title={'Workspaces'}
+              isCollapsible={true}
+              initialIsOpen={true}
+            >
+              {workspaceList?.length > 0 ? (
+                <EuiListGroup
+                  aria-label={i18n.translate('core.ui.WorkspaceList', {
+                    defaultMessage: 'Workspace list links',
+                  })}
+                  listItems={workspaceList.map((workspace) => {
+                    const href = getWorkspaceUrl(workspace.id);
+                    const { ...hydratedLink } = createWorkspaceNavLink(href, workspace, navLinks);
+                    return {
+                      href,
+                      ...hydratedLink,
+                      'data-test-subj': 'collapsibleNavAppLink--workspace',
+                      onClick: async (event) => {
+                        if (!isModifiedOrPrevented(event)) {
+                          closeNav();
+                        }
+                      },
+                    };
+                  })}
+                  maxWidth="none"
+                  color="subdued"
+                  gutterSize="none"
+                  size="s"
+                />
+              ) : (
+                <EuiText size="s" color="subdued" style={{ padding: '0 8px 8px' }}>
+                  <p>
+                    {i18n.translate('core.ui.EmptyWorkspaceList', {
+                      defaultMessage: 'No Workspaces',
+                    })}
+                  </p>
+                </EuiText>
+              )}
+              <EuiText size="s" color="subdued" style={{ padding: '0 8px 8px' }}>
+                <p>
+                  {i18n.translate('core.ui.SeeMoreWorkspace', {
+                    defaultMessage: 'SEE MORE',
+                  })}
+                </p>
+              </EuiText>
+            </EuiCollapsibleNavGroup>
             <EuiCollapsibleNavGroup onClick={closeNav} iconType={'managementApp'} title={'Admin'} />
           </>
         )}
