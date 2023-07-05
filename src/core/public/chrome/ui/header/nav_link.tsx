@@ -165,20 +165,21 @@ export function createWorkspaceNavLink(
   workspace: WorkspaceAttribute,
   navLinks: ChromeNavLink[]
 ): WorkspaceNavLink {
-  let titleAndAriaLabel = workspace.name;
+  const label = workspace.name;
+  let titleAndAriaLabel = label;
   const navLink = navLinks.find((nl) => href.startsWith(nl.baseUrl));
   if (navLink) {
     titleAndAriaLabel = i18n.translate('core.ui.workspaceLinks.linkItem.screenReaderLabel', {
       defaultMessage: '{workspaceItemLinkName}, type: {pageType}',
       values: {
-        workspaceItemLinkName: name,
+        workspaceItemLinkName: label,
         pageType: navLink.title,
       },
     });
   }
 
   return {
-    label: titleAndAriaLabel,
+    label,
     title: titleAndAriaLabel,
     'aria-label': titleAndAriaLabel,
   };
