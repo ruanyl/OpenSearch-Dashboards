@@ -289,8 +289,6 @@ export class ChromeService {
           isVisible$={this.isVisible$}
           opensearchDashboardsVersion={injectedMetadata.getOpenSearchDashboardsVersion()}
           navLinks$={navLinks.getNavLinks$()}
-          customNavLink$={customNavLink$.pipe(takeUntil(this.stop$))}
-          recentlyAccessed$={recentlyAccessed.get$()}
           navControlsLeft$={navControls.getLeft$()}
           navControlsCenter$={navControls.getCenter$()}
           navControlsRight$={navControls.getRight$()}

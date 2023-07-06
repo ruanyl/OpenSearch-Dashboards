@@ -35,7 +35,6 @@ import sinon from 'sinon';
 import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
 import { ChromeNavLink, DEFAULT_APP_CATEGORIES } from '../../..';
 import { httpServiceMock } from '../../../http/http_service.mock';
-import { ChromeRecentlyAccessedHistoryItem } from '../../recently_accessed';
 import { CollapsibleNav } from './collapsible_nav';
 import { workspacesServiceMock } from '../../../fatal_errors/fatal_errors_service.mock';
 
@@ -56,15 +55,6 @@ function mockLink({ title = 'discover', category }: Partial<ChromeNavLink>) {
     'data-test-subj': title,
   };
 }
-
-function mockRecentNavLink({ label = 'recent' }: Partial<ChromeRecentlyAccessedHistoryItem>) {
-  return {
-    label,
-    link: label,
-    id: label,
-  };
-}
-
 function mockProps() {
   return {
     appId$: new BehaviorSubject('test'),
@@ -74,7 +64,6 @@ function mockProps() {
     isNavOpen: false,
     homeHref: '/',
     navLinks$: new BehaviorSubject([]),
-    recentlyAccessed$: new BehaviorSubject([]),
     storage: new StubBrowserStorage(),
     onIsLockedUpdate: () => {},
     closeNav: () => {},
@@ -82,7 +71,6 @@ function mockProps() {
     navigateToUrl: () => Promise.resolve(),
     exitWorkspace: () => {},
     getWorkspaceUrl: (id: string) => '',
-    customNavLink$: new BehaviorSubject(undefined),
     currentWorkspace$: workspacesServiceMock.createStartContract().client.currentWorkspace$,
     workspaceList$: workspacesServiceMock.createStartContract().client.workspaceList$,
     branding: {
@@ -139,19 +127,8 @@ describe('CollapsibleNav', () => {
       mockLink({ title: 'canvas' }), // links should be able to be rendered top level as well
       mockLink({ title: 'logs', category: observability }),
     ];
-    const recentNavLinks = [
-      mockRecentNavLink({ label: 'recent 1' }),
-      mockRecentNavLink({ label: 'recent 2' }),
-    ];
-    const customNavLink = mockLink({ title: 'Custom link' });
     const component = mount(
-      <CollapsibleNav
-        {...mockProps()}
-        isNavOpen={true}
-        navLinks$={new BehaviorSubject(navLinks)}
-        recentlyAccessed$={new BehaviorSubject(recentNavLinks)}
-        customNavLink$={new BehaviorSubject(customNavLink)}
-      />
+      <CollapsibleNav {...mockProps()} isNavOpen={true} navLinks$={new BehaviorSubject(navLinks)} />
     );
     expect(component).toMatchSnapshot();
   });
@@ -161,14 +138,8 @@ describe('CollapsibleNav', () => {
       mockLink({ category: opensearchDashboards }),
       mockLink({ category: observability }),
     ];
-    const recentNavLinks = [mockRecentNavLink({})];
     const component = mount(
-      <CollapsibleNav
-        {...mockProps()}
-        isNavOpen={true}
-        navLinks$={new BehaviorSubject(navLinks)}
-        recentlyAccessed$={new BehaviorSubject(recentNavLinks)}
-      />
+      <CollapsibleNav {...mockProps()} isNavOpen={true} navLinks$={new BehaviorSubject(navLinks)} />
     );
     expectShownNavLinksCount(component, 3);
     clickGroup(component, 'opensearchDashboards');
@@ -186,14 +157,8 @@ describe('CollapsibleNav', () => {
       mockLink({ category: opensearchDashboards }),
       mockLink({ title: 'categoryless' }),
     ];
-    const recentNavLinks = [mockRecentNavLink({})];
     const component = mount(
-      <CollapsibleNav
-        {...mockProps()}
-        isNavOpen={true}
-        navLinks$={new BehaviorSubject(navLinks)}
-        recentlyAccessed$={new BehaviorSubject(recentNavLinks)}
-      />
+      <CollapsibleNav {...mockProps()} isNavOpen={true} navLinks$={new BehaviorSubject(navLinks)} />
     );
     component.setProps({
       closeNav: () => {
@@ -222,14 +187,8 @@ describe('CollapsibleNav', () => {
       mockLink({ category: opensearchDashboards }),
       mockLink({ category: observability }),
     ];
-    const recentNavLinks = [mockRecentNavLink({})];
     const component = mount(
-      <CollapsibleNav
-        {...mockProps()}
-        isNavOpen={true}
-        navLinks$={new BehaviorSubject(navLinks)}
-        recentlyAccessed$={new BehaviorSubject(recentNavLinks)}
-      />
+      <CollapsibleNav {...mockProps()} isNavOpen={true} navLinks$={new BehaviorSubject(navLinks)} />
     );
     // check if nav bar renders default mode custom logo
     expect(component).toMatchSnapshot();
@@ -249,14 +208,8 @@ describe('CollapsibleNav', () => {
       mockLink({ category: opensearchDashboards }),
       mockLink({ category: observability }),
     ];
-    const recentNavLinks = [mockRecentNavLink({})];
     const component = mount(
-      <CollapsibleNav
-        {...mockProps()}
-        isNavOpen={true}
-        navLinks$={new BehaviorSubject(navLinks)}
-        recentlyAccessed$={new BehaviorSubject(recentNavLinks)}
-      />
+      <CollapsibleNav {...mockProps()} isNavOpen={true} navLinks$={new BehaviorSubject(navLinks)} />
     );
     // check if nav bar renders dark mode custom logo
     component.setProps({
