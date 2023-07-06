@@ -19,16 +19,6 @@ export function registerRoutes({
   logger: Logger;
   http: InternalHttpServiceSetup;
 }) {
-  http.registerOnPreRouting((request, response, toolkit) => {
-    const regexp = /\/w\/([^\/]*)/;
-    const matchedResult = request.url.pathname.match(regexp);
-    if (matchedResult) {
-      const requestUrl = new URL(request.url.toString());
-      requestUrl.pathname = requestUrl.pathname.replace(regexp, '');
-      return toolkit.rewriteUrl(requestUrl.toString());
-    }
-    return toolkit.next();
-  });
   const router = http.createRouter(WORKSPACES_API_BASE_URL);
   router.post(
     {
