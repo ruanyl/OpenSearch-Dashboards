@@ -2,6 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+import { URL } from 'node:url';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
 import { InternalHttpServiceSetup } from '../http';

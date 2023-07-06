@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { schema } from '@osd/config-schema';
-import { URL } from 'node:url';
 import { InternalHttpServiceSetup } from '../../http';
 import { Logger } from '../../logging';
 import { IWorkspaceDBImpl } from '../types';
