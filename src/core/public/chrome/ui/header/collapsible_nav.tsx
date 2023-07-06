@@ -51,6 +51,7 @@ import { OnIsLockedUpdate } from './';
 import { createEuiListItem, isModifiedOrPrevented, createWorkspaceNavLink } from './nav_link';
 import { ChromeBranding } from '../../chrome_service';
 import { WorkspaceAttribute } from '../../../workspace';
+import { WORKSPACE_APP_ID, PATHS } from '../../constants';
 
 function getAllCategories(allCategorizedLinks: Record<string, ChromeNavLink[]>) {
   const allCategories = {} as Record<string, AppCategory | undefined>;
@@ -290,7 +291,16 @@ export function CollapsibleNav({
                   </p>
                 </EuiText>
               )}
-              <EuiText size="s" color="subdued" style={{ padding: '0 8px 8px' }}>
+              <EuiText
+                size="s"
+                color="subdued"
+                style={{ padding: '0 8px 8px' }}
+                onClick={async () => {
+                  await navigateToApp(WORKSPACE_APP_ID, {
+                    path: PATHS.list,
+                  });
+                }}
+              >
                 <p>
                   {i18n.translate('core.ui.SeeMoreWorkspace', {
                     defaultMessage: 'SEE MORE',
