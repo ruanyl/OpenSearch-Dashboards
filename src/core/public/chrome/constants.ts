@@ -33,9 +33,3 @@ export const GITHUB_CREATE_ISSUE_LINK =
   'https://github.com/opensearch-project/OpenSearch-Dashboards/issues/new/choose';
 
 export const WORKSPACE_APP_ID = 'workspace';
-
-export const PATHS = {
-  create: '/create',
-  overview: '/overview',
-  update: '/update',
-};
