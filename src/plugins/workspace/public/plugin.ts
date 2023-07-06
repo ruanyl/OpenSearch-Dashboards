@@ -20,13 +20,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}> {
   private getWorkpsaceIdFromURL(): string | null {
     return getWorkspaceIdFromUrl(window.location.href);
   }
-  private getPatchedUrl = (
-    url: string,
-    workspaceId: string,
-    options?: {
-      jumpable?: boolean;
-    }
-  ) => {
+  private getPatchedUrl = (url: string, workspaceId: string) => {
     const newUrl = new URL(url, window.location.href);
     /**
      * Patch workspace id into path
@@ -44,9 +38,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}> {
   };
   public async setup(core: CoreSetup) {
     this.core = core;
-    this.core?.workspaces.setFormatUrlWithWorkspaceId((url, id, options) =>
-      this.getPatchedUrl(url, id, options)
-    );
+    this.core?.workspaces.setFormatUrlWithWorkspaceId((url, id) => this.getPatchedUrl(url, id));
     /**
      * Retrive workspace id from url
      */

@@ -62,10 +62,7 @@ export function WorkspaceDropdownList(props: WorkspaceDropdownListProps) {
           path: PATHS.update,
           absolute: true,
         }),
-        id,
-        {
-          jumpable: true,
-        }
+        id
       );
       if (newUrl) {
         window.location.href = newUrl;

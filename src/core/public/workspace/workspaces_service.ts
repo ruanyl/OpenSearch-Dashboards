@@ -12,13 +12,7 @@ import { HttpSetup } from '../http';
  */
 export interface WorkspacesStart {
   client: WorkspacesClientContract;
-  formatUrlWithWorkspaceId: (
-    url: string,
-    id: WorkspaceAttribute['id'],
-    options?: {
-      jumpable?: boolean;
-    }
-  ) => string;
+  formatUrlWithWorkspaceId: (url: string, id: WorkspaceAttribute['id']) => string;
   setFormatUrlWithWorkspaceId: (formatFn: WorkspacesStart['formatUrlWithWorkspaceId']) => void;
 }
 
