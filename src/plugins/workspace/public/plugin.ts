@@ -31,9 +31,8 @@ export class WorkspacesPlugin implements Plugin<{}, {}> {
     /**
      * Patch workspace id into path
      */
-    const currentWorkspaceId = workspaceId;
     newUrl.pathname = this.core?.http.basePath.remove(newUrl.pathname) || '';
-    if (currentWorkspaceId) {
+    if (workspaceId) {
       newUrl.pathname = `${this.core?.http.basePath.serverBasePath || ''}/w/${workspaceId}${
         newUrl.pathname
       }`;
