@@ -43,7 +43,7 @@ import { groupBy, sortBy } from 'lodash';
 import React, { useRef } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import * as Rx from 'rxjs';
-import { ChromeNavLink } from '../..';
+import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '../..';
 import { AppCategory } from '../../../../types';
 import { InternalApplicationStart } from '../../../application';
 import { HttpStart } from '../../../http';
@@ -94,11 +94,13 @@ interface Props {
   isNavOpen: boolean;
   homeHref: string;
   navLinks$: Rx.Observable<ChromeNavLink[]>;
+  recentlyAccessed$: Rx.Observable<ChromeRecentlyAccessedHistoryItem[]>;
   storage?: Storage;
   onIsLockedUpdate: OnIsLockedUpdate;
   closeNav: () => void;
   navigateToApp: InternalApplicationStart['navigateToApp'];
   navigateToUrl: InternalApplicationStart['navigateToUrl'];
+  customNavLink$: Rx.Observable<ChromeNavLink | undefined>;
   branding: ChromeBranding;
   exitWorkspace: () => void;
   getWorkspaceUrl: (id: string) => string;
@@ -123,6 +125,7 @@ export function CollapsibleNav({
   ...observables
 }: Props) {
   const navLinks = useObservable(observables.navLinks$, []).filter((link) => !link.hidden);
+
   const appId = useObservable(observables.appId$, '');
   const currentWorkspace = useObservable(observables.currentWorkspace$);
   const workspaceList = useObservable(observables.workspaceList$, []).slice(0, 5);
