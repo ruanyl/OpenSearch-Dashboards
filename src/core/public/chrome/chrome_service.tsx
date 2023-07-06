@@ -184,7 +184,7 @@ export class ChromeService {
     const getWorkspaceUrl = (id: string) => {
       return workspaces?.formatUrlWithWorkspaceId(
         application.getUrlForApp(WORKSPACE_APP_ID, {
-          path: PATHS.update,
+          path: '/',
           absolute: true,
         }),
         id
