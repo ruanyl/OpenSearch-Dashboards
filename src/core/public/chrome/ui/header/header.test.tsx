@@ -56,6 +56,8 @@ function mockProps() {
     isVisible$: new BehaviorSubject(true),
     opensearchDashboardsDocLink: '/docs',
     navLinks$: new BehaviorSubject([]),
+    customNavLink$: new BehaviorSubject(undefined),
+    recentlyAccessed$: new BehaviorSubject([]),
     forceAppSwitcherNavigation$: new BehaviorSubject(false),
     helpExtension$: new BehaviorSubject(undefined),
     helpSupportUrl$: new BehaviorSubject(''),
@@ -96,13 +98,24 @@ describe('Header', () => {
     const navLinks$ = new BehaviorSubject([
       { id: 'opensearchDashboards', title: 'opensearchDashboards', baseUrl: '', href: '' },
     ]);
+    const customNavLink$ = new BehaviorSubject({
+      id: 'cloud-deployment-link',
+      title: 'Manage cloud deployment',
+      baseUrl: '',
+      href: '',
+    });
+    const recentlyAccessed$ = new BehaviorSubject([
+      { link: '', label: 'dashboard', id: 'dashboard' },
+    ]);
     const component = mountWithIntl(
       <Header
         {...mockProps()}
         isVisible$={isVisible$}
         breadcrumbs$={breadcrumbs$}
         navLinks$={navLinks$}
+        recentlyAccessed$={recentlyAccessed$}
         isLocked$={isLocked$}
+        customNavLink$={customNavLink$}
       />
     );
     expect(component.find('EuiHeader').exists()).toBeFalsy();
