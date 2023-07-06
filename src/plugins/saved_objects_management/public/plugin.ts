@@ -55,6 +55,7 @@ import { registerServices } from './register_services';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import {
   LIBRARY_OVERVIEW_WORDINGS,
+  SAVED_OBJECT_MANAGEMENT_TITLE_WORDINGS,
   SAVED_QUERIES_WORDINGS,
   SAVED_SEARCHES_WORDINGS,
 } from './constants';
@@ -123,20 +124,41 @@ export class SavedObjectsManagementPlugin
       });
     }
 
+    const opensearchDashboardsSection = management.sections.section.opensearchDashboards;
+    opensearchDashboardsSection.registerApp({
+      id: 'objects',
+      title: i18n.translate('savedObjectsManagement.managementSectionLabel', {
+        defaultMessage: 'Saved Objects',
+      }),
+      order: 1,
+      mount: async (mountParams) => {
+        const { mountManagementSection } = await import('./management_section');
+        return mountManagementSection({
+          core,
+          serviceRegistry: this.serviceRegistry,
+          mountParams,
+          title: i18n.translate('savedObjectsManagement.managementSectionLabel', {
+            defaultMessage: 'Saved Objects',
+          }),
+        });
+      },
+    });
+
     const mountWrapper = ({
       title,
       allowedObjectTypes,
     }: {
       title: string;
       allowedObjectTypes?: string[];
-    }) => async (mountParams: AppMountParameters) => {
+    }) => async (appMountParams: AppMountParameters) => {
       const { mountManagementSection } = await import('./management_section');
       return mountManagementSection({
         core,
         serviceRegistry: this.serviceRegistry,
-        mountParams,
+        appMountParams,
         title,
         allowedObjectTypes,
+        fullWidth: false,
       });
     };
 
@@ -151,7 +173,7 @@ export class SavedObjectsManagementPlugin
       order: 10000,
       category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
       mount: mountWrapper({
-        title: LIBRARY_OVERVIEW_WORDINGS,
+        title: SAVED_OBJECT_MANAGEMENT_TITLE_WORDINGS,
       }),
     });
 

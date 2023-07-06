@@ -34,6 +34,7 @@ import { Router, Switch, Route } from 'react-router-dom';
 import { I18nProvider } from '@osd/i18n/react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { AppMountParameters, CoreSetup } from 'src/core/public';
+import { ManagementAppMountParams } from 'src/plugins/management/public';
 import { StartDependencies, SavedObjectsManagementPluginStart } from '../plugin';
 import { ISavedObjectsManagementServiceRegistry } from '../services';
 import { getAllowedTypes } from './../lib';
@@ -41,9 +42,11 @@ import { getAllowedTypes } from './../lib';
 interface MountParams {
   core: CoreSetup<StartDependencies, SavedObjectsManagementPluginStart>;
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
-  mountParams: AppMountParameters;
+  mountParams?: ManagementAppMountParams;
+  appMountParams?: AppMountParameters;
   title: string;
   allowedObjectTypes?: string[];
+  fullWidth?: boolean;
 }
 
 const SavedObjectsEditionPage = lazy(() => import('./saved_objects_edition_page'));
@@ -51,14 +54,17 @@ const SavedObjectsTablePage = lazy(() => import('./saved_objects_table_page'));
 export const mountManagementSection = async ({
   core,
   mountParams,
+  appMountParams,
   serviceRegistry,
   title,
   allowedObjectTypes,
+  fullWidth = true,
 }: MountParams) => {
   const [coreStart, { data }, pluginStart] = await core.getStartServices();
-  const { element, history } = mountParams;
+  const usedMountParams = mountParams || appMountParams || ({} as ManagementAppMountParams);
+  const { element, history } = usedMountParams;
   const { chrome } = coreStart;
-  const setBreadcrumbs = chrome.setBreadcrumbs;
+  const setBreadcrumbs = mountParams?.setBreadcrumbs || chrome.setBreadcrumbs;
   let finalAllowedObjectTypes = allowedObjectTypes;
   if (finalAllowedObjectTypes === undefined) {
     finalAllowedObjectTypes = await getAllowedTypes(coreStart.http);
@@ -107,6 +113,7 @@ export const mountManagementSection = async ({
                   allowedTypes={finalAllowedObjectTypes}
                   setBreadcrumbs={setBreadcrumbs}
                   title={title}
+                  fullWidth={fullWidth}
                 />
               </Suspense>
             </RedirectToHomeIfUnauthorized>

@@ -9,6 +9,13 @@ export const LIBRARY_OVERVIEW_WORDINGS = i18n.translate('savedObjectsManagement.
   defaultMessage: 'Overview',
 });
 
+export const SAVED_OBJECT_MANAGEMENT_TITLE_WORDINGS = i18n.translate(
+  'savedObjectsManagement.objectsTable.header.savedObjectsTitle',
+  {
+    defaultMessage: 'Saved Objects',
+  }
+);
+
 export const SAVED_SEARCHES_WORDINGS = i18n.translate(
   'savedObjectsManagement.SearchesManagementSectionLabel',
   {
