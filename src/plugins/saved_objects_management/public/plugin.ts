@@ -53,6 +53,11 @@ import {
 } from './services';
 import { registerServices } from './register_services';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
+import {
+  LIBRARY_OVERVIEW_WORDINGS,
+  SAVED_QUERIES_WORDINGS,
+  SAVED_SEARCHES_WORDINGS,
+} from './constants';
 
 export interface SavedObjectsManagementPluginSetup {
   actions: SavedObjectsManagementActionServiceSetup;
@@ -136,36 +141,28 @@ export class SavedObjectsManagementPlugin
     };
 
     /**
-     * Register saved search & saved query here
+     * Register saved objects overview & saved search & saved query here
      */
     core.application.register({
       id: 'objects_overview',
       appRoute: '/app/objects',
       exactRoute: true,
-      title: i18n.translate('savedObjectsManagement.libraryOverview', {
-        defaultMessage: 'Overview',
-      }),
+      title: LIBRARY_OVERVIEW_WORDINGS,
       order: 10000,
       category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
       mount: mountWrapper({
-        title: i18n.translate('savedObjectsManagement.libraryOverview', {
-          defaultMessage: 'Overview',
-        }),
+        title: LIBRARY_OVERVIEW_WORDINGS,
       }),
     });
 
     core.application.register({
       id: 'objects_searches',
       appRoute: '/app/objects/search',
-      title: i18n.translate('savedObjectsManagement.SearchesManagementSectionLabel', {
-        defaultMessage: 'Saved searches',
-      }),
+      title: SAVED_SEARCHES_WORDINGS,
       order: 8000,
       category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
       mount: mountWrapper({
-        title: i18n.translate('savedObjectsManagement.SearchesManagementSectionLabel', {
-          defaultMessage: 'Saved searches',
-        }),
+        title: SAVED_SEARCHES_WORDINGS,
         allowedObjectTypes: ['search'],
       }),
     });
@@ -173,15 +170,11 @@ export class SavedObjectsManagementPlugin
     core.application.register({
       id: 'objects_query',
       appRoute: '/app/objects/query',
-      title: i18n.translate('savedObjectsManagement.QueriesManagementSectionLabel', {
-        defaultMessage: 'Saved filters',
-      }),
+      title: SAVED_QUERIES_WORDINGS,
       order: 8001,
       category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
       mount: mountWrapper({
-        title: i18n.translate('savedObjectsManagement.QueriesManagementSectionLabel', {
-          defaultMessage: 'Saved filters',
-        }),
+        title: SAVED_QUERIES_WORDINGS,
         allowedObjectTypes: ['query'],
       }),
     });
