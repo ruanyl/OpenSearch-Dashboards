@@ -125,7 +125,6 @@ export function CollapsibleNav({
   ...observables
 }: Props) {
   const navLinks = useObservable(observables.navLinks$, []).filter((link) => !link.hidden);
-
   const appId = useObservable(observables.appId$, '');
   const currentWorkspace = useObservable(observables.currentWorkspace$);
   const workspaceList = useObservable(observables.workspaceList$, []).slice(0, 5);
@@ -216,12 +215,22 @@ export function CollapsibleNav({
                 await navigateToApp('home');
               }}
               iconType={'logoOpenSearch'}
-              title={'Home'}
+              title={i18n.translate('core.ui.primaryNavSection.home', {
+                defaultMessage: 'Home',
+              })}
             />
-            <EuiCollapsibleNavGroup onClick={closeNav} iconType={'bell'} title={'Alerts'} />
+            <EuiCollapsibleNavGroup
+              onClick={closeNav}
+              iconType={'bell'}
+              title={i18n.translate('core.ui.primaryNavSection.alerts', {
+                defaultMessage: 'Alerts',
+              })}
+            />
             <EuiCollapsibleNavGroup
               iconType={'starEmpty'}
-              title={'Favorites'}
+              title={i18n.translate('core.ui.primaryNavSection.favorites', {
+                defaultMessage: 'Favorites',
+              })}
               isCollapsible={true}
               initialIsOpen={true}
             >
@@ -242,7 +251,9 @@ export function CollapsibleNav({
             </EuiCollapsibleNavGroup>
             <EuiCollapsibleNavGroup
               iconType={'folderClosed'}
-              title={'Workspaces'}
+              title={i18n.translate('core.ui.primaryNavSection.workspaces', {
+                defaultMessage: 'Workspaces',
+              })}
               isCollapsible={true}
               initialIsOpen={true}
             >
@@ -253,7 +264,7 @@ export function CollapsibleNav({
                   })}
                   listItems={workspaceList.map((workspace) => {
                     const href = getWorkspaceUrl(workspace.id);
-                    const { ...hydratedLink } = createWorkspaceNavLink(href, workspace, navLinks);
+                    const hydratedLink = createWorkspaceNavLink(href, workspace, navLinks);
                     return {
                       href,
                       ...hydratedLink,
@@ -287,7 +298,13 @@ export function CollapsibleNav({
                 </p>
               </EuiText>
             </EuiCollapsibleNavGroup>
-            <EuiCollapsibleNavGroup onClick={closeNav} iconType={'managementApp'} title={'Admin'} />
+            <EuiCollapsibleNavGroup
+              onClick={closeNav}
+              iconType={'managementApp'}
+              title={i18n.translate('core.ui.primaryNavSection.admin', {
+                defaultMessage: 'Admin',
+              })}
+            />
           </>
         )}
 
@@ -300,7 +317,9 @@ export function CollapsibleNav({
                 window.location.href = getWorkspaceUrl(currentWorkspace.id);
               }}
               iconType={'grid'}
-              title={'Overview'}
+              title={i18n.translate('core.ui.primaryNavSection.overview', {
+                defaultMessage: 'Overview',
+              })}
             />
           </>
         )}
