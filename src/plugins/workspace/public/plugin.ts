@@ -13,7 +13,6 @@ import {
 } from '../../../core/public';
 import { WORKSPACE_APP_ID, PATHS } from '../common/constants';
 import { mountDropdownList } from './mount';
-import { HashURL } from './components/utils/hash_url';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
 
 export class WorkspacesPlugin implements Plugin<{}, {}> {
@@ -28,7 +27,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}> {
       jumpable?: boolean;
     }
   ) => {
-    const newUrl = new HashURL(url, window.location.href);
+    const newUrl = new URL(url, window.location.href);
     /**
      * Patch workspace id into path
      */
