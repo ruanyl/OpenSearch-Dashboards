@@ -51,7 +51,6 @@ import { OnIsLockedUpdate } from './';
 import { createEuiListItem, isModifiedOrPrevented, createWorkspaceNavLink } from './nav_link';
 import { ChromeBranding } from '../../chrome_service';
 import { WorkspaceAttribute } from '../../../workspace';
-import { WORKSPACE_APP_ID, PATHS } from '../../constants';
 
 function getAllCategories(allCategorizedLinks: Record<string, ChromeNavLink[]>) {
   const allCategories = {} as Record<string, AppCategory | undefined>;
@@ -297,16 +296,8 @@ export function CollapsibleNav({
           <>
             <EuiCollapsibleNavGroup iconType={'folderClosed'} title={currentWorkspace.name} />
             <EuiCollapsibleNavGroup
-              onClick={async () => {
-                closeNav();
-                await navigateToApp(WORKSPACE_APP_ID, {
-                  path:
-                    PATHS.update +
-                    '?' +
-                    WORKSPACE_ID_IN_SESSION_STORAGE +
-                    '=' +
-                    currentWorkspace.id,
-                });
+              onClick={() => {
+                window.location.href = getWorkspaceUrl(currentWorkspace.id);
               }}
               iconType={'grid'}
               title={'Overview'}
