@@ -125,6 +125,7 @@ describe('getSortedObjectsForExport()', () => {
                 "index-pattern",
                 "search",
               ],
+              workspaces: undefined,
             },
           ],
         ],
@@ -215,6 +216,7 @@ describe('getSortedObjectsForExport()', () => {
                 "index-pattern",
                 "search",
               ],
+              workspaces: undefined,
             },
           ],
         ],
@@ -365,6 +367,7 @@ describe('getSortedObjectsForExport()', () => {
                 "index-pattern",
                 "search",
               ],
+              workspaces: undefined,
             },
           ],
         ],
@@ -456,6 +459,7 @@ describe('getSortedObjectsForExport()', () => {
                 "index-pattern",
                 "search",
               ],
+              workspaces: undefined,
             },
           ],
         ],
@@ -648,32 +652,33 @@ describe('getSortedObjectsForExport()', () => {
       ]
     `);
     expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
-            [MockFunction] {
-              "calls": Array [
-                Array [
-                  Array [
-                    Object {
-                      "id": "1",
-                      "type": "index-pattern",
-                    },
-                    Object {
-                      "id": "2",
-                      "type": "search",
-                    },
-                  ],
-                  Object {
-                    "namespace": undefined,
-                  },
-                ],
-              ],
-              "results": Array [
-                Object {
-                  "type": "return",
-                  "value": Promise {},
-                },
-              ],
-            }
-        `);
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Array [
+              Object {
+                id: 1,
+                type: index-pattern,
+              },
+              Object {
+                id: 2,
+                type: search,
+              },
+            ],
+            Object {
+              namespace: undefined,
+              workspaces: undefined,
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            type: return,
+            value: Promise {},
+          },
+        ],
+      }
+    `);
   });
 
   test('modifies return results to redact `namespaces` attribute', async () => {
@@ -770,43 +775,44 @@ describe('getSortedObjectsForExport()', () => {
       ]
     `);
     expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
-            [MockFunction] {
-              "calls": Array [
-                Array [
-                  Array [
-                    Object {
-                      "id": "2",
-                      "type": "search",
-                    },
-                  ],
-                  Object {
-                    "namespace": undefined,
-                  },
-                ],
-                Array [
-                  Array [
-                    Object {
-                      "id": "1",
-                      "type": "index-pattern",
-                    },
-                  ],
-                  Object {
-                    "namespace": undefined,
-                  },
-                ],
-              ],
-              "results": Array [
-                Object {
-                  "type": "return",
-                  "value": Promise {},
-                },
-                Object {
-                  "type": "return",
-                  "value": Promise {},
-                },
-              ],
-            }
-        `);
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Array [
+              Object {
+                id: 2,
+                type: search,
+              },
+            ],
+            Object {
+              namespace: undefined,
+              workspaces: undefined,
+            },
+          ],
+          Array [
+            Array [
+              Object {
+                id: 1,
+                type: index-pattern,
+              },
+            ],
+            Object {
+              namespace: undefined,
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            type: return,
+            value: Promise {},
+          },
+          Object {
+            type: return,
+            value: Promise {},
+          },
+        ],
+      }
+    `);
   });
 
   test('export selected objects throws error when exceeding exportSizeLimit', async () => {
