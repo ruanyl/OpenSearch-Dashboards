@@ -48,7 +48,12 @@ import { AppCategory } from '../../../../types';
 import { InternalApplicationStart } from '../../../application';
 import { HttpStart } from '../../../http';
 import { OnIsLockedUpdate } from './';
-import { createEuiListItem, isModifiedOrPrevented, createWorkspaceNavLink } from './nav_link';
+import {
+  createEuiListItem,
+  isModifiedOrPrevented,
+  createRecentNavLink,
+  createWorkspaceNavLink,
+} from './nav_link';
 import { ChromeBranding } from '../../chrome_service';
 import { WorkspaceAttribute } from '../../../workspace';
 import { WORKSPACE_APP_ID, PATHS } from '../../constants';
@@ -126,6 +131,7 @@ export function CollapsibleNav({
   ...observables
 }: Props) {
   const navLinks = useObservable(observables.navLinks$, []).filter((link) => !link.hidden);
+  const recentlyAccessed = useObservable(observables.recentlyAccessed$, []);
   const appId = useObservable(observables.appId$, '');
   const currentWorkspace = useObservable(observables.currentWorkspace$);
   const workspaceList = useObservable(observables.workspaceList$, []).slice(0, 5);
@@ -207,6 +213,61 @@ export function CollapsibleNav({
       outsideClickCloses={false}
     >
       <EuiFlexItem className="eui-yScroll">
+        {/* Recently viewed */}
+        <EuiCollapsibleNavGroup
+          key="recentlyViewed"
+          background="light"
+          title={i18n.translate('core.ui.recentlyViewed', { defaultMessage: 'Recently viewed' })}
+          isCollapsible={true}
+          initialIsOpen={getIsCategoryOpen('recentlyViewed', storage)}
+          onToggle={(isCategoryOpen) =>
+            setIsCategoryOpen('recentlyViewed', isCategoryOpen, storage)
+          }
+          data-test-subj="collapsibleNavGroup-recentlyViewed"
+        >
+          {recentlyAccessed.length > 0 ? (
+            <EuiListGroup
+              aria-label={i18n.translate('core.ui.recentlyViewedAriaLabel', {
+                defaultMessage: 'Recently viewed links',
+              })}
+              listItems={recentlyAccessed.map((link) => {
+                // TODO #64541
+                // Can remove icon from recent links completely
+                const { iconType, onClick, ...hydratedLink } = createRecentNavLink(
+                  link,
+                  navLinks,
+                  basePath,
+                  navigateToUrl
+                );
+
+                return {
+                  ...hydratedLink,
+                  'data-test-subj': 'collapsibleNavAppLink--recent',
+                  onClick: (event) => {
+                    if (!isModifiedOrPrevented(event)) {
+                      closeNav();
+                      onClick(event);
+                    }
+                  },
+                };
+              })}
+              maxWidth="none"
+              color="subdued"
+              gutterSize="none"
+              size="s"
+              className="osdCollapsibleNav__recentsListGroup"
+            />
+          ) : (
+            <EuiText size="s" color="subdued" style={{ padding: '0 8px 8px' }}>
+              <p>
+                {i18n.translate('core.ui.EmptyRecentlyViewed', {
+                  defaultMessage: 'No recently viewed items',
+                })}
+              </p>
+            </EuiText>
+          )}
+        </EuiCollapsibleNavGroup>
+
         {/* Home, Projects and Admin outside workspace */}
         {!currentWorkspace && (
           <>
