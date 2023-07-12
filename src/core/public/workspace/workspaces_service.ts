@@ -29,15 +29,18 @@ export class WorkspacesService implements CoreService<WorkspacesSetup, Workspace
     this.formatUrlWithWorkspaceId = formatFn;
   }
   public async setup({ http, uiSettings }: { http: HttpSetup; uiSettings: IUiSettingsClient }) {
+    this.client = new WorkspacesClient(http);
+
     // If workspace was disabled while opening a workspace url, navigate to basePath
     if (uiSettings.get('workspace:enabled') === false) {
       const workspaceId = getWorkspaceIdFromUrl(window.location.href);
       if (workspaceId) {
         window.location.href = http.basePath.getBasePath();
       }
+    } else {
+      this.client.init();
     }
 
-    this.client = new WorkspacesClient(http);
     return {
       client: this.client,
       formatUrlWithWorkspaceId: (url: string, id: string) => this.formatUrlWithWorkspaceId(url, id),
