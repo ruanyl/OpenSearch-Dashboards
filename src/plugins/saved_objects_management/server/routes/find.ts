@@ -34,6 +34,7 @@ import { DataSourceAttributes } from 'src/plugins/data_source/common/data_source
 import { getIndexPatternTitle } from '../../../data/common/index_patterns/utils';
 import { injectMetaAttributes } from '../lib';
 import { ISavedObjectsManagement } from '../services';
+import { formatWorkspaces, workspacesValidator } from '../../../../core/server';
 
 export const registerFindRoute = (
   router: IRouter,
@@ -64,9 +65,7 @@ export const registerFindRoute = (
           fields: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
             defaultValue: [],
           }),
-          workspaces: schema.maybe(
-            schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
-          ),
+          workspaces: workspacesValidator,
         }),
       },
     },
