@@ -39,7 +39,7 @@ export interface SavedObjectMetadata {
   icon?: string;
   title?: string;
   editUrl?: string;
-  inAppUrl?: { path: string; uiCapabilitiesPath: string };
+  inAppUrl?: { path: string; uiCapabilitiesPath: string; browserJump?: boolean };
   namespaceType?: SavedObjectsNamespaceType;
 }
 

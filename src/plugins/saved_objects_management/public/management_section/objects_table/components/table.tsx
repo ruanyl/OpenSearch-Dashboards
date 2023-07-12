@@ -29,7 +29,7 @@
  */
 
 import { IBasePath } from 'src/core/public';
-import React, { PureComponent, Fragment } from 'react';
+import React, { PureComponent, Fragment, MouseEvent } from 'react';
 import moment from 'moment';
 import {
   EuiSearchBar,
@@ -226,10 +226,17 @@ export class Table extends PureComponent<TableProps, TableState> {
         sortable: false,
         'data-test-subj': 'savedObjectsTableRowTitle',
         render: (title: string, object: SavedObjectWithMetadata) => {
-          const { path = '' } = object.meta.inAppUrl || {};
+          const { path = '', browserJump } = object.meta.inAppUrl || {};
           const canGoInApp = this.props.canGoInApp(object);
           if (!canGoInApp) {
             return <EuiText size="s">{title || getDefaultTitle(object)}</EuiText>;
+          }
+          if (browserJump) {
+            return (
+              <EuiLink onClick={() => (window.location.href = basePath.prepend(path))}>
+                {title || getDefaultTitle(object)}
+              </EuiLink>
+            );
           }
           return (
             <EuiLink href={basePath.prepend(path)}>{title || getDefaultTitle(object)}</EuiLink>

@@ -16,6 +16,8 @@ import { IWorkspaceDBImpl } from './types';
 import { WorkspacesClientWithSavedObject } from './workspaces_client';
 import { WorkspacePermissionControl } from './workspace_permission_control';
 import { UiSettingsServiceStart } from '../ui_settings/types';
+import { WORKSPACE_TEMP_JUMP_QUERYSTRING } from './constants';
+import { WORKSPACE_PATH_PREFIX } from '../../utils';
 
 export interface WorkspacesServiceSetup {
   client: IWorkspaceDBImpl;
@@ -60,6 +62,25 @@ export class WorkspacesService
      */
     setupDeps.http.registerOnPreRouting(async (request, response, toolkit) => {
       const regexp = /\/w\/([^\/]*)/;
+
+      /**
+       * If search params has _workspace_id_
+       * redirect to a url where workspace id is retained in path
+       */
+      if (request.url.searchParams.get(WORKSPACE_TEMP_JUMP_QUERYSTRING)) {
+        const requestUrl = new URL(request.url.toString());
+        requestUrl.searchParams.delete(WORKSPACE_TEMP_JUMP_QUERYSTRING);
+        requestUrl.pathname = setupDeps.http.basePath.prepend(
+          `${WORKSPACE_PATH_PREFIX}/${request.url.searchParams.get(
+            WORKSPACE_TEMP_JUMP_QUERYSTRING
+          )}` + setupDeps.http.basePath.remove(requestUrl.pathname).replace(regexp, '')
+        );
+        return response.redirected({
+          headers: {
+            location: requestUrl.toString(),
+          },
+        });
+      }
       const matchedResult = request.url.pathname.match(regexp);
 
       if (matchedResult) {
