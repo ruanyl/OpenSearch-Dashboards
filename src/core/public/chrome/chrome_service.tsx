@@ -182,7 +182,7 @@ export class ChromeService {
     });
 
     const getWorkspaceUrl = (id: string) => {
-      return workspaces?.formatUrlWithWorkspaceId(
+      return workspaces.formatUrlWithWorkspaceId(
         application.getUrlForApp(WORKSPACE_APP_ID, {
           path: '/',
           absolute: true,
@@ -194,7 +194,7 @@ export class ChromeService {
     const exitWorkspace = async () => {
       let result;
       try {
-        result = await workspaces?.client.exitWorkspace();
+        result = await workspaces.client.exitWorkspace();
       } catch (error) {
         notifications?.toasts.addDanger({
           title: i18n.translate('workspace.exit.failed', {
