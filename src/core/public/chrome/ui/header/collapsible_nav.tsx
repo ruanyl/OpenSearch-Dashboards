@@ -207,7 +207,7 @@ export function CollapsibleNav({
       outsideClickCloses={false}
     >
       <EuiFlexItem className="eui-yScroll">
-        {/* Home, Alerts, Favorites, Projects and Admin outside workspace */}
+        {/* Home, Projects and Admin outside workspace */}
         {!currentWorkspace && (
           <>
             <EuiCollapsibleNavGroup
@@ -220,36 +220,6 @@ export function CollapsibleNav({
                 defaultMessage: 'Home',
               })}
             />
-            <EuiCollapsibleNavGroup
-              onClick={closeNav}
-              iconType={'bell'}
-              title={i18n.translate('core.ui.primaryNavSection.alerts', {
-                defaultMessage: 'Alerts',
-              })}
-            />
-            <EuiCollapsibleNavGroup
-              iconType={'starEmpty'}
-              title={i18n.translate('core.ui.primaryNavSection.favorites', {
-                defaultMessage: 'Favorites',
-              })}
-              isCollapsible={true}
-              initialIsOpen={true}
-            >
-              <EuiText size="s" color="subdued" style={{ padding: '0 8px 8px' }}>
-                <p>
-                  {i18n.translate('core.ui.EmptyFavoriteList', {
-                    defaultMessage: 'No Favorites',
-                  })}
-                </p>
-              </EuiText>
-              <EuiText size="s" color="subdued" style={{ padding: '0 8px 8px' }}>
-                <p>
-                  {i18n.translate('core.ui.SeeMoreFavorite', {
-                    defaultMessage: 'SEE MORE',
-                  })}
-                </p>
-              </EuiText>
-            </EuiCollapsibleNavGroup>
             <EuiCollapsibleNavGroup
               iconType={'folderClosed'}
               title={i18n.translate('core.ui.primaryNavSection.workspaces', {
@@ -317,6 +287,42 @@ export function CollapsibleNav({
             />
           </>
         )}
+
+        {/* Alerts and Favorites */}
+        {/* !currentWorkspace && (
+          <>
+            <EuiCollapsibleNavGroup
+              onClick={closeNav}
+              iconType={'bell'}
+              title={i18n.translate('core.ui.primaryNavSection.alerts', {
+                defaultMessage: 'Alerts',
+              })}
+            />
+            <EuiCollapsibleNavGroup
+              iconType={'starEmpty'}
+              title={i18n.translate('core.ui.primaryNavSection.favorites', {
+                defaultMessage: 'Favorites',
+              })}
+              isCollapsible={true}
+              initialIsOpen={true}
+            >
+              <EuiText size="s" color="subdued" style={{ padding: '0 8px 8px' }}>
+                <p>
+                  {i18n.translate('core.ui.EmptyFavoriteList', {
+                    defaultMessage: 'No Favorites',
+                  })}
+                </p>
+              </EuiText>
+              <EuiText size="s" color="subdued" style={{ padding: '0 8px 8px' }}>
+                <p>
+                  {i18n.translate('core.ui.SeeMoreFavorite', {
+                    defaultMessage: 'SEE MORE',
+                  })}
+                </p>
+              </EuiText>
+            </EuiCollapsibleNavGroup>
+          </>
+        ) */}
 
         {/* Workspace name and Overview inside workspace */}
         {currentWorkspace && (
