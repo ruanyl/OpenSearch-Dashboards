@@ -7,7 +7,6 @@ import { WorkspacesClient, WorkspacesClientContract } from './workspaces_client'
 import type { WorkspaceAttribute } from '../../server/types';
 import { HttpSetup } from '../http';
 import { IUiSettingsClient } from '../ui_settings';
-import { getWorkspaceIdFromUrl } from '../utils/workspace';
 
 /**
  * @public
@@ -32,12 +31,7 @@ export class WorkspacesService implements CoreService<WorkspacesSetup, Workspace
     this.client = new WorkspacesClient(http);
 
     // If workspace was disabled while opening a workspace url, navigate to basePath
-    if (uiSettings.get('workspace:enabled') === false) {
-      const workspaceId = getWorkspaceIdFromUrl(window.location.href);
-      if (workspaceId) {
-        window.location.href = http.basePath.getBasePath();
-      }
-    } else {
+    if (uiSettings.get('workspace:enabled') === true) {
       this.client.init();
     }
 
