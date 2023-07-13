@@ -101,24 +101,26 @@ export const WorkspaceUpdater = () => {
   }
   const deleteWorkspace = async () => {
     if (currentWorkspace?.id) {
-      let result;
-      try {
-        result = await workspaces?.client.delete(currentWorkspace?.id);
-      } catch (error) {
-        notifications?.toasts.addDanger({
-          title: i18n.translate('workspace.delete.failed', {
-            defaultMessage: 'Failed to delete workspace',
-          }),
-          text: error instanceof Error ? error.message : JSON.stringify(error),
-        });
-        return setDeleteWorkspaceModalVisible(false);
-      }
+      const result = await workspaces?.client.delete(currentWorkspace?.id);
       if (result?.success) {
         notifications?.toasts.addSuccess({
           title: i18n.translate('workspace.delete.success', {
             defaultMessage: 'Delete workspace successfully',
           }),
         });
+        setDeleteWorkspaceModalVisible(false);
+        /**
+         * After deleting a workspace,
+         * We need to go to admin
+         */
+        application.navigateToUrl(
+          workspaces?.formatUrlWithWorkspaceId(
+            application.getUrlForApp('home', {
+              absolute: true,
+            }),
+            ''
+          ) || ''
+        );
       } else {
         notifications?.toasts.addDanger({
           title: i18n.translate('workspace.delete.failed', {
@@ -128,8 +130,6 @@ export const WorkspaceUpdater = () => {
         });
       }
     }
-    setDeleteWorkspaceModalVisible(false);
-    await application.navigateToApp('home');
   };
 
   return (
