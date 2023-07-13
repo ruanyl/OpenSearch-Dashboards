@@ -199,31 +199,6 @@ export class ChromeService {
       );
     };
 
-    const exitWorkspace = async () => {
-      let result;
-      try {
-        result = await workspaces?.client.exitWorkspace();
-      } catch (error) {
-        notifications?.toasts.addDanger({
-          title: i18n.translate('workspace.exit.failed', {
-            defaultMessage: 'Failed to exit workspace',
-          }),
-          text: error instanceof Error ? error.message : JSON.stringify(error),
-        });
-        return;
-      }
-      if (!result?.success) {
-        notifications?.toasts.addDanger({
-          title: i18n.translate('workspace.exit.failed', {
-            defaultMessage: 'Failed to exit workspace',
-          }),
-          text: result?.error,
-        });
-        return;
-      }
-      await application.navigateToApp('home');
-    };
-
     const setIsNavDrawerLocked = (isLocked: boolean) => {
       isNavDrawerLocked$.next(isLocked);
       localStorage.setItem(IS_LOCKED_KEY, `${isLocked}`);
@@ -305,7 +280,6 @@ export class ChromeService {
           navControlsExpandedCenter$={navControls.getExpandedCenter$()}
           navControlsExpandedRight$={navControls.getExpandedRight$()}
           onIsLockedUpdate={setIsNavDrawerLocked}
-          exitWorkspace={exitWorkspace}
           getWorkspaceUrl={getWorkspaceUrl}
           isLocked$={getIsNavDrawerLocked$}
           branding={injectedMetadata.getBranding()}
