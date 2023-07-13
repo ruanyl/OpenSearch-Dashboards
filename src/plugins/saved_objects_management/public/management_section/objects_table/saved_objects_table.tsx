@@ -61,6 +61,7 @@ import { FormattedMessage } from '@osd/i18n/react';
 import {
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
+  WorkspacesStart,
   HttpStart,
   OverlayStart,
   NotificationsStart,
@@ -81,6 +82,7 @@ import {
   findObject,
   extractExportDetails,
   SavedObjectsExportResultDetails,
+  copySavedObjects,
 } from '../../lib';
 import { SavedObjectWithMetadata } from '../../types';
 import {
@@ -91,6 +93,7 @@ import {
 } from '../../services';
 import { Header, Table, Flyout, Relationships } from './components';
 import { DataPublicPluginStart } from '../../../../../plugins/data/public';
+import { SavedObjectsCopyModal } from './components/copy_modal';
 
 interface ExportAllOption {
   id: string;
@@ -106,6 +109,7 @@ export interface SavedObjectsTableProps {
   savedObjectsClient: SavedObjectsClientContract;
   indexPatterns: IndexPatternsContract;
   http: HttpStart;
+  workspacesStart: WorkspacesStart;
   search: DataPublicPluginStart['search'];
   overlays: OverlayStart;
   notifications: NotificationsStart;
@@ -127,6 +131,7 @@ export interface SavedObjectsTableState {
   activeQuery: Query;
   selectedSavedObjects: SavedObjectWithMetadata[];
   isShowingImportFlyout: boolean;
+  isShowingCopyModal: boolean;
   isSearching: boolean;
   filteredItemCount: number;
   isShowingRelationships: boolean;
@@ -157,6 +162,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       activeQuery: Query.parse(''),
       selectedSavedObjects: [],
       isShowingImportFlyout: false,
+      isShowingCopyModal: false,
       isSearching: false,
       filteredItemCount: 0,
       isShowingRelationships: false,
@@ -398,6 +404,31 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     });
   };
 
+  onCopy = async (includeReferencesDeep: boolean, targetWorkspace: string) => {
+    const { selectedSavedObjects } = this.state;
+    const { notifications, http } = this.props;
+    const objectsToCopy = selectedSavedObjects.map((obj) => ({ id: obj.id, type: obj.type }));
+
+    try {
+      await copySavedObjects(http, objectsToCopy, includeReferencesDeep, targetWorkspace);
+    } catch (e) {
+      notifications.toasts.addDanger({
+        title: i18n.translate('savedObjectsManagement.objectsTable.copy.dangerNotification', {
+          defaultMessage: 'Unable to copy saved objects',
+        }),
+      });
+      throw e;
+    }
+
+    this.hideCopyModal();
+    this.refreshObjects();
+    notifications.toasts.addSuccess({
+      title: i18n.translate('savedObjectsManagement.objectsTable.copy.successNotification', {
+        defaultMessage: 'Copy saved objects successly',
+      }),
+    });
+  };
+
   onExport = async (includeReferencesDeep: boolean) => {
     const { selectedSavedObjects } = this.state;
     const { notifications, http } = this.props;
@@ -494,6 +525,14 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     this.setState({ isShowingImportFlyout: false });
   };
 
+  showCopyModal = () => {
+    this.setState({ isShowingCopyModal: true });
+  };
+
+  hideCopyModal = () => {
+    this.setState({ isShowingCopyModal: false });
+  };
+
   onDelete = () => {
     this.setState({ isShowingDeleteConfirmModal: true });
   };
@@ -560,6 +599,23 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         allowedTypes={this.props.allowedTypes}
         overlays={this.props.overlays}
         search={this.props.search}
+      />
+    );
+  }
+
+  renderCopyModal() {
+    const { isShowingCopyModal } = this.state;
+
+    if (!isShowingCopyModal) {
+      return null;
+    }
+
+    return (
+      <SavedObjectsCopyModal
+        seletedSavedObjects={this.state.selectedSavedObjects}
+        workspacesStart={this.props.workspacesStart}
+        onCopy={this.onCopy}
+        onClose={this.hideCopyModal}
       />
     );
   }
@@ -857,12 +913,15 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         {this.renderRelationships()}
         {this.renderDeleteConfirmModal()}
         {this.renderExportAllOptionsModal()}
+        {this.renderCopyModal()}
         <Header
           onExportAll={() => this.setState({ isShowingExportAllOptionsModal: true })}
           onImport={this.showImportFlyout}
+          onCopy={() => this.setState({ isShowingCopyModal: true })}
           onRefresh={this.refreshObjects}
           filteredCount={filteredItemCount}
           title={this.props.title}
+          selectedCount={selectedSavedObjects.length}
         />
         <EuiSpacer size="xs" />
         <RedirectAppLinks application={applications}>
