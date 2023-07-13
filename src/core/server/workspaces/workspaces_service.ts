@@ -81,6 +81,7 @@ export class WorkspacesService
       http: setupDeps.http,
       logger: this.logger,
       client: this.client as IWorkspaceDBImpl,
+      permissionControl: this.permissionControl,
     });
 
     return {

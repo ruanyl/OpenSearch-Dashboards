@@ -3,9 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { schema } from '@osd/config-schema';
+import Boom from '@hapi/boom';
 import { InternalHttpServiceSetup } from '../../http';
 import { Logger } from '../../logging';
 import { IWorkspaceDBImpl } from '../types';
+import {
+  WorkspacePermissionControl,
+  WorkspacePermissionMode,
+} from '../workspace_permission_control';
+import { NO_PERMISSION_DELETE, NO_PERMISSION_READ, NO_PERMISSION_WRITE } from '../constant';
 
 const WORKSPACES_API_BASE_URL = '/api/workspaces';
 
@@ -22,10 +28,12 @@ export function registerRoutes({
   client,
   logger,
   http,
+  permissionControl,
 }: {
   client: IWorkspaceDBImpl;
   logger: Logger;
   http: InternalHttpServiceSetup;
+  permissionControl: WorkspacePermissionControl;
 }) {
   const router = http.createRouter(WORKSPACES_API_BASE_URL);
   router.post(
@@ -65,6 +73,14 @@ export function registerRoutes({
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const { id } = req.params;
+      const validateResult = await permissionControl.validate(
+        id,
+        WorkspacePermissionMode.Read,
+        req
+      );
+      if (!validateResult) {
+        throw Boom.forbidden(NO_PERMISSION_READ);
+      }
       const result = await client.get(
         {
           context,
@@ -115,6 +131,15 @@ export function registerRoutes({
       const { id } = req.params;
       const { attributes } = req.body;
 
+      const validateResult = await permissionControl.validate(
+        id,
+        WorkspacePermissionMode.Admin,
+        req
+      );
+      if (!validateResult) {
+        throw Boom.forbidden(NO_PERMISSION_WRITE);
+      }
+
       const result = await client.update(
         {
           context,
@@ -138,6 +163,15 @@ export function registerRoutes({
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const { id } = req.params;
+
+      const validateResult = await permissionControl.validate(
+        id,
+        WorkspacePermissionMode.Admin,
+        req
+      );
+      if (!validateResult) {
+        throw Boom.forbidden(NO_PERMISSION_DELETE);
+      }
 
       const result = await client.delete(
         {
