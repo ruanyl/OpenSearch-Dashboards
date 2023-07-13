@@ -26,7 +26,7 @@ export const workspace: SavedObjectsType = {
          * handle the redirect logic.
          */
         path: `/app/workspace/overview?${WORKSPACE_TEMP_JUMP_QUERYSTRING}=${obj.id}`,
-        uiCapabilitiesPath: 'management.opensearchDashboards.dataSources',
+        uiCapabilitiesPath: 'management.opensearchDashboards.workspaces',
         browserJump: true,
       };
     },
