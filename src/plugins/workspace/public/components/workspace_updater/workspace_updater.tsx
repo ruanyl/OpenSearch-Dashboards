@@ -132,6 +132,31 @@ export const WorkspaceUpdater = () => {
     await application.navigateToApp('home');
   };
 
+  const exitWorkspace = async () => {
+    let result;
+    try {
+      result = await workspaces?.client.exitWorkspace();
+    } catch (error) {
+      notifications?.toasts.addDanger({
+        title: i18n.translate('workspace.exit.failed', {
+          defaultMessage: 'Failed to exit workspace',
+        }),
+        text: error instanceof Error ? error.message : JSON.stringify(error),
+      });
+      return;
+    }
+    if (!result?.success) {
+      notifications?.toasts.addDanger({
+        title: i18n.translate('workspace.exit.failed', {
+          defaultMessage: 'Failed to exit workspace',
+        }),
+        text: result?.error,
+      });
+      return;
+    }
+    await application.navigateToApp('home');
+  };
+
   return (
     <EuiPage paddingSize="none">
       <EuiPageBody panelled>
@@ -139,6 +164,7 @@ export const WorkspaceUpdater = () => {
           restrictWidth
           pageTitle="Update Workspace"
           rightSideItems={[
+            <EuiButton onClick={() => exitWorkspace()}>Exit</EuiButton>,
             <EuiButton color="danger" onClick={() => setDeleteWorkspaceModalVisible(true)}>
               Delete
             </EuiButton>,
