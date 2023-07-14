@@ -14,10 +14,12 @@ import {
 import { WORKSPACE_APP_ID } from '../common/constants';
 import { mountDropdownList } from './mount';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
+import type { Subscription } from 'rxjs';
 
 export class WorkspacesPlugin implements Plugin<{}, {}> {
   private coreSetup?: CoreSetup;
   private coreStart?: CoreStart;
+  private currentWorkspaceSubscription?: Subscription;
   private getWorkspaceIdFromURL(): string | null {
     return getWorkspaceIdFromUrl(window.location.href);
   }
@@ -86,9 +88,11 @@ export class WorkspacesPlugin implements Plugin<{}, {}> {
 
   private _changeSavedObjectCurrentWorkspace() {
     if (this.coreStart) {
-      this.coreStart.workspaces.client.currentWorkspaceId$.subscribe((currentWorkspaceId) => {
-        this.coreStart?.savedObjects.client.setCurrentWorkspace(currentWorkspaceId);
-      });
+      return this.coreStart.workspaces.client.currentWorkspaceId$.subscribe(
+        (currentWorkspaceId) => {
+          this.coreStart?.savedObjects.client.setCurrentWorkspace(currentWorkspaceId);
+        }
+      );
     }
   }
 
@@ -105,7 +109,11 @@ export class WorkspacesPlugin implements Plugin<{}, {}> {
       workspaces: core.workspaces,
       chrome: core.chrome,
     });
-    this._changeSavedObjectCurrentWorkspace();
+    this.currentWorkspaceSubscription = this._changeSavedObjectCurrentWorkspace();
     return {};
+  }
+
+  public stop() {
+    this.currentWorkspaceSubscription?.unsubscribe();
   }
 }
