@@ -27,7 +27,7 @@ function WorkspaceColumn({ coreSetup, workspaces, record }: WorkspaceColumnProps
   }, new Map<string, string>());
 
   const publicWsName = i18n.translate('workspace.public.name', {
-    defaultMessage: 'Public',
+    defaultMessage: 'public',
   });
   wsLookUp?.set('public', publicWsName);
 
@@ -52,7 +52,9 @@ export function getWorkspaceColumn(
     euiColumn: {
       align: 'left',
       field: 'workspaces',
-      name: 'Workspaces',
+      name: i18n.translate('savedObjectsManagement.objectsTable.table.columnWorkspacesName', {
+        defaultMessage: 'Workspaces',
+      }),
       render: (workspaces: string[], record: SavedObjectsManagementRecord) => {
         return <WorkspaceColumn coreSetup={coreSetup} workspaces={workspaces} record={record} />;
       },
