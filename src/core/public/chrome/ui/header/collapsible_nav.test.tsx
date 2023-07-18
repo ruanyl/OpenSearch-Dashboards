@@ -160,12 +160,14 @@ describe('CollapsibleNav', () => {
       mockLink({ category: observability }),
     ];
     const recentNavLinks = [mockRecentNavLink({})];
+    const customNavLink = mockLink({ title: 'Custom link' });
     const component = mount(
       <CollapsibleNav
         {...mockProps()}
         isNavOpen={true}
         navLinks$={new BehaviorSubject(navLinks)}
         recentlyAccessed$={new BehaviorSubject(recentNavLinks)}
+        customNavLink$={new BehaviorSubject(customNavLink)}
       />
     );
     expectShownNavLinksCount(component, 0);
@@ -189,12 +191,14 @@ describe('CollapsibleNav', () => {
       mockLink({ title: 'categoryless' }),
     ];
     const recentNavLinks = [mockRecentNavLink({})];
+    const customNavLink = mockLink({ title: 'Custom link' });
     const component = mount(
       <CollapsibleNav
         {...mockProps()}
         isNavOpen={true}
         navLinks$={new BehaviorSubject(navLinks)}
         recentlyAccessed$={new BehaviorSubject(recentNavLinks)}
+        customNavLink$={new BehaviorSubject(customNavLink)}
       />
     );
     component.setProps({
@@ -225,12 +229,14 @@ describe('CollapsibleNav', () => {
       mockLink({ category: observability }),
     ];
     const recentNavLinks = [mockRecentNavLink({})];
+    const customNavLink = mockLink({ title: 'Custom link' });
     const component = mount(
       <CollapsibleNav
         {...mockProps()}
         isNavOpen={true}
         navLinks$={new BehaviorSubject(navLinks)}
         recentlyAccessed$={new BehaviorSubject(recentNavLinks)}
+        customNavLink$={new BehaviorSubject(customNavLink)}
       />
     );
     // check if nav bar renders default mode custom logo
@@ -252,12 +258,14 @@ describe('CollapsibleNav', () => {
       mockLink({ category: observability }),
     ];
     const recentNavLinks = [mockRecentNavLink({})];
+    const customNavLink = mockLink({ title: 'Custom link' });
     const component = mount(
       <CollapsibleNav
         {...mockProps()}
         isNavOpen={true}
         navLinks$={new BehaviorSubject(navLinks)}
         recentlyAccessed$={new BehaviorSubject(recentNavLinks)}
+        customNavLink$={new BehaviorSubject(customNavLink)}
       />
     );
     // check if nav bar renders dark mode custom logo
