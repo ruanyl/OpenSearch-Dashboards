@@ -31,12 +31,7 @@
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React from 'react';
-import {
-  ChromeNavLink,
-  ChromeRecentlyAccessedHistoryItem,
-  CoreStart,
-  WorkspaceAttribute,
-} from '../../..';
+import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem, CoreStart } from '../../..';
 import { HttpStart } from '../../../http';
 import { InternalApplicationStart } from '../../../application/types';
 import { relativeToAbsolute } from '../../nav_links/to_nav_link';
