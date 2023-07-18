@@ -153,34 +153,3 @@ export function createRecentNavLink(
     },
   };
 }
-
-export interface WorkspaceNavLink {
-  label: string;
-  title: string;
-  'aria-label': string;
-}
-
-export function createWorkspaceNavLink(
-  href: string,
-  workspace: WorkspaceAttribute,
-  navLinks: ChromeNavLink[]
-): WorkspaceNavLink {
-  const label = workspace.name;
-  let titleAndAriaLabel = label;
-  const navLink = navLinks.find((nl) => href.startsWith(nl.baseUrl));
-  if (navLink) {
-    titleAndAriaLabel = i18n.translate('core.ui.workspaceLinks.linkItem.screenReaderLabel', {
-      defaultMessage: '{workspaceItemLinkName}, type: {pageType}',
-      values: {
-        workspaceItemLinkName: label,
-        pageType: navLink.title,
-      },
-    });
-  }
-
-  return {
-    label,
-    title: titleAndAriaLabel,
-    'aria-label': titleAndAriaLabel,
-  };
-}
