@@ -107,7 +107,14 @@ describe('CollapsibleNav', () => {
   // this test is mostly an "EUI works as expected" sanity check
   it('renders the default nav', () => {
     const onLock = sinon.spy();
-    const component = mount(<CollapsibleNav {...mockProps()} onIsLockedUpdate={onLock} />);
+    const customNavLink = mockLink({ title: 'Custom link' });
+    const component = mount(
+      <CollapsibleNav
+        {...mockProps()}
+        onIsLockedUpdate={onLock}
+        customNavLink$={new BehaviorSubject(customNavLink)}
+      />
+    );
     expect(component).toMatchSnapshot();
 
     component.setProps({ isOpen: true });
