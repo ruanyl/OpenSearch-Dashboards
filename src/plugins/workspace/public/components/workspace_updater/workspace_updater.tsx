@@ -15,10 +15,8 @@ import {
 import { useObservable } from 'react-use';
 import { i18n } from '@osd/i18n';
 import { of } from 'rxjs';
-
 import { WorkspaceAttribute } from 'opensearch-dashboards/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-
 import { PATHS } from '../../../common/constants';
 import { WorkspaceForm, WorkspaceFormData } from '../workspace_creator/workspace_form';
 import { WORKSPACE_APP_ID, WORKSPACE_OP_TYPE_UPDATE } from '../../../common/constants';
@@ -129,7 +127,18 @@ export const WorkspaceUpdater = () => {
       }
     }
     setDeleteWorkspaceModalVisible(false);
-    await application.navigateToApp('home');
+    window.location.href =
+      workspaces?.formatUrlWithWorkspaceId(
+        application.getUrlForApp('home', {
+          path: '/',
+          absolute: true,
+        }),
+        ''
+      ) ??
+      application.getUrlForApp('home', {
+        path: '/',
+        absolute: true,
+      });
   };
 
   const exitWorkspace = async () => {
@@ -154,7 +163,18 @@ export const WorkspaceUpdater = () => {
       });
       return;
     }
-    await application.navigateToApp('home');
+    window.location.href =
+      workspaces?.formatUrlWithWorkspaceId(
+        application.getUrlForApp('home', {
+          path: '/',
+          absolute: true,
+        }),
+        ''
+      ) ??
+      application.getUrlForApp('home', {
+        path: '/',
+        absolute: true,
+      });
   };
 
   return (
