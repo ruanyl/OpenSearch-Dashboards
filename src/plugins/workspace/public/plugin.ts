@@ -150,7 +150,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
   public start(core: CoreStart) {
     // If workspace feature is disabled, it will not load the workspace plugin
     if (core.uiSettings.get('workspace:enabled') === false) {
-      // need to set filtered nav links
+      // set filtered nav links
       const navLinksService = core.chrome.navLinks;
       const chromeNavLinks$ = navLinksService.getNavLinks$();
       combineLatest([chromeNavLinks$]).subscribe(([chromeNavLinks]) => {
@@ -178,9 +178,20 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
         ([workspaceList, chromeNavLinks, currentWorkspace]) => {
           const filteredNavLinks = new Map<string, ChromeNavLink>();
           chromeNavLinks = this.getFilterLinks(currentWorkspace, chromeNavLinks);
-          chromeNavLinks.forEach((chromeNavLink) =>
-            filteredNavLinks.set(chromeNavLink.id, chromeNavLink)
-          );
+          chromeNavLinks.forEach((chromeNavLink) => {
+            if (chromeNavLink.id === 'home') {
+              // set hidden, icon and order for home nav link
+              const homeNavLink: ChromeNavLink = {
+                ...chromeNavLink,
+                hidden: currentWorkspace !== null,
+                euiIconType: 'logoOpenSearch',
+                order: 1000,
+              };
+              filteredNavLinks.set(chromeNavLink.id, homeNavLink);
+            } else {
+              filteredNavLinks.set(chromeNavLink.id, chromeNavLink);
+            }
+          });
           workspaceList
             .filter((value, index) => !currentWorkspace && index < 5)
             .map((workspace) =>
