@@ -33,7 +33,7 @@ import { i18n } from '@osd/i18n';
 import React from 'react';
 import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem, CoreStart } from '../../..';
 import { HttpStart } from '../../../http';
-import { InternalApplicationStart } from '../../../application/types';
+import { InternalApplicationStart } from '../../../application';
 import { relativeToAbsolute } from '../../nav_links/to_nav_link';
 
 export const isModifiedOrPrevented = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) =>
@@ -60,7 +60,6 @@ export function createEuiListItem({
   onClick = () => {},
   navigateToApp,
   dataTestSubj,
-  externalLink = false,
 }: Props) {
   const { href, id, title, disabled, euiIconType, icon, tooltip } = link;
 
@@ -74,7 +73,7 @@ export function createEuiListItem({
       }
 
       if (
-        !externalLink && // ignore external links
+        !link.externalLink && // ignore external links
         event.button === 0 && // ignore everything but left clicks
         !isModifiedOrPrevented(event)
       ) {
