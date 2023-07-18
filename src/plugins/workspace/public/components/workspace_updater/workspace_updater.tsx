@@ -17,7 +17,7 @@ import { i18n } from '@osd/i18n';
 import { of } from 'rxjs';
 
 import { WorkspaceAttribute } from 'opensearch-dashboards/public';
-import { useOpenSearchDashboards } from '../../../../../../src/plugins/opensearch_dashboards_react/public';
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 
 import { PATHS } from '../../../common/constants';
 import { WorkspaceForm, WorkspaceFormData } from '../workspace_creator/workspace_form';
