@@ -104,7 +104,6 @@ interface Props {
   customNavLink$: Rx.Observable<ChromeNavLink | undefined>;
   branding: ChromeBranding;
   exitWorkspace: () => void;
-  getWorkspaceUrl: (id: string) => string;
   currentWorkspace$: Rx.BehaviorSubject<WorkspaceAttribute | null>;
   workspaceList$: Rx.BehaviorSubject<WorkspaceAttribute[]>;
 }
@@ -118,7 +117,6 @@ export function CollapsibleNav({
   storage = window.localStorage,
   onIsLockedUpdate,
   exitWorkspace,
-  getWorkspaceUrl,
   closeNav,
   navigateToApp,
   navigateToUrl,
