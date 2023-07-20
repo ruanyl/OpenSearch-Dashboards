@@ -151,16 +151,6 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
   public start(core: CoreStart) {
     // If workspace feature is disabled, it will not load the workspace plugin
     if (core.uiSettings.get('workspace:enabled') === false) {
-      // set filtered nav links
-      const navLinksService = core.chrome.navLinks;
-      const chromeNavLinks$ = navLinksService.getNavLinks$();
-      combineLatest([chromeNavLinks$]).subscribe(([chromeNavLinks]) => {
-        const filteredNavLinks = new Map<string, ChromeNavLink>();
-        chromeNavLinks.forEach((chromeNavLink) =>
-          filteredNavLinks.set(chromeNavLink.id, chromeNavLink)
-        );
-        navLinksService.setFilteredNavLinks(filteredNavLinks);
-      });
       return {};
     }
 

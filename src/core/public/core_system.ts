@@ -31,7 +31,7 @@
 import { pick } from '@osd/std';
 import { CoreId } from '../server';
 import { PackageInfo, EnvironmentMode } from '../server/types';
-import { CoreSetup, CoreStart } from '.';
+import { ChromeNavLink, CoreSetup, CoreStart } from '.';
 import { ChromeService } from './chrome';
 import { FatalErrorsService, FatalErrorsSetup } from './fatal_errors';
 import { HttpService } from './http';
@@ -233,6 +233,17 @@ export class CoreSystem {
         injectedMetadata,
         notifications,
         uiSettings,
+      });
+
+      // set default value for filtered nav links
+      const navLinksService = chrome.navLinks;
+      const chromeNavLinks$ = navLinksService.getNavLinks$();
+      chromeNavLinks$.subscribe((chromeNavLinks) => {
+        const filteredNavLinks = new Map<string, ChromeNavLink>();
+        chromeNavLinks.forEach((chromeNavLink) =>
+          filteredNavLinks.set(chromeNavLink.id, chromeNavLink)
+        );
+        navLinksService.setFilteredNavLinks(filteredNavLinks);
       });
 
       this.coreApp.start({ application, http, notifications, uiSettings });
