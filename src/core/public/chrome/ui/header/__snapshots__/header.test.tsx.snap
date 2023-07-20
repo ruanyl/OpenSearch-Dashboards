@@ -1914,6 +1914,17 @@ exports[`Header handles visibility and lock changes 1`] = `
               "borders": "none",
               "items": Array [
                 <HeaderLogo
+                  basePath={
+                    BasePath {
+                      "basePath": "/test",
+                      "get": [Function],
+                      "getBasePath": [Function],
+                      "prepend": [Function],
+                      "remove": [Function],
+                      "serverBasePath": "/test",
+                      "workspaceBasePath": "",
+                    }
+                  }
                   branding={
                     Object {
                       "applicationTitle": "OpenSearch Dashboards",
@@ -2351,6 +2362,17 @@ exports[`Header handles visibility and lock changes 1`] = `
                   className="euiHeaderSectionItem"
                 >
                   <HeaderLogo
+                    basePath={
+                      BasePath {
+                        "basePath": "/test",
+                        "get": [Function],
+                        "getBasePath": [Function],
+                        "prepend": [Function],
+                        "remove": [Function],
+                        "serverBasePath": "/test",
+                        "workspaceBasePath": "",
+                      }
+                    }
                     branding={
                       Object {
                         "applicationTitle": "OpenSearch Dashboards",
