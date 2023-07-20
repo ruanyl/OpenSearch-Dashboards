@@ -103,7 +103,7 @@ describe('SavedObjectsTable', () => {
   let notifications: ReturnType<typeof notificationServiceMock.createStartContract>;
   let savedObjects: ReturnType<typeof savedObjectsServiceMock.createStartContract>;
   let search: ReturnType<typeof dataPluginMock.createStartContract>['search'];
-  let workspacesStart: ReturnType<typeof workspacesServiceMock.createStartContract>;
+  let workspaces: ReturnType<typeof workspacesServiceMock.createStartContract>;
 
   const shallowRender = (overrides: Partial<SavedObjectsTableProps> = {}) => {
     return (shallowWithI18nProvider(
@@ -123,7 +123,7 @@ describe('SavedObjectsTable', () => {
     notifications = notificationServiceMock.createStartContract();
     savedObjects = savedObjectsServiceMock.createStartContract();
     search = dataPluginMock.createStartContract().search;
-    workspacesStart = workspacesServiceMock.createStartContract();
+    workspaces = workspacesServiceMock.createStartContract();
 
     const applications = applicationServiceMock.createStartContract();
     applications.capabilities = {
@@ -157,7 +157,7 @@ describe('SavedObjectsTable', () => {
       savedObjectsClient: savedObjects.client,
       indexPatterns: dataPluginMock.createStartContract().indexPatterns,
       http,
-      workspacesStart,
+      workspaces,
       overlays,
       notifications,
       applications,

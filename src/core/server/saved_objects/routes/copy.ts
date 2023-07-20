@@ -71,7 +71,7 @@ export const registerCopyRoute = (router: IRouter, config: SavedObjectConfig) =>
         typeRegistry: context.core.savedObjects.typeRegistry,
         readStream: objectsListStream,
         objectLimit: maxImportExportSize,
-        overwrite: true,
+        overwrite: false,
         createNewCopies: true,
         workspaces: [targetWorkspace],
       });

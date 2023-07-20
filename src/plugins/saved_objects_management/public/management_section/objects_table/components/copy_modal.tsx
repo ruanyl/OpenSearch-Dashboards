@@ -39,7 +39,7 @@ import { SAVED_OBJECT_TYPE_WORKSAPCE } from '../../../constants';
 type WorkspaceOption = EuiComboBoxOptionOption<WorkspaceAttribute>;
 
 interface Props {
-  workspacesStart: WorkspacesStart;
+  workspaces: WorkspacesStart;
   onCopy: (includeReferencesDeep: boolean, targetWorkspace: string) => Promise<void>;
   onClose: () => void;
   seletedSavedObjects: SavedObjectWithMetadata[];
@@ -77,9 +77,9 @@ export class SavedObjectsCopyModal extends React.Component<Props, State> {
   };
 
   async componentDidMount() {
-    const { workspacesStart } = this.props;
-    const workspaceList = await workspacesStart.client.workspaceList$;
-    const currentWorkspace = await workspacesStart.client.currentWorkspace$;
+    const { workspaces } = this.props;
+    const workspaceList = await workspaces.client.workspaceList$;
+    const currentWorkspace = await workspaces.client.currentWorkspace$;
 
     if (!!currentWorkspace?.value?.name) {
       const currentWorkspaceName = currentWorkspace.value.name;
@@ -116,9 +116,9 @@ export class SavedObjectsCopyModal extends React.Component<Props, State> {
       isLoading: true,
     });
 
-    const targetWorkspaceName = this.state.targetWorkspaceOption[0].label;
+    const targetWorkspace = this.state.targetWorkspaceOption[0].key;
 
-    await this.props.onCopy(this.state.isIncludeReferencesDeepChecked, targetWorkspaceName!);
+    await this.props.onCopy(this.state.isIncludeReferencesDeepChecked, targetWorkspace!);
 
     if (this.isMounted) {
       this.setState({

@@ -109,7 +109,7 @@ export interface SavedObjectsTableProps {
   savedObjectsClient: SavedObjectsClientContract;
   indexPatterns: IndexPatternsContract;
   http: HttpStart;
-  workspacesStart: WorkspacesStart;
+  workspaces: WorkspacesStart;
   search: DataPublicPluginStart['search'];
   overlays: OverlayStart;
   notifications: NotificationsStart;
@@ -613,7 +613,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     return (
       <SavedObjectsCopyModal
         seletedSavedObjects={this.state.selectedSavedObjects}
-        workspacesStart={this.props.workspacesStart}
+        workspaces={this.props.workspaces}
         onCopy={this.onCopy}
         onClose={this.hideCopyModal}
       />
