@@ -60,7 +60,7 @@ export const mountManagementSection = async ({
   allowedObjectTypes,
   fullWidth = true,
 }: MountParams) => {
-  const [coreStart, { data }, pluginStart] = await core.getStartServices();
+  const [coreStart, { data, uiActions }, pluginStart] = await core.getStartServices();
   const usedMountParams = mountParams || appMountParams || ({} as ManagementAppMountParams);
   const { element, history } = usedMountParams;
   const { chrome } = coreStart;
@@ -93,6 +93,7 @@ export const mountManagementSection = async ({
               <Suspense fallback={<EuiLoadingSpinner />}>
                 <SavedObjectsEditionPage
                   coreStart={coreStart}
+                  uiActionsStart={uiActions}
                   serviceRegistry={serviceRegistry}
                   setBreadcrumbs={setBreadcrumbs}
                   history={history}
