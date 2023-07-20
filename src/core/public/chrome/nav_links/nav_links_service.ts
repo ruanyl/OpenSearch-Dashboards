@@ -235,9 +235,9 @@ function sortNavLinks(navLinks: ReadonlyMap<string, NavLinkWrapper>) {
   );
 }
 
-function sortChromeNavLinks(ChromeNavLinks: ReadonlyMap<string, ChromeNavLink>) {
+function sortChromeNavLinks(chromeNavLinks: ReadonlyMap<string, ChromeNavLink>) {
   return sortBy(
-    [...ChromeNavLinks.values()].map((link) => link as Readonly<ChromeNavLink>),
+    [...chromeNavLinks.values()].map((link) => link as Readonly<ChromeNavLink>),
     'order'
   );
 }
