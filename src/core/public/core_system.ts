@@ -170,7 +170,7 @@ export class CoreSystem {
         pluginDependencies: new Map([...pluginDependencies]),
       });
       const application = this.application.setup({ context, http });
-      this.coreApp.setup({ application, http, injectedMetadata, notifications, workspaces });
+      this.coreApp.setup({ application, http, injectedMetadata, notifications });
 
       const core: InternalCoreSetup = {
         application,
