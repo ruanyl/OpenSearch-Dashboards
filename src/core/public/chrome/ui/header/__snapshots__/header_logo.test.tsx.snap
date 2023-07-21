@@ -6,9 +6,11 @@ exports[`Header logo when dark-themed uses custom dark-mode logo if branding dar
     BasePath {
       "basePath": "/base",
       "get": [Function],
+      "getBasePath": [Function],
       "prepend": [Function],
       "remove": [Function],
       "serverBasePath": "/base",
+      "workspaceBasePath": "",
     }
   }
   branding={
@@ -251,9 +253,11 @@ exports[`Header logo when dark-themed uses dashboards' dark logo if branding con
     BasePath {
       "basePath": "/base",
       "get": [Function],
+      "getBasePath": [Function],
       "prepend": [Function],
       "remove": [Function],
       "serverBasePath": "/base",
+      "workspaceBasePath": "",
     }
   }
   branding={
@@ -495,9 +499,11 @@ exports[`Header logo when dark-themed uses dashboards' dark logo if branding con
     BasePath {
       "basePath": "/base",
       "get": [Function],
+      "getBasePath": [Function],
       "prepend": [Function],
       "remove": [Function],
       "serverBasePath": "/base",
+      "workspaceBasePath": "",
     }
   }
   branding={
@@ -737,9 +743,11 @@ exports[`Header logo when dark-themed uses dashboards' dark logo if no branding 
     BasePath {
       "basePath": "/base",
       "get": [Function],
+      "getBasePath": [Function],
       "prepend": [Function],
       "remove": [Function],
       "serverBasePath": "/base",
+      "workspaceBasePath": "",
     }
   }
   branding={Object {}}
@@ -972,9 +980,11 @@ exports[`Header logo when dark-themed uses default-themed custom logo if brandin
     BasePath {
       "basePath": "/base",
       "get": [Function],
+      "getBasePath": [Function],
       "prepend": [Function],
       "remove": [Function],
       "serverBasePath": "/base",
+      "workspaceBasePath": "",
     }
   }
   branding={
@@ -1216,9 +1226,11 @@ exports[`Header logo when default-themed  uses custom default-mode logo if brand
     BasePath {
       "basePath": "/base",
       "get": [Function],
+      "getBasePath": [Function],
       "prepend": [Function],
       "remove": [Function],
       "serverBasePath": "/base",
+      "workspaceBasePath": "",
     }
   }
   branding={
@@ -1460,9 +1472,11 @@ exports[`Header logo when default-themed  uses dashboards logo if branding conta
     BasePath {
       "basePath": "/base",
       "get": [Function],
+      "getBasePath": [Function],
       "prepend": [Function],
       "remove": [Function],
       "serverBasePath": "/base",
+      "workspaceBasePath": "",
     }
   }
   branding={
@@ -1704,9 +1718,11 @@ exports[`Header logo when default-themed  uses dashboards logo if branding conta
     BasePath {
       "basePath": "/base",
       "get": [Function],
+      "getBasePath": [Function],
       "prepend": [Function],
       "remove": [Function],
       "serverBasePath": "/base",
+      "workspaceBasePath": "",
     }
   }
   branding={
@@ -1946,9 +1962,11 @@ exports[`Header logo when default-themed  uses dashboards logo if no branding is
     BasePath {
       "basePath": "/base",
       "get": [Function],
+      "getBasePath": [Function],
       "prepend": [Function],
       "remove": [Function],
       "serverBasePath": "/base",
+      "workspaceBasePath": "",
     }
   }
   branding={Object {}}
