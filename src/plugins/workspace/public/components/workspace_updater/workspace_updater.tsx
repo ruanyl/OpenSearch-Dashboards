@@ -25,7 +25,7 @@ import { DeleteWorkspaceModal } from '../delete_workspace_modal';
 
 export const WorkspaceUpdater = () => {
   const {
-    services: { application, workspaces, notifications, http },
+    services: { application, workspaces, notifications },
   } = useOpenSearchDashboards<{ application: ApplicationStart }>();
 
   const currentWorkspace = useObservable(
@@ -127,14 +127,13 @@ export const WorkspaceUpdater = () => {
       }
     }
     setDeleteWorkspaceModalVisible(false);
-    if (http) {
-      await application.navigateToUrl(
-        http.basePath.remove(
-          application.getUrlForApp('home', {
-            path: '',
-            absolute: false,
-          })
-        )
+    if (workspaces) {
+      window.location.href = workspaces.formatUrlWithWorkspaceId(
+        application.getUrlForApp('home', {
+          path: '/',
+          absolute: true,
+        }),
+        ''
       );
     }
   };
@@ -161,14 +160,13 @@ export const WorkspaceUpdater = () => {
       });
       return;
     }
-    if (http) {
-      await application.navigateToUrl(
-        http.basePath.remove(
-          application.getUrlForApp('home', {
-            path: '',
-            absolute: false,
-          })
-        )
+    if (workspaces) {
+      window.location.href = workspaces.formatUrlWithWorkspaceId(
+        application.getUrlForApp('home', {
+          path: '/',
+          absolute: true,
+        }),
+        ''
       );
     }
   };
