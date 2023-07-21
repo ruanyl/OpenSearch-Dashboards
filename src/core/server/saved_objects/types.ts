@@ -282,10 +282,6 @@ export interface SavedObjectsTypeManagementDefinition {
    * @returns an object containing a `path` and `uiCapabilitiesPath` properties. the `path` is the path to
    *          the object page, relative to the base path. `uiCapabilitiesPath` is the path to check in the
    *          {@link Capabilities | uiCapabilities} to check if the user has permission to access the object.
-   *          `browserJump` is the navigation approach when going to `path`, for case like jumping to a new workspace,
-   *          it requires a browser reload jump.
    */
-  getInAppUrl?: (
-    savedObject: SavedObject<any>
-  ) => { path: string; uiCapabilitiesPath: string; browserJump?: boolean };
+  getInAppUrl?: (savedObject: SavedObject<any>) => { path: string; uiCapabilitiesPath: string };
 }

@@ -4,7 +4,6 @@
  */
 
 import { SavedObjectsType } from 'opensearch-dashboards/server';
-import { WORKSPACE_TEMP_JUMP_QUERYSTRING } from '../constants';
 
 export const workspace: SavedObjectsType = {
   name: 'workspace',
@@ -16,19 +15,6 @@ export const workspace: SavedObjectsType = {
     importableAndExportable: true,
     getTitle(obj) {
       return obj.attributes.name;
-    },
-    getInAppUrl(obj) {
-      return {
-        /**
-         * As path is always relative to basePath,
-         * we have to add the workspace id into query.
-         * There is a handler in src/core/server/workspaces/workspaces_service.ts to
-         * handle the redirect logic.
-         */
-        path: `/app/workspace/overview?${WORKSPACE_TEMP_JUMP_QUERYSTRING}=${obj.id}`,
-        uiCapabilitiesPath: 'management.opensearchDashboards.workspaces',
-        browserJump: true,
-      };
     },
   },
   mappings: {

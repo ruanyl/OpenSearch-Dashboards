@@ -226,17 +226,10 @@ export class Table extends PureComponent<TableProps, TableState> {
         sortable: false,
         'data-test-subj': 'savedObjectsTableRowTitle',
         render: (title: string, object: SavedObjectWithMetadata) => {
-          const { path = '', browserJump } = object.meta.inAppUrl || {};
+          const { path = '' } = object.meta.inAppUrl || {};
           const canGoInApp = this.props.canGoInApp(object);
           if (!canGoInApp) {
             return <EuiText size="s">{title || getDefaultTitle(object)}</EuiText>;
-          }
-          if (browserJump) {
-            return (
-              <EuiLink onClick={() => (window.location.href = basePath.prepend(path))}>
-                {title || getDefaultTitle(object)}
-              </EuiLink>
-            );
           }
           return (
             <EuiLink href={basePath.prepend(path)}>{title || getDefaultTitle(object)}</EuiLink>
