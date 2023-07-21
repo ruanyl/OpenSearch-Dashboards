@@ -358,4 +358,4 @@ export {
   WorkspaceFindOptions,
 } from './workspace';
 
-export { getWorkspaceIdFromUrl } from './utils';
+export { getWorkspaceIdFromUrl, WORKSPACE_TYPE } from './utils';

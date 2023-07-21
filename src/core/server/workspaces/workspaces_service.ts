@@ -16,7 +16,6 @@ import { IWorkspaceDBImpl } from './types';
 import { WorkspacesClientWithSavedObject } from './workspaces_client';
 import { WorkspacePermissionControl } from './workspace_permission_control';
 import { UiSettingsServiceStart } from '../ui_settings/types';
-import { WORKSPACE_PATH_PREFIX } from '../../utils';
 
 export interface WorkspacesServiceSetup {
   client: IWorkspaceDBImpl;

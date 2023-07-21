@@ -4,9 +4,10 @@
  */
 
 import { SavedObjectsType } from 'opensearch-dashboards/server';
+import { WORKSPACE_TYPE } from '../constants';
 
 export const workspace: SavedObjectsType = {
-  name: 'workspace',
+  name: WORKSPACE_TYPE,
   namespaceType: 'agnostic',
   hidden: false,
   management: {
