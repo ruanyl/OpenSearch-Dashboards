@@ -105,7 +105,7 @@ export interface IBasePath {
   /**
    * Prepends `path` with the basePath + workspace.
    */
-  prepend: (url: string) => string;
+  prepend: (url: string, withoutWorkspace?: boolean) => string;
 
   /**
    * Removes the prepended basePath + workspace from the `path`.
