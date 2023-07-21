@@ -235,17 +235,6 @@ export class CoreSystem {
         uiSettings,
       });
 
-      // set default value for filtered nav links
-      const navLinksService = chrome.navLinks;
-      const chromeNavLinks$ = navLinksService.getNavLinks$();
-      chromeNavLinks$.subscribe((chromeNavLinks) => {
-        const filteredNavLinks = new Map<string, ChromeNavLink>();
-        chromeNavLinks.forEach((chromeNavLink) =>
-          filteredNavLinks.set(chromeNavLink.id, chromeNavLink)
-        );
-        navLinksService.setFilteredNavLinks(filteredNavLinks);
-      });
-
       this.coreApp.start({ application, http, notifications, uiSettings });
 
       application.registerMountContext(this.coreContext.coreId, 'core', () => ({
