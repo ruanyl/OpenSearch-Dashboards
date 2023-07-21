@@ -180,7 +180,7 @@ export const WorkspaceUpdater = () => {
           restrictWidth
           pageTitle="Update Workspace"
           rightSideItems={[
-            <EuiButton onClick={() => exitWorkspace()}>Exit</EuiButton>,
+            <EuiButton onClick={exitWorkspace}>Exit</EuiButton>,
             <EuiButton color="danger" onClick={() => setDeleteWorkspaceModalVisible(true)}>
               Delete
             </EuiButton>,
