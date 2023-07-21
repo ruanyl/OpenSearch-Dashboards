@@ -508,3 +508,5 @@ export const config = {
     appenders: appendersSchema as Type<AppenderConfigType>,
   },
 };
+
+export { formatWorkspaces, workspacesValidator, WORKSPACE_TYPE } from './workspaces';

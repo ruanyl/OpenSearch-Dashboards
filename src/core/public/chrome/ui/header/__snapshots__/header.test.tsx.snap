@@ -1918,9 +1918,11 @@ exports[`Header handles visibility and lock changes 1`] = `
                     BasePath {
                       "basePath": "/test",
                       "get": [Function],
+                      "getBasePath": [Function],
                       "prepend": [Function],
                       "remove": [Function],
                       "serverBasePath": "/test",
+                      "workspaceBasePath": "",
                     }
                   }
                   branding={
@@ -2365,9 +2367,11 @@ exports[`Header handles visibility and lock changes 1`] = `
                       BasePath {
                         "basePath": "/test",
                         "get": [Function],
+                        "getBasePath": [Function],
                         "prepend": [Function],
                         "remove": [Function],
                         "serverBasePath": "/test",
+                        "workspaceBasePath": "",
                       }
                     }
                     branding={
