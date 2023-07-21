@@ -74,12 +74,12 @@ function mockProps() {
     homeHref: '/',
     navLinks$: new BehaviorSubject([]),
     recentlyAccessed$: new BehaviorSubject([]),
-    customNavLink$: new BehaviorSubject(mockLink({ title: 'Custom link' })),
     storage: new StubBrowserStorage(),
     onIsLockedUpdate: () => {},
     closeNav: () => {},
     navigateToApp: () => Promise.resolve(),
     navigateToUrl: () => Promise.resolve(),
+    customNavLink$: new BehaviorSubject(undefined),
     branding: {
       darkMode: false,
       mark: {
@@ -138,12 +138,14 @@ describe('CollapsibleNav', () => {
       mockRecentNavLink({ label: 'recent 1' }),
       mockRecentNavLink({ label: 'recent 2' }),
     ];
+    const customNavLink = mockLink({ title: 'Custom link' });
     const component = mount(
       <CollapsibleNav
         {...mockProps()}
         isNavOpen={true}
         navLinks$={new BehaviorSubject(navLinks)}
         recentlyAccessed$={new BehaviorSubject(recentNavLinks)}
+        customNavLink$={new BehaviorSubject(customNavLink)}
       />
     );
     expect(component).toMatchSnapshot();
