@@ -10,14 +10,9 @@ export const workspace: SavedObjectsType = {
   name: WORKSPACE_TYPE,
   namespaceType: 'agnostic',
   hidden: false,
-  management: {
-    icon: 'apps', // todo: pending ux #2034
-    defaultSearchField: 'title',
-    importableAndExportable: true,
-    getTitle(obj) {
-      return obj.attributes.name;
-    },
-  },
+  /**
+   * workspace won't appear in management page.
+   */
   mappings: {
     dynamic: false,
     properties: {
