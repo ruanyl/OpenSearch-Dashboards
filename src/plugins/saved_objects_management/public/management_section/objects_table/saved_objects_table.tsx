@@ -404,10 +404,13 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     });
   };
 
-  onCopy = async (includeReferencesDeep: boolean, targetWorkspace: string) => {
-    const { selectedSavedObjects } = this.state;
+  onCopy = async (
+    savedObjects: SavedObjectWithMetadata[],
+    includeReferencesDeep: boolean,
+    targetWorkspace: string
+  ) => {
     const { notifications, http } = this.props;
-    const objectsToCopy = selectedSavedObjects.map((obj) => ({ id: obj.id, type: obj.type }));
+    const objectsToCopy = savedObjects.map((obj) => ({ id: obj.id, type: obj.type }));
 
     try {
       await copySavedObjects(http, objectsToCopy, includeReferencesDeep, targetWorkspace);

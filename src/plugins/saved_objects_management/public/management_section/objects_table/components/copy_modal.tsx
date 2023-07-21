@@ -32,6 +32,7 @@ import {
 } from '@elastic/eui';
 import { WorkspaceAttribute, WorkspacesStart } from 'opensearch-dashboards/public';
 import { i18n } from '@osd/i18n';
+import { iteratorSymbol } from 'immer/dist/internal';
 import { SavedObjectWithMetadata } from '../../../types';
 import { getSavedObjectLabel } from '../../../lib';
 import { SAVED_OBJECT_TYPE_WORKSAPCE } from '../../../constants';
@@ -40,13 +41,16 @@ type WorkspaceOption = EuiComboBoxOptionOption<WorkspaceAttribute>;
 
 interface Props {
   workspaces: WorkspacesStart;
-  onCopy: (includeReferencesDeep: boolean, targetWorkspace: string) => Promise<void>;
+  onCopy: (
+    savedObjects: SavedObjectWithMetadata[],
+    includeReferencesDeep: boolean,
+    targetWorkspace: string
+  ) => Promise<void>;
   onClose: () => void;
   seletedSavedObjects: SavedObjectWithMetadata[];
 }
 
 interface State {
-  ignoredSeletedObjects: SavedObjectWithMetadata[];
   allSeletedObjects: SavedObjectWithMetadata[];
   workspaceOptions: WorkspaceOption[];
   allWorkspaceOptions: WorkspaceOption[];
@@ -62,7 +66,6 @@ export class SavedObjectsCopyModal extends React.Component<Props, State> {
     super(props);
 
     this.state = {
-      ignoredSeletedObjects: [],
       allSeletedObjects: this.props.seletedSavedObjects,
       workspaceOptions: [],
       allWorkspaceOptions: [],
@@ -83,18 +86,12 @@ export class SavedObjectsCopyModal extends React.Component<Props, State> {
 
     if (!!currentWorkspace?.value?.name) {
       const currentWorkspaceName = currentWorkspace.value.name;
-      const ignoredSeletedObjects = this.state.allSeletedObjects.filter(
-        (item) =>
-          item.workspaces?.includes(currentWorkspaceName) ||
-          item.type === SAVED_OBJECT_TYPE_WORKSAPCE
-      );
       const filteredWorkspaceOptions = workspaceList.value
         .map(this.workspaceToOption)
         .filter((item) => item.label !== currentWorkspaceName);
       this.setState({
         workspaceOptions: filteredWorkspaceOptions,
         allWorkspaceOptions: filteredWorkspaceOptions,
-        ignoredSeletedObjects,
       });
     } else {
       const allWorkspaceOptions = workspaceList.value.map(this.workspaceToOption);
@@ -111,14 +108,18 @@ export class SavedObjectsCopyModal extends React.Component<Props, State> {
     this.isMounted = false;
   }
 
-  copySavedObjects = async () => {
+  copySavedObjects = async (savedObjects: SavedObjectWithMetadata[]) => {
     this.setState({
       isLoading: true,
     });
 
     const targetWorkspace = this.state.targetWorkspaceOption[0].key;
 
-    await this.props.onCopy(this.state.isIncludeReferencesDeepChecked, targetWorkspace!);
+    await this.props.onCopy(
+      savedObjects,
+      this.state.isIncludeReferencesDeepChecked,
+      targetWorkspace!
+    );
 
     if (this.isMounted) {
       this.setState({
@@ -152,21 +153,18 @@ export class SavedObjectsCopyModal extends React.Component<Props, State> {
       workspaceOptions,
       targetWorkspaceOption,
       isIncludeReferencesDeepChecked,
-      ignoredSeletedObjects,
       allSeletedObjects,
     } = this.state;
-    const includedSeletedObjects = allSeletedObjects.filter(
-      (item) => !ignoredSeletedObjects.some((ignoredItem) => item.id === ignoredItem.id)
+    const targetWorkspaceId = targetWorkspaceOption?.at(0)?.key;
+    const includedSeletedObjects = allSeletedObjects.filter((item) =>
+      !!targetWorkspaceId && !!item.workspaces
+        ? !item.workspaces.includes(targetWorkspaceId)
+        : true && item.type !== SAVED_OBJECT_TYPE_WORKSAPCE
     );
-    const ignoredSeletedObjectsLength = ignoredSeletedObjects.length;
+    const ignoredSeletedObjectsLength = allSeletedObjects.length - includedSeletedObjects.length;
 
     let confirmCopyButtonEnabled = false;
-    if (
-      !!targetWorkspaceOption &&
-      targetWorkspaceOption.length === 1 &&
-      !!targetWorkspaceOption[0].label &&
-      includedSeletedObjects.length > 0
-    ) {
+    if (!!targetWorkspaceId && includedSeletedObjects.length > 0) {
       confirmCopyButtonEnabled = true;
     }
 
@@ -304,7 +302,7 @@ export class SavedObjectsCopyModal extends React.Component<Props, State> {
           <EuiButton
             fill
             data-test-subj="copyConfirmButton"
-            onClick={this.copySavedObjects}
+            onClick={() => this.copySavedObjects(includedSeletedObjects)}
             isLoading={this.state.isLoading}
             disabled={!confirmCopyButtonEnabled}
           >
