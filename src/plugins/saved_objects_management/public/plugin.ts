@@ -104,54 +104,10 @@ export class SavedObjectsManagementPlugin
   private columnService = new SavedObjectsManagementColumnService();
   private namespaceService = new SavedObjectsManagementNamespaceService();
   private serviceRegistry = new SavedObjectsManagementServiceRegistry();
+  private coreSetup?: CoreSetup<StartDependencies, SavedObjectsManagementPluginStart>;
 
-  public setup(
-    core: CoreSetup<StartDependencies, SavedObjectsManagementPluginStart>,
-    { home, management, uiActions }: SetupDependencies
-  ): SavedObjectsManagementPluginSetup {
-    const actionSetup = this.actionService.setup();
-    const columnSetup = this.columnService.setup();
-    const namespaceSetup = this.namespaceService.setup();
-
-    if (home) {
-      home.featureCatalogue.register({
-        id: 'saved_objects',
-        title: i18n.translate('savedObjectsManagement.objects.savedObjectsTitle', {
-          defaultMessage: 'Saved Objects',
-        }),
-        description: i18n.translate('savedObjectsManagement.objects.savedObjectsDescription', {
-          defaultMessage:
-            'Import, export, and manage your saved searches, visualizations, and dashboards.',
-        }),
-        icon: 'savedObjectsApp',
-        path: '/app/management/opensearch-dashboards/objects',
-        showOnHomePage: false,
-        category: FeatureCatalogueCategory.ADMIN,
-      });
-    }
-
-    const opensearchDashboardsSection = management.sections.section.opensearchDashboards;
-    opensearchDashboardsSection.registerApp({
-      id: 'objects',
-      title: i18n.translate('savedObjectsManagement.managementSectionLabel', {
-        defaultMessage: 'Saved objects',
-      }),
-      order: 1,
-      mount: async (mountParams) => {
-        const { mountManagementSection } = await import('./management_section');
-        return mountManagementSection({
-          core,
-          serviceRegistry: this.serviceRegistry,
-          mountParams,
-          title: i18n.translate('savedObjectsManagement.managementSectionLabel', {
-            defaultMessage: 'Saved Objects',
-          }),
-        });
-      },
-    });
-
-    // sets up the context mappings and registers any triggers/actions for the plugin
-    bootstrap(uiActions);
+  private registerLibrarySubApp() {
+    const core = this.coreSetup as CoreSetup<StartDependencies, SavedObjectsManagementPluginStart>;
     const mountWrapper = ({
       title,
       allowedObjectTypes,
@@ -208,6 +164,58 @@ export class SavedObjectsManagementPlugin
         allowedObjectTypes: ['query'],
       }),
     });
+  }
+
+  public setup(
+    core: CoreSetup<StartDependencies, SavedObjectsManagementPluginStart>,
+    { home, management, uiActions }: SetupDependencies
+  ): SavedObjectsManagementPluginSetup {
+    this.coreSetup = core;
+    const actionSetup = this.actionService.setup();
+    const columnSetup = this.columnService.setup();
+    const namespaceSetup = this.namespaceService.setup();
+    const isWorkspaceEnabled = core.uiSettings.get('workspace:enabled');
+
+    if (home) {
+      home.featureCatalogue.register({
+        id: 'saved_objects',
+        title: i18n.translate('savedObjectsManagement.objects.savedObjectsTitle', {
+          defaultMessage: 'Saved Objects',
+        }),
+        description: i18n.translate('savedObjectsManagement.objects.savedObjectsDescription', {
+          defaultMessage:
+            'Import, export, and manage your saved searches, visualizations, and dashboards.',
+        }),
+        icon: 'savedObjectsApp',
+        path: '/app/management/opensearch-dashboards/objects',
+        showOnHomePage: false,
+        category: FeatureCatalogueCategory.ADMIN,
+      });
+    }
+
+    const opensearchDashboardsSection = management.sections.section.opensearchDashboards;
+    opensearchDashboardsSection.registerApp({
+      id: 'objects',
+      title: i18n.translate('savedObjectsManagement.managementSectionLabel', {
+        defaultMessage: 'Saved objects',
+      }),
+      order: 1,
+      mount: async (mountParams) => {
+        const { mountManagementSection } = await import('./management_section');
+        return mountManagementSection({
+          core,
+          serviceRegistry: this.serviceRegistry,
+          mountParams,
+          title: SAVED_OBJECT_MANAGEMENT_TITLE_WORDINGS,
+        });
+      },
+    });
+
+    // sets up the context mappings and registers any triggers/actions for the plugin
+    bootstrap(uiActions);
+    if (isWorkspaceEnabled) {
+      this.registerLibrarySubApp();
+    }
 
     // depends on `getStartServices`, should not be awaited
     registerServices(this.serviceRegistry, core.getStartServices);
