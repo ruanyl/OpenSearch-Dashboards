@@ -104,10 +104,11 @@ export class SavedObjectsManagementPlugin
   private columnService = new SavedObjectsManagementColumnService();
   private namespaceService = new SavedObjectsManagementNamespaceService();
   private serviceRegistry = new SavedObjectsManagementServiceRegistry();
-  private coreSetup?: CoreSetup<StartDependencies, SavedObjectsManagementPluginStart>;
 
-  private registerLibrarySubApp() {
-    const core = this.coreSetup as CoreSetup<StartDependencies, SavedObjectsManagementPluginStart>;
+  private registerLibrarySubApp(
+    coreSetup: CoreSetup<StartDependencies, SavedObjectsManagementPluginStart>
+  ) {
+    const core = coreSetup;
     const mountWrapper = ({
       title,
       allowedObjectTypes,
@@ -170,7 +171,6 @@ export class SavedObjectsManagementPlugin
     core: CoreSetup<StartDependencies, SavedObjectsManagementPluginStart>,
     { home, management, uiActions }: SetupDependencies
   ): SavedObjectsManagementPluginSetup {
-    this.coreSetup = core;
     const actionSetup = this.actionService.setup();
     const columnSetup = this.columnService.setup();
     const namespaceSetup = this.namespaceService.setup();
@@ -214,7 +214,7 @@ export class SavedObjectsManagementPlugin
     // sets up the context mappings and registers any triggers/actions for the plugin
     bootstrap(uiActions);
     if (isWorkspaceEnabled) {
-      this.registerLibrarySubApp();
+      this.registerLibrarySubApp(core);
     }
 
     // depends on `getStartServices`, should not be awaited

@@ -153,23 +153,6 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
     return allNavLinks.filter((item) => features.includes(item.id));
   }
 
-  private changeCategoryNameByWorkspaceFeatureFlag(chromeLinks: ChromeNavLink[]): ChromeNavLink[] {
-    return chromeLinks.map((item) => {
-      if (item.category?.id === DEFAULT_APP_CATEGORIES.opensearchDashboards.id) {
-        return {
-          ...item,
-          category: {
-            ...item.category,
-            label: i18n.translate('core.ui.libraryNavList.label', {
-              defaultMessage: 'Library',
-            }),
-          },
-        };
-      }
-      return item;
-    });
-  }
-
   private filterNavLinks(core: CoreStart, workspaceEnabled: boolean) {
     const navLinksService = core.chrome.navLinks;
     const chromeNavLinks$ = navLinksService.getNavLinks$();
@@ -271,6 +254,28 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
         navLinksService.setFilteredNavLinks(filteredNavLinks);
       });
     }
+  }
+
+  /**
+   * The category "Opensearch Dashboards" needs to be renamed as "Library"
+   * when workspace feature flag is on, we need to do it here and by pass
+   * a new item without polluting the original ChromeNavLink.
+   */
+  private changeCategoryNameByWorkspaceFeatureFlag(chromeLinks: ChromeNavLink[]): ChromeNavLink[] {
+    return chromeLinks.map((item) => {
+      if (item.category?.id === DEFAULT_APP_CATEGORIES.opensearchDashboards.id) {
+        return {
+          ...item,
+          category: {
+            ...item.category,
+            label: i18n.translate('core.ui.libraryNavList.label', {
+              defaultMessage: 'Library',
+            }),
+          },
+        };
+      }
+      return item;
+    });
   }
 
   public start(core: CoreStart) {
