@@ -258,7 +258,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
 
   /**
    * The category "Opensearch Dashboards" needs to be renamed as "Library"
-   * when workspace feature flag is on, we need to do it here and by pass
+   * when workspace feature flag is on, we need to do it here and generate
    * a new item without polluting the original ChromeNavLink.
    */
   private changeCategoryNameByWorkspaceFeatureFlag(chromeLinks: ChromeNavLink[]): ChromeNavLink[] {
