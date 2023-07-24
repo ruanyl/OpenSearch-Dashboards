@@ -132,7 +132,9 @@ export const WorkspaceUpdater = () => {
         path: '/',
         absolute: false,
       });
-      const targetUrl = http.basePath.prepend(http.basePath.remove(homeUrl), true);
+      const targetUrl = http.basePath.prepend(http.basePath.remove(homeUrl), {
+        withoutWorkspace: true,
+      });
       await application.navigateToUrl(targetUrl);
     }
   };
@@ -164,7 +166,9 @@ export const WorkspaceUpdater = () => {
         path: '/',
         absolute: false,
       });
-      const targetUrl = http.basePath.prepend(http.basePath.remove(homeUrl), true);
+      const targetUrl = http.basePath.prepend(http.basePath.remove(homeUrl), {
+        withoutWorkspace: true,
+      });
       await application.navigateToUrl(targetUrl);
     }
   };
