@@ -71,6 +71,45 @@ function getOrderedCategories(
   );
 }
 
+function getMergedNavLinks(
+  unknowns: ChromeNavLink[],
+  orderedCategories: string[],
+  categoryDictionary: ReturnType<typeof getAllCategories>
+): Array<string | ChromeNavLink> {
+  unknowns = sortBy(unknowns, 'order');
+  const maxOrder = 9999;
+  const mergedNavLinks: Array<string | ChromeNavLink> = [];
+  let indexUnknowns = 0;
+  let indexOrderedCategories = 0;
+
+  while (indexUnknowns < unknowns.length && indexOrderedCategories < orderedCategories.length) {
+    const unknownOrder = unknowns[indexUnknowns].order ?? maxOrder;
+    const categoryOrder =
+      categoryDictionary[orderedCategories[indexOrderedCategories]]?.order ?? maxOrder;
+    if (unknownOrder < categoryOrder) {
+      mergedNavLinks.push(unknowns[indexUnknowns]);
+      indexUnknowns++;
+    } else {
+      mergedNavLinks.push(orderedCategories[indexOrderedCategories]);
+      indexOrderedCategories++;
+    }
+  }
+
+  // remaining items in unknowns
+  while (indexUnknowns < unknowns.length) {
+    mergedNavLinks.push(unknowns[indexUnknowns]);
+    indexUnknowns++;
+  }
+
+  // remaining items in orderedCategories
+  while (indexOrderedCategories < orderedCategories.length) {
+    mergedNavLinks.push(orderedCategories[indexOrderedCategories]);
+    indexOrderedCategories++;
+  }
+
+  return mergedNavLinks;
+}
+
 function getCategoryLocalStorageKey(id: string) {
   return `core.navGroup.${id}`;
 }
@@ -125,6 +164,7 @@ export function CollapsibleNav({
   const { undefined: unknowns = [], ...allCategorizedLinks } = groupedNavLinks;
   const categoryDictionary = getAllCategories(allCategorizedLinks);
   const orderedCategories = getOrderedCategories(allCategorizedLinks, categoryDictionary);
+  const mergedNavLinks = getMergedNavLinks(unknowns, orderedCategories, categoryDictionary);
 
   const readyForEUI = (link: ChromeNavLink, needsIcon: boolean = false) => {
     return createEuiListItem({
@@ -277,46 +317,49 @@ export function CollapsibleNav({
           </>
         ) */}
 
-        {/* OpenSearchDashboards, Observability, Security, and Management sections */}
-        {orderedCategories.map((categoryName) => {
-          const category = categoryDictionary[categoryName]!;
-          const opensearchLinkLogo =
-            category.id === 'opensearchDashboards' ? customSideMenuLogo() : category.euiIconType;
+        {/* merged NavLinks */}
+        {mergedNavLinks.map((item, i) => {
+          if (typeof item === 'string') {
+            const category = categoryDictionary[item]!;
+            const opensearchLinkLogo =
+              category.id === 'opensearchDashboards' ? customSideMenuLogo() : category.euiIconType;
 
-          return (
-            <EuiCollapsibleNavGroup
-              key={category.id}
-              iconType={opensearchLinkLogo}
-              title={category.label}
-              isCollapsible={true}
-              initialIsOpen={getIsCategoryOpen(category.id, storage)}
-              onToggle={(isCategoryOpen) => setIsCategoryOpen(category.id, isCategoryOpen, storage)}
-              data-test-subj={`collapsibleNavGroup-${category.id}`}
-              data-test-opensearch-logo={opensearchLinkLogo}
-            >
-              <EuiListGroup
-                aria-label={i18n.translate('core.ui.primaryNavSection.screenReaderLabel', {
-                  defaultMessage: 'Primary navigation links, {category}',
-                  values: { category: category.label },
-                })}
-                listItems={allCategorizedLinks[categoryName].map((link) => readyForEUI(link))}
-                maxWidth="none"
-                color="subdued"
-                gutterSize="none"
-                size="s"
-              />
-            </EuiCollapsibleNavGroup>
-          );
+            return (
+              <EuiCollapsibleNavGroup
+                key={category.id}
+                iconType={opensearchLinkLogo}
+                title={category.label}
+                isCollapsible={true}
+                initialIsOpen={getIsCategoryOpen(category.id, storage)}
+                onToggle={(isCategoryOpen) =>
+                  setIsCategoryOpen(category.id, isCategoryOpen, storage)
+                }
+                data-test-subj={`collapsibleNavGroup-${category.id}`}
+                data-test-opensearch-logo={opensearchLinkLogo}
+              >
+                <EuiListGroup
+                  aria-label={i18n.translate('core.ui.primaryNavSection.screenReaderLabel', {
+                    defaultMessage: 'Primary navigation links, {category}',
+                    values: { category: category.label },
+                  })}
+                  listItems={allCategorizedLinks[item].map((link) => readyForEUI(link))}
+                  maxWidth="none"
+                  color="subdued"
+                  gutterSize="none"
+                  size="s"
+                />
+              </EuiCollapsibleNavGroup>
+            );
+          } else {
+            return (
+              <EuiCollapsibleNavGroup data-test-subj={`collapsibleNavGroup-noCategory`} key={i}>
+                <EuiListGroup flush>
+                  <EuiListGroupItem color="text" size="s" {...readyForEUI(item, true)} />
+                </EuiListGroup>
+              </EuiCollapsibleNavGroup>
+            );
+          }
         })}
-
-        {/* Things with no category (largely for custom plugins) */}
-        {unknowns.map((link, i) => (
-          <EuiCollapsibleNavGroup data-test-subj={`collapsibleNavGroup-noCategory`} key={i}>
-            <EuiListGroup flush>
-              <EuiListGroupItem color="text" size="s" {...readyForEUI(link, true)} />
-            </EuiListGroup>
-          </EuiCollapsibleNavGroup>
-        ))}
 
         {/* Docking button only for larger screens that can support it*/}
         <EuiShowFor sizes={['l', 'xl']}>
