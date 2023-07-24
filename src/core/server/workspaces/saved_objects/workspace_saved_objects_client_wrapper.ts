@@ -190,6 +190,16 @@ export class WorkspaceSavedObjectsClientWrapper {
       objects: Array<SavedObjectsBulkUpdateObject<T>>,
       options: SavedObjectsBulkUpdateOptions = {}
     ) => {
+      const objectToBulkUpdate = await wrapperOptions.client.bulkGet<T>(objects, options);
+      for (const object of objectToBulkUpdate.saved_objects) {
+        if (isWorkspacesLikeAttributes(object.attributes)) {
+          await this.validateMultiWorkspacesPermissions(
+            object.attributes.workspaces,
+            wrapperOptions.request,
+            WorkspacePermissionMode.Admin
+          );
+        }
+      }
       return await wrapperOptions.client.bulkUpdate(objects, options);
     };
 
