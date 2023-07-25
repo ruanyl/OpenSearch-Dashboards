@@ -76,18 +76,21 @@ function getMergedNavLinks(
   orderedCategories: string[],
   categoryDictionary: ReturnType<typeof getAllCategories>
 ): Array<string | ChromeNavLink> {
-  unknowns = sortBy(unknowns, 'order');
   const maxOrder = 9999;
   const mergedNavLinks: Array<string | ChromeNavLink> = [];
+  const sortedUnknowns = sortBy(unknowns, 'order');
   let indexUnknowns = 0;
   let indexOrderedCategories = 0;
 
-  while (indexUnknowns < unknowns.length && indexOrderedCategories < orderedCategories.length) {
-    const unknownOrder = unknowns[indexUnknowns].order ?? maxOrder;
+  while (
+    indexUnknowns < sortedUnknowns.length &&
+    indexOrderedCategories < orderedCategories.length
+  ) {
+    const unknownOrder = sortedUnknowns[indexUnknowns].order ?? maxOrder;
     const categoryOrder =
       categoryDictionary[orderedCategories[indexOrderedCategories]]?.order ?? maxOrder;
     if (unknownOrder < categoryOrder) {
-      mergedNavLinks.push(unknowns[indexUnknowns]);
+      mergedNavLinks.push(sortedUnknowns[indexUnknowns]);
       indexUnknowns++;
     } else {
       mergedNavLinks.push(orderedCategories[indexOrderedCategories]);
@@ -96,8 +99,8 @@ function getMergedNavLinks(
   }
 
   // remaining items in unknowns
-  while (indexUnknowns < unknowns.length) {
-    mergedNavLinks.push(unknowns[indexUnknowns]);
+  while (indexUnknowns < sortedUnknowns.length) {
+    mergedNavLinks.push(sortedUnknowns[indexUnknowns]);
     indexUnknowns++;
   }
 
