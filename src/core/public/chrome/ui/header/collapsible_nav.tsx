@@ -72,45 +72,26 @@ function getOrderedCategories(
 }
 
 function getMergedNavLinks(
-  unknowns: ChromeNavLink[],
   orderedCategories: string[],
+  uncategorizedLinks: ChromeNavLink[],
   categoryDictionary: ReturnType<typeof getAllCategories>
 ): Array<string | ChromeNavLink> {
-  const maxOrder = 9999;
-  const mergedNavLinks: Array<string | ChromeNavLink> = [];
-  const sortedUnknowns = sortBy(unknowns, 'order');
-  let indexUnknowns = 0;
-  let indexOrderedCategories = 0;
-
-  while (
-    indexUnknowns < sortedUnknowns.length &&
-    indexOrderedCategories < orderedCategories.length
-  ) {
-    const unknownOrder = sortedUnknowns[indexUnknowns].order ?? maxOrder;
-    const categoryOrder =
-      categoryDictionary[orderedCategories[indexOrderedCategories]]?.order ?? maxOrder;
-    if (unknownOrder < categoryOrder) {
-      mergedNavLinks.push(sortedUnknowns[indexUnknowns]);
-      indexUnknowns++;
-    } else {
-      mergedNavLinks.push(orderedCategories[indexOrderedCategories]);
-      indexOrderedCategories++;
-    }
-  }
-
-  // remaining items in sortedUnknowns
-  while (indexUnknowns < sortedUnknowns.length) {
-    mergedNavLinks.push(sortedUnknowns[indexUnknowns]);
-    indexUnknowns++;
-  }
-
-  // remaining items in orderedCategories
-  while (indexOrderedCategories < orderedCategories.length) {
-    mergedNavLinks.push(orderedCategories[indexOrderedCategories]);
-    indexOrderedCategories++;
-  }
-
-  return mergedNavLinks;
+  const uncategorizedLinksWithOrder = sortBy(
+    uncategorizedLinks.filter((link) => link.order),
+    'order'
+  );
+  const uncategorizedLinksWithoutOrder = uncategorizedLinks.filter((link) => !link.order);
+  const orderedCategoryWithOrder = orderedCategories
+    .filter((categoryName) => categoryDictionary[categoryName]?.order)
+    .map((categoryName) => ({ categoryName, order: categoryDictionary[categoryName]?.order }));
+  const orderedCategoryWithoutOrder = orderedCategories.filter(
+    (categoryName) => !categoryDictionary[categoryName]?.order
+  );
+  const mergedNavLinks = sortBy(
+    [...uncategorizedLinksWithOrder, ...orderedCategoryWithOrder],
+    'order'
+  ).map((navLink) => ('categoryName' in navLink ? navLink.categoryName : navLink));
+  return [...mergedNavLinks, ...orderedCategoryWithoutOrder, ...uncategorizedLinksWithoutOrder];
 }
 
 function getCategoryLocalStorageKey(id: string) {
@@ -164,10 +145,14 @@ export function CollapsibleNav({
   const appId = useObservable(observables.appId$, '');
   const lockRef = useRef<HTMLButtonElement>(null);
   const groupedNavLinks = groupBy(navLinks, (link) => link?.category?.id);
-  const { undefined: unknowns = [], ...allCategorizedLinks } = groupedNavLinks;
+  const { undefined: uncategorizedLinks = [], ...allCategorizedLinks } = groupedNavLinks;
   const categoryDictionary = getAllCategories(allCategorizedLinks);
   const orderedCategories = getOrderedCategories(allCategorizedLinks, categoryDictionary);
-  const mergedNavLinks = getMergedNavLinks(unknowns, orderedCategories, categoryDictionary);
+  const mergedNavLinks = getMergedNavLinks(
+    orderedCategories,
+    uncategorizedLinks,
+    categoryDictionary
+  );
 
   const readyForEUI = (link: ChromeNavLink, needsIcon: boolean = false) => {
     return createEuiListItem({
