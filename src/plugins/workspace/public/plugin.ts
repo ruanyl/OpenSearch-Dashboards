@@ -208,9 +208,14 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
     workspace: WorkspaceAttribute | null | undefined,
     allNavLinks: ChromeNavLink[]
   ) {
-    if (!workspace) return allNavLinks;
+    const outsideWorkspaceCategoryIds = new Set<string>(['management', 'workspace']);
+    if (!workspace) {
+      return allNavLinks.filter(
+        (navLink) => !navLink.category || outsideWorkspaceCategoryIds.has(navLink.category?.id)
+      );
+    }
     const features = workspace.features ?? [];
-    return allNavLinks.filter((item) => features.includes(item.id));
+    return allNavLinks.filter((navLink) => features.includes(navLink.id));
   }
 
   private filterNavLinks(core: CoreStart) {
