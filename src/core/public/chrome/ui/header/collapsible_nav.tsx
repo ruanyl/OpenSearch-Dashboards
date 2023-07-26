@@ -77,15 +77,15 @@ function getMergedNavLinks(
   categoryDictionary: ReturnType<typeof getAllCategories>
 ): Array<string | ChromeNavLink> {
   const uncategorizedLinksWithOrder = sortBy(
-    uncategorizedLinks.filter((link) => link.order),
+    uncategorizedLinks.filter((link) => link.order !== null),
     'order'
   );
-  const uncategorizedLinksWithoutOrder = uncategorizedLinks.filter((link) => !link.order);
+  const uncategorizedLinksWithoutOrder = uncategorizedLinks.filter((link) => link.order === null);
   const orderedCategoryWithOrder = orderedCategories
-    .filter((categoryName) => categoryDictionary[categoryName]?.order)
+    .filter((categoryName) => categoryDictionary[categoryName]?.order !== null)
     .map((categoryName) => ({ categoryName, order: categoryDictionary[categoryName]?.order }));
   const orderedCategoryWithoutOrder = orderedCategories.filter(
-    (categoryName) => !categoryDictionary[categoryName]?.order
+    (categoryName) => categoryDictionary[categoryName]?.order === null
   );
   const mergedNavLinks = sortBy(
     [...uncategorizedLinksWithOrder, ...orderedCategoryWithOrder],
