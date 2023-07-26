@@ -98,7 +98,7 @@ function getMergedNavLinks(
     }
   }
 
-  // remaining items in unknowns
+  // remaining items in sortedUnknowns
   while (indexUnknowns < sortedUnknowns.length) {
     mergedNavLinks.push(sortedUnknowns[indexUnknowns]);
     indexUnknowns++;
