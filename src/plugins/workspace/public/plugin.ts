@@ -208,7 +208,10 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
     workspace: WorkspaceAttribute | null | undefined,
     allNavLinks: ChromeNavLink[]
   ) {
-    const outsideWorkspaceCategoryIds = new Set<string>(['management', 'workspace']);
+    const outsideWorkspaceCategoryIds = new Set<string>([
+      DEFAULT_APP_CATEGORIES.management.id,
+      WORKSPACE_NAV_CATEGORY.id,
+    ]);
     if (!workspace) {
       return allNavLinks.filter(
         (navLink) => !navLink.category || outsideWorkspaceCategoryIds.has(navLink.category?.id)
