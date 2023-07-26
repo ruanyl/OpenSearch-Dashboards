@@ -91,6 +91,7 @@ function getMergedNavLinks(
     [...uncategorizedLinksWithOrder, ...orderedCategoryWithOrder],
     'order'
   ).map((navLink) => ('categoryName' in navLink ? navLink.categoryName : navLink));
+  // if order is not defined , categorized links will be placed before uncategorized links
   return [...mergedNavLinks, ...orderedCategoryWithoutOrder, ...uncategorizedLinksWithoutOrder];
 }
 
