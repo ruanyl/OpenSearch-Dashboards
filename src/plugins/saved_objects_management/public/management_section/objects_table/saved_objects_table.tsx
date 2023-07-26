@@ -615,7 +615,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         close={this.hideImportFlyout}
         done={this.finishImport}
         http={this.props.http}
-        workspaces={this.state.workspaceId ? [this.state.workspaceId] : undefined}
+        workspace={this.state.workspaceId || undefined}
         serviceRegistry={this.props.serviceRegistry}
         indexPatterns={this.props.indexPatterns}
         newIndexPatternUrl={newIndexPatternUrl}

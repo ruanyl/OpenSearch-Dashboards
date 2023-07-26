@@ -217,6 +217,18 @@ export class SavedObjectsRepository {
     this._serializer = serializer;
   }
 
+  private isSharedObject(object: SavedObject) {
+    if (!object.workspaces || object.workspaces.includes('public')) {
+      return true;
+    }
+
+    return false;
+  }
+
+  private isWorkspaceSpecificObject(object: SavedObject) {
+    return !this.isSharedObject(object);
+  }
+
   /**
    * Persists an object
    *
@@ -244,7 +256,7 @@ export class SavedObjectsRepository {
       originId,
       initialNamespaces,
       version,
-      workspaces,
+      workspace,
     } = options;
     const namespace = normalizeNamespace(options.namespace);
 
@@ -281,7 +293,7 @@ export class SavedObjectsRepository {
       }
     }
 
-    let savedObjectWorkspaces = workspaces;
+    let savedObjectWorkspaces = workspace ? [workspace] : undefined;
 
     if (id && overwrite) {
       try {
@@ -372,15 +384,28 @@ export class SavedObjectsRepository {
 
       const method = object.id && overwrite ? 'index' : 'create';
       const requiresNamespacesCheck = object.id && this._registry.isMultiNamespace(object.type);
+      /**
+       * Only when importing an object to a target workspace should we check if the object is workspace-specific.
+       */
+      const requiresWorkspaceCheck = object.id && options.workspace;
 
       if (object.id == null) object.id = uuid.v1();
+
+      let opensearchRequestIndexPayload = {};
+
+      if (requiresNamespacesCheck || requiresWorkspaceCheck) {
+        opensearchRequestIndexPayload = {
+          opensearchRequestIndex: bulkGetRequestIndexCounter,
+        };
+        bulkGetRequestIndexCounter++;
+      }
 
       return {
         tag: 'Right' as 'Right',
         value: {
           method,
           object,
-          ...(requiresNamespacesCheck && { opensearchRequestIndex: bulkGetRequestIndexCounter++ }),
+          ...opensearchRequestIndexPayload,
         },
       };
     });
@@ -391,7 +416,7 @@ export class SavedObjectsRepository {
       .map(({ value: { object: { type, id } } }) => ({
         _id: this._serializer.generateRawId(namespace, type, id),
         _index: this.getIndexForType(type),
-        _source: ['type', 'namespaces'],
+        _source: ['type', 'namespaces', 'workspaces'],
       }));
     const bulkGetResponse = bulkGetDocs.length
       ? await this.client.mget(
@@ -420,15 +445,8 @@ export class SavedObjectsRepository {
         method,
       } = expectedBulkGetResult.value;
       let savedObjectWorkspaces: string[] | undefined;
-      if (expectedBulkGetResult.value.method === 'create') {
-        if (options.workspaces) {
-          savedObjectWorkspaces = Array.from(new Set([...(options.workspaces || [])]));
-        }
-      } else if (object.workspaces) {
-        savedObjectWorkspaces = Array.from(
-          new Set([...object.workspaces, ...(options.workspaces || [])])
-        );
-      }
+      let finalMethod = method;
+      let finalObjectId = object.id;
       if (opensearchRequestIndex !== undefined) {
         const indexFound = bulkGetResponse?.statusCode !== 404;
         const actualResult = indexFound
@@ -465,12 +483,49 @@ export class SavedObjectsRepository {
         versionProperties = getExpectedVersionProperties(version);
       }
 
+      if (expectedBulkGetResult.value.method === 'create') {
+        if (options.workspace) {
+          savedObjectWorkspaces = [options.workspace];
+        }
+      } else {
+        /**
+         * When overwrite, need to check if the object is workspace-specific
+         * if so, copy object to target workspace instead of refering it.
+         */
+        if (opensearchRequestIndex !== undefined && bulkGetResponse?.statusCode !== 404) {
+          const rawId = this._serializer.generateRawId(namespace, object.type, object.id);
+          const findObject = bulkGetResponse?.body.docs?.find((item) => item._id === rawId);
+          if (findObject && findObject.found) {
+            const transformedObject = this._serializer.rawToSavedObject(
+              findObject as SavedObjectsRawDoc
+            ) as SavedObject;
+            if (
+              options.workspace &&
+              this.isWorkspaceSpecificObject(transformedObject) &&
+              !transformedObject.workspaces?.includes(options.workspace)
+            ) {
+              finalMethod = 'create';
+              finalObjectId = uuid.v1();
+              savedObjectWorkspaces = [options.workspace];
+              versionProperties = {};
+            } else {
+              savedObjectWorkspaces = transformedObject.workspaces;
+            }
+          } else {
+            finalMethod = 'create';
+            finalObjectId = object.id;
+            savedObjectWorkspaces = options.workspace ? [options.workspace] : undefined;
+            versionProperties = {};
+          }
+        }
+      }
+
       const expectedResult = {
         opensearchRequestIndex: bulkRequestIndexCounter++,
-        requestedId: object.id,
+        requestedId: finalObjectId,
         rawMigratedDoc: this._serializer.savedObjectToRaw(
           this._migrator.migrateDocument({
-            id: object.id,
+            id: finalObjectId,
             type: object.type,
             attributes: object.attributes,
             migrationVersion: object.migrationVersion,
@@ -486,7 +541,7 @@ export class SavedObjectsRepository {
 
       bulkCreateParams.push(
         {
-          [method]: {
+          [finalMethod]: {
             _id: expectedResult.rawMigratedDoc._id,
             _index: this.getIndexForType(object.type),
             ...(overwrite && versionProperties),

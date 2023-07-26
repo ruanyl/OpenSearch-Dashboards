@@ -61,7 +61,7 @@ export interface SavedObjectsCreateOptions {
   /** {@inheritDoc SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
   references?: SavedObjectReference[];
-  workspaces?: string[];
+  workspace?: string;
 }
 
 /**
@@ -268,11 +268,7 @@ export class SavedObjectsClient {
         attributes,
         migrationVersion: options.migrationVersion,
         references: options.references,
-        ...(options.workspaces || currentWorkspaceId
-          ? {
-              workspaces: options.workspaces || [currentWorkspaceId],
-            }
-          : {}),
+        workspace: options.workspace || currentWorkspaceId,
       }),
     });
 

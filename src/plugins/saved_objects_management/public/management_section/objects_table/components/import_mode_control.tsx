@@ -51,7 +51,7 @@ export interface ImportModeControlProps {
 export interface ImportMode {
   createNewCopies: boolean;
   overwrite: boolean;
-  workspaces?: string[];
+  workspace?: string;
 }
 
 const createNewCopiesDisabled = {

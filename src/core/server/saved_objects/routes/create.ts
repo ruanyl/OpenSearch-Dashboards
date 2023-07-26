@@ -56,14 +56,14 @@ export const registerCreateRoute = (router: IRouter) => {
             )
           ),
           initialNamespaces: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
-          workspaces: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+          workspace: schema.maybe(schema.string()),
         }),
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const { type, id } = req.params;
       const { overwrite } = req.query;
-      const { attributes, migrationVersion, references, initialNamespaces, workspaces } = req.body;
+      const { attributes, migrationVersion, references, initialNamespaces, workspace } = req.body;
 
       const options = {
         id,
@@ -71,7 +71,7 @@ export const registerCreateRoute = (router: IRouter) => {
         migrationVersion,
         references,
         initialNamespaces,
-        workspaces,
+        workspace,
       };
       const result = await context.core.savedObjects.client.create(type, attributes, options);
       return res.ok({ body: result });

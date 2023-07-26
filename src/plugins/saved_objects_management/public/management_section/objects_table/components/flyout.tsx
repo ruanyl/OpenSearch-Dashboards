@@ -92,7 +92,7 @@ export interface FlyoutProps {
   overlays: OverlayStart;
   http: HttpStart;
   search: DataPublicPluginStart['search'];
-  workspaces?: string[];
+  workspace?: string;
 }
 
 export interface FlyoutState {
@@ -184,7 +184,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
    * Does the initial import of a file, resolveImportErrors then handles errors and retries
    */
   import = async () => {
-    const { http, workspaces } = this.props;
+    const { http, workspace } = this.props;
     const { file, importMode } = this.state;
     this.setState({ status: 'loading', error: undefined });
 
@@ -192,7 +192,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     try {
       const response = await importFile(http, file!, {
         ...importMode,
-        workspaces,
+        workspace,
       });
       this.setState(processImportResponse(response), () => {
         // Resolve import errors right away if there's no index patterns to match
