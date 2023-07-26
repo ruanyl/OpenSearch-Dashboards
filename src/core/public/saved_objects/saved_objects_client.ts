@@ -268,7 +268,7 @@ export class SavedObjectsClient {
         attributes,
         migrationVersion: options.migrationVersion,
         references: options.references,
-        workspace: options.workspace || currentWorkspaceId,
+        workspace: options.workspace || currentWorkspaceId || undefined,
       }),
     });
 
