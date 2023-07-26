@@ -18,7 +18,7 @@ export const PATHS = {
 export const WORKSPACE_OP_TYPE_CREATE = 'create';
 export const WORKSPACE_OP_TYPE_UPDATE = 'update';
 
-export const WORKSPACE_NAV_CATEGORY: AppCategory = {
+export const WORKSPACE_APP_CATEGORY: AppCategory = {
   id: 'workspace',
   label: i18n.translate('core.ui.workspaceNavList.label', {
     defaultMessage: 'Workspaces',

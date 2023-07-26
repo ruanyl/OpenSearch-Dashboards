@@ -19,7 +19,7 @@ import {
   WorkspacesStart,
   DEFAULT_APP_CATEGORIES,
 } from '../../../core/public';
-import { PATHS, WORKSPACE_APP_ID, WORKSPACE_NAV_CATEGORY } from '../common/constants';
+import { PATHS, WORKSPACE_APP_ID, WORKSPACE_APP_CATEGORY } from '../common/constants';
 import { mountDropdownList } from './mount';
 import { SavedObjectsManagementPluginSetup } from '../../saved_objects_management/public';
 import { getWorkspaceColumn } from './components/utils/workspace_column';
@@ -186,7 +186,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
       disabled: false,
       baseUrl: url,
       href: url,
-      category: WORKSPACE_NAV_CATEGORY,
+      category: WORKSPACE_APP_CATEGORY,
       title: i18n.translate('core.ui.workspaceNavList.workspaceName', {
         defaultMessage: workspace.name,
       }),
@@ -210,7 +210,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
   ) {
     const outsideWorkspaceCategoryIds = new Set<string>([
       DEFAULT_APP_CATEGORIES.management.id,
-      WORKSPACE_NAV_CATEGORY.id,
+      WORKSPACE_APP_CATEGORY.id,
     ]);
     if (!workspace) {
       return allNavLinks.filter(
