@@ -19,9 +19,9 @@ import {
   SavedObjectsFindOptions,
 } from 'opensearch-dashboards/server';
 import {
-  WorkspacePermissionControl,
-  WorkspacePermissionMode,
-} from '../workspace_permission_control';
+  SavedObjectsPermissionControl,
+  PermissionMode,
+} from '../../saved_objects/permission_control/client';
 
 // Can't throw unauthorized for now, the page will be refreshed if unauthorized
 const generateWorkspacePermissionError = () =>
@@ -45,13 +45,13 @@ export class WorkspaceSavedObjectsClientWrapper {
   private async validateMultiWorkspacesPermissions(
     workspaces: string[] | undefined,
     request: OpenSearchDashboardsRequest,
-    permissionMode: WorkspacePermissionMode | WorkspacePermissionMode[]
+    permissionMode: PermissionMode | PermissionMode[]
   ) {
     if (!workspaces) {
       return;
     }
     for (const workspaceId of workspaces) {
-      if (!(await this.permissionControl.validate(workspaceId, permissionMode, request))) {
+      if (!(await this.permissionControl.validate(request, workspaceId, permissionMode))) {
         throw generateWorkspacePermissionError();
       }
     }
@@ -60,14 +60,14 @@ export class WorkspaceSavedObjectsClientWrapper {
   private async validateAtLeastOnePermittedWorkspaces(
     workspaces: string[] | undefined,
     request: OpenSearchDashboardsRequest,
-    permissionMode: WorkspacePermissionMode | WorkspacePermissionMode[]
+    permissionMode: PermissionMode | PermissionMode[]
   ) {
     if (!workspaces) {
       return;
     }
     let permitted = false;
     for (const workspaceId of workspaces) {
-      if (await this.permissionControl.validate(workspaceId, permissionMode, request)) {
+      if (await this.permissionControl.validate(request, workspaceId, permissionMode)) {
         permitted = true;
         break;
       }
@@ -87,7 +87,7 @@ export class WorkspaceSavedObjectsClientWrapper {
       await this.validateMultiWorkspacesPermissions(
         objectToDeleted.workspaces,
         wrapperOptions.request,
-        WorkspacePermissionMode.Admin
+        PermissionMode.Management
       );
       return await wrapperOptions.client.delete(type, id, options);
     };
@@ -108,7 +108,7 @@ export class WorkspaceSavedObjectsClientWrapper {
         await this.validateMultiWorkspacesPermissions(
           attributes.workspaces,
           wrapperOptions.request,
-          WorkspacePermissionMode.Admin
+          PermissionMode.Management
         );
       }
       return await wrapperOptions.client.create(type, attributes, options);
@@ -123,7 +123,7 @@ export class WorkspaceSavedObjectsClientWrapper {
       await this.validateAtLeastOnePermittedWorkspaces(
         objectToGet.workspaces,
         wrapperOptions.request,
-        WorkspacePermissionMode.Read
+        PermissionMode.Read
       );
       return objectToGet;
     };
@@ -137,7 +137,7 @@ export class WorkspaceSavedObjectsClientWrapper {
         await this.validateAtLeastOnePermittedWorkspaces(
           object.workspaces,
           wrapperOptions.request,
-          WorkspacePermissionMode.Read
+          PermissionMode.Read
         );
       }
       return objectToBulkGet;
@@ -150,17 +150,17 @@ export class WorkspaceSavedObjectsClientWrapper {
         options.workspaces = options.workspaces.filter(
           async (workspaceId) =>
             await this.permissionControl.validate(
+              wrapperOptions.request,
               workspaceId,
-              WorkspacePermissionMode.Read,
-              wrapperOptions.request
+              PermissionMode.Read
             )
         );
       } else {
         options.workspaces = [
           'public',
           ...(await this.permissionControl.getPermittedWorkspaceIds(
-            WorkspacePermissionMode.Read,
-            wrapperOptions.request
+            wrapperOptions.request,
+            PermissionMode.Read
           )),
         ];
       }
@@ -184,5 +184,5 @@ export class WorkspaceSavedObjectsClientWrapper {
     };
   };
 
-  constructor(private readonly permissionControl: WorkspacePermissionControl) {}
+  constructor(private readonly permissionControl: SavedObjectsPermissionControl) {}
 }

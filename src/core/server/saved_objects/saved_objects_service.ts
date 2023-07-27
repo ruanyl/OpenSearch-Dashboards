@@ -65,6 +65,7 @@ import { registerRoutes } from './routes';
 import { ServiceStatus } from '../status';
 import { calculateStatus$ } from './status';
 import { createMigrationOpenSearchClient } from './migrations/core/';
+import { SavedObjectsPermissionControl } from './permission_control/client';
 /**
  * Saved Objects is OpenSearchDashboards's data persistence mechanism allowing plugins to
  * use OpenSearch for storing and querying state. The SavedObjectsServiceSetup API exposes methods
@@ -175,6 +176,8 @@ export interface SavedObjectsServiceSetup {
   setRepositoryFactoryProvider: (
     respositoryFactoryProvider: SavedObjectRepositoryFactoryProvider
   ) => void;
+
+  permissionControl: SavedObjectsPermissionControl;
 }
 
 /**
@@ -301,6 +304,7 @@ export class SavedObjectsService
   private started = false;
 
   private respositoryFactoryProvider?: SavedObjectRepositoryFactoryProvider;
+  private permissionControl?: SavedObjectsPermissionControl;
 
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('savedobjects-service');
@@ -327,6 +331,8 @@ export class SavedObjectsService
       config: this.config,
       migratorPromise: this.migrator$.pipe(first()).toPromise(),
     });
+
+    this.permissionControl = new SavedObjectsPermissionControl();
 
     return {
       status$: calculateStatus$(
@@ -368,6 +374,7 @@ export class SavedObjectsService
         }
         this.respositoryFactoryProvider = repositoryProvider;
       },
+      permissionControl: this.permissionControl,
     };
   }
 
@@ -483,8 +490,11 @@ export class SavedObjectsService
 
     this.started = true;
 
+    const getScopedClient = clientProvider.getClient.bind(clientProvider);
+    this.permissionControl?.setup(getScopedClient);
+
     return {
-      getScopedClient: clientProvider.getClient.bind(clientProvider),
+      getScopedClient,
       createScopedRepository: repositoryFactory.createScopedRepository,
       createInternalRepository: repositoryFactory.createInternalRepository,
       createSerializer: () => new SavedObjectsSerializer(this.typeRegistry),
