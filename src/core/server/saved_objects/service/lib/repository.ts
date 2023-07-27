@@ -233,10 +233,6 @@ export class SavedObjectsRepository {
     return false;
   }
 
-  private isWorkspaceSpecificObject(object: SavedObject) {
-    return !this.isSharedObject(object);
-  }
-
   /**
    * This function will compute the exclude workspaces from baseWorkspaces
    */
