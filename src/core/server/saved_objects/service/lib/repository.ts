@@ -225,14 +225,6 @@ export class SavedObjectsRepository {
     return false;
   }
 
-  private isSharedObject(object: SavedObject) {
-    if (this.isPublicWorkspace(object.workspaces)) {
-      return true;
-    }
-
-    return false;
-  }
-
   /**
    * This function will compute the exclude workspaces from baseWorkspaces
    */
