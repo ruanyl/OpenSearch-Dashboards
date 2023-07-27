@@ -19,9 +19,10 @@ import {
   SavedObjectsFindOptions,
 } from 'opensearch-dashboards/server';
 import {
-  SavedObjectsPermissionControl,
   PermissionMode,
+  SavedObjectsPermissionControlContract,
 } from '../../saved_objects/permission_control/client';
+import { WORKSPACE_TYPE } from '../constants';
 
 // Can't throw unauthorized for now, the page will be refreshed if unauthorized
 const generateWorkspacePermissionError = () =>
@@ -51,7 +52,16 @@ export class WorkspaceSavedObjectsClientWrapper {
       return;
     }
     for (const workspaceId of workspaces) {
-      if (!(await this.permissionControl.validate(request, workspaceId, permissionMode))) {
+      if (
+        !(await this.permissionControl.validate(
+          request,
+          {
+            type: WORKSPACE_TYPE,
+            id: workspaceId,
+          },
+          permissionMode
+        ))
+      ) {
         throw generateWorkspacePermissionError();
       }
     }
@@ -67,7 +77,16 @@ export class WorkspaceSavedObjectsClientWrapper {
     }
     let permitted = false;
     for (const workspaceId of workspaces) {
-      if (await this.permissionControl.validate(request, workspaceId, permissionMode)) {
+      if (
+        await this.permissionControl.validate(
+          request,
+          {
+            type: WORKSPACE_TYPE,
+            id: workspaceId,
+          },
+          permissionMode
+        )
+      ) {
         permitted = true;
         break;
       }
@@ -151,7 +170,10 @@ export class WorkspaceSavedObjectsClientWrapper {
           async (workspaceId) =>
             await this.permissionControl.validate(
               wrapperOptions.request,
-              workspaceId,
+              {
+                type: WORKSPACE_TYPE,
+                id: workspaceId,
+              },
               PermissionMode.Read
             )
         );
@@ -184,5 +206,5 @@ export class WorkspaceSavedObjectsClientWrapper {
     };
   };
 
-  constructor(private readonly permissionControl: SavedObjectsPermissionControl) {}
+  constructor(private readonly permissionControl: SavedObjectsPermissionControlContract) {}
 }
