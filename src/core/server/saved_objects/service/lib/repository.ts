@@ -217,8 +217,16 @@ export class SavedObjectsRepository {
     this._serializer = serializer;
   }
 
+  private isPublicWorkspace(workspaces?: string[]) {
+    if (!workspaces || workspaces.includes('public')) {
+      return true;
+    }
+
+    return false;
+  }
+
   private isSharedObject(object: SavedObject) {
-    if (!object.workspaces || object.workspaces.includes('public')) {
+    if (this.isPublicWorkspace(object.workspaces)) {
       return true;
     }
 
@@ -227,6 +235,16 @@ export class SavedObjectsRepository {
 
   private isWorkspaceSpecificObject(object: SavedObject) {
     return !this.isSharedObject(object);
+  }
+
+  /**
+   * This function will compute the exclude workspaces from baseWorkspaces
+   */
+  private filterWorkspacesAccordingToBaseWorkspaces(
+    targetWorkspaces?: string[],
+    baseWorkspaces?: string[]
+  ): string[] {
+    return targetWorkspaces?.filter((item) => !baseWorkspaces?.includes(item)) || [];
   }
 
   /**
@@ -387,7 +405,7 @@ export class SavedObjectsRepository {
       /**
        * Only when importing an object to a target workspace should we check if the object is workspace-specific.
        */
-      const requiresWorkspaceCheck = object.id && options.workspace;
+      const requiresWorkspaceCheck = object.id;
 
       if (object.id == null) object.id = uuid.v1();
 
@@ -484,39 +502,51 @@ export class SavedObjectsRepository {
       }
 
       if (expectedBulkGetResult.value.method === 'create') {
-        if (options.workspace) {
-          savedObjectWorkspaces = [options.workspace];
+        if (!this.isPublicWorkspace(options.workspaces)) {
+          savedObjectWorkspaces = options.workspaces;
         }
       } else {
+        const changeToCreate = () => {
+          finalMethod = 'create';
+          finalObjectId = object.id;
+          savedObjectWorkspaces = this.isPublicWorkspace(options.workspaces)
+            ? undefined
+            : options.workspaces;
+          versionProperties = {};
+        };
         /**
          * When overwrite, need to check if the object is workspace-specific
          * if so, copy object to target workspace instead of refering it.
          */
-        if (opensearchRequestIndex !== undefined && bulkGetResponse?.statusCode !== 404) {
-          const rawId = this._serializer.generateRawId(namespace, object.type, object.id);
-          const findObject = bulkGetResponse?.body.docs?.find((item) => item._id === rawId);
-          if (findObject && findObject.found) {
-            const transformedObject = this._serializer.rawToSavedObject(
-              findObject as SavedObjectsRawDoc
-            ) as SavedObject;
-            if (
-              options.workspace &&
-              this.isWorkspaceSpecificObject(transformedObject) &&
-              !transformedObject.workspaces?.includes(options.workspace)
-            ) {
-              finalMethod = 'create';
-              finalObjectId = uuid.v1();
-              savedObjectWorkspaces = [options.workspace];
-              versionProperties = {};
-            } else {
-              savedObjectWorkspaces = transformedObject.workspaces;
-            }
+        const rawId = this._serializer.generateRawId(namespace, object.type, object.id);
+        const findObject =
+          bulkGetResponse?.statusCode !== 404
+            ? bulkGetResponse?.body.docs?.find((item) => item._id === rawId)
+            : null;
+        if (findObject && findObject.found) {
+          const transformedObject = this._serializer.rawToSavedObject(
+            findObject as SavedObjectsRawDoc
+          ) as SavedObject;
+          const filteredWorkspaces = this.filterWorkspacesAccordingToBaseWorkspaces(
+            options.workspaces,
+            transformedObject.workspaces
+          );
+          /**
+           * We need to create a new object when the object
+           * is about to import into workspaces it is not belong to
+           */
+          if (this.isWorkspaceSpecificObject(transformedObject) && filteredWorkspaces.length) {
+            /**
+             * Create a new object but only belong to the set of (target workspaces - original workspace)
+             */
+            changeToCreate();
+            finalObjectId = uuid.v1();
+            savedObjectWorkspaces = filteredWorkspaces;
           } else {
-            finalMethod = 'create';
-            finalObjectId = object.id;
-            savedObjectWorkspaces = options.workspace ? [options.workspace] : undefined;
-            versionProperties = {};
+            savedObjectWorkspaces = transformedObject.workspaces;
           }
+        } else {
+          changeToCreate();
         }
       }
 
