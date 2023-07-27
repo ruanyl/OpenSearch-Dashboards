@@ -535,7 +535,7 @@ export class SavedObjectsRepository {
            * We need to create a new object when the object
            * is about to import into workspaces it is not belong to
            */
-          if (this.isWorkspaceSpecificObject(transformedObject) && filteredWorkspaces.length) {
+          if (!this.isPublicWorkspace(options.workspaces) && filteredWorkspaces.length) {
             /**
              * Create a new object but only belong to the set of (target workspaces - original workspace)
              */
@@ -546,7 +546,9 @@ export class SavedObjectsRepository {
             savedObjectWorkspaces = transformedObject.workspaces;
           }
         } else {
-          changeToCreate();
+          savedObjectWorkspaces = this.isPublicWorkspace(options.workspaces)
+            ? undefined
+            : options.workspaces;
         }
       }
 
