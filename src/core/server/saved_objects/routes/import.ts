@@ -35,6 +35,7 @@ import { IRouter } from '../../http';
 import { importSavedObjectsFromStream } from '../import';
 import { SavedObjectConfig } from '../saved_objects_config';
 import { createSavedObjectsStreamFromNdJson } from './utils';
+import { formatWorkspaces, workspacesValidator } from '../../workspaces';
 
 interface FileStream extends Readable {
   hapi: {
@@ -60,7 +61,7 @@ export const registerImportRoute = (router: IRouter, config: SavedObjectConfig) 
           {
             overwrite: schema.boolean({ defaultValue: false }),
             createNewCopies: schema.boolean({ defaultValue: false }),
-            workspace: schema.maybe(schema.string()),
+            workspaces: workspacesValidator,
           },
           {
             validate: (object) => {
@@ -76,7 +77,7 @@ export const registerImportRoute = (router: IRouter, config: SavedObjectConfig) 
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
-      const { overwrite, createNewCopies, workspace } = req.query;
+      const { overwrite, createNewCopies } = req.query;
       const file = req.body.file as FileStream;
       const fileExtension = extname(file.hapi.filename).toLowerCase();
       if (fileExtension !== '.ndjson') {
@@ -92,6 +93,8 @@ export const registerImportRoute = (router: IRouter, config: SavedObjectConfig) 
         });
       }
 
+      const workspaces = formatWorkspaces(req.query.workspaces);
+
       const result = await importSavedObjectsFromStream({
         savedObjectsClient: context.core.savedObjects.client,
         typeRegistry: context.core.savedObjects.typeRegistry,
@@ -99,7 +102,7 @@ export const registerImportRoute = (router: IRouter, config: SavedObjectConfig) 
         objectLimit: maxImportExportSize,
         overwrite,
         createNewCopies,
-        workspace,
+        workspaces,
       });
 
       return res.ok({ body: result });

@@ -40,11 +40,11 @@ interface ImportResponse {
 export async function importFile(
   http: HttpStart,
   file: File,
-  { createNewCopies, overwrite, workspace }: ImportMode
+  { createNewCopies, overwrite, workspaces }: ImportMode
 ) {
   const formData = new FormData();
   formData.append('file', file);
-  const query = createNewCopies ? { createNewCopies, workspace } : { overwrite, workspace };
+  const query = createNewCopies ? { createNewCopies, workspaces } : { overwrite, workspaces };
   return await http.post<ImportResponse>('/api/saved_objects/_import', {
     body: formData,
     headers: {

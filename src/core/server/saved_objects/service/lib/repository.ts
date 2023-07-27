@@ -256,7 +256,7 @@ export class SavedObjectsRepository {
       originId,
       initialNamespaces,
       version,
-      workspace,
+      workspaces,
     } = options;
     const namespace = normalizeNamespace(options.namespace);
 
@@ -293,7 +293,7 @@ export class SavedObjectsRepository {
       }
     }
 
-    let savedObjectWorkspaces = workspace ? [workspace] : undefined;
+    let savedObjectWorkspaces = workspaces;
 
     if (id && overwrite) {
       try {

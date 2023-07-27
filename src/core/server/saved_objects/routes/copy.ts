@@ -73,7 +73,7 @@ export const registerCopyRoute = (router: IRouter, config: SavedObjectConfig) =>
         objectLimit: maxImportExportSize,
         overwrite: false,
         createNewCopies: true,
-        workspace: targetWorkspace,
+        workspaces: [targetWorkspace],
       });
 
       return res.ok({ body: result });

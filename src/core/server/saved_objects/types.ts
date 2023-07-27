@@ -120,7 +120,7 @@ export interface SavedObjectsFindOptions {
 export interface SavedObjectsBaseOptions {
   /** Specify the namespace for this operation */
   namespace?: string;
-  workspace?: string;
+  workspaces?: string[];
 }
 
 /**
