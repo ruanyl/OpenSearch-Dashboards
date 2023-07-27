@@ -43,37 +43,23 @@ export class WorkspacesService
   implements CoreService<WorkspacesServiceSetup, WorkspacesServiceStart> {
   private logger: Logger;
   private client?: IWorkspaceDBImpl;
-  private startDeps?: WorkspacesStartDeps;
+
   constructor(coreContext: CoreContext) {
     this.logger = coreContext.logger.get('workspaces-service');
   }
 
   private proxyWorkspaceTrafficToRealHandler(setupDeps: WorkspacesSetupDeps) {
     /**
-     * Proxy all {basePath}/w/{workspaceId}{osdPath*} paths to
-     * {basePath}{osdPath*} when workspace is enabled
-     *
-     * Return HTTP 404 if accessing {basePath}/w/{workspaceId} when workspace is disabled
+     * Proxy all {basePath}/w/{workspaceId}{osdPath*} paths to {basePath}{osdPath*}
      */
     setupDeps.http.registerOnPreRouting(async (request, response, toolkit) => {
       const regexp = /\/w\/([^\/]*)/;
       const matchedResult = request.url.pathname.match(regexp);
 
       if (matchedResult) {
-        if (this.startDeps) {
-          const savedObjectsClient = this.startDeps.savedObjects.getScopedClient(request);
-          const uiSettingsClient = this.startDeps.uiSettings.asScopedToClient(savedObjectsClient);
-          const workspacesEnabled = await uiSettingsClient.get<boolean>('workspace:enabled');
-
-          if (workspacesEnabled) {
-            const requestUrl = new URL(request.url.toString());
-            requestUrl.pathname = requestUrl.pathname.replace(regexp, '');
-            return toolkit.rewriteUrl(requestUrl.toString());
-          } else {
-            // If workspace was disable, return HTTP 404
-            return response.notFound();
-          }
-        }
+        const requestUrl = new URL(request.url.toString());
+        requestUrl.pathname = requestUrl.pathname.replace(regexp, '');
+        return toolkit.rewriteUrl(requestUrl.toString());
       }
       return toolkit.next();
     });
@@ -108,8 +94,7 @@ export class WorkspacesService
     };
   }
 
-  public async start(deps: WorkspacesStartDeps): Promise<InternalWorkspacesServiceStart> {
-    this.startDeps = deps;
+  public async start(): Promise<InternalWorkspacesServiceStart> {
     this.logger.debug('Starting SavedObjects service');
 
     return {
