@@ -178,6 +178,60 @@ function defaultMapping(): IndexMapping {
       workspaces: {
         type: 'keyword',
       },
+      permissions: {
+        properties: {
+          read: {
+            properties: {
+              users: {
+                type: 'keyword',
+              },
+              groups: {
+                type: 'keyword',
+              },
+            },
+          },
+          write: {
+            properties: {
+              users: {
+                type: 'keyword',
+              },
+              groups: {
+                type: 'keyword',
+              },
+            },
+          },
+          management: {
+            properties: {
+              users: {
+                type: 'keyword',
+              },
+              groups: {
+                type: 'keyword',
+              },
+            },
+          },
+          library_read: {
+            properties: {
+              users: {
+                type: 'keyword',
+              },
+              groups: {
+                type: 'keyword',
+              },
+            },
+          },
+          library_write: {
+            properties: {
+              users: {
+                type: 'keyword',
+              },
+              groups: {
+                type: 'keyword',
+              },
+            },
+          },
+        },
+      },
     },
   };
 }
