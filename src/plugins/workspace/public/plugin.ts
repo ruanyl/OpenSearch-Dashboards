@@ -179,45 +179,8 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
           filteredNavLinks.set(chromeNavLink.id, chromeNavLink);
         }
       });
-      workspaceList
-        .filter((value, index) => !currentWorkspace && index < 5)
-        .map((workspace) =>
-          this.workspaceToChromeNavLink(workspace, core.workspaces, core.application)
-        )
-        .forEach((workspaceNavLink) => filteredNavLinks.set(workspaceNavLink.id, workspaceNavLink));
-      // See more
-      const seeMoreId = WORKSPACE_APP_ID + PATHS.list;
-      const seeMoreUrl = WORKSPACE_APP_ID + PATHS.list;
-      const seeMoreNavLink: ChromeNavLink = {
-        id: seeMoreId,
-        title: i18n.translate('core.ui.workspaceNavList.seeMore', {
-          defaultMessage: 'SEE MORE',
-        }),
-        hidden: currentWorkspace !== null,
-        disabled: false,
-        baseUrl: seeMoreUrl,
-        href: seeMoreUrl,
-        category: WORKSPACE_NAV_CATEGORY,
-      };
-      filteredNavLinks.set(seeMoreId, seeMoreNavLink);
-      // Admin
-      const adminId = 'admin';
-      const adminUrl = '/app/admin';
-      const adminNavLink: ChromeNavLink = {
-        id: adminId,
-        title: i18n.translate('core.ui.workspaceNavList.admin', {
-          defaultMessage: 'Admin',
-        }),
-        hidden: currentWorkspace !== null,
-        disabled: true,
-        baseUrl: adminUrl,
-        href: adminUrl,
-        euiIconType: 'managementApp',
-        order: 9000,
-      };
-      filteredNavLinks.set(adminId, adminNavLink);
-      // Overview only inside workspace
       if (currentWorkspace) {
+        // Overview only inside workspace
         const overviewId = WORKSPACE_APP_ID + PATHS.update;
         const overviewUrl = core.workspaces.formatUrlWithWorkspaceId(
           core.application.getUrlForApp(WORKSPACE_APP_ID, {
@@ -239,6 +202,46 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
           order: 0,
         };
         filteredNavLinks.set(overviewId, overviewNavLink);
+      } else {
+        workspaceList
+          .filter((workspace, index) => index < 5)
+          .map((workspace) =>
+            this.workspaceToChromeNavLink(workspace, core.workspaces, core.application)
+          )
+          .forEach((workspaceNavLink) =>
+            filteredNavLinks.set(workspaceNavLink.id, workspaceNavLink)
+          );
+        // See more
+        const seeMoreId = WORKSPACE_APP_ID + PATHS.list;
+        const seeMoreUrl = WORKSPACE_APP_ID + PATHS.list;
+        const seeMoreNavLink: ChromeNavLink = {
+          id: seeMoreId,
+          title: i18n.translate('core.ui.workspaceNavList.seeMore', {
+            defaultMessage: 'SEE MORE',
+          }),
+          hidden: false,
+          disabled: false,
+          baseUrl: seeMoreUrl,
+          href: seeMoreUrl,
+          category: WORKSPACE_NAV_CATEGORY,
+        };
+        filteredNavLinks.set(seeMoreId, seeMoreNavLink);
+        // Admin
+        const adminId = 'admin';
+        const adminUrl = '/app/admin';
+        const adminNavLink: ChromeNavLink = {
+          id: adminId,
+          title: i18n.translate('core.ui.workspaceNavList.admin', {
+            defaultMessage: 'Admin',
+          }),
+          hidden: false,
+          disabled: true,
+          baseUrl: adminUrl,
+          href: adminUrl,
+          euiIconType: 'managementApp',
+          order: 9000,
+        };
+        filteredNavLinks.set(adminId, adminNavLink);
       }
       navLinksService.setFilteredNavLinks(filteredNavLinks);
     });
