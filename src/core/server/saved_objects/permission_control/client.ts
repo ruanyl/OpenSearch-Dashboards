@@ -20,6 +20,8 @@ export type SavedObjectsPermissionControlContract = Pick<
   keyof SavedObjectsPermissionControl
 >;
 
+export type SavedObjectsPermissionModes = PermissionMode | PermissionMode[] | string[];
+
 export class SavedObjectsPermissionControl {
   private getScopedClient?: SavedObjectsServiceStart['getScopedClient'];
   private getScopedSavedObjectsClient(request: OpenSearchDashboardsRequest) {
@@ -39,21 +41,27 @@ export class SavedObjectsPermissionControl {
   public async validate(
     request: OpenSearchDashboardsRequest,
     savedObject: SavedObjectsBulkGetObject,
-    permissionModeOrModes: PermissionMode | PermissionMode[]
+    permissionModeOrModes: SavedObjectsPermissionModes
   ) {
     const savedObjectsGet = await this.bulkGetSavedObjects(request, [savedObject]);
     if (savedObjectsGet) {
-      return true;
+      return {
+        success: true,
+        result: true,
+      };
     }
 
-    return true;
+    return {
+      success: true,
+      result: false,
+    };
   }
 
   public async addPrinciplesToObjects(
     request: OpenSearchDashboardsRequest,
     savedObjects: SavedObjectsBulkGetObject[],
     personas: string[],
-    permissionModeOrModes: PermissionMode | PermissionMode[]
+    permissionModeOrModes: SavedObjectsPermissionModes
   ): Promise<boolean> {
     return true;
   }
@@ -62,7 +70,7 @@ export class SavedObjectsPermissionControl {
     request: OpenSearchDashboardsRequest,
     savedObjects: SavedObjectsBulkGetObject[],
     personas: string[],
-    permissionModeOrModes: PermissionMode | PermissionMode[]
+    permissionModeOrModes: SavedObjectsPermissionModes
   ): Promise<boolean> {
     return true;
   }
@@ -76,7 +84,7 @@ export class SavedObjectsPermissionControl {
 
   public async getPermittedWorkspaceIds(
     request: OpenSearchDashboardsRequest,
-    permissionModeOrModes: PermissionMode | PermissionMode[]
+    permissionModeOrModes: SavedObjectsPermissionModes
   ) {
     return [];
   }

@@ -69,6 +69,7 @@ import {
   SavedObjectsPermissionControl,
   SavedObjectsPermissionControlContract,
 } from './permission_control/client';
+import { registerPermissionCheckRoutes } from './permission_control/routes';
 /**
  * Saved Objects is OpenSearchDashboards's data persistence mechanism allowing plugins to
  * use OpenSearch for storing and querying state. The SavedObjectsServiceSetup API exposes methods
@@ -336,6 +337,11 @@ export class SavedObjectsService
     });
 
     this.permissionControl = new SavedObjectsPermissionControl();
+
+    registerPermissionCheckRoutes({
+      http: setupDeps.http,
+      permissionControl: this.permissionControl,
+    });
 
     return {
       status$: calculateStatus$(
