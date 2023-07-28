@@ -32,7 +32,8 @@ import { omit } from 'lodash';
 import type { opensearchtypes } from '@opensearch-project/opensearch';
 import uuid from 'uuid';
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
-import { OpenSearchClient, DeleteDocumentResponse } from '../../../opensearch/';
+import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import { DeleteDocumentResponse, OpenSearchClient } from '../../../opensearch/';
 import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
 import {
   createRepositoryOpenSearchClient,
@@ -40,43 +41,45 @@ import {
 } from './repository_opensearch_client';
 import { getSearchDsl } from './search_dsl';
 import { includedFields } from './included_fields';
-import { SavedObjectsErrorHelpers, DecoratedError } from './errors';
-import { decodeRequestVersion, encodeVersion, encodeHitVersion } from '../../version';
+import { DecoratedError, SavedObjectsErrorHelpers } from './errors';
+import { decodeRequestVersion, encodeHitVersion, encodeVersion } from '../../version';
 import { IOpenSearchDashboardsMigrator } from '../../migrations';
 import {
-  SavedObjectsSerializer,
   SavedObjectSanitizedDoc,
   SavedObjectsRawDoc,
   SavedObjectsRawDocSource,
+  SavedObjectsSerializer,
 } from '../../serialization';
 import {
+  SavedObjectsAddToNamespacesOptions,
+  SavedObjectsAddToNamespacesResponse,
+  SavedObjectsAddToWorkspacesOptions,
+  SavedObjectsAddToWorkspacesResponse,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
   SavedObjectsBulkResponse,
+  SavedObjectsBulkUpdateObject,
+  SavedObjectsBulkUpdateOptions,
   SavedObjectsBulkUpdateResponse,
   SavedObjectsCheckConflictsObject,
   SavedObjectsCheckConflictsResponse,
   SavedObjectsCreateOptions,
-  SavedObjectsFindResponse,
-  SavedObjectsFindResult,
-  SavedObjectsUpdateOptions,
-  SavedObjectsUpdateResponse,
-  SavedObjectsBulkUpdateObject,
-  SavedObjectsBulkUpdateOptions,
-  SavedObjectsDeleteOptions,
-  SavedObjectsAddToNamespacesOptions,
-  SavedObjectsAddToNamespacesResponse,
   SavedObjectsDeleteFromNamespacesOptions,
   SavedObjectsDeleteFromNamespacesResponse,
+  SavedObjectsDeleteOptions,
+  SavedObjectsFindResponse,
+  SavedObjectsFindResult,
+  SavedObjectsShareObjects,
+  SavedObjectsUpdateOptions,
+  SavedObjectsUpdateResponse,
 } from '../saved_objects_client';
 import {
+  MutatingOperationRefreshSetting,
   SavedObject,
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,
   SavedObjectsMigrationVersion,
-  MutatingOperationRefreshSetting,
 } from '../../types';
-import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { validateConvertFilterToKueryNode } from './filter_utils';
 import {
   ALL_NAMESPACES_STRING,
@@ -1270,6 +1273,73 @@ export class SavedObjectsRepository {
         })}`
       );
     }
+  }
+
+  async addToWorkspaces(
+    objects: SavedObjectsShareObjects[],
+    workspaces: string[],
+    options: SavedObjectsAddToWorkspacesOptions = {}
+  ): Promise<SavedObjectsAddToWorkspacesResponse[]> {
+    objects.forEach(({ type, id }) => {
+      if (!this._allowedTypes.includes(type)) {
+        throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+      }
+    });
+
+    if (!workspaces.length) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        'workspaces must be a non-empty array of strings'
+      );
+    }
+
+    const { version, refresh = DEFAULT_REFRESH_SETTING } = options;
+    // we do not need to normalize the namespace to its ID format, since it will be converted to a namespace string before being used
+
+    const savedObjectsBulkResponse = await this.bulkGet(objects);
+
+    const docs = savedObjectsBulkResponse.saved_objects.map((obj) => {
+      const { type, id } = obj;
+      const rawId = this._serializer.generateRawId(undefined, type, id);
+      const existingWorkspace = obj.workspaces || [];
+      // there should never be a case where a multi-namespace object does not have any existing namespaces
+      // however, it is a possibility if someone manually modifies the document in OpenSearch
+      const time = this._getCurrentTime();
+
+      return [
+        {
+          update: {
+            _id: rawId,
+            _index: this.getIndexForType(type),
+            ...getExpectedVersionProperties(version),
+          },
+        },
+        {
+          doc: {
+            updated_at: time,
+            workspaces: unique(existingWorkspace.concat(workspaces)),
+          },
+        },
+      ];
+    });
+
+    const bulkUpdateResponse = await this.client.bulk({
+      refresh,
+      body: docs.flat(),
+      _source_includes: ['workspaces'],
+    });
+
+    const savedObjectIdWorkspaceMap = bulkUpdateResponse.body.items.reduce((map, item) => {
+      return map.set(item.update?._id!, item.update?.get?._source.workspaces);
+    }, new Map<string, string[]>());
+
+    return objects.map((obj) => {
+      const rawId = this._serializer.generateRawId(undefined, obj.type, obj.id);
+      return {
+        type: obj.type,
+        id: obj.id,
+        workspaces: savedObjectIdWorkspaceMap.get(rawId),
+      } as SavedObjectsAddToWorkspacesResponse;
+    });
   }
 
   /**
