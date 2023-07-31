@@ -13,7 +13,7 @@ export const registerListRoute = (
 ) => {
   router.post(
     {
-      path: '/list',
+      path: '/principles',
       validate: {
         body: schema.object({
           objects: schema.arrayOf(

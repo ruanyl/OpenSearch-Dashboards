@@ -6,14 +6,13 @@
 import { OpenSearchDashboardsRequest } from '../../http';
 import { SavedObjectsServiceStart } from '../saved_objects_service';
 import { SavedObjectsBulkGetObject } from '../service';
-import { PermissionMode } from '../../../utils';
 
 export type SavedObjectsPermissionControlContract = Pick<
   SavedObjectsPermissionControl,
   keyof SavedObjectsPermissionControl
 >;
 
-export type SavedObjectsPermissionModes = PermissionMode | PermissionMode[] | string[];
+export type SavedObjectsPermissionModes = string[];
 
 export class SavedObjectsPermissionControl {
   private getScopedClient?: SavedObjectsServiceStart['getScopedClient'];
