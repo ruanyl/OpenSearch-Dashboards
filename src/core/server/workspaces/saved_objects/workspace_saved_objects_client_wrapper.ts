@@ -41,6 +41,15 @@ const isWorkspacesLikeAttributes = (attributes: unknown): attributes is Attribut
   Array.isArray((attributes as { workspaces: unknown }).workspaces);
 
 export class WorkspaceSavedObjectsClientWrapper {
+  private formatPermissionModeToStringArray(
+    permission: PermissionMode | PermissionMode[]
+  ): string[] {
+    if (Array.isArray(permission)) {
+      return permission;
+    }
+
+    return [permission];
+  }
   private async validateMultiWorkspacesPermissions(
     workspaces: string[] | undefined,
     request: OpenSearchDashboardsRequest,
@@ -57,7 +66,7 @@ export class WorkspaceSavedObjectsClientWrapper {
             type: WORKSPACE_TYPE,
             id: workspaceId,
           },
-          permissionMode
+          this.formatPermissionModeToStringArray(permissionMode)
         ))
       ) {
         throw generateWorkspacePermissionError();
@@ -82,7 +91,7 @@ export class WorkspaceSavedObjectsClientWrapper {
             type: WORKSPACE_TYPE,
             id: workspaceId,
           },
-          permissionMode
+          this.formatPermissionModeToStringArray(permissionMode)
         )
       ) {
         permitted = true;
@@ -172,7 +181,7 @@ export class WorkspaceSavedObjectsClientWrapper {
                 type: WORKSPACE_TYPE,
                 id: workspaceId,
               },
-              PermissionMode.Read
+              this.formatPermissionModeToStringArray(PermissionMode.Read)
             )
         );
       } else {
@@ -180,7 +189,7 @@ export class WorkspaceSavedObjectsClientWrapper {
           'public',
           ...(await this.permissionControl.getPermittedWorkspaceIds(
             wrapperOptions.request,
-            PermissionMode.Read
+            this.formatPermissionModeToStringArray(PermissionMode.Read)
           )),
         ];
       }
