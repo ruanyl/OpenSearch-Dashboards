@@ -181,16 +181,15 @@ export class WorkspaceSavedObjectsClientWrapper {
                 type: WORKSPACE_TYPE,
                 id: workspaceId,
               },
-              this.formatPermissionModeToStringArray(PermissionMode.Read)
+              [PermissionMode.Read]
             )
         );
       } else {
         options.workspaces = [
           'public',
-          ...(await this.permissionControl.getPermittedWorkspaceIds(
-            wrapperOptions.request,
-            this.formatPermissionModeToStringArray(PermissionMode.Read)
-          )),
+          ...(await this.permissionControl.getPermittedWorkspaceIds(wrapperOptions.request, [
+            PermissionMode.Read,
+          ])),
         ];
       }
       return await wrapperOptions.client.find<T>(options);
