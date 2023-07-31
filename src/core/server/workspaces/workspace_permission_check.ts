@@ -40,17 +40,13 @@ const addPermissionToPrincipals = (
     if (!principals.users) {
       principals.users = [];
     }
-    principals.users = principals.users.concat(
-      users.filter((item) => !principals?.users?.includes(item))
-    );
+    principals.users = Array.from(new Set([...principals.users, ...users]));
   }
   if (!!groups && !(principals.groups?.length === 1 && principals.groups[0] === '*')) {
     if (!principals.groups) {
       principals.groups = [];
     }
-    principals.groups = principals.groups.concat(
-      groups.filter((item) => !principals?.groups?.includes(item))
-    );
+    principals.groups = Array.from(new Set([...principals.groups, ...groups]));
   }
   return principals;
 };
