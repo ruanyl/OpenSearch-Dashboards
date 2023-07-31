@@ -4,7 +4,7 @@
  */
 
 import {
-  PERMISSION_TYPE_READ,
+  PERMISSION_TYPE,
   Principals,
   Permissions,
   WorkspacePermissionCheck,
@@ -18,7 +18,7 @@ describe('SavedObjectTypeRegistry', () => {
   });
 
   it('test has permission', () => {
-    const permissonType = PERMISSION_TYPE_READ;
+    const permissionType = PERMISSION_TYPE.READ;
     const principals: Principals = {
       users: ['user1'],
       groups: [],
@@ -26,16 +26,16 @@ describe('SavedObjectTypeRegistry', () => {
     const permissions: Permissions = {
       read: principals,
     };
-    expect(workspacePermissionCheck.hasPermission(permissonType, permissions, 'user1')).toEqual(
+    expect(workspacePermissionCheck.hasPermission(permissionType, permissions, 'user1')).toEqual(
       true
     );
-    expect(workspacePermissionCheck.hasPermission(permissonType, permissions, 'user2')).toEqual(
+    expect(workspacePermissionCheck.hasPermission(permissionType, permissions, 'user2')).toEqual(
       false
     );
   });
 
   it('test add permission', () => {
-    const permissonType = PERMISSION_TYPE_READ;
+    const permissionType = PERMISSION_TYPE.READ;
     const principals: Principals = {
       users: ['user1'],
       groups: [],
@@ -43,15 +43,15 @@ describe('SavedObjectTypeRegistry', () => {
     const permissions: Permissions = {
       read: principals,
     };
-    const result1 = workspacePermissionCheck.addPermission(permissonType, permissions, ['user1']);
+    const result1 = workspacePermissionCheck.addPermission(permissionType, permissions, ['user1']);
     expect(result1.read?.users).toEqual(['user1']);
 
-    const result2 = workspacePermissionCheck.addPermission(permissonType, permissions, ['user2']);
+    const result2 = workspacePermissionCheck.addPermission(permissionType, permissions, ['user2']);
     expect(result2.read?.users).toEqual(['user1', 'user2']);
   });
 
   it('test remove permission', () => {
-    const permissonType = PERMISSION_TYPE_READ;
+    const permissionType = PERMISSION_TYPE.READ;
     const principals: Principals = {
       users: ['user1'],
       groups: [],
@@ -59,22 +59,22 @@ describe('SavedObjectTypeRegistry', () => {
     const permissions: Permissions = {
       read: principals,
     };
-    const result1 = workspacePermissionCheck.removePermission(permissonType, permissions, [
+    const result1 = workspacePermissionCheck.removePermission(permissionType, permissions, [
       'user1',
     ]);
     expect(result1.read?.users).toEqual([]);
 
-    const result2 = workspacePermissionCheck.removePermission(permissonType, permissions, [
+    const result2 = workspacePermissionCheck.removePermission(permissionType, permissions, [
       'user2',
     ]);
     expect(result2.read?.users).toEqual(['user1']);
   });
 
   it('test genereate query DSL', () => {
-    const permissonType = PERMISSION_TYPE_READ;
+    const permissionType = PERMISSION_TYPE.READ;
 
     const result = workspacePermissionCheck.genereateGetPermittedSavedObjectsQueryDSL(
-      permissonType,
+      permissionType,
       'workspace',
       'user1'
     );
@@ -83,8 +83,19 @@ describe('SavedObjectTypeRegistry', () => {
         bool: {
           filter: [
             {
-              term: {
-                'permissions.read.users': 'user1',
+              bool: {
+                should: [
+                  {
+                    term: {
+                      'permissions.read.users': 'user1',
+                    },
+                  },
+                  {
+                    term: {
+                      'permissions.read.users': '*',
+                    },
+                  },
+                ],
               },
             },
             {

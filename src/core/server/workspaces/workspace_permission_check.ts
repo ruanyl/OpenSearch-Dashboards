@@ -5,12 +5,12 @@
 
 import { cloneDeep } from 'lodash';
 
-export interface Permissions {
-  write?: Principals;
-  read?: Principals;
-  management?: Principals;
-  library_read?: Principals;
-  library_write?: Principals;
+export enum PERMISSION_TYPE {
+  READ = 'read',
+  WRITE = 'write',
+  MANAGEMENT = 'management',
+  LIBRARY_READ = 'library_read',
+  LIBRARY_WRITE = 'library_write',
 }
 
 export interface Principals {
@@ -18,39 +18,15 @@ export interface Principals {
   groups?: string[];
 }
 
-export const PERMISSION_TYPE_READ = 'read';
-export const PERMISSION_TYPE_WRITE = 'write';
-export const PERMISSION_TYPE_MANAGEMENT = 'management';
-export const PERMISSION_TYPE_LIBRARY_READ = 'library_read';
-export const PERMISSION_TYPE_LIBRARY_WRITE = 'library_write';
+export type Permissions = Partial<Record<PERMISSION_TYPE, Principals>>;
 
-export const PERMISSION_TYPES: Set<string> = new Set([
-  PERMISSION_TYPE_READ,
-  PERMISSION_TYPE_WRITE,
-  PERMISSION_TYPE_MANAGEMENT,
-  PERMISSION_TYPE_LIBRARY_READ,
-  PERMISSION_TYPE_LIBRARY_WRITE,
+const PERMISSION_TYPE_MAP = new Map<string, PERMISSION_TYPE>([
+  ['read', PERMISSION_TYPE.READ],
+  ['write', PERMISSION_TYPE.WRITE],
+  ['management', PERMISSION_TYPE.MANAGEMENT],
+  ['library_read', PERMISSION_TYPE.LIBRARY_READ],
+  ['library_write', PERMISSION_TYPE.LIBRARY_WRITE],
 ]);
-
-const transferPermissionsToMap = (permissions: Permissions) => {
-  const map: Map<string, Principals> = new Map();
-  if (!!permissions.read) {
-    map.set(PERMISSION_TYPE_READ, permissions.read);
-  }
-  if (!!permissions.write) {
-    map.set(PERMISSION_TYPE_WRITE, permissions.write);
-  }
-  if (!!permissions.management) {
-    map.set(PERMISSION_TYPE_MANAGEMENT, permissions.management);
-  }
-  if (!!permissions.library_read) {
-    map.set(PERMISSION_TYPE_LIBRARY_READ, permissions.library_read);
-  }
-  if (!!permissions.library_write) {
-    map.set(PERMISSION_TYPE_LIBRARY_WRITE, permissions.library_write);
-  }
-  return map;
-};
 
 const addPermissionToPrincipals = (
   principals?: Principals,
@@ -62,7 +38,7 @@ const addPermissionToPrincipals = (
   }
   if (!!users && !(principals.users?.length === 1 && principals.users[0] === '*')) {
     if (!principals.users) {
-      principals.users = [] as string[];
+      principals.users = [];
     }
     principals.users = principals.users.concat(
       users.filter((item) => !principals?.users?.includes(item))
@@ -70,7 +46,7 @@ const addPermissionToPrincipals = (
   }
   if (!!groups && !(principals.groups?.length === 1 && principals.groups[0] === '*')) {
     if (!principals.groups) {
-      principals.groups = [] as string[];
+      principals.groups = [];
     }
     principals.groups = principals.groups.concat(
       groups.filter((item) => !principals?.groups?.includes(item))
@@ -97,11 +73,11 @@ const deletePermissionFromPrincipals = (
 };
 
 const isParamsValid = (
-  permissonType: string,
+  permissionType: string,
   user?: string | string[],
   group?: string | string[]
 ) => {
-  if ((!user && !group) || !permissonType || !PERMISSION_TYPES.has(permissonType)) {
+  if ((!user && !group) || !permissionType || !PERMISSION_TYPE_MAP.get(permissionType)) {
     return false;
   }
   return true;
@@ -117,8 +93,9 @@ export class WorkspacePermissionCheck {
     if (!isParamsValid(permissonType, user, group) || !permissions) {
       return false;
     }
-    const permissionMap = transferPermissionsToMap(permissions);
-    const principals = permissionMap.get(permissonType);
+
+    const principals =
+      permissions[(PERMISSION_TYPE_MAP.get(permissonType) as unknown) as PERMISSION_TYPE];
     if (!!principals) {
       if (
         !!user &&
@@ -154,35 +131,11 @@ export class WorkspacePermissionCheck {
     if (!newPermissions) {
       newPermissions = {};
     }
-    switch (permissonType) {
-      case PERMISSION_TYPE_READ:
-        newPermissions.read = addPermissionToPrincipals(newPermissions.read, users, groups);
-        break;
-      case PERMISSION_TYPE_WRITE:
-        newPermissions.write = addPermissionToPrincipals(newPermissions.write, users, groups);
-        break;
-      case PERMISSION_TYPE_MANAGEMENT:
-        newPermissions.management = addPermissionToPrincipals(
-          newPermissions.management,
-          users,
-          groups
-        );
-        break;
-      case PERMISSION_TYPE_LIBRARY_READ:
-        newPermissions.library_read = addPermissionToPrincipals(
-          newPermissions.library_read,
-          users,
-          groups
-        );
-        break;
-      case PERMISSION_TYPE_LIBRARY_WRITE:
-        newPermissions.library_write = addPermissionToPrincipals(
-          newPermissions.library_write,
-          users,
-          groups
-        );
-        break;
-    }
+
+    let newPrincipals =
+      newPermissions[(PERMISSION_TYPE_MAP.get(permissonType) as unknown) as PERMISSION_TYPE];
+    newPrincipals = addPermissionToPrincipals(newPrincipals, users, groups);
+
     return newPermissions;
   }
 
@@ -197,35 +150,11 @@ export class WorkspacePermissionCheck {
     }
 
     const newPermissions = cloneDeep(permissions);
-    switch (permissonType) {
-      case PERMISSION_TYPE_READ:
-        newPermissions.read = deletePermissionFromPrincipals(newPermissions.read, users, groups);
-        break;
-      case PERMISSION_TYPE_WRITE:
-        newPermissions.write = deletePermissionFromPrincipals(newPermissions.write, users, groups);
-        break;
-      case PERMISSION_TYPE_MANAGEMENT:
-        newPermissions.management = deletePermissionFromPrincipals(
-          newPermissions.management,
-          users,
-          groups
-        );
-        break;
-      case PERMISSION_TYPE_LIBRARY_READ:
-        newPermissions.library_read = deletePermissionFromPrincipals(
-          newPermissions.library_read,
-          users,
-          groups
-        );
-        break;
-      case PERMISSION_TYPE_LIBRARY_WRITE:
-        newPermissions.library_write = deletePermissionFromPrincipals(
-          newPermissions.library_write,
-          users,
-          groups
-        );
-        break;
-    }
+
+    let newPrincipals =
+      newPermissions[(PERMISSION_TYPE_MAP.get(permissonType) as unknown) as PERMISSION_TYPE];
+    newPrincipals = deletePermissionFromPrincipals(newPrincipals, users, groups);
+
     return newPermissions;
   }
 
@@ -235,7 +164,7 @@ export class WorkspacePermissionCheck {
     user?: string,
     group?: string
   ) {
-    if ((!user && !group) || !permissonType || !PERMISSION_TYPES.has(permissonType)) {
+    if (!isParamsValid(permissonType, user, group)) {
       return {
         query: {
           match_none: {},
@@ -247,16 +176,38 @@ export class WorkspacePermissionCheck {
       filter: [],
     };
     if (!!user) {
-      bool.filter.push({
+      const subBool: any = {
+        should: [],
+      };
+      subBool.should.push({
         term: {
           ['permissions.' + permissonType + '.users']: user,
         },
       });
-    } else if (!!group) {
+      subBool.should.push({
+        term: {
+          ['permissions.' + permissonType + '.users']: '*',
+        },
+      });
       bool.filter.push({
+        bool: subBool,
+      });
+    } else if (!!group) {
+      const subBool: any = {
+        should: [],
+      };
+      subBool.should.push({
         term: {
           ['permissions.' + permissonType + '.groups']: group,
         },
+      });
+      subBool.should.push({
+        term: {
+          ['permissions.' + permissonType + '.groups']: '*',
+        },
+      });
+      bool.filter.push({
+        bool: subBool,
       });
     }
 
