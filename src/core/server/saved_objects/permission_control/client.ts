@@ -6,14 +6,7 @@
 import { OpenSearchDashboardsRequest } from '../../http';
 import { SavedObjectsServiceStart } from '../saved_objects_service';
 import { SavedObjectsBulkGetObject } from '../service';
-
-export enum PermissionMode {
-  Read = 'read',
-  Write = 'write',
-  Management = 'management',
-  LibraryRead = 'library_read',
-  LibraryWrite = 'library_write',
-}
+import { PermissionMode } from '../../../utils';
 
 export type SavedObjectsPermissionControlContract = Pick<
   SavedObjectsPermissionControl,

@@ -18,11 +18,9 @@ import {
   SavedObjectsDeleteOptions,
   SavedObjectsFindOptions,
 } from 'opensearch-dashboards/server';
-import {
-  PermissionMode,
-  SavedObjectsPermissionControlContract,
-} from '../../saved_objects/permission_control/client';
+import { SavedObjectsPermissionControlContract } from '../../saved_objects/permission_control/client';
 import { WORKSPACE_TYPE } from '../constants';
+import { PermissionMode } from '../../../utils';
 
 // Can't throw unauthorized for now, the page will be refreshed if unauthorized
 const generateWorkspacePermissionError = () =>
