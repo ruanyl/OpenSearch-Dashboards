@@ -31,7 +31,7 @@ export const WorkspaceApp = ({ appBasePath }: { appBasePath: string }) => {
         {ROUTES.map(({ path, Component, exact }) => (
           <Route key={path} path={path} render={() => <Component />} exact={exact ?? false} />
         ))}
-        <Redirect from="/" to={PATHS.update} />
+        <Redirect from="/" to={PATHS.overview} />
       </Switch>
     </I18nProvider>
   );
