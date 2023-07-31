@@ -45,6 +45,7 @@ import { typeRegistryMock } from './saved_objects_type_registry.mock';
 import { migrationMocks } from './migrations/mocks';
 import { ServiceStatusLevels } from '../status';
 import { ISavedObjectTypeRegistry } from './saved_objects_type_registry';
+import { savedObjectsPermissionControlMock } from './permission_control/client.mock';
 
 type SavedObjectsServiceContract = PublicMethodsOf<SavedObjectsService>;
 
@@ -79,6 +80,8 @@ const createSetupContractMock = () => {
     addClientWrapper: jest.fn(),
     registerType: jest.fn(),
     getImportExportObjectLimit: jest.fn(),
+    setRepositoryFactoryProvider: jest.fn(),
+    permissionControl: savedObjectsPermissionControlMock,
   };
 
   setupContract.getImportExportObjectLimit.mockReturnValue(100);

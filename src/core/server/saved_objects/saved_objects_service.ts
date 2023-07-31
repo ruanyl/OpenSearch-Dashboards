@@ -56,6 +56,7 @@ import { ISavedObjectsRepository, SavedObjectsRepository } from './service/lib/r
 import {
   SavedObjectsClientFactoryProvider,
   SavedObjectsClientWrapperFactory,
+  SavedObjectRepositoryFactoryProvider,
 } from './service/lib/scoped_client_provider';
 import { Logger } from '../logging';
 import { SavedObjectTypeRegistry, ISavedObjectTypeRegistry } from './saved_objects_type_registry';
@@ -64,6 +65,11 @@ import { registerRoutes } from './routes';
 import { ServiceStatus } from '../status';
 import { calculateStatus$ } from './status';
 import { createMigrationOpenSearchClient } from './migrations/core/';
+import {
+  SavedObjectsPermissionControl,
+  SavedObjectsPermissionControlContract,
+} from './permission_control/client';
+import { registerPermissionCheckRoutes } from './permission_control/routes';
 /**
  * Saved Objects is OpenSearchDashboards's data persistence mechanism allowing plugins to
  * use OpenSearch for storing and querying state. The SavedObjectsServiceSetup API exposes methods
@@ -166,6 +172,16 @@ export interface SavedObjectsServiceSetup {
    * Returns the maximum number of objects allowed for import or export operations.
    */
   getImportExportObjectLimit: () => number;
+
+  /**
+   * Set the default {@link SavedObjectRepositoryFactoryProvider | factory provider} for creating Saved Objects repository.
+   * Only one repository can be set, subsequent calls to this method will fail.
+   */
+  setRepositoryFactoryProvider: (
+    respositoryFactoryProvider: SavedObjectRepositoryFactoryProvider
+  ) => void;
+
+  permissionControl: SavedObjectsPermissionControlContract;
 }
 
 /**
@@ -291,6 +307,9 @@ export class SavedObjectsService
   private typeRegistry = new SavedObjectTypeRegistry();
   private started = false;
 
+  private respositoryFactoryProvider?: SavedObjectRepositoryFactoryProvider;
+  private permissionControl?: SavedObjectsPermissionControlContract;
+
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('savedobjects-service');
   }
@@ -315,6 +334,13 @@ export class SavedObjectsService
       logger: this.logger,
       config: this.config,
       migratorPromise: this.migrator$.pipe(first()).toPromise(),
+    });
+
+    this.permissionControl = new SavedObjectsPermissionControl();
+
+    registerPermissionCheckRoutes({
+      http: setupDeps.http,
+      permissionControl: this.permissionControl,
     });
 
     return {
@@ -348,6 +374,16 @@ export class SavedObjectsService
         this.typeRegistry.registerType(type);
       },
       getImportExportObjectLimit: () => this.config!.maxImportExportSize,
+      setRepositoryFactoryProvider: (repositoryProvider) => {
+        if (this.started) {
+          throw new Error('cannot call `setRepositoryFactoryProvider` after service startup.');
+        }
+        if (this.respositoryFactoryProvider) {
+          throw new Error('custom repository factory is already set, and can only be set once');
+        }
+        this.respositoryFactoryProvider = repositoryProvider;
+      },
+      permissionControl: this.permissionControl,
     };
   }
 
@@ -455,8 +491,11 @@ export class SavedObjectsService
 
     this.started = true;
 
+    const getScopedClient = clientProvider.getClient.bind(clientProvider);
+    this.permissionControl?.setup(getScopedClient);
+
     return {
-      getScopedClient: clientProvider.getClient.bind(clientProvider),
+      getScopedClient,
       createScopedRepository: repositoryFactory.createScopedRepository,
       createInternalRepository: repositoryFactory.createInternalRepository,
       createSerializer: () => new SavedObjectsSerializer(this.typeRegistry),
