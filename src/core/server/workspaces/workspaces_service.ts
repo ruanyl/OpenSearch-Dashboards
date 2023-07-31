@@ -8,13 +8,9 @@ import { CoreContext } from '../core_context';
 import { InternalHttpServiceSetup } from '../http';
 import { Logger } from '../logging';
 import { registerRoutes } from './routes';
-import {
-  InternalSavedObjectsServiceSetup,
-  InternalSavedObjectsServiceStart,
-} from '../saved_objects';
+import { InternalSavedObjectsServiceSetup } from '../saved_objects';
 import { IWorkspaceDBImpl } from './types';
 import { WorkspacesClientWithSavedObject } from './workspaces_client';
-import { UiSettingsServiceStart } from '../ui_settings/types';
 import { WorkspaceSavedObjectsClientWrapper } from './saved_objects';
 
 export interface WorkspacesServiceSetup {
@@ -32,12 +28,6 @@ export interface WorkspacesSetupDeps {
 
 export type InternalWorkspacesServiceSetup = WorkspacesServiceSetup;
 export type InternalWorkspacesServiceStart = WorkspacesServiceStart;
-
-/** @internal */
-export interface WorkspacesStartDeps {
-  savedObjects: InternalSavedObjectsServiceStart;
-  uiSettings: UiSettingsServiceStart;
-}
 
 export class WorkspacesService
   implements CoreService<WorkspacesServiceSetup, WorkspacesServiceStart> {
