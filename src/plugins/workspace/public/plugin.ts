@@ -84,14 +84,67 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
      */
     savedObjectsManagement?.columns.register(getWorkspaceColumn(core));
 
+    // create
     core.application.register({
-      id: WORKSPACE_APP_ID,
-      title: i18n.translate('workspace.settings.title', {
-        defaultMessage: 'Workspace',
+      id: WORKSPACE_APP_ID + PATHS.create,
+      title: i18n.translate('workspace.settings.workspaceCreate', {
+        defaultMessage: 'Create Workspace',
       }),
-      // order: 6010,
       navLinkStatus: AppNavLinkStatus.hidden,
-      // updater$: this.appUpdater,
+      async mount(params: AppMountParameters) {
+        const { renderApp } = await import('./application');
+        const [coreStart] = await core.getStartServices();
+        const services = {
+          ...coreStart,
+        };
+
+        return renderApp(params, services);
+      },
+    });
+
+    // overview
+    core.application.register({
+      id: WORKSPACE_APP_ID + PATHS.overview,
+      title: i18n.translate('workspace.settings.workspaceOverview', {
+        defaultMessage: 'Overview',
+      }),
+      navLinkStatus: AppNavLinkStatus.hidden,
+      async mount(params: AppMountParameters) {
+        const { renderApp } = await import('./application');
+        const [coreStart] = await core.getStartServices();
+        const services = {
+          ...coreStart,
+        };
+
+        return renderApp(params, services);
+      },
+    });
+
+    // update
+    core.application.register({
+      id: WORKSPACE_APP_ID + PATHS.update,
+      title: i18n.translate('workspace.settings.workspaceUpdate', {
+        defaultMessage: 'Workspace Settings',
+      }),
+      navLinkStatus: AppNavLinkStatus.hidden,
+      async mount(params: AppMountParameters) {
+        const { renderApp } = await import('./application');
+        const [coreStart] = await core.getStartServices();
+        const services = {
+          ...coreStart,
+        };
+
+        return renderApp(params, services);
+      },
+    });
+
+    // list
+    core.application.register({
+      id: WORKSPACE_APP_ID + PATHS.list,
+      title: i18n.translate('workspace.settings.workspaceList', {
+        defaultMessage: 'See More',
+      }),
+      navLinkStatus: AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
         const { renderApp } = await import('./application');
         const [coreStart] = await core.getStartServices();
@@ -179,30 +232,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
           filteredNavLinks.set(chromeNavLink.id, chromeNavLink);
         }
       });
-      if (currentWorkspace) {
-        // Overview only inside workspace
-        const overviewId = WORKSPACE_APP_ID + PATHS.update;
-        const overviewUrl = core.workspaces.formatUrlWithWorkspaceId(
-          core.application.getUrlForApp(WORKSPACE_APP_ID, {
-            path: PATHS.update,
-            absolute: true,
-          }),
-          currentWorkspace.id
-        );
-        const overviewNavLink: ChromeNavLink = {
-          id: overviewId,
-          title: i18n.translate('core.ui.workspaceNavList.overview', {
-            defaultMessage: 'Overview',
-          }),
-          hidden: false,
-          disabled: false,
-          baseUrl: overviewUrl,
-          href: overviewUrl,
-          euiIconType: 'grid',
-          order: 0,
-        };
-        filteredNavLinks.set(overviewId, overviewNavLink);
-      } else {
+      if (!currentWorkspace) {
         workspaceList
           .filter((workspace, index) => index < 5)
           .map((workspace) =>
@@ -211,37 +241,6 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
           .forEach((workspaceNavLink) =>
             filteredNavLinks.set(workspaceNavLink.id, workspaceNavLink)
           );
-        // See more
-        const seeMoreId = WORKSPACE_APP_ID + PATHS.list;
-        const seeMoreUrl = WORKSPACE_APP_ID + PATHS.list;
-        const seeMoreNavLink: ChromeNavLink = {
-          id: seeMoreId,
-          title: i18n.translate('core.ui.workspaceNavList.seeMore', {
-            defaultMessage: 'SEE MORE',
-          }),
-          hidden: false,
-          disabled: false,
-          baseUrl: seeMoreUrl,
-          href: seeMoreUrl,
-          category: WORKSPACE_NAV_CATEGORY,
-        };
-        filteredNavLinks.set(seeMoreId, seeMoreNavLink);
-        // Admin
-        const adminId = 'admin';
-        const adminUrl = '/app/admin';
-        const adminNavLink: ChromeNavLink = {
-          id: adminId,
-          title: i18n.translate('core.ui.workspaceNavList.admin', {
-            defaultMessage: 'Admin',
-          }),
-          hidden: false,
-          disabled: true,
-          baseUrl: adminUrl,
-          href: adminUrl,
-          euiIconType: 'managementApp',
-          order: 9000,
-        };
-        filteredNavLinks.set(adminId, adminNavLink);
       }
       navLinksService.setFilteredNavLinks(filteredNavLinks);
     });
