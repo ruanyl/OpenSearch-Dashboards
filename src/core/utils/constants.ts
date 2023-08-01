@@ -17,3 +17,5 @@ export enum PrincipalType {
   Users = 'users',
   Groups = 'groups',
 }
+
+export const PUBLIC_WORKSPACE = 'public';

@@ -42,6 +42,7 @@ import {
 
 import { SimpleSavedObject } from './simple_saved_object';
 import { HttpFetchOptions, HttpSetup } from '../http';
+import { PUBLIC_WORKSPACE } from '../../utils';
 
 type SavedObjectsFindOptions = Omit<
   SavedObjectFindOptionsServer,
@@ -368,7 +369,7 @@ export class SavedObjectsClient {
 
     const workspaces = [
       ...(options.workspaces || [await this._getCurrentWorkspace()]),
-      'public',
+      PUBLIC_WORKSPACE,
     ].filter((item) => item);
 
     const renamedQuery = renameKeys<SavedObjectsFindOptions, any>(renameMap, {
