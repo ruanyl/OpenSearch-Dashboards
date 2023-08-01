@@ -1299,9 +1299,7 @@ export class SavedObjectsRepository {
       );
     }
 
-    const { version, refresh = DEFAULT_REFRESH_SETTING } = options;
-    // we do not need to normalize the namespace to its ID format, since it will be converted to a namespace string before being used
-
+    const { refresh = DEFAULT_REFRESH_SETTING } = options;
     const savedObjectsBulkResponse = await this.bulkGet(objects);
 
     const docs = savedObjectsBulkResponse.saved_objects.map((obj) => {
@@ -1314,13 +1312,12 @@ export class SavedObjectsRepository {
           update: {
             _id: rawId,
             _index: this.getIndexForType(type),
-            ...getExpectedVersionProperties(version),
           },
         },
         {
           script: {
             source: `
-              if (params.workspaces != null && ctx._source.workspaces != null && !ctx._source.workspaces?.contains(params.publicWorkspaceName)) {
+              if (params.workspaces != null && ctx._source.workspaces != null && !ctx._source.workspaces?.contains(params.globalWorkspaceId)) {
                 ctx._source.workspaces.addAll(params.workspaces);
                 HashSet workspacesSet = new HashSet(ctx._source.workspaces);
                 ctx._source.workspaces = new ArrayList(workspacesSet);
@@ -1331,7 +1328,7 @@ export class SavedObjectsRepository {
             params: {
               time,
               workspaces,
-              publicWorkspaceName: GLOBAL_WORKSPACE_ID,
+              globalWorkspaceId: GLOBAL_WORKSPACE_ID,
             },
           },
         },
@@ -1345,11 +1342,11 @@ export class SavedObjectsRepository {
     });
 
     if (bulkUpdateResponse.body.errors) {
-      const causedBy = bulkUpdateResponse.body.items
+      const failures = bulkUpdateResponse.body.items
         .map((item) => item.update?.error?.reason)
         .join(',');
       throw SavedObjectsErrorHelpers.createBadRequestError(
-        'bulk update error with reason:' + causedBy
+        'Add to workspace failed with: ' + failures
       );
     }
 

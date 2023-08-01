@@ -195,12 +195,7 @@ export interface SavedObjectsAddToNamespacesOptions extends SavedObjectsBaseOpti
   refresh?: MutatingOperationRefreshSetting;
 }
 
-export interface SavedObjectsAddToWorkspacesOptions extends SavedObjectsBaseOptions {
-  /** An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control. */
-  version?: string;
-  /** The OpenSearch Refresh setting for this operation */
-  refresh?: MutatingOperationRefreshSetting;
-}
+export type SavedObjectsAddToWorkspacesOptions = Pick<SavedObjectsUpdateOptions, 'refresh'>;
 
 /**
  *

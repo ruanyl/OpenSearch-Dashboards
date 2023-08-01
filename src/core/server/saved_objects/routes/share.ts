@@ -9,6 +9,7 @@ import { exportSavedObjectsToStream } from '../export';
 import { validateObjects } from './utils';
 import { collectSavedObjects } from '../import/collect_saved_objects';
 import { WORKSPACE_TYPE } from '../../workspaces';
+import { GLOBAL_WORKSPACE_ID } from '../../workspaces/constants';
 
 const SHARE_LIMIT = 10000;
 
@@ -68,8 +69,11 @@ export const registerShareRoute = (router: IRouter) => {
 
       if (sourceWorkspaceId) {
         const invalidObjects = savedObjects.filter((obj) => {
-          // TODO non-public workspace
-          if (obj.workspaces && obj.workspaces.length > 0) {
+          if (
+            obj.workspaces &&
+            obj.workspaces.length > 0 &&
+            !obj.workspaces.includes(GLOBAL_WORKSPACE_ID)
+          ) {
             return !obj.workspaces.includes(sourceWorkspaceId);
           }
           return false;
@@ -85,12 +89,17 @@ export const registerShareRoute = (router: IRouter) => {
         }
       }
 
-      const sharedObjects = savedObjects
+      const nonPublicSharedObjects = savedObjects
         // non-public
-        .filter((obj) => obj.workspaces && obj.workspaces.length > 0)
+        .filter(
+          (obj) =>
+            obj.workspaces &&
+            obj.workspaces.length > 0 &&
+            !obj.workspaces.includes(GLOBAL_WORKSPACE_ID)
+        )
         .map((obj) => ({ id: obj.id, type: obj.type }));
 
-      if (sharedObjects.length === 0) {
+      if (nonPublicSharedObjects.length === 0) {
         return res.ok({
           body: savedObjects.map((savedObject) => ({
             type: savedObject.type,
@@ -100,7 +109,10 @@ export const registerShareRoute = (router: IRouter) => {
         });
       }
 
-      const response = await savedObjectsClient.addToWorkspaces(sharedObjects, targetWorkspaceIds);
+      const response = await savedObjectsClient.addToWorkspaces(
+        nonPublicSharedObjects,
+        targetWorkspaceIds
+      );
       return res.ok({
         body: response,
       });
