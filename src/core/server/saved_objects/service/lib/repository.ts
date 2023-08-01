@@ -523,7 +523,7 @@ export class SavedObjectsRepository {
            * We need to create a new object when the object
            * is about to import into workspaces it is not belong to
            */
-          if (!this.isPublicWorkspace(options.workspaces) && filteredWorkspaces.length) {
+          if (filteredWorkspaces.length) {
             /**
              * Create a new object but only belong to the set of (target workspaces - original workspace)
              */
