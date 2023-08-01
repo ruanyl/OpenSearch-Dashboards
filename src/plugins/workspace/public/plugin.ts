@@ -19,7 +19,13 @@ import {
   WorkspacesStart,
   DEFAULT_APP_CATEGORIES,
 } from '../../../core/public';
-import { PATHS, WORKSPACE_APP_ID, WORKSPACE_NAV_CATEGORY } from '../common/constants';
+import {
+  WORKSPACE_LIST_APP_ID,
+  WORKSPACE_UPDATE_APP_ID,
+  WORKSPACE_CREATE_APP_ID,
+  WORKSPACE_OVERVIEW_APP_ID,
+  WORKSPACE_NAV_CATEGORY,
+} from '../common/constants';
 import { mountDropdownList } from './mount';
 import { SavedObjectsManagementPluginSetup } from '../../saved_objects_management/public';
 import { getWorkspaceColumn } from './components/utils/workspace_column';
@@ -86,7 +92,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
 
     // create
     core.application.register({
-      id: WORKSPACE_APP_ID + PATHS.create,
+      id: WORKSPACE_CREATE_APP_ID,
       title: i18n.translate('workspace.settings.workspaceCreate', {
         defaultMessage: 'Create Workspace',
       }),
@@ -104,7 +110,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
 
     // overview
     core.application.register({
-      id: WORKSPACE_APP_ID + PATHS.overview,
+      id: WORKSPACE_OVERVIEW_APP_ID,
       title: i18n.translate('workspace.settings.workspaceOverview', {
         defaultMessage: 'Home',
       }),
@@ -124,7 +130,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
 
     // update
     core.application.register({
-      id: WORKSPACE_APP_ID + PATHS.update,
+      id: WORKSPACE_UPDATE_APP_ID,
       title: i18n.translate('workspace.settings.workspaceUpdate', {
         defaultMessage: 'Workspace Settings',
       }),
@@ -143,7 +149,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
 
     // list
     core.application.register({
-      id: WORKSPACE_APP_ID + PATHS.list,
+      id: WORKSPACE_LIST_APP_ID,
       title: i18n.translate('workspace.settings.workspaceList', {
         defaultMessage: 'See More',
       }),
@@ -170,9 +176,9 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
     application: ApplicationStart,
     index: number
   ): ChromeNavLink {
-    const id = WORKSPACE_APP_ID + '/' + workspace.id;
+    const id = WORKSPACE_OVERVIEW_APP_ID + '/' + workspace.id;
     const url = workspacesStart?.formatUrlWithWorkspaceId(
-      application.getUrlForApp(WORKSPACE_APP_ID + PATHS.overview, {
+      application.getUrlForApp(WORKSPACE_OVERVIEW_APP_ID, {
         absolute: true,
       }),
       workspace.id
