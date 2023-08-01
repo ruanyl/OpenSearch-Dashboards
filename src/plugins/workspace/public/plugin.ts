@@ -90,6 +90,16 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
      */
     savedObjectsManagement?.columns.register(getWorkspaceColumn(core));
 
+    type WorkspaceAppType = (params: AppMountParameters, services: CoreStart) => () => void;
+    const workspaceMount = async (params: AppMountParameters, renderApp: WorkspaceAppType) => {
+      const [coreStart] = await core.getStartServices();
+      const services = {
+        ...coreStart,
+      };
+
+      return renderApp(params, services);
+    };
+
     // create
     core.application.register({
       id: WORKSPACE_CREATE_APP_ID,
@@ -99,12 +109,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
       navLinkStatus: AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
         const { renderCreatorApp } = await import('./application');
-        const [coreStart] = await core.getStartServices();
-        const services = {
-          ...coreStart,
-        };
-
-        return renderCreatorApp(params, services);
+        return workspaceMount(params, renderCreatorApp);
       },
     });
 
@@ -119,12 +124,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
       navLinkStatus: AppNavLinkStatus.default,
       async mount(params: AppMountParameters) {
         const { renderOverviewApp } = await import('./application');
-        const [coreStart] = await core.getStartServices();
-        const services = {
-          ...coreStart,
-        };
-
-        return renderOverviewApp(params, services);
+        return workspaceMount(params, renderOverviewApp);
       },
     });
 
@@ -138,12 +138,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
       navLinkStatus: AppNavLinkStatus.default,
       async mount(params: AppMountParameters) {
         const { renderUpdateApp } = await import('./application');
-        const [coreStart] = await core.getStartServices();
-        const services = {
-          ...coreStart,
-        };
-
-        return renderUpdateApp(params, services);
+        return workspaceMount(params, renderUpdateApp);
       },
     });
 
@@ -158,12 +153,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
       navLinkStatus: workspaceId ? AppNavLinkStatus.hidden : AppNavLinkStatus.default,
       async mount(params: AppMountParameters) {
         const { renderListApp } = await import('./application');
-        const [coreStart] = await core.getStartServices();
-        const services = {
-          ...coreStart,
-        };
-
-        return renderListApp(params, services);
+        return workspaceMount(params, renderListApp);
       },
     });
 
