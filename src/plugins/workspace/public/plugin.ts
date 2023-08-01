@@ -92,13 +92,13 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
       }),
       navLinkStatus: AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
-        const { renderApp } = await import('./application');
+        const { renderCreatorApp } = await import('./application');
         const [coreStart] = await core.getStartServices();
         const services = {
           ...coreStart,
         };
 
-        return renderApp(params, services);
+        return renderCreatorApp(params, services);
       },
     });
 
@@ -106,17 +106,19 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
     core.application.register({
       id: WORKSPACE_APP_ID + PATHS.overview,
       title: i18n.translate('workspace.settings.workspaceOverview', {
-        defaultMessage: 'Overview',
+        defaultMessage: 'Home',
       }),
-      navLinkStatus: AppNavLinkStatus.hidden,
+      order: 0,
+      euiIconType: 'home',
+      navLinkStatus: AppNavLinkStatus.default,
       async mount(params: AppMountParameters) {
-        const { renderApp } = await import('./application');
+        const { renderOverviewApp } = await import('./application');
         const [coreStart] = await core.getStartServices();
         const services = {
           ...coreStart,
         };
 
-        return renderApp(params, services);
+        return renderOverviewApp(params, services);
       },
     });
 
@@ -126,15 +128,16 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
       title: i18n.translate('workspace.settings.workspaceUpdate', {
         defaultMessage: 'Workspace Settings',
       }),
-      navLinkStatus: AppNavLinkStatus.hidden,
+      euiIconType: 'managementApp',
+      navLinkStatus: AppNavLinkStatus.default,
       async mount(params: AppMountParameters) {
-        const { renderApp } = await import('./application');
+        const { renderUpdateApp } = await import('./application');
         const [coreStart] = await core.getStartServices();
         const services = {
           ...coreStart,
         };
 
-        return renderApp(params, services);
+        return renderUpdateApp(params, services);
       },
     });
 
@@ -144,15 +147,17 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
       title: i18n.translate('workspace.settings.workspaceList', {
         defaultMessage: 'See More',
       }),
-      navLinkStatus: AppNavLinkStatus.hidden,
+      euiIconType: 'folderClosed',
+      category: WORKSPACE_NAV_CATEGORY,
+      navLinkStatus: AppNavLinkStatus.default,
       async mount(params: AppMountParameters) {
-        const { renderApp } = await import('./application');
+        const { renderListApp } = await import('./application');
         const [coreStart] = await core.getStartServices();
         const services = {
           ...coreStart,
         };
 
-        return renderApp(params, services);
+        return renderListApp(params, services);
       },
     });
 
@@ -162,7 +167,8 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
   private workspaceToChromeNavLink(
     workspace: WorkspaceAttribute,
     workspacesStart: WorkspacesStart,
-    application: ApplicationStart
+    application: ApplicationStart,
+    index: number
   ): ChromeNavLink {
     const id = WORKSPACE_APP_ID + '/' + workspace.id;
     const url = workspacesStart?.formatUrlWithWorkspaceId(
@@ -175,6 +181,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
     return {
       id,
       url,
+      order: index,
       hidden: false,
       disabled: false,
       baseUrl: url,
@@ -219,24 +226,13 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
       const filteredNavLinks = new Map<string, ChromeNavLink>();
       chromeNavLinks = this.filterByWorkspace(currentWorkspace, chromeNavLinks);
       chromeNavLinks.forEach((chromeNavLink) => {
-        if (chromeNavLink.id === 'home') {
-          // set hidden, icon and order for home nav link
-          const homeNavLink: ChromeNavLink = {
-            ...chromeNavLink,
-            hidden: currentWorkspace !== null,
-            euiIconType: 'logoOpenSearch',
-            order: 0,
-          };
-          filteredNavLinks.set(chromeNavLink.id, homeNavLink);
-        } else {
-          filteredNavLinks.set(chromeNavLink.id, chromeNavLink);
-        }
+        filteredNavLinks.set(chromeNavLink.id, chromeNavLink);
       });
       if (!currentWorkspace) {
         workspaceList
           .filter((workspace, index) => index < 5)
-          .map((workspace) =>
-            this.workspaceToChromeNavLink(workspace, core.workspaces, core.application)
+          .map((workspace, index) =>
+            this.workspaceToChromeNavLink(workspace, core.workspaces, core.application, index)
           )
           .forEach((workspaceNavLink) =>
             filteredNavLinks.set(workspaceNavLink.id, workspaceNavLink)
