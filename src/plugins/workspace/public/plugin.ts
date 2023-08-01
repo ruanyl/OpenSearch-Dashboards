@@ -149,7 +149,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
       }),
       euiIconType: 'folderClosed',
       category: WORKSPACE_NAV_CATEGORY,
-      navLinkStatus: AppNavLinkStatus.default,
+      navLinkStatus: workspaceId ? AppNavLinkStatus.hidden : AppNavLinkStatus.default,
       async mount(params: AppMountParameters) {
         const { renderListApp } = await import('./application');
         const [coreStart] = await core.getStartServices();
