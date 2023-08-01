@@ -173,9 +173,6 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
     const id = WORKSPACE_APP_ID + '/' + workspace.id;
     const url = workspacesStart?.formatUrlWithWorkspaceId(
       application.getUrlForApp(WORKSPACE_APP_ID + PATHS.overview, {
-       absolute: true,
-     }),
-        path: PATHS.overview,
         absolute: true,
       }),
       workspace.id
