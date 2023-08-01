@@ -28,7 +28,14 @@ import { PermissionMode } from '../../../utils';
 const generateWorkspacePermissionError = () =>
   Boom.illegal(
     i18n.translate('workspace.permission.invalidate', {
-      defaultMessage: 'Invalidate workspace permission',
+      defaultMessage: 'Invalid workspace permission',
+    })
+  );
+
+const generateSavedObjectsPermissionError = () =>
+  Boom.illegal(
+    i18n.translate('saved_objects.permission.invalidate', {
+      defaultMessage: 'Invalid saved objects permission',
     })
   );
 
@@ -225,7 +232,7 @@ export class WorkspaceSavedObjectsClientWrapper {
       );
 
       if (!permitted) {
-        throw generateWorkspacePermissionError();
+        throw generateSavedObjectsPermissionError();
       }
 
       return await wrapperOptions.client.addToWorkspaces(objects, targetWorkspaces, options);
