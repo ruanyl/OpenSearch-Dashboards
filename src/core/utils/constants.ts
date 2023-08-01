@@ -12,3 +12,5 @@ export enum PermissionMode {
   LibraryRead = 'library_read',
   LibraryWrite = 'library_write',
 }
+
+export const PUBLIC_WORKSPACE = 'public';

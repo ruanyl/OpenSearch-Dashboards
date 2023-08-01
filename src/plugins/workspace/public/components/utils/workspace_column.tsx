@@ -12,6 +12,7 @@ import {
   SavedObjectsManagementColumn,
   SavedObjectsManagementRecord,
 } from '../../../../saved_objects_management/public';
+import { PUBLIC_WORKSPACE } from '../../../../../core/public/utils';
 
 interface WorkspaceColumnProps {
   coreSetup: CoreSetup;
@@ -31,7 +32,7 @@ function WorkspaceColumn({ coreSetup, workspaces, record }: WorkspaceColumnProps
   });
   wsLookUp?.set('public', publicWsName);
 
-  if (!workspaces) {
+  if (!workspaces || workspaces?.includes(PUBLIC_WORKSPACE)) {
     return <EuiText>{publicWsName}</EuiText>;
   }
 

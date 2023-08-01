@@ -20,7 +20,7 @@ import {
 } from 'opensearch-dashboards/server';
 import { SavedObjectsPermissionControlContract } from '../../saved_objects/permission_control/client';
 import { WORKSPACE_TYPE } from '../constants';
-import { PermissionMode } from '../../../utils';
+import { PUBLIC_WORKSPACE, PermissionMode } from '../../../utils';
 
 // Can't throw unauthorized for now, the page will be refreshed if unauthorized
 const generateWorkspacePermissionError = () =>
@@ -186,7 +186,7 @@ export class WorkspaceSavedObjectsClientWrapper {
         );
       } else {
         options.workspaces = [
-          'public',
+          PUBLIC_WORKSPACE,
           ...(await this.permissionControl.getPermittedWorkspaceIds(wrapperOptions.request, [
             PermissionMode.Read,
           ])),
