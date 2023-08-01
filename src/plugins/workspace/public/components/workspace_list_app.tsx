@@ -5,13 +5,12 @@
 
 import React, { useEffect } from 'react';
 import { I18nProvider } from '@osd/i18n/react';
-import { Route, Switch, Redirect, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { ROUTES } from './routes';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
 import { createBreadcrumbsFromPath } from './utils/breadcrumbs';
-import { PATHS } from '../../common/constants';
-
-export const WorkspaceApp = ({ appBasePath }: { appBasePath: string }) => {
+import { WorkspaceList } from './workspace_list';
+export const WorkspaceListApp = ({ appBasePath }: { appBasePath: string }) => {
   const {
     services: { chrome },
   } = useOpenSearchDashboards();
@@ -27,12 +26,7 @@ export const WorkspaceApp = ({ appBasePath }: { appBasePath: string }) => {
 
   return (
     <I18nProvider>
-      <Switch>
-        {ROUTES.map(({ path, Component, exact }) => (
-          <Route key={path} path={path} render={() => <Component />} exact={exact ?? false} />
-        ))}
-        <Redirect from="/" to={PATHS.overview} />
-      </Switch>
+      <WorkspaceList />
     </I18nProvider>
   );
 };
