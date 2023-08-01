@@ -11,7 +11,7 @@ type Core = Pick<CoreStart, 'workspaces' | 'application'>;
 export const switchWorkspace = ({ workspaces, application }: Core, id: string) => {
   const newUrl = workspaces?.formatUrlWithWorkspaceId(
     application.getUrlForApp(WORKSPACE_APP_ID, {
-      path: PATHS.update,
+      path: PATHS.overview,
       absolute: true,
     }),
     id
