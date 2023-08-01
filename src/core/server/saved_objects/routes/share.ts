@@ -90,8 +90,17 @@ export const registerShareRoute = (router: IRouter) => {
         .filter((obj) => obj.workspaces && obj.workspaces.length > 0)
         .map((obj) => ({ id: obj.id, type: obj.type }));
 
-      const response = await savedObjectsClient.addToWorkspaces(sharedObjects, targetWorkspaceIds);
+      if (sharedObjects.length === 0) {
+        return res.ok({
+          body: savedObjects.map((savedObject) => ({
+            type: savedObject.type,
+            id: savedObject.id,
+            workspaces: savedObject.workspaces,
+          })),
+        });
+      }
 
+      const response = await savedObjectsClient.addToWorkspaces(sharedObjects, targetWorkspaceIds);
       return res.ok({
         body: response,
       });

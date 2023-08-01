@@ -208,20 +208,20 @@ export class WorkspaceSavedObjectsClientWrapper {
       targetWorkspaces: string[],
       options: SavedObjectsAddToWorkspacesOptions = {}
     ) => {
-      const objectToBulkGet = await wrapperOptions.client.bulkGet(objects, options);
-
       // target workspaces
       await this.validateMultiWorkspacesPermissions(
         targetWorkspaces,
         wrapperOptions.request,
-        WorkspacePermissionMode.Write
+        PermissionMode.LibraryWrite
       );
 
       // saved_objects
-      const permitted = await this.permissionControl.validateSavedObjects(
-        objectToBulkGet.saved_objects,
-        WorkspacePermissionMode.Write,
-        wrapperOptions.request
+      const permitted = await this.permissionControl.batchValidate(
+        wrapperOptions.request,
+        objects.map((savedObj) => ({
+          ...savedObj,
+        })),
+        [PermissionMode.Write]
       );
 
       if (!permitted) {

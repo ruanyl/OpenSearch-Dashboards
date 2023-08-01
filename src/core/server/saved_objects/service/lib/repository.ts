@@ -87,6 +87,7 @@ import {
   FIND_DEFAULT_PER_PAGE,
   SavedObjectsUtils,
 } from './utils';
+import { GLOBAL_WORKSPACE_ID } from '../../../workspaces/constants';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -1280,6 +1281,12 @@ export class SavedObjectsRepository {
     workspaces: string[],
     options: SavedObjectsAddToWorkspacesOptions = {}
   ): Promise<SavedObjectsAddToWorkspacesResponse[]> {
+    if (!objects.length) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        'shared objects must not be an empty array'
+      );
+    }
+
     objects.forEach(({ type, id }) => {
       if (!this._allowedTypes.includes(type)) {
         throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
@@ -1300,9 +1307,6 @@ export class SavedObjectsRepository {
     const docs = savedObjectsBulkResponse.saved_objects.map((obj) => {
       const { type, id } = obj;
       const rawId = this._serializer.generateRawId(undefined, type, id);
-      const existingWorkspace = obj.workspaces || [];
-      // there should never be a case where a multi-namespace object does not have any existing namespaces
-      // however, it is a possibility if someone manually modifies the document in OpenSearch
       const time = this._getCurrentTime();
 
       return [
@@ -1314,9 +1318,21 @@ export class SavedObjectsRepository {
           },
         },
         {
-          doc: {
-            updated_at: time,
-            workspaces: unique(existingWorkspace.concat(workspaces)),
+          script: {
+            source: `
+              if (params.workspaces != null && ctx._source.workspaces != null && !ctx._source.workspaces?.contains(params.publicWorkspaceName)) {
+                ctx._source.workspaces.addAll(params.workspaces);
+                HashSet workspacesSet = new HashSet(ctx._source.workspaces);
+                ctx._source.workspaces = new ArrayList(workspacesSet);
+              }
+              ctx._source.updated_at = params.time;
+            `,
+            lang: 'painless',
+            params: {
+              time,
+              workspaces,
+              publicWorkspaceName: GLOBAL_WORKSPACE_ID,
+            },
           },
         },
       ];
@@ -1327,6 +1343,15 @@ export class SavedObjectsRepository {
       body: docs.flat(),
       _source_includes: ['workspaces'],
     });
+
+    if (bulkUpdateResponse.body.errors) {
+      const causedBy = bulkUpdateResponse.body.items
+        .map((item) => item.update?.error?.reason)
+        .join(',');
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        'bulk update error with reason:' + causedBy
+      );
+    }
 
     const savedObjectIdWorkspaceMap = bulkUpdateResponse.body.items.reduce((map, item) => {
       return map.set(item.update?._id!, item.update?.get?._source.workspaces);
