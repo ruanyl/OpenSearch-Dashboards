@@ -123,14 +123,10 @@ export class WorkspaceSavedObjectsClientWrapper {
       options: SavedObjectsCreateOptions = {}
     ): Promise<SavedObjectsBulkResponse<T>> => {
       if (options.workspaces) {
-        options.workspaces = options.workspaces.filter(
-          async (workspaceId) =>
-            await this.permissionControl.validate(
-              workspaceId,
-              WorkspacePermissionMode.Admin,
-              wrapperOptions.request
-            )
-        );
+        await this.validateMultiWorkspacesPermissions(options.workspaces, wrapperOptions.request, [
+          PermissionMode.Write,
+          PermissionMode.Management,
+        ]);
       }
       return await wrapperOptions.client.bulkCreate(objects, options);
     };
