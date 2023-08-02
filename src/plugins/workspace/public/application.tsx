@@ -18,7 +18,7 @@ export const renderListApp = (
 ) => {
   ReactDOM.render(
     <OpenSearchDashboardsContextProvider services={services}>
-      <WorkspaceListApp appBasePath={appBasePath} />
+      <WorkspaceListApp />
     </OpenSearchDashboardsContextProvider>,
     element
   );
@@ -33,7 +33,7 @@ export const renderCreatorApp = (
 ) => {
   ReactDOM.render(
     <OpenSearchDashboardsContextProvider services={services}>
-      <WorkspaceCreatorApp appBasePath={appBasePath} />
+      <WorkspaceCreatorApp />
     </OpenSearchDashboardsContextProvider>,
     element
   );
@@ -49,7 +49,7 @@ export const renderUpdateApp = (
 ) => {
   ReactDOM.render(
     <OpenSearchDashboardsContextProvider services={services}>
-      <WorkspaceUpdaterApp appBasePath={appBasePath} />
+      <WorkspaceUpdaterApp />
     </OpenSearchDashboardsContextProvider>,
     element
   );
@@ -65,7 +65,7 @@ export const renderOverviewApp = (
 ) => {
   ReactDOM.render(
     <OpenSearchDashboardsContextProvider services={services}>
-      <WorkspaceOverviewApp appBasePath={appBasePath} />
+      <WorkspaceOverviewApp />
     </OpenSearchDashboardsContextProvider>,
     element
   );

@@ -9,7 +9,7 @@ import { i18n } from '@osd/i18n';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
 import { WorkspaceOverview } from './workspace_overview';
 
-export const WorkspaceOverviewApp = ({ appBasePath }: { appBasePath: string }) => {
+export const WorkspaceOverviewApp = () => {
   const {
     services: { chrome },
   } = useOpenSearchDashboards();
@@ -20,13 +20,12 @@ export const WorkspaceOverviewApp = ({ appBasePath }: { appBasePath: string }) =
   useEffect(() => {
     chrome?.setBreadcrumbs([
       {
-        href: appBasePath,
         text: i18n.translate('workspace.workspaceOverviewTitle', {
           defaultMessage: 'Workspace Overview',
         }),
       },
     ]);
-  }, [appBasePath, chrome]);
+  }, [chrome]);
 
   return (
     <I18nProvider>
