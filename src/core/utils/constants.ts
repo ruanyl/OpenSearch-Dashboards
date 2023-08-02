@@ -12,3 +12,8 @@ export enum PermissionMode {
   LibraryRead = 'library_read',
   LibraryWrite = 'library_write',
 }
+
+export enum PrincipalType {
+  User = 'user',
+  Group = 'group',
+}
