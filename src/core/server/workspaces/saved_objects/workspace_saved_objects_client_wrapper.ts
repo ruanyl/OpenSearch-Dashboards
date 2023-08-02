@@ -216,11 +216,10 @@ export class WorkspaceSavedObjectsClientWrapper {
       options: SavedObjectsAddToWorkspacesOptions = {}
     ) => {
       // target workspaces
-      await this.validateMultiWorkspacesPermissions(
-        targetWorkspaces,
-        wrapperOptions.request,
-        PermissionMode.LibraryWrite
-      );
+      await this.validateMultiWorkspacesPermissions(targetWorkspaces, wrapperOptions.request, [
+        PermissionMode.LibraryWrite,
+        PermissionMode.Management,
+      ]);
 
       // saved_objects
       const permitted = await this.permissionControl.batchValidate(
