@@ -36,6 +36,7 @@ import crypto from 'crypto';
 import { cloneDeep, mapValues } from 'lodash';
 import {
   IndexMapping,
+  SavedObjectsFieldMapping,
   SavedObjectsMappingProperties,
   SavedObjectsTypeMappingDefinitions,
 } from './../../mappings';
@@ -137,6 +138,16 @@ function findChangedProp(actual: any, expected: any) {
  * @returns {IndexMapping}
  */
 function defaultMapping(): IndexMapping {
+  const principals: SavedObjectsFieldMapping = {
+    properties: {
+      users: {
+        type: 'keyword',
+      },
+      groups: {
+        type: 'keyword',
+      },
+    },
+  };
   return {
     dynamic: 'strict',
     properties: {
@@ -180,56 +191,11 @@ function defaultMapping(): IndexMapping {
       },
       permissions: {
         properties: {
-          read: {
-            properties: {
-              users: {
-                type: 'keyword',
-              },
-              groups: {
-                type: 'keyword',
-              },
-            },
-          },
-          write: {
-            properties: {
-              users: {
-                type: 'keyword',
-              },
-              groups: {
-                type: 'keyword',
-              },
-            },
-          },
-          management: {
-            properties: {
-              users: {
-                type: 'keyword',
-              },
-              groups: {
-                type: 'keyword',
-              },
-            },
-          },
-          library_read: {
-            properties: {
-              users: {
-                type: 'keyword',
-              },
-              groups: {
-                type: 'keyword',
-              },
-            },
-          },
-          library_write: {
-            properties: {
-              users: {
-                type: 'keyword',
-              },
-              groups: {
-                type: 'keyword',
-              },
-            },
-          },
+          read: principals,
+          write: principals,
+          management: principals,
+          library_read: principals,
+          library_write: principals,
         },
       },
     },
