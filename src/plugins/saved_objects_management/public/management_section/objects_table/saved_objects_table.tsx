@@ -180,7 +180,9 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   }
 
   private get workspaceIdQuery() {
-    return this.state.workspaceId ? [PUBLIC_WORKSPACE, this.state.workspaceId] : [PUBLIC_WORKSPACE];
+    return this.state.workspaceId
+      ? Array.from(new Set([PUBLIC_WORKSPACE, this.state.workspaceId]))
+      : undefined;
   }
 
   componentDidMount() {

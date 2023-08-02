@@ -32,7 +32,7 @@ function WorkspaceColumn({ coreSetup, workspaces, record }: WorkspaceColumnProps
   });
   wsLookUp?.set('public', publicWsName);
 
-  if (!workspaces || workspaces?.includes(PUBLIC_WORKSPACE)) {
+  if (workspaces?.includes(PUBLIC_WORKSPACE)) {
     return <EuiText>{publicWsName}</EuiText>;
   }
 

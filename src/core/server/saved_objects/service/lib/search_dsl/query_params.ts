@@ -34,7 +34,6 @@ type KueryNode = any;
 
 import { ISavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
 import { ALL_NAMESPACES_STRING, DEFAULT_NAMESPACE_STRING } from '../utils';
-import { PUBLIC_WORKSPACE } from '../../../../../utils';
 
 /**
  * Gets the types based on the type. Uses mappings to support
@@ -139,14 +138,6 @@ function getClauseForWorkspace(workspace: string) {
         must: {
           match_all: {},
         },
-      },
-    };
-  }
-
-  if (workspace === PUBLIC_WORKSPACE) {
-    return {
-      bool: {
-        must_not: [{ exists: { field: 'workspaces' } }],
       },
     };
   }

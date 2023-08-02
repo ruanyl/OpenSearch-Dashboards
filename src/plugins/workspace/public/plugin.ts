@@ -194,7 +194,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
     if (this.coreStart) {
       return this.coreStart.workspaces.client.currentWorkspaceId$.subscribe(
         (currentWorkspaceId) => {
-          this.coreStart?.savedObjects.client.setCurrentWorkspace(currentWorkspaceId);
+          this.coreStart?.savedObjects.client.setCurrentWorkspace(currentWorkspaceId || '');
         }
       );
     }
