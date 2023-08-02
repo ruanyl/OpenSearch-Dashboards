@@ -5,7 +5,6 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router } from 'react-router-dom';
 import { AppMountParameters, CoreStart } from '../../../core/public';
 import { OpenSearchDashboardsContextProvider } from '../../opensearch_dashboards_react/public';
 import { WorkspaceListApp } from './components/workspace_list_app';
@@ -18,11 +17,9 @@ export const renderListApp = (
   services: CoreStart
 ) => {
   ReactDOM.render(
-    <Router history={history}>
-      <OpenSearchDashboardsContextProvider services={services}>
-        <WorkspaceListApp appBasePath={appBasePath} />
-      </OpenSearchDashboardsContextProvider>
-    </Router>,
+    <OpenSearchDashboardsContextProvider services={services}>
+      <WorkspaceListApp appBasePath={appBasePath} />
+    </OpenSearchDashboardsContextProvider>,
     element
   );
 
@@ -35,11 +32,9 @@ export const renderCreatorApp = (
   services: CoreStart
 ) => {
   ReactDOM.render(
-    <Router history={history}>
-      <OpenSearchDashboardsContextProvider services={services}>
-        <WorkspaceCreatorApp appBasePath={appBasePath} />
-      </OpenSearchDashboardsContextProvider>
-    </Router>,
+    <OpenSearchDashboardsContextProvider services={services}>
+      <WorkspaceCreatorApp appBasePath={appBasePath} />
+    </OpenSearchDashboardsContextProvider>,
     element
   );
 
@@ -53,11 +48,9 @@ export const renderUpdateApp = (
   services: CoreStart
 ) => {
   ReactDOM.render(
-    <Router history={history}>
-      <OpenSearchDashboardsContextProvider services={services}>
-        <WorkspaceUpdaterApp appBasePath={appBasePath} />
-      </OpenSearchDashboardsContextProvider>
-    </Router>,
+    <OpenSearchDashboardsContextProvider services={services}>
+      <WorkspaceUpdaterApp appBasePath={appBasePath} />
+    </OpenSearchDashboardsContextProvider>,
     element
   );
 
@@ -71,11 +64,9 @@ export const renderOverviewApp = (
   services: CoreStart
 ) => {
   ReactDOM.render(
-    <Router history={history}>
-      <OpenSearchDashboardsContextProvider services={services}>
-        <WorkspaceOverviewApp appBasePath={appBasePath} />
-      </OpenSearchDashboardsContextProvider>
-    </Router>,
+    <OpenSearchDashboardsContextProvider services={services}>
+      <WorkspaceOverviewApp appBasePath={appBasePath} />
+    </OpenSearchDashboardsContextProvider>,
     element
   );
 

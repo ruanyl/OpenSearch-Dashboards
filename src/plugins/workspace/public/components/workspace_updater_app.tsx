@@ -5,25 +5,28 @@
 
 import React, { useEffect } from 'react';
 import { I18nProvider } from '@osd/i18n/react';
-import { useLocation } from 'react-router-dom';
-import { ROUTES } from './routes';
+import { i18n } from '@osd/i18n';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
-import { createBreadcrumbsFromPath } from './utils/breadcrumbs';
 import { WorkspaceUpdater } from './workspace_updater';
 
 export const WorkspaceUpdaterApp = ({ appBasePath }: { appBasePath: string }) => {
   const {
     services: { chrome },
   } = useOpenSearchDashboards();
-  const location = useLocation();
 
   /**
-   * map the current pathname to breadcrumbs
+   * set breadcrumbs to chrome
    */
   useEffect(() => {
-    const breadcrumbs = createBreadcrumbsFromPath(location.pathname, ROUTES, appBasePath);
-    chrome?.setBreadcrumbs(breadcrumbs);
-  }, [appBasePath, location.pathname, chrome]);
+    chrome?.setBreadcrumbs([
+      {
+        href: appBasePath,
+        text: i18n.translate('workspace.workspaceUpdateTitle', {
+          defaultMessage: 'Workspace Update',
+        }),
+      },
+    ]);
+  }, [appBasePath, chrome]);
 
   return (
     <I18nProvider>
