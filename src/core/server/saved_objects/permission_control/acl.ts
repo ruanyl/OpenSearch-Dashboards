@@ -79,7 +79,7 @@ export class ACL {
     this.permissions = initialPermissions || {};
   }
 
-  // parse the permissions object to check whether the specific user or group has the specific permission or not
+  // parse the permissions object to check whether the specific principal has the specific permission types or not
   public hasPermission(permissionTypes: string[], principals: Principals) {
     if (!permissionTypes || permissionTypes.length === 0 || !this.permissions || !principals) {
       return false;
@@ -91,7 +91,7 @@ export class ACL {
     );
   }
 
-  // permissions object build function, add users or groups with specific permission to the object
+  // permissions object build function, add principal with specific permission to the object
   public addPermission(permissionTypes: string[], principals: Principals) {
     if (!permissionTypes || !principals) {
       return this;
@@ -111,7 +111,7 @@ export class ACL {
     return this;
   }
 
-  // permissions object build funciton, remove specific permission of specific users or groups from the object
+  // permissions object build funciton, remove specific permission of specific principal from the object
   public removePermission(permissionTypes: string[], principals: Principals) {
     if (!permissionTypes || !principals) {
       return this;
@@ -132,21 +132,21 @@ export class ACL {
   }
 
   /* 
-      transfrom permissions format
-      original permissions:   {
-          read: {
-              users:['user1']
-          },
-          write:{
-              groups:['group1']
-          }
-      }
-  
-      transformed permissions: [
-          {type:'user',name:'user1',permissions:['read']},
-          {type:'group',name:'group1',permissions:['write']},
-      ]
-      */
+        transfrom permissions format
+        original permissions:   {
+            read: {
+                users:['user1']
+            },
+            write:{
+                groups:['group1']
+            }
+        }
+    
+        transformed permissions: [
+            {type:'users',name:'user1',permissions:['read']},
+            {type:'groups',name:'group1',permissions:['write']},
+        ]
+        */
   public transformPermissions(): TransformedPermission[] {
     const result: TransformedPermission[] = [];
     if (!this.permissions) {
@@ -201,8 +201,8 @@ export class ACL {
   }
 
   /*
-      generate query DSL by the specific conditions, used for fetching saved objects from the saved objects index
-      */
+        generate query DSL by the specific conditions, used for fetching saved objects from the saved objects index
+        */
   public static genereateGetPermittedSavedObjectsQueryDSL(
     permissionType: string,
     principals: Principals,
