@@ -217,6 +217,12 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
             filteredNavLinks.set(workspaceNavLink.id, workspaceNavLink)
           );
       }
+      filteredWorkspaceList
+        .map((workspace, index) =>
+          this.workspaceToChromeNavLink(workspace, core.workspaces, core.application, index)
+        )
+        .forEach((workspaceNavLink) => filteredNavLinks.set(workspaceNavLink.id, workspaceNavLink));
+
       navLinksService.setFilteredNavLinks(filteredNavLinks);
     });
   }
