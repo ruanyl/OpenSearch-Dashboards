@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { omit } from 'lodash';
+import { omit, intersection } from 'lodash';
 import type { opensearchtypes } from '@opensearch-project/opensearch';
 import uuid from 'uuid';
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
@@ -1277,17 +1277,35 @@ export class SavedObjectsRepository {
   }
 
   async addToWorkspaces(
-    objects: SavedObjectsShareObjects[],
+    savedObjects: SavedObjectsShareObjects[],
     workspaces: string[],
     options: SavedObjectsAddToWorkspacesOptions = {}
   ): Promise<SavedObjectsAddToWorkspacesResponse[]> {
-    if (!objects.length) {
+    if (!savedObjects.length) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
-        'shared objects must not be an empty array'
+        'shared savedObjects must not be an empty array'
       );
     }
 
-    objects.forEach(({ type, id }) => {
+    // saved objects must exist in specified workspace
+    if (options.workspaces) {
+      const invalidObjects = savedObjects.filter((obj) => {
+        if (
+          obj.workspaces &&
+          obj.workspaces.length > 0 &&
+          !obj.workspaces.includes(GLOBAL_WORKSPACE_ID)
+        ) {
+          return intersection(obj.workspaces, options.workspaces).length === 0;
+        }
+        return false;
+      });
+      if (invalidObjects && invalidObjects.length > 0) {
+        const [savedObj] = invalidObjects;
+        throw SavedObjectsErrorHelpers.createConflictError(savedObj.type, savedObj.id);
+      }
+    }
+
+    savedObjects.forEach(({ type, id }) => {
       if (!this._allowedTypes.includes(type)) {
         throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
       }
@@ -1300,7 +1318,7 @@ export class SavedObjectsRepository {
     }
 
     const { refresh = DEFAULT_REFRESH_SETTING } = options;
-    const savedObjectsBulkResponse = await this.bulkGet(objects);
+    const savedObjectsBulkResponse = await this.bulkGet(savedObjects);
 
     const docs = savedObjectsBulkResponse.saved_objects.map((obj) => {
       const { type, id } = obj;
@@ -1354,7 +1372,7 @@ export class SavedObjectsRepository {
       return map.set(item.update?._id!, item.update?.get?._source.workspaces);
     }, new Map<string, string[]>());
 
-    return objects.map((obj) => {
+    return savedObjects.map((obj) => {
       const rawId = this._serializer.generateRawId(undefined, obj.type, obj.id);
       return {
         type: obj.type,

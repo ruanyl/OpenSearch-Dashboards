@@ -169,7 +169,7 @@ export interface SavedObjectsCheckConflictsResponse {
   }>;
 }
 
-export type SavedObjectsShareObjects = Pick<SavedObject, 'type' | 'id'>;
+export type SavedObjectsShareObjects = Pick<SavedObject, 'type' | 'id' | 'workspaces'>;
 
 /**
  *
@@ -195,7 +195,10 @@ export interface SavedObjectsAddToNamespacesOptions extends SavedObjectsBaseOpti
   refresh?: MutatingOperationRefreshSetting;
 }
 
-export type SavedObjectsAddToWorkspacesOptions = Pick<SavedObjectsUpdateOptions, 'refresh'>;
+export type SavedObjectsAddToWorkspacesOptions = Pick<
+  SavedObjectsUpdateOptions,
+  'refresh' | 'workspaces'
+>;
 
 /**
  *

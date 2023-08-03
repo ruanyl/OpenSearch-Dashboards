@@ -67,28 +67,6 @@ export const registerShareRoute = (router: IRouter) => {
 
       const savedObjects = collectSavedObjectsResult.collectedObjects;
 
-      if (sourceWorkspaceId) {
-        const invalidObjects = savedObjects.filter((obj) => {
-          if (
-            obj.workspaces &&
-            obj.workspaces.length > 0 &&
-            !obj.workspaces.includes(GLOBAL_WORKSPACE_ID)
-          ) {
-            return !obj.workspaces.includes(sourceWorkspaceId);
-          }
-          return false;
-        });
-        if (invalidObjects && invalidObjects.length > 0) {
-          return res.badRequest({
-            body: {
-              message: `Saved objects are not belong to current workspace: ${invalidObjects
-                .map((obj) => `${obj.type}:${obj.id}`)
-                .join(', ')}`,
-            },
-          });
-        }
-      }
-
       const nonPublicSharedObjects = savedObjects
         // non-public
         .filter(
@@ -97,7 +75,7 @@ export const registerShareRoute = (router: IRouter) => {
             obj.workspaces.length > 0 &&
             !obj.workspaces.includes(GLOBAL_WORKSPACE_ID)
         )
-        .map((obj) => ({ id: obj.id, type: obj.type }));
+        .map((obj) => ({ id: obj.id, type: obj.type, workspaces: obj.workspaces }));
 
       if (nonPublicSharedObjects.length === 0) {
         return res.ok({
@@ -111,7 +89,10 @@ export const registerShareRoute = (router: IRouter) => {
 
       const response = await savedObjectsClient.addToWorkspaces(
         nonPublicSharedObjects,
-        targetWorkspaceIds
+        targetWorkspaceIds,
+        {
+          workspaces: sourceWorkspaceId ? [sourceWorkspaceId] : undefined,
+        }
       );
       return res.ok({
         body: response,
