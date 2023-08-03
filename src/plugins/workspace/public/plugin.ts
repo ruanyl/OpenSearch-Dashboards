@@ -91,7 +91,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
     savedObjectsManagement?.columns.register(getWorkspaceColumn(core));
 
     type WorkspaceAppType = (params: AppMountParameters, services: CoreStart) => () => void;
-    const workspaceMount = async (params: AppMountParameters, renderApp: WorkspaceAppType) => {
+    const mountWorkspaceApp = async (params: AppMountParameters, renderApp: WorkspaceAppType) => {
       const [coreStart] = await core.getStartServices();
       const services = {
         ...coreStart,
@@ -109,7 +109,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
       navLinkStatus: AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
         const { renderCreatorApp } = await import('./application');
-        return workspaceMount(params, renderCreatorApp);
+        return mountWorkspaceApp(params, renderCreatorApp);
       },
     });
 
@@ -124,7 +124,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
       navLinkStatus: AppNavLinkStatus.default,
       async mount(params: AppMountParameters) {
         const { renderOverviewApp } = await import('./application');
-        return workspaceMount(params, renderOverviewApp);
+        return mountWorkspaceApp(params, renderOverviewApp);
       },
     });
 
@@ -138,7 +138,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
       navLinkStatus: AppNavLinkStatus.default,
       async mount(params: AppMountParameters) {
         const { renderUpdateApp } = await import('./application');
-        return workspaceMount(params, renderUpdateApp);
+        return mountWorkspaceApp(params, renderUpdateApp);
       },
     });
 
@@ -153,7 +153,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
       navLinkStatus: workspaceId ? AppNavLinkStatus.hidden : AppNavLinkStatus.default,
       async mount(params: AppMountParameters) {
         const { renderListApp } = await import('./application');
-        return workspaceMount(params, renderListApp);
+        return mountWorkspaceApp(params, renderListApp);
       },
     });
 
