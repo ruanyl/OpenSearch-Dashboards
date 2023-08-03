@@ -273,7 +273,7 @@ export class SavedObjectsClient {
        * When the currentWorkspaceId is an empty string instead of undefined
        * It means user is creating object in public workspace.
        */
-      finalWorkspaces = currentWorkspaceId ? [currentWorkspaceId] : [PUBLIC_WORKSPACE];
+      finalWorkspaces = [currentWorkspaceId];
     }
 
     const createRequest: Promise<SavedObject<T>> = this.savedObjectsFetch(path, {

@@ -29,7 +29,11 @@ import {
 import { mountDropdownList } from './mount';
 import { SavedObjectsManagementPluginSetup } from '../../saved_objects_management/public';
 import { getWorkspaceColumn } from './components/utils/workspace_column';
-import { getWorkspaceIdFromUrl, WORKSPACE_PATH_PREFIX } from '../../../core/public/utils';
+import {
+  getWorkspaceIdFromUrl,
+  PUBLIC_WORKSPACE,
+  WORKSPACE_PATH_PREFIX,
+} from '../../../core/public/utils';
 
 interface WorkspacesPluginSetupDeps {
   savedObjectsManagement?: SavedObjectsManagementPluginSetup;
@@ -73,7 +77,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
     /**
      * Retrieve workspace id from url
      */
-    const workspaceId = this.getWorkspaceIdFromURL();
+    const workspaceId = this.getWorkspaceIdFromURL() || PUBLIC_WORKSPACE;
 
     if (workspaceId) {
       const result = await core.workspaces.client.enterWorkspace(workspaceId);
@@ -194,7 +198,9 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
     if (this.coreStart) {
       return this.coreStart.workspaces.client.currentWorkspaceId$.subscribe(
         (currentWorkspaceId) => {
-          this.coreStart?.savedObjects.client.setCurrentWorkspace(currentWorkspaceId || '');
+          this.coreStart?.savedObjects.client.setCurrentWorkspace(
+            currentWorkspaceId || PUBLIC_WORKSPACE
+          );
         }
       );
     }
