@@ -20,7 +20,6 @@ import { InternalUiSettingsServiceSetup } from '../ui_settings';
 import { uiSettings } from './ui_settings';
 import { WORKSPACE_TYPE } from './constants';
 import { MANAGEMENT_WORKSPACE, PUBLIC_WORKSPACE } from '../../utils';
-import { UiSettingsServiceStart } from '../ui_settings';
 
 export interface WorkspacesServiceSetup {
   client: IWorkspaceDBImpl;
@@ -38,7 +37,6 @@ export interface WorkspacesSetupDeps {
 
 export interface WorkpsaceStartDeps {
   savedObjects: SavedObjectsServiceStart;
-  uiSettings: UiSettingsServiceStart;
 }
 
 export type InternalWorkspacesServiceSetup = WorkspacesServiceSetup;
