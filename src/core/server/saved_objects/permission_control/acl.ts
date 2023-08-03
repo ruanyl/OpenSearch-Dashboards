@@ -12,11 +12,13 @@ export interface Principals {
 
 export type Permissions = Partial<Record<string, Principals>>;
 
-const addPermissionToPrincipals = (
-  principals?: Principals,
-  users?: string[],
-  groups?: string[]
-) => {
+export interface TransformedPermission {
+  type: string;
+  name: string;
+  permissions: string[];
+}
+
+const addToPrincipals = (principals?: Principals, users?: string[], groups?: string[]) => {
   if (!principals) {
     principals = {};
   }
@@ -35,11 +37,7 @@ const addPermissionToPrincipals = (
   return principals;
 };
 
-const deletePermissionFromPrincipals = (
-  principals?: Principals,
-  users?: string[],
-  groups?: string[]
-) => {
+const deleteFromPrincipals = (principals?: Principals, users?: string[], groups?: string[]) => {
   if (!principals) {
     return principals;
   }
@@ -52,47 +50,50 @@ const deletePermissionFromPrincipals = (
   return principals;
 };
 
+const checkPermission = (currentPrincipals: Principals | undefined, principals: Principals) => {
+  return (
+    (currentPrincipals?.users &&
+      principals?.users &&
+      checkPermissionForSinglePrincipalType(currentPrincipals.users, principals.users)) ||
+    (currentPrincipals?.groups &&
+      principals.groups &&
+      checkPermissionForSinglePrincipalType(currentPrincipals.groups, principals.groups))
+  );
+};
+
+const checkPermissionForSinglePrincipalType = (
+  currentPrincipalArray: string[],
+  principalArray: string[]
+) => {
+  return (
+    currentPrincipalArray &&
+    principalArray &&
+    (currentPrincipalArray.includes('*') ||
+      principalArray.some((item) => currentPrincipalArray.includes(item)))
+  );
+};
+
 export class ACL {
   private permissions?: Permissions;
   constructor(initialPermissions?: Permissions) {
-    this.permissions = initialPermissions;
+    this.permissions = initialPermissions || {};
   }
 
   // parse the permissions object to check whether the specific user or group has the specific permission or not
-  public hasPermission(
-    permissionType: string,
-    permissions: Permissions,
-    user?: string,
-    group?: string
-  ) {
-    if ((!user && !group) || !permissionType || !permissions) {
+  public hasPermission(permissionTypes: string[], principals: Principals) {
+    if (!permissionTypes || permissionTypes.length === 0 || !this.permissions || !principals) {
       return false;
     }
 
-    const principals = permissions[permissionType];
-    if (!!principals) {
-      if (
-        !!user &&
-        !!principals.users &&
-        (principals.users.includes('*') || principals.users.includes(user))
-      ) {
-        return true;
-      }
-      if (
-        !!group &&
-        !!principals.groups &&
-        (principals.groups.includes('*') || principals.groups.includes(group))
-      ) {
-        return true;
-      }
-    }
-
-    return false;
+    const currentPermissions = this.permissions;
+    return permissionTypes.some((permissionType) =>
+      checkPermission(currentPermissions[permissionType], principals)
+    );
   }
 
   // permissions object build function, add users or groups with specific permission to the object
-  public addPermission(permissionTypes: string[], users?: string[], groups?: string[]) {
-    if ((!users && !groups) || !permissionTypes) {
+  public addPermission(permissionTypes: string[], principals: Principals) {
+    if (!permissionTypes || !principals) {
       return this;
     }
     if (!this.permissions) {
@@ -100,10 +101,10 @@ export class ACL {
     }
 
     for (const permissionType of permissionTypes) {
-      this.permissions[permissionType] = addPermissionToPrincipals(
+      this.permissions[permissionType] = addToPrincipals(
         this.permissions[permissionType],
-        users,
-        groups
+        principals.users,
+        principals.groups
       );
     }
 
@@ -111,8 +112,8 @@ export class ACL {
   }
 
   // permissions object build funciton, remove specific permission of specific users or groups from the object
-  public removePermission(permissionTypes: string[], users?: string[], groups?: string[]) {
-    if ((!users && !groups) || !permissionTypes) {
+  public removePermission(permissionTypes: string[], principals: Principals) {
+    if (!permissionTypes || !principals) {
       return this;
     }
     if (!this.permissions) {
@@ -120,35 +121,94 @@ export class ACL {
     }
 
     for (const permissionType of permissionTypes) {
-      this.permissions[permissionType] = deletePermissionFromPrincipals(
-        this.permissions[permissionType],
-        users,
-        groups
+      this.permissions[permissionType] = deleteFromPrincipals(
+        this.permissions![permissionType],
+        principals.users,
+        principals.groups
       );
     }
 
     return this;
   }
 
-  // return the permissions object
-  public getPermissions() {
-    const permissions = this.permissions;
+  /* 
+      transfrom permissions format
+      original permissions:   {
+          read: {
+              users:['user1']
+          },
+          write:{
+              groups:['group1']
+          }
+      }
+  
+      transformed permissions: [
+          {type:'user',name:'user1',permissions:['read']},
+          {type:'group',name:'group1',permissions:['write']},
+      ]
+      */
+  public transformPermissions(): TransformedPermission[] {
+    const result: TransformedPermission[] = [];
+    if (!this.permissions) {
+      return result;
+    }
+
+    const permissionMapResult: Record<string, Record<string, string[]>> = {};
+    const principalTypes = [PrincipalType.Users, PrincipalType.Groups];
+    for (const permissionType in this.permissions) {
+      if (!!permissionType) {
+        const value = this.permissions[permissionType];
+        principalTypes.forEach((principalType) => {
+          if (value?.[principalType]) {
+            for (const principal of value[principalType]!) {
+              if (!permissionMapResult[principalType]) {
+                permissionMapResult[principalType] = {};
+              }
+              if (!permissionMapResult[principalType][principal]) {
+                permissionMapResult[principalType][principal] = [];
+              }
+              permissionMapResult[principalType][principal] = [
+                ...permissionMapResult[principalType][principal]!,
+                permissionType,
+              ];
+            }
+          }
+        });
+      }
+    }
+
+    Object.entries(permissionMapResult).forEach(([type, permissionMap]) => {
+      Object.entries(permissionMap).forEach(([principal, permissions]) => {
+        result.push({
+          type,
+          name: principal,
+          permissions,
+        });
+      });
+    });
+
+    return result;
+  }
+
+  public resetPermissions() {
     // reset permissions
     this.permissions = {};
+  }
 
-    return permissions;
+  // return the permissions object
+  public getPermissions() {
+    return this.permissions;
   }
 
   /*
-    generate query DSL by the specific conditions, used for fetching saved objects from the saved objects index
-    */
-  public genereateGetPermittedSavedObjectsQueryDSL(
+      generate query DSL by the specific conditions, used for fetching saved objects from the saved objects index
+      */
+  public static genereateGetPermittedSavedObjectsQueryDSL(
     permissionType: string,
-    savedObjectType?: string | string[],
-    user?: string,
-    group?: string
+    principals: Principals,
+    savedObjectType?: string | string[]
   ) {
-    if ((!user && !group) || !permissionType) {
+    if (!principals || !permissionType) {
       return {
         query: {
           match_none: {},
@@ -162,10 +222,10 @@ export class ACL {
     const subBool: any = {
       should: [],
     };
-    if (!!user) {
+    if (!!principals.users) {
       subBool.should.push({
-        term: {
-          ['permissions.' + permissionType + '.users']: user,
+        terms: {
+          ['permissions.' + permissionType + '.users']: principals.users,
         },
       });
       subBool.should.push({
@@ -174,10 +234,10 @@ export class ACL {
         },
       });
     }
-    if (!!group) {
+    if (!!principals.groups) {
       subBool.should.push({
-        term: {
-          ['permissions.' + permissionType + '.groups']: group,
+        terms: {
+          ['permissions.' + permissionType + '.groups']: principals.groups,
         },
       });
       subBool.should.push({
@@ -200,69 +260,5 @@ export class ACL {
     }
 
     return { query: { bool } };
-  }
-
-  /* 
-    transfrom permissions format
-    input:   {
-        read: {
-            users:['user1']
-        },
-        write:{
-            groups:['group1']
-        }
-    }
-
-    output: [
-        {type:'user',name:'user1',permissions:['read']},
-        {type:'group',name:'group1',permissions:['write']},
-    ]
-    */
-  public transformPermissions(permissions: Permissions) {
-    const result: any = [];
-    if (!permissions) {
-      return result;
-    }
-    const userPermissionMap: Map<string, string[]> = new Map();
-    const groupPermissionMap: Map<string, string[]> = new Map();
-    for (const permissionType in permissions) {
-      if (!!permissionType) {
-        const value = permissions[permissionType];
-        if (value?.users) {
-          for (const user of value?.users) {
-            if (!userPermissionMap.get(user)) {
-              userPermissionMap.set(user, []);
-            }
-            userPermissionMap.set(user, [...userPermissionMap.get(user)!, permissionType]);
-          }
-        }
-        if (value?.groups) {
-          for (const group of value?.groups) {
-            if (!groupPermissionMap.get(group)) {
-              groupPermissionMap.set(group, []);
-            }
-            groupPermissionMap.set(group, [...groupPermissionMap.get(group)!, permissionType]);
-          }
-        }
-      }
-    }
-
-    for (const [user, userPermissions] of userPermissionMap) {
-      result.push({
-        type: PrincipalType.User,
-        name: user,
-        permissions: userPermissions,
-      });
-    }
-
-    for (const [group, groupPermissions] of groupPermissionMap) {
-      result.push({
-        type: PrincipalType.Group,
-        name: group,
-        permissions: groupPermissions,
-      });
-    }
-
-    return result;
   }
 }

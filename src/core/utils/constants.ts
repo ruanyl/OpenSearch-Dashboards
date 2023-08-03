@@ -14,6 +14,6 @@ export enum PermissionMode {
 }
 
 export enum PrincipalType {
-  User = 'user',
-  Group = 'group',
+  Users = 'users',
+  Groups = 'groups',
 }
