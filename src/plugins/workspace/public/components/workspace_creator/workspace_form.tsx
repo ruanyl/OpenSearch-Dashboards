@@ -138,6 +138,9 @@ export const WorkspaceForm = ({
           templates: workspaceTemplate || [],
           dependencies,
         }));
+      if (features.length === 0) {
+        return previousValue;
+      }
       if (features.length === 1 || currentKey === 'undefined') {
         return [...previousValue, ...features];
       }
