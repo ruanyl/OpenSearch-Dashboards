@@ -12,7 +12,6 @@ import {
   SavedObjectsManagementColumn,
   SavedObjectsManagementRecord,
 } from '../../../../saved_objects_management/public';
-import { PUBLIC_WORKSPACE } from '../../../../../core/public/utils';
 
 interface WorkspaceColumnProps {
   coreSetup: CoreSetup;
