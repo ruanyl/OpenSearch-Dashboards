@@ -214,7 +214,8 @@ export class WorkspaceSavedObjectsClientWrapper {
         );
         if (options.workspaces) {
           const isEveryWorkspaceIsPermitted = options.workspaces.every((item) =>
-            permittedWorkspaceIds?.includes(item)
+            // TODO modify this line to use permittedWorkspaceIds if public workspace is also a workspace
+            ['public', ...(permittedWorkspaceIds || [])]?.includes(item)
           );
           if (!isEveryWorkspaceIsPermitted) {
             throw generateWorkspacePermissionError();
