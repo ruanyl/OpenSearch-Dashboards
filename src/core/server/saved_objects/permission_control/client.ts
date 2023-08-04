@@ -89,7 +89,7 @@ export class SavedObjectsPermissionControl {
     };
   }
 
-  public async getPrinciplesOfObjects(
+  public async getPrincipalsOfObjects(
     request: OpenSearchDashboardsRequest,
     savedObjects: SavedObjectsBulkGetObject[]
   ): Promise<Record<string, TransformedPermission>> {
