@@ -19,7 +19,8 @@ import { WorkspaceSavedObjectsClientWrapper } from './saved_objects';
 import { InternalUiSettingsServiceSetup } from '../ui_settings';
 import { uiSettings } from './ui_settings';
 import { WORKSPACE_TYPE } from './constants';
-import { MANAGEMENT_WORKSPACE, PUBLIC_WORKSPACE } from '../../utils';
+import { MANAGEMENT_WORKSPACE, PUBLIC_WORKSPACE, PermissionMode } from '../../utils';
+import { ACL } from '../saved_objects/permission_control/acl';
 
 export interface WorkspacesServiceSetup {
   client: IWorkspaceDBImpl;
@@ -127,13 +128,29 @@ export class WorkspacesService
 
   private async setupWorkspaces(startDeps: WorkpsaceStartDeps) {
     const internalRepository = startDeps.savedObjects.createInternalRepository();
+    const publicWorkspaceACL = new ACL()
+      .addPermission([PermissionMode.LibraryRead, PermissionMode.LibraryWrite], {
+        users: ['*'],
+      })
+      .addPermission([PermissionMode.Management], {
+        groups: ['dashboard_admin'],
+      });
+    const managementWorkspaceACL = new ACL()
+      .addPermission([PermissionMode.LibraryRead], {
+        users: ['*'],
+      })
+      .addPermission([PermissionMode.Management], {
+        groups: ['dashboard_admin'],
+      });
 
     await Promise.all([
       this.checkAndCreateWorkspace(internalRepository, PUBLIC_WORKSPACE, {
         name: 'public',
+        permissions: publicWorkspaceACL,
       }),
       this.checkAndCreateWorkspace(internalRepository, MANAGEMENT_WORKSPACE, {
         name: 'Management',
+        permissions: managementWorkspaceACL,
       }),
     ]);
   }
