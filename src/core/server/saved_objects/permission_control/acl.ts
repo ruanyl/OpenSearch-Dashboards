@@ -121,11 +121,14 @@ export class ACL {
     }
 
     for (const permissionType of permissionTypes) {
-      this.permissions[permissionType] = deleteFromPrincipals(
+      const result = deleteFromPrincipals(
         this.permissions![permissionType],
         principals.users,
         principals.groups
       );
+      if (result) {
+        this.permissions[permissionType] = result;
+      }
     }
 
     return this;
