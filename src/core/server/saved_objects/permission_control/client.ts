@@ -34,10 +34,8 @@ export class SavedObjectsPermissionControl {
     const payload: Principals = {};
     if (!authInfo) {
       /**
-       * No authentication is presented.
-       * Every user have access to all the workspaces.
-       * The logic will be used that users create workspaces with authentication enabled
-       * but turn off authentication for any reason.
+       * Login user have access to all the workspaces when no authentication is presented.
+       * The logic will be used when users create workspaces with authentication enabled but turn off authentication for any reason.
        */
       return payload;
     }
