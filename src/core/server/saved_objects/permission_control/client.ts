@@ -32,6 +32,23 @@ export class SavedObjectsPermissionControl {
     const rawRequest = ensureRawRequest(request);
     const authInfo = rawRequest?.auth?.credentials?.authInfo as AuthInfo | null;
     const payload: Principals = {};
+    if (!authInfo) {
+      /**
+       * No authentication is presented.
+       * Every user have access to all the workspaces.
+       * The logic will be used that users create workspaces with authentication enabled
+       * but turn off authentication for any reason.
+       */
+      return payload;
+    }
+    if (!authInfo?.backend_roles && !authInfo.user_name) {
+      /**
+       * It means OSD can not recognize who the user is even if authentication is enabled,
+       * use a fake user that won't be granted permission explicitly.
+       */
+      payload[PrincipalType.Users] = [`_user_fake_${Date.now()}_`];
+      return payload;
+    }
     if (authInfo?.backend_roles) {
       payload[PrincipalType.Groups] = authInfo.backend_roles;
     }
