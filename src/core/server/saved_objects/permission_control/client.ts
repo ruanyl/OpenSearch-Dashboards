@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-
+import { i18n } from '@osd/i18n';
 import { OpenSearchDashboardsRequest } from '../../http';
 import { ensureRawRequest } from '../../http/router';
 import { SavedObjectsServiceStart } from '../saved_objects_service';
@@ -24,9 +24,9 @@ export interface AuthInfo {
 }
 
 export class SavedObjectsPermissionControl {
-  private createScopedRepository?: SavedObjectsServiceStart['createScopedRepository'];
-  private getScopedRepository(request: OpenSearchDashboardsRequest) {
-    return this.createScopedRepository?.(request);
+  private createInternalRepository?: SavedObjectsServiceStart['createInternalRepository'];
+  private getInternalRepository() {
+    return this.createInternalRepository?.();
   }
   public getPrincipalsFromRequest(request: OpenSearchDashboardsRequest): Principals {
     const rawRequest = ensureRawRequest(request);
@@ -44,30 +44,32 @@ export class SavedObjectsPermissionControl {
     request: OpenSearchDashboardsRequest,
     savedObjects: SavedObjectsBulkGetObject[]
   ) {
-    return (await this.getScopedRepository(request)?.bulkGet(savedObjects))?.saved_objects || [];
+    return (await this.getInternalRepository()?.bulkGet(savedObjects))?.saved_objects || [];
   }
-  public async setup(createScopedRepository: SavedObjectsServiceStart['createScopedRepository']) {
-    this.createScopedRepository = createScopedRepository;
+  public async setup(
+    createInternalRepository: SavedObjectsServiceStart['createInternalRepository']
+  ) {
+    this.createInternalRepository = createInternalRepository;
   }
   public async validate(
     request: OpenSearchDashboardsRequest,
     savedObject: SavedObjectsBulkGetObject,
-    permissionModeOrModes: SavedObjectsPermissionModes
+    permissionModes: SavedObjectsPermissionModes
   ) {
-    return await this.batchValidate(request, [savedObject], permissionModeOrModes);
+    return await this.batchValidate(request, [savedObject], permissionModes);
   }
 
   /**
    * In batch validate case, the logic is a.withPermission && b.withPermission
    * @param request
    * @param savedObjects
-   * @param permissionModeOrModes
+   * @param permissionModes
    * @returns
    */
   public async batchValidate(
     request: OpenSearchDashboardsRequest,
     savedObjects: SavedObjectsBulkGetObject[],
-    permissionModeOrModes: SavedObjectsPermissionModes
+    permissionModes: SavedObjectsPermissionModes
   ) {
     const savedObjectsGet = await this.bulkGetSavedObjects(request, savedObjects);
     if (savedObjectsGet) {
@@ -75,7 +77,7 @@ export class SavedObjectsPermissionControl {
       const hasAllPermission = savedObjectsGet.every((item) => {
         // item.permissions
         const aclInstance = new ACL(item.permissions);
-        return aclInstance.hasPermission(permissionModeOrModes, principals);
+        return aclInstance.hasPermission(permissionModes, principals);
       });
       return {
         success: true,
@@ -85,7 +87,9 @@ export class SavedObjectsPermissionControl {
 
     return {
       success: false,
-      error: 'Can not find target saved objects.',
+      error: i18n.translate('savedObjects.permission.notFound', {
+        defaultMessage: 'Can not find target saved objects.',
+      }),
     };
   }
 
@@ -104,19 +108,18 @@ export class SavedObjectsPermissionControl {
 
   public async getPermittedWorkspaceIds(
     request: OpenSearchDashboardsRequest,
-    permissionModeOrModes: SavedObjectsPermissionModes
+    permissionModes: SavedObjectsPermissionModes
   ) {
     const principals = this.getPrincipalsFromRequest(request);
-    const queryDSL = ACL.genereateGetPermittedSavedObjectsQueryDSL(
-      permissionModeOrModes,
-      principals,
-      [WORKSPACE_TYPE]
-    );
-    const repository = this.createScopedRepository?.(request);
+    const queryDSL = ACL.genereateGetPermittedSavedObjectsQueryDSL(permissionModes, principals, [
+      WORKSPACE_TYPE,
+    ]);
+    const repository = this.getInternalRepository();
     try {
       const result = await repository?.find({
         type: [WORKSPACE_TYPE],
         queryDSL,
+        perPage: 999,
       });
       return result?.saved_objects.map((item) => item.id);
     } catch (e) {
