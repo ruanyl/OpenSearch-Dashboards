@@ -39,7 +39,7 @@ export class SavedObjectsPermissionControl {
        */
       return payload;
     }
-    if (!authInfo?.backend_roles && !authInfo.user_name) {
+    if (!authInfo?.backend_roles?.length && !authInfo.user_name) {
       /**
        * It means OSD can not recognize who the user is even if authentication is enabled,
        * use a fake user that won't be granted permission explicitly.
