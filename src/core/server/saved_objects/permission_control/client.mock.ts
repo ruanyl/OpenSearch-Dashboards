@@ -8,7 +8,7 @@ export const savedObjectsPermissionControlMock: SavedObjectsPermissionControlCon
   setup: jest.fn(),
   validate: jest.fn(),
   batchValidate: jest.fn(),
-  getPrinciplesOfObjects: jest.fn(),
+  getPrincipalsOfObjects: jest.fn(),
   getPermittedWorkspaceIds: jest.fn(),
   getPrincipalsFromRequest: jest.fn(),
 };
