@@ -23,3 +23,5 @@ export const PUBLIC_WORKSPACE = 'public';
 export const MANAGEMENT_WORKSPACE = 'management';
 
 export const WORKSPACE_FEATURE_FLAG_KEY_IN_UI_SETTINGS = 'workspace:enabled';
+
+export const DASHBOARD_ADMIN_GROUP = 'dashboard_admin';

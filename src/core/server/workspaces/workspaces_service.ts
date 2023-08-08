@@ -19,8 +19,13 @@ import { WorkspaceSavedObjectsClientWrapper } from './saved_objects';
 import { InternalUiSettingsServiceSetup } from '../ui_settings';
 import { uiSettings } from './ui_settings';
 import { WORKSPACE_TYPE } from './constants';
-import { MANAGEMENT_WORKSPACE, PUBLIC_WORKSPACE, PermissionMode } from '../../utils';
-import { ACL } from '../saved_objects/permission_control/acl';
+import {
+  MANAGEMENT_WORKSPACE,
+  PUBLIC_WORKSPACE,
+  PermissionMode,
+  DASHBOARD_ADMIN_GROUP,
+} from '../../utils';
+import { ACL, Permissions } from '../saved_objects/permission_control/acl';
 
 export interface WorkspacesServiceSetup {
   client: IWorkspaceDBImpl;
@@ -103,7 +108,8 @@ export class WorkspacesService
   private async checkAndCreateWorkspace(
     internalRepository: ISavedObjectsRepository,
     workspaceId: string,
-    workspaceAttribute: Omit<WorkspaceAttribute, 'id'>
+    workspaceAttribute: Omit<WorkspaceAttribute, 'id'>,
+    permissions?: Permissions
   ) {
     /**
      * Internal repository is attached to global tenant.
@@ -116,6 +122,7 @@ export class WorkspacesService
       try {
         const createResult = await internalRepository.create(WORKSPACE_TYPE, workspaceAttribute, {
           id: workspaceId,
+          permissions,
         });
         if (createResult.id) {
           this.logger.info(`Created workspace ${createResult.id} in global tenant.`);
@@ -127,31 +134,40 @@ export class WorkspacesService
   }
 
   private async setupWorkspaces(startDeps: WorkpsaceStartDeps) {
+    return;
     const internalRepository = startDeps.savedObjects.createInternalRepository();
     const publicWorkspaceACL = new ACL()
       .addPermission([PermissionMode.LibraryRead, PermissionMode.LibraryWrite], {
         users: ['*'],
       })
       .addPermission([PermissionMode.Management], {
-        groups: ['dashboard_admin'],
+        groups: [DASHBOARD_ADMIN_GROUP],
       });
     const managementWorkspaceACL = new ACL()
       .addPermission([PermissionMode.LibraryRead], {
         users: ['*'],
       })
-      .addPermission([PermissionMode.Management], {
-        groups: ['dashboard_admin'],
+      .addPermission([PermissionMode.Management, PermissionMode.LibraryWrite], {
+        groups: [DASHBOARD_ADMIN_GROUP],
       });
 
     await Promise.all([
-      this.checkAndCreateWorkspace(internalRepository, PUBLIC_WORKSPACE, {
-        name: 'public',
-        permissions: publicWorkspaceACL,
-      }),
-      this.checkAndCreateWorkspace(internalRepository, MANAGEMENT_WORKSPACE, {
-        name: 'Management',
-        permissions: managementWorkspaceACL,
-      }),
+      this.checkAndCreateWorkspace(
+        internalRepository,
+        PUBLIC_WORKSPACE,
+        {
+          name: 'public',
+        },
+        publicWorkspaceACL.getPermissions()
+      ),
+      this.checkAndCreateWorkspace(
+        internalRepository,
+        MANAGEMENT_WORKSPACE,
+        {
+          name: 'Management',
+        },
+        managementWorkspaceACL.getPermissions()
+      ),
     ]);
   }
 
