@@ -22,7 +22,7 @@ import {
 } from 'opensearch-dashboards/server';
 import { SavedObjectsPermissionControlContract } from '../../saved_objects/permission_control/client';
 import { WORKSPACE_TYPE } from '../constants';
-import { PUBLIC_WORKSPACE, PermissionMode } from '../../../utils';
+import { PermissionMode } from '../../../utils';
 import { ACL } from '../../saved_objects/permission_control/acl';
 
 // Can't throw unauthorized for now, the page will be refreshed if unauthorized
@@ -214,8 +214,7 @@ export class WorkspaceSavedObjectsClientWrapper {
         );
         if (options.workspaces) {
           const isEveryWorkspaceIsPermitted = options.workspaces.every((item) =>
-            // TODO modify this line to use permittedWorkspaceIds if public workspace is also a workspace
-            [PUBLIC_WORKSPACE, ...(permittedWorkspaceIds || [])]?.includes(item)
+            (permittedWorkspaceIds || []).includes(item)
           );
           if (!isEveryWorkspaceIsPermitted) {
             throw generateWorkspacePermissionError();

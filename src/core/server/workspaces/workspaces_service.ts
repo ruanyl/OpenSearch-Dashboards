@@ -134,7 +134,6 @@ export class WorkspacesService
   }
 
   private async setupWorkspaces(startDeps: WorkpsaceStartDeps) {
-    return;
     const internalRepository = startDeps.savedObjects.createInternalRepository();
     const publicWorkspaceACL = new ACL()
       .addPermission([PermissionMode.LibraryRead, PermissionMode.LibraryWrite], {
