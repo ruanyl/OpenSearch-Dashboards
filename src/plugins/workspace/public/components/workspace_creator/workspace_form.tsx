@@ -15,14 +15,10 @@ import {
   EuiText,
   EuiButton,
   EuiFlexItem,
-  EuiCheckableCard,
   htmlIdGenerator,
   EuiFlexGrid,
-  EuiFlexGroup,
-  EuiImage,
   EuiCheckbox,
   EuiCheckboxGroup,
-  EuiCheckableCardProps,
   EuiCheckboxGroupProps,
   EuiCheckboxProps,
   EuiFieldTextProps,
@@ -31,10 +27,15 @@ import {
   EuiComboBox,
   EuiComboBoxProps,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 
-import { WorkspaceTemplate } from '../../../../../core/types';
-import { App, AppNavLinkStatus, ApplicationStart } from '../../../../../core/public';
-import { useApplications, useWorkspaceTemplate } from '../../hooks';
+import {
+  App,
+  AppNavLinkStatus,
+  ApplicationStart,
+  DEFAULT_APP_CATEGORIES,
+} from '../../../../../core/public';
+import { useApplications } from '../../hooks';
 import { WORKSPACE_OP_TYPE_CREATE, WORKSPACE_OP_TYPE_UPDATE } from '../../../common/constants';
 import {
   isFeatureDependBySelectedFeatures,
@@ -43,11 +44,14 @@ import {
 } from '../utils/feature';
 
 import { WorkspaceIconSelector } from './workspace_icon_selector';
+import {
+  WorkspacePermissionSetting,
+  WorkspacePermissionSettingPanel,
+} from './workspace_permission_setting_panel';
 
 interface WorkspaceFeature extends Pick<App, 'dependencies'> {
   id: string;
   name: string;
-  templates: WorkspaceTemplate[];
 }
 
 interface WorkspaceFeatureGroup {
@@ -62,13 +66,23 @@ export interface WorkspaceFormData {
   color?: string;
   icon?: string;
   defaultVISTheme?: string;
+  permissions: WorkspacePermissionSetting[];
 }
 
-type WorkspaceFormErrors = { [key in keyof WorkspaceFormData]?: string };
+type WorkspaceFormErrors = Omit<{ [key in keyof WorkspaceFormData]?: string }, 'permissions'> & {
+  permissions?: string[];
+};
 
 const isWorkspaceFeatureGroup = (
   featureOrGroup: WorkspaceFeature | WorkspaceFeatureGroup
 ): featureOrGroup is WorkspaceFeatureGroup => 'features' in featureOrGroup;
+
+const isValidWorkspacePermissionSetting = (
+  setting: Partial<WorkspacePermissionSetting>
+): setting is WorkspacePermissionSetting =>
+  !!setting.modes &&
+  setting.modes.length > 0 &&
+  ((setting.type === 'user' && !!setting.userId) || (setting.type === 'group' && !!setting.group));
 
 const workspaceHtmlIdGenerator = htmlIdGenerator();
 
@@ -87,7 +101,6 @@ export const WorkspaceForm = ({
   defaultValues,
   opType,
 }: WorkspaceFormProps) => {
-  const { workspaceTemplates, templateFeatureMap } = useWorkspaceTemplate(application);
   const applications = useApplications(application);
 
   const [name, setName] = useState(defaultValues?.name);
@@ -96,11 +109,15 @@ export const WorkspaceForm = ({
   const [icon, setIcon] = useState(defaultValues?.icon);
   const [defaultVISTheme, setDefaultVISTheme] = useState(defaultValues?.defaultVISTheme);
 
-  const [selectedTemplateId, setSelectedTemplateId] = useState<string>();
   const [selectedFeatureIds, setSelectedFeatureIds] = useState(defaultValues?.features || []);
-  const selectedTemplate = workspaceTemplates.find(
-    (template) => template.id === selectedTemplateId
+  const [permissionSettings, setPermissionSettings] = useState<
+    Array<Partial<WorkspacePermissionSetting>>
+  >(
+    defaultValues?.permissions && defaultValues.permissions.length > 0
+      ? defaultValues.permissions
+      : [{}]
   );
+
   const [formErrors, setFormErrors] = useState<WorkspaceFormErrors>({});
   const formIdRef = useRef<string>();
   const getFormData = () => ({
@@ -110,6 +127,7 @@ export const WorkspaceForm = ({
     color,
     icon,
     defaultVISTheme,
+    permissions: permissionSettings,
   });
   const getFormDataRef = useRef(getFormData);
   getFormDataRef.current = getFormData;
@@ -122,17 +140,19 @@ export const WorkspaceForm = ({
       const apps = category2Applications[currentKey];
       const features = apps
         .filter(
-          ({ navLinkStatus, chromeless, featureGroup }) =>
+          ({ navLinkStatus, chromeless, category }) =>
             navLinkStatus !== AppNavLinkStatus.hidden &&
             !chromeless &&
-            featureGroup?.includes('WORKSPACE')
+            category?.id !== DEFAULT_APP_CATEGORIES.management.id
         )
-        .map(({ id, title, workspaceTemplate, dependencies }) => ({
+        .map(({ id, title, dependencies }) => ({
           id,
           name: title,
-          templates: workspaceTemplate || [],
           dependencies,
         }));
+      if (features.length === 0) {
+        return previousValue;
+      }
       if (features.length === 1 || currentKey === 'undefined') {
         return [...previousValue, ...features];
       }
@@ -170,22 +190,6 @@ export const WorkspaceForm = ({
   if (!formIdRef.current) {
     formIdRef.current = workspaceHtmlIdGenerator();
   }
-
-  const handleTemplateCardChange = useCallback<EuiCheckableCardProps['onChange']>(
-    (e) => {
-      const templateId = e.target.value;
-      setSelectedTemplateId(templateId);
-      setSelectedFeatureIds(
-        getFinalFeatureIdsByDependency(
-          allFeatures
-            .filter(({ templates }) => !!templates.find((template) => template.id === templateId))
-            .map((feature) => feature.id),
-          featureDependencies
-        )
-      );
-    },
-    [allFeatures, featureDependencies]
-  );
 
   const handleFeatureChange = useCallback<EuiCheckboxGroupProps['onChange']>(
     (featureId) => {
@@ -257,11 +261,51 @@ export const WorkspaceForm = ({
       e.preventDefault();
       const formData = getFormDataRef.current();
       if (!formData.name) {
-        setFormErrors({ name: "Name can't be empty." });
+        setFormErrors({
+          name: i18n.translate('workspace.form.name.empty', {
+            defaultMessage: "Name can't be empty.",
+          }),
+        });
         return;
       }
+      const permissionErrors: string[] = new Array(formData.permissions.length);
+      for (let i = 0; i < formData.permissions.length; i++) {
+        const permission = formData.permissions[i];
+        if (isValidWorkspacePermissionSetting(permission)) {
+          continue;
+        }
+        if (!permission.type) {
+          permissionErrors[i] = i18n.translate('workspace.form.permission.invalidate.type', {
+            defaultMessage: 'Invalid type',
+          });
+          continue;
+        }
+        if (!permission.modes || permission.modes.length === 0) {
+          permissionErrors[i] = i18n.translate('workspace.form.permission.invalidate.modes', {
+            defaultMessage: 'Invalid permission modes',
+          });
+          continue;
+        }
+        if (permission.type === 'user' && !permission.userId) {
+          permissionErrors[i] = i18n.translate('workspace.form.permission.invalidate.userId', {
+            defaultMessage: 'Invalid userId',
+          });
+          continue;
+        }
+        if (permission.type === 'group' && !permission.group) {
+          permissionErrors[i] = i18n.translate('workspace.form.permission.invalidate.group', {
+            defaultMessage: 'Invalid user group',
+          });
+          continue;
+        }
+      }
+      if (permissionErrors.some((error) => !!error)) {
+        setFormErrors({ permissions: permissionErrors });
+        return;
+      }
+      const permissions = formData.permissions.filter(isValidWorkspacePermissionSetting);
       setFormErrors({});
-      onSubmit?.({ ...formData, name: formData.name });
+      onSubmit?.({ ...formData, name: formData.name, permissions });
     },
     [onSubmit]
   );
@@ -330,56 +374,6 @@ export const WorkspaceForm = ({
       <EuiSpacer />
       <EuiPanel>
         <EuiTitle size="s">
-          <h2>Workspace Template</h2>
-        </EuiTitle>
-        <EuiSpacer />
-        <EuiFlexGrid columns={2}>
-          {workspaceTemplates.map((template) => (
-            <EuiFlexItem key={template.label}>
-              <EuiCheckableCard
-                id={workspaceHtmlIdGenerator()}
-                title={template.label}
-                label={template.label}
-                value={template.id}
-                checked={template.id === selectedTemplateId}
-                onChange={handleTemplateCardChange}
-              />
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGrid>
-        <EuiSpacer />
-        {selectedTemplate && (
-          <>
-            <EuiTitle size="xs">
-              <h3>Features</h3>
-            </EuiTitle>
-            <EuiSpacer />
-            <EuiFlexGroup>
-              {selectedTemplate.coverImage && (
-                <EuiFlexItem>
-                  <EuiImage src={selectedTemplate.coverImage} alt={selectedTemplate.label} />
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem>
-                <EuiText>{selectedTemplate.description}</EuiText>
-                <EuiTitle size="xs">
-                  <h4>Key Features:</h4>
-                </EuiTitle>
-                <EuiSpacer />
-                <EuiFlexGrid style={{ paddingLeft: 20, paddingRight: 100 }} columns={2}>
-                  {templateFeatureMap.get(selectedTemplate.id)?.map((feature) => (
-                    <EuiFlexItem key={feature.id}>• {feature.title}</EuiFlexItem>
-                  ))}
-                </EuiFlexGrid>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer />
-          </>
-        )}
-      </EuiPanel>
-      <EuiSpacer />
-      <EuiPanel>
-        <EuiTitle size="s">
           <h2>Workspace features</h2>
         </EuiTitle>
         <EuiFlexGrid style={{ paddingLeft: 20, paddingTop: 20 }} columns={2}>
@@ -435,6 +429,17 @@ export const WorkspaceForm = ({
             );
           })}
         </EuiFlexGrid>
+      </EuiPanel>
+      <EuiSpacer />
+      <EuiPanel>
+        <EuiTitle size="s">
+          <h2>Members & permissions</h2>
+        </EuiTitle>
+        <WorkspacePermissionSettingPanel
+          errors={formErrors.permissions}
+          value={permissionSettings}
+          onChange={setPermissionSettings}
+        />
       </EuiPanel>
       <EuiSpacer />
       <EuiText textAlign="right">

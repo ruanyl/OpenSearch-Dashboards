@@ -356,6 +356,7 @@ export {
   WorkspacesService,
   WorkspaceAttribute,
   WorkspaceFindOptions,
+  WorkspacePermissionMode,
 } from './workspace';
 
 export { getWorkspaceIdFromUrl, WORKSPACE_TYPE } from './utils';

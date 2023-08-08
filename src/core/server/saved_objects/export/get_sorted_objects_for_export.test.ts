@@ -670,6 +670,7 @@ describe('getSortedObjectsForExport()', () => {
             ],
             Object {
               namespace: undefined,
+              workspaces: undefined,
             },
           ],
         ],
@@ -788,6 +789,7 @@ describe('getSortedObjectsForExport()', () => {
             ],
             Object {
               namespace: undefined,
+              workspaces: undefined,
             },
           ],
           Array [

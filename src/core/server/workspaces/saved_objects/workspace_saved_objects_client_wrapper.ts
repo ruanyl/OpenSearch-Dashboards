@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import {
   OpenSearchDashboardsRequest,
   SavedObject,
+  SavedObjectsAddToWorkspacesOptions,
   SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
@@ -17,16 +18,25 @@ import {
   SavedObjectsCreateOptions,
   SavedObjectsDeleteOptions,
   SavedObjectsFindOptions,
+  SavedObjectsShareObjects,
 } from 'opensearch-dashboards/server';
 import { SavedObjectsPermissionControlContract } from '../../saved_objects/permission_control/client';
 import { WORKSPACE_TYPE } from '../constants';
 import { PermissionMode } from '../../../utils';
+import { ACL } from '../../saved_objects/permission_control/acl';
 
 // Can't throw unauthorized for now, the page will be refreshed if unauthorized
 const generateWorkspacePermissionError = () =>
   Boom.illegal(
     i18n.translate('workspace.permission.invalidate', {
-      defaultMessage: 'Invalidate workspace permission',
+      defaultMessage: 'Invalid workspace permission',
+    })
+  );
+
+const generateSavedObjectsPermissionError = () =>
+  Boom.illegal(
+    i18n.translate('saved_objects.permission.invalidate', {
+      defaultMessage: 'Invalid saved objects permission',
     })
   );
 
@@ -103,6 +113,16 @@ export class WorkspaceSavedObjectsClientWrapper {
     }
   }
 
+  /**
+   * check if the type include workspace
+   * Workspace permission check is totally different from object permission check.
+   * @param type
+   * @returns
+   */
+  private isRelatedToWorkspace(type: string | string[]): boolean {
+    return type === WORKSPACE_TYPE || (Array.isArray(type) && type.includes(WORKSPACE_TYPE));
+  }
+
   public wrapperFactory: SavedObjectsClientWrapperFactory = (wrapperOptions) => {
     const deleteWithWorkspacePermissionControl = async (
       type: string,
@@ -122,6 +142,12 @@ export class WorkspaceSavedObjectsClientWrapper {
       objects: Array<SavedObjectsBulkCreateObject<T>>,
       options: SavedObjectsCreateOptions = {}
     ): Promise<SavedObjectsBulkResponse<T>> => {
+      if (options.workspaces) {
+        await this.validateMultiWorkspacesPermissions(options.workspaces, wrapperOptions.request, [
+          PermissionMode.Write,
+          PermissionMode.Management,
+        ]);
+      }
       return await wrapperOptions.client.bulkCreate(objects, options);
     };
 
@@ -172,27 +198,73 @@ export class WorkspaceSavedObjectsClientWrapper {
     const findWithWorkspacePermissionControl = async <T = unknown>(
       options: SavedObjectsFindOptions
     ) => {
-      if (options.workspaces) {
-        options.workspaces = options.workspaces.filter(
-          async (workspaceId) =>
-            await this.permissionControl.validate(
-              wrapperOptions.request,
-              {
-                type: WORKSPACE_TYPE,
-                id: workspaceId,
-              },
-              [PermissionMode.Read]
-            )
+      const principals = this.permissionControl.getPrincipalsFromRequest(wrapperOptions.request);
+
+      if (this.isRelatedToWorkspace(options.type)) {
+        const queryDSLForQueryingWorkspaces = ACL.genereateGetPermittedSavedObjectsQueryDSL(
+          [PermissionMode.LibraryRead, PermissionMode.LibraryWrite, PermissionMode.Management],
+          principals,
+          WORKSPACE_TYPE
         );
+        options.queryDSL = queryDSLForQueryingWorkspaces;
       } else {
-        options.workspaces = [
-          'public',
-          ...(await this.permissionControl.getPermittedWorkspaceIds(wrapperOptions.request, [
-            PermissionMode.Read,
-          ])),
-        ];
+        const permittedWorkspaceIds = await this.permissionControl.getPermittedWorkspaceIds(
+          wrapperOptions.request,
+          [PermissionMode.LibraryRead, PermissionMode.LibraryWrite, PermissionMode.Management]
+        );
+        if (options.workspaces) {
+          const isEveryWorkspaceIsPermitted = options.workspaces.every((item) =>
+            // TODO modify this line to use permittedWorkspaceIds if public workspace is also a workspace
+            ['public', ...(permittedWorkspaceIds || [])]?.includes(item)
+          );
+          if (!isEveryWorkspaceIsPermitted) {
+            throw generateWorkspacePermissionError();
+          }
+        } else {
+          const queryDSL = ACL.genereateGetPermittedSavedObjectsQueryDSL(
+            [
+              PermissionMode.LibraryRead,
+              PermissionMode.LibraryWrite,
+              PermissionMode.Management,
+              PermissionMode.Read,
+              PermissionMode.Write,
+            ],
+            principals,
+            options.type
+          );
+          options.workspaces = permittedWorkspaceIds;
+          options.queryDSL = queryDSL;
+        }
       }
+
       return await wrapperOptions.client.find<T>(options);
+    };
+
+    const addToWorkspacesWithPermissionControl = async (
+      objects: SavedObjectsShareObjects[],
+      targetWorkspaces: string[],
+      options: SavedObjectsAddToWorkspacesOptions = {}
+    ) => {
+      // target workspaces
+      await this.validateMultiWorkspacesPermissions(targetWorkspaces, wrapperOptions.request, [
+        PermissionMode.LibraryWrite,
+        PermissionMode.Management,
+      ]);
+
+      // saved_objects
+      const permitted = await this.permissionControl.batchValidate(
+        wrapperOptions.request,
+        objects.map((savedObj) => ({
+          ...savedObj,
+        })),
+        [PermissionMode.Write]
+      );
+
+      if (!permitted) {
+        throw generateSavedObjectsPermissionError();
+      }
+
+      return await wrapperOptions.client.addToWorkspaces(objects, targetWorkspaces, options);
     };
 
     return {
@@ -209,6 +281,7 @@ export class WorkspaceSavedObjectsClientWrapper {
       delete: deleteWithWorkspacePermissionControl,
       update: wrapperOptions.client.update,
       bulkUpdate: wrapperOptions.client.bulkUpdate,
+      addToWorkspaces: addToWorkspacesWithPermissionControl,
     };
   };
 
