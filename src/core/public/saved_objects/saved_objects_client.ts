@@ -266,13 +266,9 @@ export class SavedObjectsClient {
     };
     const currentWorkspaceId = this._getCurrentWorkspace();
     let finalWorkspaces;
-    if (options.workspaces) {
+    if (options.hasOwnProperty('workspaces')) {
       finalWorkspaces = options.workspaces;
     } else if (typeof currentWorkspaceId === 'string') {
-      /**
-       * When the currentWorkspaceId is an empty string instead of undefined
-       * It means user is creating object in public workspace.
-       */
       finalWorkspaces = [currentWorkspaceId];
     }
 
@@ -383,10 +379,13 @@ export class SavedObjectsClient {
 
     const currentWorkspaceId = this._getCurrentWorkspace();
     let finalWorkspaces;
-    if (options.workspaces) {
+    if (options.hasOwnProperty('workspaces')) {
       finalWorkspaces = options.workspaces;
     } else if (typeof currentWorkspaceId === 'string') {
-      finalWorkspaces = currentWorkspaceId ? [PUBLIC_WORKSPACE, currentWorkspaceId] : undefined;
+      finalWorkspaces =
+        currentWorkspaceId === PUBLIC_WORKSPACE
+          ? undefined
+          : [PUBLIC_WORKSPACE, currentWorkspaceId];
     }
 
     const renamedQuery = renameKeys<SavedObjectsFindOptions, any>(renameMap, {

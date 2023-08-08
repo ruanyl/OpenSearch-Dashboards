@@ -220,19 +220,7 @@ export class WorkspaceSavedObjectsClientWrapper {
             throw generateWorkspacePermissionError();
           }
         } else {
-          const queryDSL = ACL.genereateGetPermittedSavedObjectsQueryDSL(
-            [
-              PermissionMode.LibraryRead,
-              PermissionMode.LibraryWrite,
-              PermissionMode.Management,
-              PermissionMode.Read,
-              PermissionMode.Write,
-            ],
-            principals,
-            options.type
-          );
           options.workspaces = permittedWorkspaceIds;
-          options.queryDSL = queryDSL;
         }
       }
 
