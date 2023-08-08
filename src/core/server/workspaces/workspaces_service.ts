@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { URL } from 'node:url';
+import { i18n } from '@osd/i18n';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
 import { InternalHttpServiceSetup } from '../http';
@@ -108,7 +109,7 @@ export class WorkspacesService
   private async checkAndCreateWorkspace(
     internalRepository: ISavedObjectsRepository,
     workspaceId: string,
-    workspaceAttribute: Omit<WorkspaceAttribute, 'id'>,
+    workspaceAttribute: Omit<WorkspaceAttribute, 'id' | 'permissions'>,
     permissions?: Permissions
   ) {
     /**
@@ -155,7 +156,9 @@ export class WorkspacesService
         internalRepository,
         PUBLIC_WORKSPACE,
         {
-          name: 'public',
+          name: i18n.translate('workspaces.public.workspace.default.name', {
+            defaultMessage: 'public',
+          }),
         },
         publicWorkspaceACL.getPermissions()
       ),
@@ -163,7 +166,9 @@ export class WorkspacesService
         internalRepository,
         MANAGEMENT_WORKSPACE,
         {
-          name: 'Management',
+          name: i18n.translate('workspaces.management.workspace.default.name', {
+            defaultMessage: 'Management',
+          }),
         },
         managementWorkspaceACL.getPermissions()
       ),
