@@ -78,7 +78,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
     /**
      * Retrieve workspace id from url
      */
-    const workspaceId = this.getWorkspaceIdFromURL() || PUBLIC_WORKSPACE;
+    const workspaceId = this.getWorkspaceIdFromURL();
 
     if (workspaceId) {
       const result = await core.workspaces.client.enterWorkspace(workspaceId);
