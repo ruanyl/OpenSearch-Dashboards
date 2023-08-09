@@ -29,7 +29,6 @@
  */
 
 import { Permissions } from '../permission_control/acl';
-
 import { ISavedObjectsRepository } from './lib';
 import {
   SavedObject,
@@ -41,7 +40,6 @@ import {
   SavedObjectsFindOptions,
 } from '../types';
 import { SavedObjectsErrorHelpers } from './lib/errors';
-import { Permissions } from '../permission_control/acl';
 
 /**
  *
