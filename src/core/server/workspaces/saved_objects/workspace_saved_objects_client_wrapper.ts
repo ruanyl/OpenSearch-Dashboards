@@ -230,7 +230,7 @@ export class WorkspaceSavedObjectsClientWrapper {
            * Select all the docs that
            * 1. ACL matches right or write permission OR
            * 2. workspaces matches library_read or library_write or management OR
-           * 3. Records without workspaces field (Advances settings)
+           * 3. Advances settings
            */
           options.queryDSL = {
             query: {
@@ -241,9 +241,9 @@ export class WorkspaceSavedObjectsClientWrapper {
                       should: [
                         {
                           bool: {
-                            must_not: {
-                              exists: {
-                                field: 'workspaces',
+                            must: {
+                              term: {
+                                type: 'config',
                               },
                             },
                           },
