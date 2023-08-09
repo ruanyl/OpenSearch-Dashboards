@@ -220,7 +220,51 @@ export class WorkspaceSavedObjectsClientWrapper {
             throw generateWorkspacePermissionError();
           }
         } else {
-          options.workspaces = permittedWorkspaceIds;
+          const queryDSL = ACL.genereateGetPermittedSavedObjectsQueryDSL(
+            [PermissionMode.Read, PermissionMode.Write],
+            principals,
+            options.type
+          );
+          options.workspaces = undefined;
+          /**
+           * Select all the docs that
+           * 1. ACL matches right or write permission OR
+           * 2. workspaces matches library_read or library_write or management OR
+           * 3. Records without workspaces field (Advances settings)
+           */
+          options.queryDSL = {
+            query: {
+              bool: {
+                filter: [
+                  {
+                    bool: {
+                      should: [
+                        {
+                          bool: {
+                            must_not: {
+                              exists: {
+                                field: 'workspaces',
+                              },
+                            },
+                          },
+                        },
+                        queryDSL.query,
+                        {
+                          bool: {
+                            should: permittedWorkspaceIds?.map((item) => ({
+                              terms: {
+                                workspaces: [item],
+                              },
+                            })),
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          };
         }
       }
 
