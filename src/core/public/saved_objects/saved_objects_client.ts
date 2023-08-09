@@ -382,10 +382,7 @@ export class SavedObjectsClient {
     if (options.hasOwnProperty('workspaces')) {
       finalWorkspaces = options.workspaces;
     } else if (typeof currentWorkspaceId === 'string') {
-      finalWorkspaces =
-        currentWorkspaceId === PUBLIC_WORKSPACE
-          ? undefined
-          : [PUBLIC_WORKSPACE, currentWorkspaceId];
+      finalWorkspaces = Array.from(new Set([PUBLIC_WORKSPACE, currentWorkspaceId]));
     }
 
     const renamedQuery = renameKeys<SavedObjectsFindOptions, any>(renameMap, {
