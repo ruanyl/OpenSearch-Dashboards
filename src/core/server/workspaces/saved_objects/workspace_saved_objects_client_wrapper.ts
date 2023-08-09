@@ -228,7 +228,7 @@ export class WorkspaceSavedObjectsClientWrapper {
           options.workspaces = undefined;
           /**
            * Select all the docs that
-           * 1. ACL matches right or write permission OR
+           * 1. ACL matches read or write permission OR
            * 2. workspaces matches library_read or library_write or management OR
            * 3. Advances settings
            */
