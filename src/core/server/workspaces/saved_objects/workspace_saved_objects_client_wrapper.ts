@@ -240,22 +240,14 @@ export class WorkspaceSavedObjectsClientWrapper {
                     bool: {
                       should: [
                         {
-                          bool: {
-                            must: {
-                              term: {
-                                type: 'config',
-                              },
-                            },
+                          term: {
+                            type: 'config',
                           },
                         },
                         queryDSL.query,
                         {
-                          bool: {
-                            should: permittedWorkspaceIds?.map((item) => ({
-                              terms: {
-                                workspaces: [item],
-                              },
-                            })),
+                          terms: {
+                            workspaces: permittedWorkspaceIds,
                           },
                         },
                       ],
