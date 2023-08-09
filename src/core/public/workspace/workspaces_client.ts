@@ -70,8 +70,6 @@ export class WorkspacesClient {
         }
       }
     );
-
-    this.init();
   }
 
   /**
