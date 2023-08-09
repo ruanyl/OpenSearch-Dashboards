@@ -157,23 +157,25 @@ export class ACL {
     }
 
     for (const permissionType in this.permissions) {
-      const { users = [], groups = [] } = this.permissions[permissionType] ?? {};
-      users.forEach((user) => {
-        const found = result.find((r) => r.type === PrincipalType.Users && r.name === user);
-        if (found) {
-          found.permissions.push(permissionType);
-        } else {
-          result.push({ type: PrincipalType.Users, name: user, permissions: [permissionType] });
-        }
-      });
-      groups.forEach((group) => {
-        const found = result.find((r) => r.type === PrincipalType.Groups && r.name === group);
-        if (found) {
-          found.permissions.push(permissionType);
-        } else {
-          result.push({ type: PrincipalType.Groups, name: group, permissions: [permissionType] });
-        }
-      });
+      if (Object.hasOwn(this.permissions, permissionType)) {
+        const { users = [], groups = [] } = this.permissions[permissionType] ?? {};
+        users.forEach((user) => {
+          const found = result.find((r) => r.type === PrincipalType.Users && r.name === user);
+          if (found) {
+            found.permissions.push(permissionType);
+          } else {
+            result.push({ type: PrincipalType.Users, name: user, permissions: [permissionType] });
+          }
+        });
+        groups.forEach((group) => {
+          const found = result.find((r) => r.type === PrincipalType.Groups && r.name === group);
+          if (found) {
+            found.permissions.push(permissionType);
+          } else {
+            result.push({ type: PrincipalType.Groups, name: group, permissions: [permissionType] });
+          }
+        });
+      }
     }
 
     return result;
