@@ -230,7 +230,7 @@ export class WorkspaceSavedObjectsClientWrapper {
            * Select all the docs that
            * 1. ACL matches read or write permission OR
            * 2. workspaces matches library_read or library_write or management OR
-           * 3. Advances settings
+           * 3. Advanced settings
            */
           options.queryDSL = {
             query: {
