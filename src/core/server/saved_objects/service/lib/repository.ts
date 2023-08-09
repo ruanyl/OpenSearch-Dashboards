@@ -221,14 +221,6 @@ export class SavedObjectsRepository {
     this._serializer = serializer;
   }
 
-  private isPublicWorkspace(workspaces?: string[]) {
-    if (!workspaces || workspaces.includes('public')) {
-      return true;
-    }
-
-    return false;
-  }
-
   /**
    * This function will compute the exclude workspaces from baseWorkspaces
    */
@@ -494,16 +486,12 @@ export class SavedObjectsRepository {
       }
 
       if (expectedBulkGetResult.value.method === 'create') {
-        if (!this.isPublicWorkspace(options.workspaces)) {
-          savedObjectWorkspaces = options.workspaces;
-        }
+        savedObjectWorkspaces = options.workspaces;
       } else {
         const changeToCreate = () => {
           finalMethod = 'create';
           finalObjectId = object.id;
-          savedObjectWorkspaces = this.isPublicWorkspace(options.workspaces)
-            ? undefined
-            : options.workspaces;
+          savedObjectWorkspaces = options.workspaces;
           versionProperties = {};
         };
         /**
@@ -538,9 +526,7 @@ export class SavedObjectsRepository {
             savedObjectWorkspaces = transformedObject.workspaces;
           }
         } else {
-          savedObjectWorkspaces = this.isPublicWorkspace(options.workspaces)
-            ? undefined
-            : options.workspaces;
+          savedObjectWorkspaces = options.workspaces;
         }
       }
 
