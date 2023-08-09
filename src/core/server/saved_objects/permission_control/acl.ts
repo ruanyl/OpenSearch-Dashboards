@@ -157,7 +157,7 @@ export class ACL {
     }
 
     for (const permissionType in this.permissions) {
-      if (Object.hasOwn(this.permissions, permissionType)) {
+      if (Object.prototype.hasOwnProperty.call(this.permissions, permissionType)) {
         const { users = [], groups = [] } = this.permissions[permissionType] ?? {};
         users.forEach((user) => {
           const found = result.find((r) => r.type === PrincipalType.Users && r.name === user);
