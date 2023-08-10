@@ -158,7 +158,6 @@ export class WorkspaceSavedObjectsClientWrapper {
     ) => {
       if (this.isRelatedToWorkspace(type)) {
         await this.validateSingleWorkspacePermissions(id, wrapperOptions.request, [
-          PermissionMode.LibraryWrite,
           PermissionMode.Management,
         ]);
       }
@@ -180,7 +179,6 @@ export class WorkspaceSavedObjectsClientWrapper {
     ): Promise<SavedObjectsUpdateResponse<T>> => {
       if (this.isRelatedToWorkspace(type)) {
         await this.validateSingleWorkspacePermissions(id, wrapperOptions.request, [
-          PermissionMode.LibraryWrite,
           PermissionMode.Management,
         ]);
       }
@@ -191,13 +189,19 @@ export class WorkspaceSavedObjectsClientWrapper {
       objects: Array<SavedObjectsBulkUpdateObject<T>>,
       options?: SavedObjectsBulkUpdateOptions
     ): Promise<SavedObjectsBulkUpdateResponse<T>> => {
-      for (const object of objects) {
-        if (this.isRelatedToWorkspace(object.type)) {
-          await this.validateSingleWorkspacePermissions(object.id, wrapperOptions.request, [
-            PermissionMode.LibraryWrite,
-            PermissionMode.Management,
-          ]);
+      const workspaceIds = objects.reduce<string[]>((acc, cur) => {
+        if (this.isRelatedToWorkspace(cur.type)) {
+          acc.push(cur.id);
         }
+        return acc;
+      }, []);
+      const permittedWorkspaceIds =
+        (await this.permissionControl.getPermittedWorkspaceIds(wrapperOptions.request, [
+          PermissionMode.Management,
+        ])) ?? [];
+      const workspacePermitted = workspaceIds.every((id) => permittedWorkspaceIds?.includes(id));
+      if (!workspacePermitted) {
+        throw generateWorkspacePermissionError();
       }
 
       return await wrapperOptions.client.bulkUpdate(objects, options);
