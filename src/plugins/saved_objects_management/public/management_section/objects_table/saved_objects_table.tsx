@@ -69,7 +69,6 @@ import {
   WorkspaceAttribute,
 } from 'src/core/public';
 import { Subscription } from 'rxjs';
-import { PUBLIC_WORKSPACE } from '../../../../../core/public';
 import { RedirectAppLinks } from '../../../../opensearch_dashboards_react/public';
 import { IndexPatternsContract } from '../../../../data/public';
 import {
@@ -97,6 +96,7 @@ import {
 import { Header, Table, Flyout, Relationships } from './components';
 import { DataPublicPluginStart } from '../../../../../plugins/data/public';
 import { SavedObjectsCopyModal } from './components/copy_modal';
+import { PUBLIC_WORKSPACE, MANAGEMENT_WORKSPACE } from '../../../../../core/public';
 
 interface ExportAllOption {
   id: string;
@@ -193,7 +193,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     if (!availableWorkspace?.length) {
       return undefined;
     }
-    if (!workspaceId) {
+    if (!workspaceId || workspaceId === MANAGEMENT_WORKSPACE) {
       return availableWorkspace.map((ws) => ws.id);
     } else if (workspaceId === PUBLIC_WORKSPACE) {
       return [PUBLIC_WORKSPACE];
@@ -301,11 +301,10 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
   fetchWorkspace = () => {
     const workspace = this.props.workspaces;
-    this.currentWorkspaceIdSubscription = workspace.currentWorkspaceId$.subscribe(
-      (workspaceId) =>
-        this.setState({
-          workspaceId,
-        })
+    this.currentWorkspaceIdSubscription = workspace.currentWorkspaceId$.subscribe((workspaceId) =>
+      this.setState({
+        workspaceId,
+      })
     );
 
     this.workspacesSubscription = workspace.workspaceList$.subscribe((workspaceList) => {
