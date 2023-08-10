@@ -199,7 +199,7 @@ export class WorkspaceSavedObjectsClientWrapper {
         (await this.permissionControl.getPermittedWorkspaceIds(wrapperOptions.request, [
           PermissionMode.Management,
         ])) ?? [];
-      const workspacePermitted = workspaceIds.every((id) => permittedWorkspaceIds?.includes(id));
+      const workspacePermitted = workspaceIds.every((id) => permittedWorkspaceIds.includes(id));
       if (!workspacePermitted) {
         throw generateWorkspacePermissionError();
       }
