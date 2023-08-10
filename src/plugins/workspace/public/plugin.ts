@@ -25,15 +25,12 @@ import {
   WORKSPACE_CREATE_APP_ID,
   WORKSPACE_OVERVIEW_APP_ID,
   WORKSPACE_NAV_CATEGORY,
+  WORKSPACE_FATAL_ERROR_APP_ID,
 } from '../common/constants';
 import { mountDropdownList } from './mount';
 import { SavedObjectsManagementPluginSetup } from '../../saved_objects_management/public';
 import { getWorkspaceColumn } from './components/utils/workspace_column';
-import {
-  getWorkspaceIdFromUrl,
-  PUBLIC_WORKSPACE,
-  WORKSPACE_PATH_PREFIX,
-} from '../../../core/public/utils';
+import { getWorkspaceIdFromUrl, WORKSPACE_PATH_PREFIX } from '../../../core/public/utils';
 import { WORKSPACE_FEATURE_FLAG_KEY_IN_UI_SETTINGS } from '../../../core/public/utils';
 
 interface WorkspacesPluginSetupDeps {
@@ -83,12 +80,20 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
     if (workspaceId) {
       const result = await core.workspaces.client.enterWorkspace(workspaceId);
       if (!result.success) {
-        core.fatalErrors.add(
-          result.error ||
-            i18n.translate('workspace.error.setup', {
-              defaultMessage: 'Workspace init failed',
-            })
-        );
+        /**
+         * Fatal error service does not support customized actions
+         * So we have to use a self-hosted page to show the errors and redirect.
+         */
+        (async () => {
+          const [{ application, chrome }] = await core.getStartServices();
+          chrome.setIsVisible(false);
+          application.navigateToApp(WORKSPACE_FATAL_ERROR_APP_ID, {
+            replace: true,
+            state: {
+              error: result.error,
+            },
+          });
+        })();
       }
     }
     /**
@@ -160,6 +165,17 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
       async mount(params: AppMountParameters) {
         const { renderListApp } = await import('./application');
         return mountWorkspaceApp(params, renderListApp);
+      },
+    });
+
+    // workspace fatal error
+    core.application.register({
+      id: WORKSPACE_FATAL_ERROR_APP_ID,
+      title: '',
+      navLinkStatus: AppNavLinkStatus.hidden,
+      async mount(params: AppMountParameters) {
+        const { renderFatalErrorApp } = await import('./application');
+        return mountWorkspaceApp(params, renderFatalErrorApp);
       },
     });
 

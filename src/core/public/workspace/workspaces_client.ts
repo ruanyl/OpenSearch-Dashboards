@@ -40,6 +40,7 @@ type IResponse<T> =
  */
 export class WorkspacesClient {
   private http: HttpSetup;
+  private hasFetchedWorkspaceList = new BehaviorSubject<boolean>(false);
   public currentWorkspaceId$ = new BehaviorSubject<string>('');
   public workspaceList$ = new BehaviorSubject<WorkspaceAttribute[]>([]);
   public currentWorkspace$ = new BehaviorSubject<WorkspaceAttribute | null>(null);
@@ -48,7 +49,7 @@ export class WorkspacesClient {
 
     combineLatest([this.workspaceList$, this.currentWorkspaceId$]).subscribe(
       ([workspaceList, currentWorkspaceId]) => {
-        if (workspaceList.length) {
+        if (this.hasFetchedWorkspaceList.getValue()) {
           const currentWorkspace = this.findWorkspace([workspaceList, currentWorkspaceId]);
 
           /**
@@ -135,6 +136,8 @@ export class WorkspacesClient {
     const result = await this.list({
       perPage: 999,
     });
+
+    this.hasFetchedWorkspaceList.next(true);
 
     if (result?.success) {
       this.workspaceList$.next(result.result.workspaces);
