@@ -19,11 +19,16 @@ import {
   SavedObjectsDeleteOptions,
   SavedObjectsFindOptions,
   SavedObjectsShareObjects,
-  SavedObjectsPermissionControlContract,
-  WORKSPACE_TYPE,
-  ACL,
-  WorkspacePermissionMode,
-} from '../../../../core/server';
+  SavedObjectsUpdateOptions,
+  SavedObjectsUpdateResponse,
+  SavedObjectsBulkUpdateObject,
+  SavedObjectsBulkUpdateResponse,
+  SavedObjectsBulkUpdateOptions,
+} from 'opensearch-dashboards/server';
+import { SavedObjectsPermissionControlContract } from '../../saved_objects/permission_control/client';
+import { WORKSPACE_TYPE } from '../constants';
+import { PermissionMode } from '../../../utils';
+import { ACL } from '../../saved_objects/permission_control/acl';
 
 // Can't throw unauthorized for now, the page will be refreshed if unauthorized
 const generateWorkspacePermissionError = () =>
@@ -60,6 +65,28 @@ export class WorkspaceSavedObjectsClientWrapper {
 
     return [permission];
   }
+  private async validateSingleWorkspacePermissions(
+    workspaceId: string | undefined,
+    request: OpenSearchDashboardsRequest,
+    permissionMode: PermissionMode | PermissionMode[]
+  ) {
+    if (!workspaceId) {
+      return;
+    }
+    if (
+      !(await this.permissionControl.validate(
+        request,
+        {
+          type: WORKSPACE_TYPE,
+          id: workspaceId,
+        },
+        this.formatPermissionModeToStringArray(permissionMode)
+      ))
+    ) {
+      throw generateWorkspacePermissionError();
+    }
+  }
+
   private async validateMultiWorkspacesPermissions(
     workspaces: string[] | undefined,
     request: OpenSearchDashboardsRequest,
@@ -129,6 +156,13 @@ export class WorkspaceSavedObjectsClientWrapper {
       id: string,
       options: SavedObjectsDeleteOptions = {}
     ) => {
+      if (this.isRelatedToWorkspace(type)) {
+        await this.validateSingleWorkspacePermissions(id, wrapperOptions.request, [
+          PermissionMode.LibraryWrite,
+          PermissionMode.Management,
+        ]);
+      }
+
       const objectToDeleted = await wrapperOptions.client.get(type, id, options);
       await this.validateMultiWorkspacesPermissions(
         objectToDeleted.workspaces,
@@ -136,6 +170,37 @@ export class WorkspaceSavedObjectsClientWrapper {
         WorkspacePermissionMode.Management
       );
       return await wrapperOptions.client.delete(type, id, options);
+    };
+
+    const updateWithWorkspacePermissionControl = async <T = unknown>(
+      type: string,
+      id: string,
+      attributes: Partial<T>,
+      options: SavedObjectsUpdateOptions = {}
+    ): Promise<SavedObjectsUpdateResponse<T>> => {
+      if (this.isRelatedToWorkspace(type)) {
+        await this.validateSingleWorkspacePermissions(id, wrapperOptions.request, [
+          PermissionMode.LibraryWrite,
+          PermissionMode.Management,
+        ]);
+      }
+      return await wrapperOptions.client.update(type, id, attributes, options);
+    };
+
+    const bulkUpdateWithWorkspacePermissionControl = async <T = unknown>(
+      objects: Array<SavedObjectsBulkUpdateObject<T>>,
+      options?: SavedObjectsBulkUpdateOptions
+    ): Promise<SavedObjectsBulkUpdateResponse<T>> => {
+      for (const object of objects) {
+        if (this.isRelatedToWorkspace(object.type)) {
+          await this.validateSingleWorkspacePermissions(object.id, wrapperOptions.request, [
+            PermissionMode.LibraryWrite,
+            PermissionMode.Management,
+          ]);
+        }
+      }
+
+      return await wrapperOptions.client.bulkUpdate(objects, options);
     };
 
     const bulkCreateWithWorkspacePermissionControl = async <T = unknown>(
@@ -310,8 +375,8 @@ export class WorkspaceSavedObjectsClientWrapper {
       create: createWithWorkspacePermissionControl,
       bulkCreate: bulkCreateWithWorkspacePermissionControl,
       delete: deleteWithWorkspacePermissionControl,
-      update: wrapperOptions.client.update,
-      bulkUpdate: wrapperOptions.client.bulkUpdate,
+      update: updateWithWorkspacePermissionControl,
+      bulkUpdate: bulkUpdateWithWorkspacePermissionControl,
       addToWorkspaces: addToWorkspacesWithPermissionControl,
     };
   };
