@@ -2,7 +2,6 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import type { PublicContract } from '@osd/utility-types';
 import { combineLatest } from 'rxjs';
 import { isEqual } from 'lodash';
 
