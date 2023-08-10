@@ -7,8 +7,7 @@ import { OpenSearchDashboardsRequest } from '../../http';
 import { ensureRawRequest } from '../../http/router';
 import { SavedObjectsServiceStart } from '../saved_objects_service';
 import { SavedObjectsBulkGetObject } from '../service';
-import { ACL, Principals, TransformedPermission } from './acl';
-import { PrincipalType } from '../../../utils/constants';
+import { ACL, Principals, TransformedPermission, PrincipalType } from './acl';
 import { WORKSPACE_TYPE } from '../constants';
 
 export type SavedObjectsPermissionControlContract = Pick<

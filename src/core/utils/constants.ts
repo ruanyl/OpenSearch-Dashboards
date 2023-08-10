@@ -13,11 +13,6 @@ export enum PermissionMode {
   LibraryWrite = 'library_write',
 }
 
-export enum PrincipalType {
-  Users = 'users',
-  Groups = 'groups',
-}
-
 export const PUBLIC_WORKSPACE = 'public';
 
 export const MANAGEMENT_WORKSPACE = 'management';
