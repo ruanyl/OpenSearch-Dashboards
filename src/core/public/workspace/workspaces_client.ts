@@ -6,8 +6,8 @@ import type { PublicContract } from '@osd/utility-types';
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { isEqual } from 'lodash';
 import { HttpFetchError, HttpFetchOptions, HttpSetup } from '../http';
-import { WorkspaceAttribute, WorkspaceFindOptions, WorkspaceRoutePermissionItem } from '.';
 import { WORKSPACES_API_BASE_URL, WORKSPACE_ERROR_REASON_MAP } from './consts';
+import { PermissionMode } from '../../utils/constants';
 
 /**
  * WorkspacesClientContract as implemented by the {@link WorkspacesClient}
@@ -31,6 +31,31 @@ type IResponse<T> =
       success: false;
       error?: string;
     };
+
+type WorkspaceRoutePermissionItem = {
+  modes: Array<
+    PermissionMode.LibraryRead | PermissionMode.LibraryWrite | PermissionMode.Management
+  >;
+} & ({ type: 'user'; userId: string } | { type: 'group'; group: string });
+
+interface WorkspaceFindOptions {
+  page?: number;
+  perPage?: number;
+  search?: string;
+  searchFields?: string[];
+  sortField?: string;
+  sortOrder?: string;
+}
+
+export interface WorkspaceAttribute {
+  id: string;
+  name: string;
+  description?: string;
+  features?: string[];
+  color?: string;
+  icon?: string;
+  defaultVISTheme?: string;
+}
 
 /**
  * Workspaces is OpenSearchDashboards's visualize mechanism allowing admins to

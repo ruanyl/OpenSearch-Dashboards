@@ -2,58 +2,34 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import { URL } from 'node:url';
 import { i18n } from '@osd/i18n';
-import { CoreService } from '../../types';
-import { CoreContext } from '../core_context';
-import { InternalHttpServiceSetup } from '../http';
-import { Logger } from '../logging';
-import { registerRoutes } from './routes';
+
 import {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  Logger,
   ISavedObjectsRepository,
-  InternalSavedObjectsServiceSetup,
-  SavedObjectsServiceStart,
-} from '../saved_objects';
+  WORKSPACE_TYPE,
+  ACL,
+  Permissions,
+} from '../../../core/server';
+import { PermissionMode, PUBLIC_WORKSPACE, MANAGEMENT_WORKSPACE } from '../../../core/utils';
 import { IWorkspaceDBImpl, WorkspaceAttribute } from './types';
-import { WorkspacesClientWithSavedObject } from './workspaces_client';
-import { WorkspaceSavedObjectsClientWrapper } from './saved_objects';
-import { InternalUiSettingsServiceSetup } from '../ui_settings';
 import { uiSettings } from './ui_settings';
-import { WORKSPACE_TYPE } from './constants';
-import { MANAGEMENT_WORKSPACE, PUBLIC_WORKSPACE, PermissionMode } from '../../utils';
-import { ACL, Permissions } from '../saved_objects/permission_control/acl';
+import { WorkspacesClientWithSavedObject } from './workspace_client';
+import { WorkspaceSavedObjectsClientWrapper } from './saved_objects';
+import { registerRoutes } from './routes';
 
-export interface WorkspacesServiceSetup {
-  client: IWorkspaceDBImpl;
-}
+export interface WorkspacePluginSetup {}
+export interface WorkspacePluginStart {}
 
-export interface WorkspacesServiceStart {
-  client: IWorkspaceDBImpl;
-}
-
-export interface WorkspacesSetupDeps {
-  http: InternalHttpServiceSetup;
-  savedObject: InternalSavedObjectsServiceSetup;
-  uiSettings: InternalUiSettingsServiceSetup;
-}
-
-export interface WorkpsaceStartDeps {
-  savedObjects: SavedObjectsServiceStart;
-}
-
-export type InternalWorkspacesServiceSetup = WorkspacesServiceSetup;
-export type InternalWorkspacesServiceStart = WorkspacesServiceStart;
-
-export class WorkspacesService
-  implements CoreService<WorkspacesServiceSetup, WorkspacesServiceStart> {
-  private logger: Logger;
+export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePluginStart> {
+  private readonly logger: Logger;
   private client?: IWorkspaceDBImpl;
 
-  constructor(coreContext: CoreContext) {
-    this.logger = coreContext.logger.get('workspaces-service');
-  }
-
-  private proxyWorkspaceTrafficToRealHandler(setupDeps: WorkspacesSetupDeps) {
+  private proxyWorkspaceTrafficToRealHandler(setupDeps: CoreSetup) {
     /**
      * Proxy all {basePath}/w/{workspaceId}{osdPath*} paths to {basePath}{osdPath*}
      */
@@ -70,28 +46,32 @@ export class WorkspacesService
     });
   }
 
-  public async setup(setupDeps: WorkspacesSetupDeps): Promise<InternalWorkspacesServiceSetup> {
+  constructor(initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get('plugins', 'workspace');
+  }
+
+  public async setup(core: CoreSetup) {
     this.logger.debug('Setting up Workspaces service');
 
-    setupDeps.uiSettings.register(uiSettings);
+    core.uiSettings.register(uiSettings);
 
-    this.client = new WorkspacesClientWithSavedObject(setupDeps);
+    this.client = new WorkspacesClientWithSavedObject(core);
 
-    await this.client.setup(setupDeps);
+    await this.client.setup(core);
     const workspaceSavedObjectsClientWrapper = new WorkspaceSavedObjectsClientWrapper(
-      setupDeps.savedObject.permissionControl
+      core.savedObjects.permissionControl
     );
 
-    setupDeps.savedObject.addClientWrapper(
+    core.savedObjects.addClientWrapper(
       0,
       'workspace',
       workspaceSavedObjectsClientWrapper.wrapperFactory
     );
 
-    this.proxyWorkspaceTrafficToRealHandler(setupDeps);
+    this.proxyWorkspaceTrafficToRealHandler(core);
 
     registerRoutes({
-      http: setupDeps.http,
+      http: core.http,
       logger: this.logger,
       client: this.client as IWorkspaceDBImpl,
     });
@@ -129,7 +109,7 @@ export class WorkspacesService
     }
   }
 
-  private async setupWorkspaces(startDeps: WorkpsaceStartDeps) {
+  private async setupWorkspaces(startDeps: CoreStart) {
     const internalRepository = startDeps.savedObjects.createInternalRepository();
     const publicWorkspaceACL = new ACL().addPermission(
       [PermissionMode.LibraryRead, PermissionMode.LibraryWrite],
@@ -165,15 +145,15 @@ export class WorkspacesService
     ]);
   }
 
-  public async start(startDeps: WorkpsaceStartDeps): Promise<InternalWorkspacesServiceStart> {
+  public start(core: CoreStart) {
     this.logger.debug('Starting SavedObjects service');
 
-    this.setupWorkspaces(startDeps);
+    this.setupWorkspaces(core);
 
     return {
       client: this.client as IWorkspaceDBImpl,
     };
   }
 
-  public async stop() {}
+  public stop() {}
 }

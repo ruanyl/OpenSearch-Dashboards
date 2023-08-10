@@ -322,6 +322,10 @@ export {
   SavedObjectsShareObjects,
   SavedObjectsAddToWorkspacesOptions,
   SavedObjectsAddToWorkspacesResponse,
+  WORKSPACE_TYPE,
+  Permissions,
+  ACL,
+  SavedObjectsPermissionControlContract,
 } from './saved_objects';
 
 export {
@@ -511,5 +515,3 @@ export const config = {
     appenders: appendersSchema as Type<AppenderConfigType>,
   },
 };
-
-export { formatWorkspaces, workspacesValidator, WORKSPACE_TYPE } from './workspaces';

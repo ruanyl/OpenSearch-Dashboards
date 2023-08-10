@@ -29,11 +29,7 @@ import {
 import { mountDropdownList } from './mount';
 import { SavedObjectsManagementPluginSetup } from '../../saved_objects_management/public';
 import { getWorkspaceColumn } from './components/utils/workspace_column';
-import {
-  getWorkspaceIdFromUrl,
-  PUBLIC_WORKSPACE,
-  WORKSPACE_PATH_PREFIX,
-} from '../../../core/public/utils';
+import { getWorkspaceIdFromUrl, WORKSPACE_PATH_PREFIX } from '../../../core/public/utils';
 import { WORKSPACE_FEATURE_FLAG_KEY_IN_UI_SETTINGS } from '../../../core/public/utils';
 
 interface WorkspacesPluginSetupDeps {

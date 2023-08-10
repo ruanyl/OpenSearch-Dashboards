@@ -4,10 +4,8 @@
  */
 import { schema } from '@osd/config-schema';
 
-import { PermissionMode } from '../../../utils/constants';
-import { ACL, Permissions } from '../../saved_objects/permission_control/acl';
-import { InternalHttpServiceSetup } from '../../http';
-import { Logger } from '../../logging';
+import { PermissionMode } from '../../../../core/utils/constants';
+import { ACL, Permissions, CoreSetup, Logger } from '../../../../core/server';
 import { IWorkspaceDBImpl, WorkspaceRoutePermissionItem } from '../types';
 
 const WORKSPACES_API_BASE_URL = '/api/workspaces';
@@ -81,12 +79,12 @@ export function registerRoutes({
 }: {
   client: IWorkspaceDBImpl;
   logger: Logger;
-  http: InternalHttpServiceSetup;
+  http: CoreSetup['http'];
 }) {
-  const router = http.createRouter(WORKSPACES_API_BASE_URL);
+  const router = http.createRouter();
   router.post(
     {
-      path: '/_list',
+      path: `${WORKSPACES_API_BASE_URL}/_list`,
       validate: {
         body: schema.object({
           search: schema.maybe(schema.string()),
@@ -126,7 +124,7 @@ export function registerRoutes({
   );
   router.get(
     {
-      path: '/{id}',
+      path: `${WORKSPACES_API_BASE_URL}/{id}`,
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -160,7 +158,7 @@ export function registerRoutes({
   );
   router.post(
     {
-      path: '',
+      path: `${WORKSPACES_API_BASE_URL}`,
       validate: {
         body: schema.object({
           attributes: workspaceAttributesSchema,
@@ -186,7 +184,7 @@ export function registerRoutes({
   );
   router.put(
     {
-      path: '/{id?}',
+      path: `${WORKSPACES_API_BASE_URL}/{id?}`,
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -217,7 +215,7 @@ export function registerRoutes({
   );
   router.delete(
     {
-      path: '/{id?}',
+      path: `${WORKSPACES_API_BASE_URL}/{id?}`,
       validate: {
         params: schema.object({
           id: schema.string(),

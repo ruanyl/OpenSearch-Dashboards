@@ -4,9 +4,5 @@
  */
 export { WorkspacesClientContract, WorkspacesClient } from './workspaces_client';
 export { WorkspacesStart, WorkspacesService, WorkspacesSetup } from './workspaces_service';
-export type {
-  WorkspaceAttribute,
-  WorkspaceFindOptions,
-  WorkspaceRoutePermissionItem,
-} from '../../server/types';
+export type { WorkspaceAttribute } from './workspaces_client';
 export { PermissionMode as WorkspacePermissionMode } from '../../utils/constants';

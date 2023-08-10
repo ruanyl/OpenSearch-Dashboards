@@ -354,7 +354,6 @@ export {
   WorkspacesStart,
   WorkspacesService,
   WorkspaceAttribute,
-  WorkspaceFindOptions,
   WorkspacePermissionMode,
 } from './workspace';
 

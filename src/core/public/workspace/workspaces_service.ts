@@ -4,7 +4,7 @@
  */
 import { CoreService } from 'src/core/types';
 import { WorkspacesClient, WorkspacesClientContract } from './workspaces_client';
-import type { WorkspaceAttribute } from '../../server/types';
+import type { WorkspaceAttribute } from './workspaces_client';
 import { HttpSetup } from '../http';
 import { IUiSettingsClient } from '../ui_settings';
 
