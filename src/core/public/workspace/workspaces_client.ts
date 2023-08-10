@@ -48,25 +48,27 @@ export class WorkspacesClient {
 
     combineLatest([this.workspaceList$, this.currentWorkspaceId$]).subscribe(
       ([workspaceList, currentWorkspaceId]) => {
-        const currentWorkspace = this.findWorkspace([workspaceList, currentWorkspaceId]);
+        if (workspaceList.length) {
+          const currentWorkspace = this.findWorkspace([workspaceList, currentWorkspaceId]);
 
-        /**
-         * Do a simple idempotent verification here
-         */
-        if (!isEqual(currentWorkspace, this.currentWorkspace$.getValue())) {
-          this.currentWorkspace$.next(currentWorkspace);
-        }
-
-        if (currentWorkspaceId && !currentWorkspace?.id) {
           /**
-           * Current workspace is staled
+           * Do a simple idempotent verification here
            */
-          this.currentWorkspaceId$.error({
-            reason: WORKSPACE_ERROR_REASON_MAP.WORKSPACE_STALED,
-          });
-          this.currentWorkspace$.error({
-            reason: WORKSPACE_ERROR_REASON_MAP.WORKSPACE_STALED,
-          });
+          if (!isEqual(currentWorkspace, this.currentWorkspace$.getValue())) {
+            this.currentWorkspace$.next(currentWorkspace);
+          }
+
+          if (currentWorkspaceId && !currentWorkspace?.id) {
+            /**
+             * Current workspace is staled
+             */
+            this.currentWorkspaceId$.error({
+              reason: WORKSPACE_ERROR_REASON_MAP.WORKSPACE_STALED,
+            });
+            this.currentWorkspace$.error({
+              reason: WORKSPACE_ERROR_REASON_MAP.WORKSPACE_STALED,
+            });
+          }
         }
       }
     );
@@ -192,7 +194,7 @@ export class WorkspacesClient {
    * @returns
    */
   public async create(
-    attributes: Omit<WorkspaceAttribute, 'id' | 'permissions'> & {
+    attributes: Omit<WorkspaceAttribute, 'id'> & {
       permissions: WorkspaceRoutePermissionItem[];
     }
   ): Promise<IResponse<WorkspaceAttribute>> {
@@ -280,7 +282,7 @@ export class WorkspacesClient {
   public async update(
     id: string,
     attributes: Partial<
-      Omit<WorkspaceAttribute, 'permissions'> & {
+      WorkspaceAttribute & {
         permissions: WorkspaceRoutePermissionItem[];
       }
     >

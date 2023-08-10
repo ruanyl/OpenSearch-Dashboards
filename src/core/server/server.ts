@@ -178,6 +178,7 @@ export class Server {
     await this.workspaces.setup({
       http: httpSetup,
       savedObject: savedObjectsSetup,
+      uiSettings: uiSettingsSetup,
     });
 
     const statusSetup = await this.status.setup({
@@ -261,7 +262,9 @@ export class Server {
       opensearch: opensearchStart,
       savedObjects: savedObjectsStart,
     });
-    await this.workspaces.start();
+    await this.workspaces.start({
+      savedObjects: savedObjectsStart,
+    });
 
     this.coreStart = {
       capabilities: capabilitiesStart,

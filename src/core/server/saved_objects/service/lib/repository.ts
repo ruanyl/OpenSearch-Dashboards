@@ -87,7 +87,7 @@ import {
   FIND_DEFAULT_PER_PAGE,
   SavedObjectsUtils,
 } from './utils';
-import { GLOBAL_WORKSPACE_ID } from '../../../workspaces/constants';
+import { PUBLIC_WORKSPACE } from '../../../../utils/constants';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -259,6 +259,7 @@ export class SavedObjectsRepository {
       initialNamespaces,
       version,
       workspaces,
+      permissions,
     } = options;
     const namespace = normalizeNamespace(options.namespace);
 
@@ -320,6 +321,7 @@ export class SavedObjectsRepository {
       updated_at: time,
       ...(Array.isArray(references) && { references }),
       ...(Array.isArray(savedObjectWorkspaces) && { workspaces: savedObjectWorkspaces }),
+      ...(permissions && { permissions }),
     });
 
     const raw = this._serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc);
@@ -1073,7 +1075,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    const { originId, updated_at: updatedAt, workspaces } = body._source;
+    const { originId, updated_at: updatedAt, workspaces, permissions } = body._source;
 
     let namespaces: string[] = [];
     if (!this._registry.isNamespaceAgnostic(type)) {
@@ -1089,6 +1091,7 @@ export class SavedObjectsRepository {
       ...(originId && { originId }),
       ...(updatedAt && { updated_at: updatedAt }),
       ...(workspaces && { workspaces }),
+      ...(permissions && { permissions }),
       version: encodeHitVersion(body),
       attributes: body._source[type],
       references: body._source.references || [],
@@ -1117,7 +1120,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    const { version, references, refresh = DEFAULT_REFRESH_SETTING } = options;
+    const { version, references, refresh = DEFAULT_REFRESH_SETTING, permissions } = options;
     const namespace = normalizeNamespace(options.namespace);
 
     let preflightResult: SavedObjectsRawDoc | undefined;
@@ -1131,6 +1134,7 @@ export class SavedObjectsRepository {
       [type]: attributes,
       updated_at: time,
       ...(Array.isArray(references) && { references }),
+      ...(permissions && { permissions }),
     };
 
     const { body, statusCode } = await this.client.update<SavedObjectsRawDocSource>(
@@ -1356,7 +1360,7 @@ export class SavedObjectsRepository {
         if (
           obj.workspaces &&
           obj.workspaces.length > 0 &&
-          !obj.workspaces.includes(GLOBAL_WORKSPACE_ID)
+          !obj.workspaces.includes(PUBLIC_WORKSPACE)
         ) {
           return intersection(obj.workspaces, options.workspaces).length === 0;
         }
@@ -1409,7 +1413,7 @@ export class SavedObjectsRepository {
             params: {
               time,
               workspaces,
-              globalWorkspaceId: GLOBAL_WORKSPACE_ID,
+              globalWorkspaceId: PUBLIC_WORKSPACE,
             },
           },
         },
