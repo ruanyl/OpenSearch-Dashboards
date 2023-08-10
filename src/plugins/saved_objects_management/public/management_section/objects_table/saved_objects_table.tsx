@@ -188,15 +188,23 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   }
 
   private get workspaceIdQuery() {
-    const { availableWorkspace } = this.state;
-    return availableWorkspace?.map((ws) => ws.id) ?? [PUBLIC_WORKSPACE];
-    // return this.state.workspaceId
-      ? Array.from(new Set([PUBLIC_WORKSPACE, this.state.workspaceId]))
-      : undefined;
+    const { availableWorkspace, workspaceId } = this.state;
+    // workspace is turned off
+    if (!availableWorkspace?.length) {
+      return undefined;
+    }
+    if (!workspaceId) {
+      return availableWorkspace.map((ws) => ws.id);
+    } else if (workspaceId === PUBLIC_WORKSPACE) {
+      return [PUBLIC_WORKSPACE];
+    } else {
+      return [workspaceId, PUBLIC_WORKSPACE];
+    }
   }
 
   private get wsNameIdLookup() {
     const { availableWorkspace } = this.state;
+    //  Assumption: workspace name is unique across the system
     return availableWorkspace?.reduce((map, ws) => {
       return map.set(ws.name, ws.id);
     }, new Map<string, string>());
@@ -275,12 +283,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       countOptions.namespacesToInclude = availableNamespaces;
     }
 
-    if (visibleWorkspaces?.length) {
-      countOptions.workspaces = visibleWorkspaces.map(
-        (wsName) => this.wsNameIdLookup?.get(wsName) || GLOBAL_WORKSPACE_ID
-      );
-    }
-
     // Fetch all the saved objects that exist so we can accurately populate the counts within
     // the table filter dropdown.
     const savedObjectCounts = await getSavedObjectCounts(this.props.http, countOptions);
@@ -339,7 +341,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
     if (visibleWorkspaces?.length) {
       const workspaceIds: string[] = visibleWorkspaces.map(
-        (wsName) => this.wsNameIdLookup?.get(wsName) || GLOBAL_WORKSPACE_ID
+        (wsName) => this.wsNameIdLookup?.get(wsName) || PUBLIC_WORKSPACE
       );
       findOptions.workspaces = workspaceIds;
     }
@@ -984,14 +986,17 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     // Add workspace filter
     if (availableWorkspace?.length) {
       const wsCounts = savedObjectCounts.workspaces || {};
-      // this will include public workspace
-      const wsFilterOptions = availableWorkspace.map((ws) => {
-        return {
-          name: ws.name,
-          value: ws.name,
-          view: `${ws.name} (${wsCounts[ws.id] || 0})`,
-        };
-      });
+      const wsFilterOptions = availableWorkspace
+        .filter((ws) => {
+          return this.workspaceIdQuery?.includes(ws.id);
+        })
+        .map((ws) => {
+          return {
+            name: ws.name,
+            value: ws.name,
+            view: `${ws.name} (${wsCounts[ws.id] || 0})`,
+          };
+        });
 
       filters.push({
         type: 'field_value_selection',
