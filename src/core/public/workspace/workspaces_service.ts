@@ -8,13 +8,13 @@ import { CoreService } from '../../types';
 /**
  * @public
  */
-export interface WorkspacesStart {
+export interface WorkspaceStart {
   currentWorkspaceId$: BehaviorSubject<string>;
   currentWorkspace$: BehaviorSubject<WorkspaceAttribute | null>;
   workspaceList$: BehaviorSubject<WorkspaceAttribute[]>;
 }
 
-export type WorkspacesSetup = WorkspacesStart;
+export type WorkspaceSetup = WorkspaceStart;
 
 export interface WorkspaceAttribute {
   id: string;
@@ -26,12 +26,12 @@ export interface WorkspaceAttribute {
   defaultVISTheme?: string;
 }
 
-export class WorkspacesService implements CoreService<WorkspacesSetup, WorkspacesStart> {
+export class WorkspaceService implements CoreService<WorkspaceSetup, WorkspaceStart> {
   private currentWorkspaceId$ = new BehaviorSubject<string>('');
   private workspaceList$ = new BehaviorSubject<WorkspaceAttribute[]>([]);
   private currentWorkspace$ = new BehaviorSubject<WorkspaceAttribute | null>(null);
 
-  public setup(): WorkspacesSetup {
+  public setup(): WorkspaceSetup {
     return {
       currentWorkspaceId$: this.currentWorkspaceId$,
       currentWorkspace$: this.currentWorkspace$,
@@ -39,7 +39,7 @@ export class WorkspacesService implements CoreService<WorkspacesSetup, Workspace
     };
   }
 
-  public start(): WorkspacesStart {
+  public start(): WorkspaceStart {
     return {
       currentWorkspaceId$: this.currentWorkspaceId$,
       currentWorkspace$: this.currentWorkspace$,

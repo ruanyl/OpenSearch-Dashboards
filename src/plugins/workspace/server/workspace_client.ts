@@ -14,7 +14,7 @@ import {
 } from './types';
 import { workspace } from './saved_objects';
 
-export class WorkspacesClientWithSavedObject implements IWorkspaceDBImpl {
+export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
   private setupDep: CoreSetup;
   constructor(core: CoreSetup) {
     this.setupDep = core;

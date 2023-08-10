@@ -35,17 +35,17 @@ import { formatUrlWithWorkspaceId } from './utils';
 import { WorkspaceClient } from './workspace_client';
 import { Services } from './application';
 
-interface WorkspacesPluginSetupDeps {
+interface WorkspacePluginSetupDeps {
   savedObjectsManagement?: SavedObjectsManagementPluginSetup;
 }
 
-export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDeps> {
+export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps> {
   private coreStart?: CoreStart;
   private currentWorkspaceSubscription?: Subscription;
   private getWorkspaceIdFromURL(): string | null {
     return getWorkspaceIdFromUrl(window.location.href);
   }
-  public async setup(core: CoreSetup, { savedObjectsManagement }: WorkspacesPluginSetupDeps) {
+  public async setup(core: CoreSetup, { savedObjectsManagement }: WorkspacePluginSetupDeps) {
     // If workspace feature is disabled, it will not load the workspace plugin
     if (core.uiSettings.get(WORKSPACE_FEATURE_FLAG_KEY_IN_UI_SETTINGS) === false) {
       return {};

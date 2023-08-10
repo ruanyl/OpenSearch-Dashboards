@@ -11,7 +11,7 @@ import {
   HttpFetchOptions,
   HttpSetup,
   WorkspaceAttribute,
-  WorkspacesStart,
+  WorkspaceStart,
 } from '../../../core/public';
 import { PermissionMode } from '../../../core/utils/constants';
 
@@ -20,13 +20,6 @@ const WORKSPACES_API_BASE_URL = '/api/workspaces';
 enum WORKSPACE_ERROR_REASON_MAP {
   WORKSPACE_STALED = 'WORKSPACE_STALED',
 }
-
-/**
- * WorkspacesClientContract as implemented by the {@link WorkspaceClient}
- *
- * @public
- */
-export type WorkspacesClientContract = PublicContract<WorkspaceClient>;
 
 const join = (...uriComponents: Array<string | undefined>) =>
   uriComponents
@@ -67,9 +60,9 @@ interface WorkspaceFindOptions {
  */
 export class WorkspaceClient {
   private http: HttpSetup;
-  private workspaces: WorkspacesStart;
+  private workspaces: WorkspaceStart;
 
-  constructor(http: HttpSetup, workspaces: WorkspacesStart) {
+  constructor(http: HttpSetup, workspaces: WorkspaceStart) {
     this.http = http;
     this.workspaces = workspaces;
 

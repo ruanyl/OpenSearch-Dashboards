@@ -11,7 +11,7 @@ import {
   ApplicationStart,
   HttpSetup,
   WorkspaceAttribute,
-  WorkspacesStart,
+  WorkspaceStart,
 } from '../../../../../core/public';
 import { WORKSPACE_CREATE_APP_ID } from '../../../common/constants';
 import { switchWorkspace } from '../../components/utils/workspace';
@@ -19,7 +19,7 @@ import { switchWorkspace } from '../../components/utils/workspace';
 type WorkspaceOption = EuiComboBoxOptionOption<WorkspaceAttribute>;
 
 interface WorkspaceDropdownListProps {
-  workspaces: WorkspacesStart;
+  workspaces: WorkspaceStart;
   application: ApplicationStart;
   http: HttpSetup;
 }

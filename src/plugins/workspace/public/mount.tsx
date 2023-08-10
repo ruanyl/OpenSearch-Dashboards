@@ -5,7 +5,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { ApplicationStart, ChromeStart, HttpSetup, WorkspacesStart } from '../../../core/public';
+import { ApplicationStart, ChromeStart, HttpSetup, WorkspaceStart } from '../../../core/public';
 import { WorkspaceDropdownList } from './containers/workspace_dropdown_list';
 
 export const mountDropdownList = ({
@@ -15,7 +15,7 @@ export const mountDropdownList = ({
   http,
 }: {
   application: ApplicationStart;
-  workspaces: WorkspacesStart;
+  workspaces: WorkspaceStart;
   chrome: ChromeStart;
   http: HttpSetup;
 }) => {

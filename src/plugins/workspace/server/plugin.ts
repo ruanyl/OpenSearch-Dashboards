@@ -18,7 +18,7 @@ import {
 import { PermissionMode, PUBLIC_WORKSPACE, MANAGEMENT_WORKSPACE } from '../../../core/utils';
 import { IWorkspaceDBImpl, WorkspaceAttribute } from './types';
 import { uiSettings } from './ui_settings';
-import { WorkspacesClientWithSavedObject } from './workspace_client';
+import { WorkspaceClientWithSavedObject } from './workspace_client';
 import { WorkspaceSavedObjectsClientWrapper } from './saved_objects';
 import { registerRoutes } from './routes';
 
@@ -55,7 +55,7 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
 
     core.uiSettings.register(uiSettings);
 
-    this.client = new WorkspacesClientWithSavedObject(core);
+    this.client = new WorkspaceClientWithSavedObject(core);
 
     await this.client.setup(core);
     const workspaceSavedObjectsClientWrapper = new WorkspaceSavedObjectsClientWrapper(
