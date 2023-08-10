@@ -163,7 +163,7 @@ export class CoreSystem {
       const http = this.http.setup({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings });
-      const workspaces = await this.workspaces.setup({ http, uiSettings });
+      const workspaces = this.workspaces.setup();
 
       const pluginDependencies = this.plugins.getOpaqueIds();
       const context = this.context.setup({
@@ -225,7 +225,7 @@ export class CoreSystem {
         targetDomElement: notificationsTargetDomElement,
       });
       const application = await this.application.start({ http, overlays });
-      const workspaces = await this.workspaces.start();
+      const workspaces = this.workspaces.start();
       const chrome = await this.chrome.start({
         application,
         docLinks,

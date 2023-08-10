@@ -175,7 +175,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       exportAllOptions: [],
       exportAllSelectedOptions: {},
       isIncludeReferencesDeepChecked: true,
-      workspaceId: this.props.workspaces.client.currentWorkspaceId$.getValue(),
+      workspaceId: this.props.workspaces.currentWorkspaceId$.getValue(),
     };
   }
 
@@ -187,7 +187,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
   componentDidMount() {
     this._isMounted = true;
-    this.props.workspaces.client.currentWorkspaceId$.subscribe((workspaceId) =>
+    this.props.workspaces.currentWorkspaceId$.subscribe((workspaceId) =>
       this.setState({
         workspaceId,
       })

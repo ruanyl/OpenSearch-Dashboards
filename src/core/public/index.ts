@@ -348,13 +348,8 @@ export {
 
 export { __osdBootstrap__ } from './osd_bootstrap';
 
-export {
-  WorkspacesClientContract,
-  WorkspacesClient,
-  WorkspacesStart,
-  WorkspacesService,
-  WorkspaceAttribute,
-  WorkspacePermissionMode,
-} from './workspace';
+export { WorkspacesStart, WorkspacesService, WorkspaceAttribute } from './workspace';
+
+export { PermissionMode as WorkspacePermissionMode } from '../utils/constants';
 
 export { getWorkspaceIdFromUrl, WORKSPACE_TYPE } from './utils';
