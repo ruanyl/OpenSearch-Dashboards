@@ -66,6 +66,8 @@ import {
   SavedObjectsCreateOptions,
   SavedObjectsDeleteFromNamespacesOptions,
   SavedObjectsDeleteFromNamespacesResponse,
+  SavedObjectsDeleteFromWorkspacesOptions,
+  SavedObjectsDeleteFromWorkspacesResponse,
   SavedObjectsDeleteOptions,
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
@@ -87,7 +89,7 @@ import {
   FIND_DEFAULT_PER_PAGE,
   SavedObjectsUtils,
 } from './utils';
-import { PUBLIC_WORKSPACE } from '../../../../utils/constants';
+import { MANAGEMENT_WORKSPACE, PUBLIC_WORKSPACE } from '../../../../utils/constants';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -125,6 +127,12 @@ export interface SavedObjectsIncrementCounterOptions extends SavedObjectsBaseOpt
  */
 export interface SavedObjectsDeleteByNamespaceOptions
   extends Omit<SavedObjectsBaseOptions, 'workspaces'> {
+  /** The OpenSearch supports only boolean flag for this operation */
+  refresh?: boolean;
+}
+
+export interface SavedObjectsDeleteByWorkspaceOptions
+  extends Omit<SavedObjectsBaseOptions, 'namespace'> {
   /** The OpenSearch supports only boolean flag for this operation */
   refresh?: boolean;
 }
@@ -656,6 +664,14 @@ export class SavedObjectsRepository {
       }
     }
 
+    const obj = await this.get(type, id);
+    const existingWorkspace = obj.workspaces || [];
+    if (!force && (existingWorkspace.length > 1 || existingWorkspace.includes(PUBLIC_WORKSPACE))) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        'Unable to delete saved object that exists in multiple workspaces, use the `force` option to delete it anyway'
+      );
+    }
+
     const { body, statusCode } = await this.client.delete<DeleteDocumentResponse>(
       {
         id: rawId,
@@ -727,6 +743,55 @@ export class SavedObjectsRepository {
           ...getSearchDsl(this._mappings, this._registry, {
             namespaces: namespace ? [namespace] : undefined,
             type: typesToUpdate,
+          }),
+        },
+      },
+      { ignore: [404] }
+    );
+
+    return body;
+  }
+
+  /**
+   * Deletes all objects from the provided namespace.
+   *
+   * @param {string} workspace
+   * @param options SavedObjectsDeleteByWorkspaceOptions
+   * @returns {promise} - { took, timed_out, total, deleted, batches, version_conflicts, noops, retries, failures }
+   */
+  async deleteByWorkspace(
+    workspace: string,
+    options: SavedObjectsDeleteByWorkspaceOptions = {}
+  ): Promise<any> {
+    if (!workspace || workspace === PUBLIC_WORKSPACE || workspace === MANAGEMENT_WORKSPACE) {
+      throw new TypeError(`namespace is required, and must not be reserved workspace`);
+    }
+
+    const allTypes = Object.keys(getRootPropertiesObjects(this._mappings));
+
+    const { body } = await this.client.updateByQuery(
+      {
+        index: this.getIndicesForTypes(allTypes),
+        refresh: options.refresh,
+        body: {
+          script: {
+            source: `
+              if (!ctx._source.containsKey('workspaces')) {
+                ctx.op = "delete";
+              } else {
+                ctx._source['workspaces'].removeAll(Collections.singleton(params['workspace']));
+                if (ctx._source['workspaces'].empty) {
+                  ctx.op = "delete";
+                }
+              }
+            `,
+            lang: 'painless',
+            params: { workspace },
+          },
+          conflicts: 'proceed',
+          ...getSearchDsl(this._mappings, this._registry, {
+            workspaces: workspace ? [workspace] : undefined,
+            type: allTypes,
           }),
         },
       },
@@ -1386,6 +1451,102 @@ export class SavedObjectsRepository {
         workspaces: savedObjectIdWorkspaceMap.get(rawId),
       } as SavedObjectsAddToWorkspacesResponse;
     });
+  }
+
+  /**
+   * Removes one or more namespaces from a given multi-namespace saved object. If no namespaces remain, the saved object is deleted
+   * entirely. This method and [`addToNamespaces`]{@link SavedObjectsRepository.addToNamespaces} are the only ways to change which Spaces a
+   * multi-namespace saved object is shared to.
+   */
+  async deleteFromWorkspaces(
+    type: string,
+    id: string,
+    workspaces: string[],
+    options: SavedObjectsDeleteFromWorkspacesOptions = {}
+  ): Promise<SavedObjectsDeleteFromWorkspacesResponse> {
+    if (!this._allowedTypes.includes(type)) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+    }
+
+    if (!workspaces.length) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        'workspaces must be a non-empty array of strings'
+      );
+    }
+
+    const { refresh = DEFAULT_REFRESH_SETTING } = options;
+    // we do not need to normalize the namespace to its ID format, since it will be converted to a namespace string before being used
+
+    const rawId = this._serializer.generateRawId(undefined, type, id);
+    const savedObject = await this.get(type, id);
+    const existingWorkspaces = savedObject.workspaces;
+    // if there are somehow no existing namespaces, allow the operation to proceed and delete this saved object
+    const remainingWorkspaces = existingWorkspaces?.filter((x) => !workspaces.includes(x));
+
+    if (remainingWorkspaces?.length) {
+      // if there is 1 or more namespace remaining, update the saved object
+      const time = this._getCurrentTime();
+
+      const doc = {
+        updated_at: time,
+        workspaces: remainingWorkspaces,
+      };
+
+      const { statusCode } = await this.client.update(
+        {
+          id: rawId,
+          index: this.getIndexForType(type),
+          ...decodeRequestVersion(savedObject.version),
+          refresh,
+
+          body: {
+            doc,
+          },
+        },
+        {
+          ignore: [404],
+        }
+      );
+
+      if (statusCode === 404) {
+        // see "404s from missing index" above
+        throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+      }
+      return { workspaces: doc.workspaces };
+    } else {
+      // if there are no namespaces remaining, delete the saved object
+      const { body, statusCode } = await this.client.delete<DeleteDocumentResponse>(
+        {
+          id: rawId,
+          index: this.getIndexForType(type),
+          refresh,
+          ...decodeRequestVersion(savedObject.version),
+        },
+        {
+          ignore: [404],
+        }
+      );
+
+      const deleted = body.result === 'deleted';
+      if (deleted) {
+        return { workspaces: [] };
+      }
+
+      const deleteDocNotFound = body.result === 'not_found';
+      const deleteIndexNotFound = body.error && body.error.type === 'index_not_found_exception';
+      if (deleteDocNotFound || deleteIndexNotFound) {
+        // see "404s from missing index" above
+        throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+      }
+
+      throw new Error(
+        `Unexpected OpenSearch DELETE response: ${JSON.stringify({
+          type,
+          id,
+          response: { body, statusCode },
+        })}`
+      );
+    }
   }
 
   /**

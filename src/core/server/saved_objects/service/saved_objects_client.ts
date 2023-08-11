@@ -228,6 +228,12 @@ export interface SavedObjectsDeleteFromNamespacesOptions extends SavedObjectsBas
   refresh?: MutatingOperationRefreshSetting;
 }
 
+export interface SavedObjectsDeleteFromWorkspacesOptions
+  extends Omit<SavedObjectsBaseOptions, 'namespace'> {
+  /** The OpenSearch Refresh setting for this operation */
+  refresh?: MutatingOperationRefreshSetting;
+}
+
 /**
  *
  * @public
@@ -235,6 +241,11 @@ export interface SavedObjectsDeleteFromNamespacesOptions extends SavedObjectsBas
 export interface SavedObjectsDeleteFromNamespacesResponse {
   /** The namespaces the object exists in after this operation is complete. An empty array indicates the object was deleted. */
   namespaces: string[];
+}
+
+export interface SavedObjectsDeleteFromWorkspacesResponse {
+  /** The workspaces the object exists in after this operation is complete. An empty array indicates the object was deleted. */
+  workspaces: string[];
 }
 
 /**
