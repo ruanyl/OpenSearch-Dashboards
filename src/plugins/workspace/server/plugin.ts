@@ -19,7 +19,6 @@ import {
   WorkspacePermissionMode,
 } from '../../../core/server';
 import { IWorkspaceDBImpl, WorkspaceAttribute } from './types';
-import { uiSettings } from './ui_settings';
 import { WorkspaceClientWithSavedObject } from './workspace_client';
 import { WorkspaceSavedObjectsClientWrapper } from './saved_objects';
 import { registerRoutes } from './routes';
@@ -51,8 +50,6 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
 
   public async setup(core: CoreSetup) {
     this.logger.debug('Setting up Workspaces service');
-
-    core.uiSettings.register(uiSettings);
 
     this.client = new WorkspaceClientWithSavedObject(core);
 

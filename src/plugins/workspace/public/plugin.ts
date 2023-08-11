@@ -30,7 +30,6 @@ import { mountDropdownList } from './mount';
 import { SavedObjectsManagementPluginSetup } from '../../saved_objects_management/public';
 import { getWorkspaceColumn } from './components/utils/workspace_column';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
-import { WORKSPACE_FEATURE_FLAG_KEY_IN_UI_SETTINGS } from '../../../core/public/utils';
 import { formatUrlWithWorkspaceId } from './utils';
 import { WorkspaceClient } from './workspace_client';
 import { Services } from './application';
@@ -46,11 +45,6 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     return getWorkspaceIdFromUrl(window.location.href);
   }
   public async setup(core: CoreSetup, { savedObjectsManagement }: WorkspacePluginSetupDeps) {
-    // If workspace feature is disabled, it will not load the workspace plugin
-    if (core.uiSettings.get(WORKSPACE_FEATURE_FLAG_KEY_IN_UI_SETTINGS) === false) {
-      return {};
-    }
-
     const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
     workspaceClient.init();
 
@@ -74,6 +68,9 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
      * register workspace column into saved objects table
      */
     savedObjectsManagement?.columns.register(getWorkspaceColumn(core));
+
+    // register apps for library object management
+    savedObjectsManagement?.registerLibrarySubApp();
 
     type WorkspaceAppType = (params: AppMountParameters, services: Services) => () => void;
     const mountWorkspaceApp = async (params: AppMountParameters, renderApp: WorkspaceAppType) => {
@@ -247,11 +244,6 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
   }
 
   public start(core: CoreStart) {
-    // If workspace feature is disabled, it will not load the workspace plugin
-    if (core.uiSettings.get(WORKSPACE_FEATURE_FLAG_KEY_IN_UI_SETTINGS) === false) {
-      return {};
-    }
-
     this.coreStart = core;
 
     mountDropdownList({

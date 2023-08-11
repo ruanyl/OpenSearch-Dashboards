@@ -16,5 +16,3 @@ export enum WorkspacePermissionMode {
 export const PUBLIC_WORKSPACE = 'public';
 
 export const MANAGEMENT_WORKSPACE = 'management';
-
-export const WORKSPACE_FEATURE_FLAG_KEY_IN_UI_SETTINGS = 'workspace:enabled';

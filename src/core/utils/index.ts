@@ -41,6 +41,5 @@ export {
   WORKSPACE_PATH_PREFIX,
   WorkspacePermissionMode,
   PUBLIC_WORKSPACE,
-  WORKSPACE_FEATURE_FLAG_KEY_IN_UI_SETTINGS,
   MANAGEMENT_WORKSPACE,
 } from './constants';
