@@ -8,7 +8,6 @@ import type { Subscription } from 'rxjs';
 import { combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {
-  ApplicationStart,
   AppMountParameters,
   AppNavLinkStatus,
   ChromeNavLink,
@@ -195,34 +194,16 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
   private filterNavLinks(core: CoreStart) {
     const navLinksService = core.chrome.navLinks;
     const chromeNavLinks$ = navLinksService.getNavLinks$();
-    const workspaceList$ = core.workspaces.workspaceList$;
     const currentWorkspace$ = core.workspaces.currentWorkspace$;
     combineLatest([
-      workspaceList$,
       chromeNavLinks$.pipe(map(this.changeCategoryNameByWorkspaceFeatureFlag)),
       currentWorkspace$,
-    ]).subscribe(([workspaceList, chromeNavLinks, currentWorkspace]) => {
+    ]).subscribe(([chromeNavLinks, currentWorkspace]) => {
       const filteredNavLinks = new Map<string, ChromeNavLink>();
       chromeNavLinks = this.filterByWorkspace(currentWorkspace, chromeNavLinks);
       chromeNavLinks.forEach((chromeNavLink) => {
         filteredNavLinks.set(chromeNavLink.id, chromeNavLink);
       });
-      if (!currentWorkspace) {
-        workspaceList
-          .filter((workspace, index) => index < 5)
-          .map((workspace, index) =>
-            this.workspaceToChromeNavLink(workspace, core.http, core.application, index)
-          )
-          .forEach((workspaceNavLink) =>
-            filteredNavLinks.set(workspaceNavLink.id, workspaceNavLink)
-          );
-      }
-      filteredWorkspaceList
-        .map((workspace, index) =>
-          this.workspaceToChromeNavLink(workspace, core.workspaces, core.application, index)
-        )
-        .forEach((workspaceNavLink) => filteredNavLinks.set(workspaceNavLink.id, workspaceNavLink));
-
       navLinksService.setFilteredNavLinks(filteredNavLinks);
     });
   }
