@@ -173,7 +173,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     };
   }
 
-  private async _changeSavedObjectCurrentWorkspace() {
+  private _changeSavedObjectCurrentWorkspace() {
     if (this.coreStart) {
       return this.coreStart.workspaces.currentWorkspaceId$.subscribe((currentWorkspaceId) => {
         if (currentWorkspaceId) {

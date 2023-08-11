@@ -64,6 +64,7 @@ import {
   SavedObjectsCheckConflictsObject,
   SavedObjectsCheckConflictsResponse,
   SavedObjectsCreateOptions,
+  SavedObjectsDeleteByWorkspaceOptions,
   SavedObjectsDeleteFromNamespacesOptions,
   SavedObjectsDeleteFromNamespacesResponse,
   SavedObjectsDeleteFromWorkspacesOptions,
@@ -89,7 +90,7 @@ import {
   FIND_DEFAULT_PER_PAGE,
   SavedObjectsUtils,
 } from './utils';
-import { MANAGEMENT_WORKSPACE, PUBLIC_WORKSPACE } from '../../../../utils/constants';
+import { PUBLIC_WORKSPACE } from '../../../../utils/constants';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -127,12 +128,6 @@ export interface SavedObjectsIncrementCounterOptions extends SavedObjectsBaseOpt
  */
 export interface SavedObjectsDeleteByNamespaceOptions
   extends Omit<SavedObjectsBaseOptions, 'workspaces'> {
-  /** The OpenSearch supports only boolean flag for this operation */
-  refresh?: boolean;
-}
-
-export interface SavedObjectsDeleteByWorkspaceOptions
-  extends Omit<SavedObjectsBaseOptions, 'namespace'> {
   /** The OpenSearch supports only boolean flag for this operation */
   refresh?: boolean;
 }
@@ -753,7 +748,7 @@ export class SavedObjectsRepository {
   }
 
   /**
-   * Deletes all objects from the provided namespace.
+   * Deletes all objects from the provided workspace.
    *
    * @param {string} workspace
    * @param options SavedObjectsDeleteByWorkspaceOptions
@@ -763,8 +758,8 @@ export class SavedObjectsRepository {
     workspace: string,
     options: SavedObjectsDeleteByWorkspaceOptions = {}
   ): Promise<any> {
-    if (!workspace || workspace === PUBLIC_WORKSPACE || workspace === MANAGEMENT_WORKSPACE) {
-      throw new TypeError(`namespace is required, and must not be reserved workspace`);
+    if (!workspace || workspace === '*') {
+      throw new TypeError(`workspace is required, and must be a string that is not equal to '*'`);
     }
 
     const allTypes = Object.keys(getRootPropertiesObjects(this._mappings));
@@ -790,7 +785,7 @@ export class SavedObjectsRepository {
           },
           conflicts: 'proceed',
           ...getSearchDsl(this._mappings, this._registry, {
-            workspaces: workspace ? [workspace] : undefined,
+            workspaces: [workspace],
             type: allTypes,
           }),
         },

@@ -23,6 +23,7 @@ import {
   WORKSPACE_TYPE,
   ACL,
   WorkspacePermissionMode,
+  SavedObjectsDeleteByWorkspaceOptions,
 } from '../../../../core/server';
 
 // Can't throw unauthorized for now, the page will be refreshed if unauthorized
@@ -298,6 +299,18 @@ export class WorkspaceSavedObjectsClientWrapper {
       return await wrapperOptions.client.addToWorkspaces(objects, targetWorkspaces, options);
     };
 
+    const deleteByWorkspaceWithPermissionControl = async (
+      workspace: string,
+      options: SavedObjectsDeleteByWorkspaceOptions = {}
+    ) => {
+      await this.validateMultiWorkspacesPermissions([workspace], wrapperOptions.request, [
+        WorkspacePermissionMode.LibraryWrite,
+        WorkspacePermissionMode.Management,
+      ]);
+
+      return await wrapperOptions.client.deleteByWorkspace(workspace, options);
+    };
+
     return {
       ...wrapperOptions.client,
       get: getWithWorkspacePermissionControl,
@@ -313,6 +326,7 @@ export class WorkspaceSavedObjectsClientWrapper {
       update: wrapperOptions.client.update,
       bulkUpdate: wrapperOptions.client.bulkUpdate,
       addToWorkspaces: addToWorkspacesWithPermissionControl,
+      deleteByWorkspace: deleteByWorkspaceWithPermissionControl,
     };
   };
 

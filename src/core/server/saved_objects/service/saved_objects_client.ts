@@ -234,6 +234,11 @@ export interface SavedObjectsDeleteFromWorkspacesOptions
   refresh?: MutatingOperationRefreshSetting;
 }
 
+export interface SavedObjectsDeleteByWorkspaceOptions {
+  /** The OpenSearch supports only boolean flag for this operation */
+  refresh?: boolean;
+}
+
 /**
  *
  * @public
@@ -474,6 +479,18 @@ export class SavedObjectsClient {
     options: SavedObjectsAddToWorkspacesOptions = {}
   ): Promise<SavedObjectsAddToWorkspacesResponse[]> => {
     return await this._repository.addToWorkspaces(objects, workspaces, options);
+  };
+
+  /**
+   * delete saved objects by workspace id
+   * @param workspace
+   * @param options
+   */
+  deleteByWorkspace = async (
+    workspace: string,
+    options: SavedObjectsDeleteByWorkspaceOptions = {}
+  ): Promise<SavedObjectsAddToWorkspacesResponse[]> => {
+    return await this._repository.deleteByWorkspace(workspace, options);
   };
 
   /**

@@ -139,7 +139,9 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
   }
   public async delete(requestDetail: IRequestDetail, id: string): Promise<IResponse<boolean>> {
     try {
-      await this.getSavedObjectClientsFromRequestDetail(requestDetail).delete(WORKSPACE_TYPE, id);
+      const savedObjectClient = this.getSavedObjectClientsFromRequestDetail(requestDetail);
+      await savedObjectClient.delete(WORKSPACE_TYPE, id);
+      await savedObjectClient.deleteByWorkspace(id);
       return {
         success: true,
         result: true,
