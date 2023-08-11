@@ -4,16 +4,21 @@
  */
 import { schema } from '@osd/config-schema';
 
-import { PermissionMode } from '../../../../core/utils/constants';
-import { ACL, Permissions, CoreSetup, Logger } from '../../../../core/server';
+import {
+  ACL,
+  Permissions,
+  CoreSetup,
+  Logger,
+  WorkspacePermissionMode,
+} from '../../../../core/server';
 import { IWorkspaceDBImpl, WorkspaceRoutePermissionItem } from '../types';
 
 const WORKSPACES_API_BASE_URL = '/api/workspaces';
 
 const workspacePermissionMode = schema.oneOf([
-  schema.literal(PermissionMode.LibraryRead),
-  schema.literal(PermissionMode.LibraryWrite),
-  schema.literal(PermissionMode.Management),
+  schema.literal(WorkspacePermissionMode.LibraryRead),
+  schema.literal(WorkspacePermissionMode.LibraryWrite),
+  schema.literal(WorkspacePermissionMode.Management),
 ]);
 
 const workspacePermission = schema.oneOf([

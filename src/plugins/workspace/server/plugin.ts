@@ -13,19 +13,18 @@ import {
   ISavedObjectsRepository,
   WORKSPACE_TYPE,
   ACL,
+  PUBLIC_WORKSPACE,
+  MANAGEMENT_WORKSPACE,
   Permissions,
+  WorkspacePermissionMode,
 } from '../../../core/server';
-import { PermissionMode, PUBLIC_WORKSPACE, MANAGEMENT_WORKSPACE } from '../../../core/utils';
 import { IWorkspaceDBImpl, WorkspaceAttribute } from './types';
 import { uiSettings } from './ui_settings';
 import { WorkspaceClientWithSavedObject } from './workspace_client';
 import { WorkspaceSavedObjectsClientWrapper } from './saved_objects';
 import { registerRoutes } from './routes';
 
-export interface WorkspacePluginSetup {}
-export interface WorkspacePluginStart {}
-
-export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePluginStart> {
+export class WorkspacePlugin implements Plugin<{}, {}> {
   private readonly logger: Logger;
   private client?: IWorkspaceDBImpl;
 
@@ -112,12 +111,12 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
   private async setupWorkspaces(startDeps: CoreStart) {
     const internalRepository = startDeps.savedObjects.createInternalRepository();
     const publicWorkspaceACL = new ACL().addPermission(
-      [PermissionMode.LibraryRead, PermissionMode.LibraryWrite],
+      [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.LibraryWrite],
       {
         users: ['*'],
       }
     );
-    const managementWorkspaceACL = new ACL().addPermission([PermissionMode.LibraryRead], {
+    const managementWorkspaceACL = new ACL().addPermission([WorkspacePermissionMode.LibraryRead], {
       users: ['*'],
     });
 

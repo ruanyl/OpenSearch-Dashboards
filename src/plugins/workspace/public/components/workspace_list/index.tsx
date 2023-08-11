@@ -49,7 +49,7 @@ export const WorkspaceList = () => {
         switchWorkspace({ application, http }, id);
       }
     },
-    [workspaces, application]
+    [application, http]
   );
 
   const columns = [

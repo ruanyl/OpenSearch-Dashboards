@@ -12,7 +12,7 @@ import {
   WorkspaceAttribute,
   WorkspaceStart,
 } from '../../../core/public';
-import { PermissionMode } from '../../../core/utils/constants';
+import { WorkspacePermissionMode } from '../../../core/public';
 
 const WORKSPACES_API_BASE_URL = '/api/workspaces';
 
@@ -38,7 +38,9 @@ type IResponse<T> =
 
 type WorkspaceRoutePermissionItem = {
   modes: Array<
-    PermissionMode.LibraryRead | PermissionMode.LibraryWrite | PermissionMode.Management
+    | WorkspacePermissionMode.LibraryRead
+    | WorkspacePermissionMode.LibraryWrite
+    | WorkspacePermissionMode.Management
   >;
 } & ({ type: 'user'; userId: string } | { type: 'group'; group: string });
 

@@ -8,10 +8,9 @@ import {
   RequestHandlerContext,
   SavedObjectsFindResponse,
   CoreSetup,
+  WorkspacePermissionMode,
+  Permissions,
 } from '../../../core/server';
-
-import { Permissions } from '../../../core/server';
-import { PermissionMode } from '../../../core/utils';
 
 export interface WorkspaceAttribute {
   id: string;
@@ -83,6 +82,8 @@ export type IResponse<T> =
 
 export type WorkspaceRoutePermissionItem = {
   modes: Array<
-    PermissionMode.LibraryRead | PermissionMode.LibraryWrite | PermissionMode.Management
+    | WorkspacePermissionMode.LibraryRead
+    | WorkspacePermissionMode.LibraryWrite
+    | WorkspacePermissionMode.Management
   >;
 } & ({ type: 'user'; userId: string } | { type: 'group'; group: string });

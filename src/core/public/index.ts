@@ -350,6 +350,6 @@ export { __osdBootstrap__ } from './osd_bootstrap';
 
 export { WorkspaceStart, WorkspaceService, WorkspaceAttribute } from './workspace';
 
-export { PermissionMode as WorkspacePermissionMode } from '../utils/constants';
+export { WorkspacePermissionMode, PUBLIC_WORKSPACE, MANAGEMENT_WORKSPACE } from '../utils';
 
 export { getWorkspaceIdFromUrl, WORKSPACE_TYPE } from './utils';

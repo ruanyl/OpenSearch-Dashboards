@@ -66,7 +66,7 @@ export function WorkspaceDropdownList(props: WorkspaceDropdownListProps) {
       switchWorkspace({ http: props.http, application: props.application }, id);
       setLoading(false);
     },
-    [props.application, props.workspaces]
+    [props.application, props.http]
   );
 
   const onCreateWorkspaceClick = () => {

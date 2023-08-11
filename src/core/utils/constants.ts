@@ -5,7 +5,7 @@
 
 export const WORKSPACE_PATH_PREFIX = '/w';
 
-export enum PermissionMode {
+export enum WorkspacePermissionMode {
   Read = 'read',
   Write = 'write',
   Management = 'management',

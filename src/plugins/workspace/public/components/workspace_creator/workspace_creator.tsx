@@ -57,7 +57,7 @@ export const WorkspaceCreator = () => {
         text: result?.error,
       });
     },
-    [notifications?.toasts, http, application]
+    [notifications?.toasts, http, application, workspaceClient]
   );
 
   return (

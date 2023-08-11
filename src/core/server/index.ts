@@ -353,7 +353,12 @@ export {
 } from './metrics';
 
 export { AppCategory } from '../types';
-export { DEFAULT_APP_CATEGORIES } from '../utils';
+export {
+  DEFAULT_APP_CATEGORIES,
+  WorkspacePermissionMode,
+  PUBLIC_WORKSPACE,
+  MANAGEMENT_WORKSPACE,
+} from '../utils';
 
 export {
   SavedObject,

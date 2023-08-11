@@ -66,7 +66,8 @@ import {
   OverlayStart,
   NotificationsStart,
   ApplicationStart,
-} from 'src/core/public';
+  PUBLIC_WORKSPACE,
+} from '../../../../../core/public';
 import { RedirectAppLinks } from '../../../../opensearch_dashboards_react/public';
 import { IndexPatternsContract } from '../../../../data/public';
 import {
@@ -94,7 +95,6 @@ import {
 import { Header, Table, Flyout, Relationships } from './components';
 import { DataPublicPluginStart } from '../../../../../plugins/data/public';
 import { SavedObjectsCopyModal } from './components/copy_modal';
-import { PUBLIC_WORKSPACE } from '../../../../../core/public/utils';
 
 interface ExportAllOption {
   id: string;

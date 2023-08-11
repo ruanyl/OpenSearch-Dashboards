@@ -91,7 +91,7 @@ export const WorkspaceUpdater = () => {
         text: result?.error,
       });
     },
-    [notifications?.toasts, currentWorkspace, application]
+    [notifications?.toasts, currentWorkspace, application, http, workspaceClient]
   );
 
   if (!currentWorkspaceFormData.name) {
