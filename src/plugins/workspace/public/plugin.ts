@@ -17,6 +17,7 @@ import {
   WorkspaceAttribute,
   DEFAULT_APP_CATEGORIES,
   HttpSetup,
+  ApplicationStart,
 } from '../../../core/public';
 import {
   WORKSPACE_LIST_APP_ID,
@@ -142,36 +143,6 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     return {};
   }
 
-  private workspaceToChromeNavLink(
-    workspace: WorkspaceAttribute,
-    http: HttpSetup,
-    application: ApplicationStart,
-    index: number
-  ): ChromeNavLink {
-    const id = WORKSPACE_OVERVIEW_APP_ID + '/' + workspace.id;
-    const url = formatUrlWithWorkspaceId(
-      application.getUrlForApp(WORKSPACE_OVERVIEW_APP_ID, {
-        absolute: true,
-      }),
-      workspace.id,
-      http.basePath
-    );
-    return {
-      id,
-      url,
-      order: index,
-      hidden: false,
-      disabled: false,
-      baseUrl: url,
-      href: url,
-      category: WORKSPACE_NAV_CATEGORY,
-      title: i18n.translate('core.ui.workspaceNavList.workspaceName', {
-        defaultMessage: workspace.name,
-      }),
-      externalLink: true,
-    };
-  }
-
   private async _changeSavedObjectCurrentWorkspace() {
     if (this.coreStart) {
       return this.coreStart.workspaces.currentWorkspaceId$.subscribe((currentWorkspaceId) => {
@@ -182,10 +153,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     }
   }
 
-  private filterByWorkspace(
-    workspace: WorkspaceAttribute | null | undefined,
-    allNavLinks: ChromeNavLink[]
-  ) {
+  private filterByWorkspace(workspace: WorkspaceAttribute | null, allNavLinks: ChromeNavLink[]) {
     if (!workspace) return allNavLinks;
     const features = workspace.features ?? [];
     return allNavLinks.filter((item) => features.includes(item.id));

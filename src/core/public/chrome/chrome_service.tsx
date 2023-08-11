@@ -34,7 +34,7 @@ import { FormattedMessage } from '@osd/i18n/react';
 import { BehaviorSubject, combineLatest, merge, Observable, of, ReplaySubject } from 'rxjs';
 import { flatMap, map, takeUntil } from 'rxjs/operators';
 import { EuiLink } from '@elastic/eui';
-import { mountReactNode } from '../utils/mount';
+import { mountReactNode } from '../utils';
 import { InternalApplicationStart } from '../application';
 import { DocLinksStart } from '../doc_links';
 import { HttpStart } from '../http';
@@ -48,7 +48,7 @@ import { ChromeNavLinks, NavLinksService, ChromeNavLink } from './nav_links';
 import { ChromeRecentlyAccessed, RecentlyAccessedService } from './recently_accessed';
 import { Header } from './ui';
 import { ChromeHelpExtensionMenuLink } from './ui/header/header_help_menu';
-import { Branding, WorkspacesStart } from '../';
+import { Branding, WorkspaceStart } from '../';
 export { ChromeNavControls, ChromeRecentlyAccessed, ChromeDocTitle };
 
 const IS_LOCKED_KEY = 'core.chrome.isLocked';
@@ -99,7 +99,7 @@ interface StartDeps {
   injectedMetadata: InjectedMetadataStart;
   notifications: NotificationsStart;
   uiSettings: IUiSettingsClient;
-  workspaces: WorkspacesStart;
+  workspaces: WorkspaceStart;
 }
 
 /** @internal */

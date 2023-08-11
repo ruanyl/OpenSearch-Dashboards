@@ -44,7 +44,7 @@ import classnames from 'classnames';
 import React, { createRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
-import { WorkspacesStart } from 'opensearch-dashboards/public';
+import { WorkspaceStart } from 'opensearch-dashboards/public';
 import { LoadingIndicator } from '../';
 import {
   ChromeBadge,
@@ -92,7 +92,7 @@ export interface HeaderProps {
   onIsLockedUpdate: OnIsLockedUpdate;
   branding: ChromeBranding;
   survey: string | undefined;
-  workspaces: WorkspacesStart;
+  workspaces: WorkspaceStart;
 }
 
 export function Header({

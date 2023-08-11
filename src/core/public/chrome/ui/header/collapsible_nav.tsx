@@ -43,7 +43,7 @@ import { groupBy, sortBy } from 'lodash';
 import React, { useRef } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import * as Rx from 'rxjs';
-import { WorkspacesStart } from 'opensearch-dashboards/public';
+import { WorkspaceStart } from 'opensearch-dashboards/public';
 import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '../..';
 import { AppCategory } from '../../../../types';
 import { InternalApplicationStart } from '../../../application';
@@ -128,7 +128,7 @@ interface Props {
   navigateToUrl: InternalApplicationStart['navigateToUrl'];
   customNavLink$: Rx.Observable<ChromeNavLink | undefined>;
   branding: ChromeBranding;
-  workspaces: WorkspacesStart;
+  workspaces: WorkspaceStart;
 }
 
 export function CollapsibleNav({

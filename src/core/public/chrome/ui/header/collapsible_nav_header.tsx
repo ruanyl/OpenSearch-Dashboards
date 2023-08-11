@@ -3,18 +3,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import React, { useState } from 'react';
-import { WorkspaceAttribute, WorkspacesStart } from 'opensearch-dashboards/public';
+import { WorkspaceAttribute } from 'opensearch-dashboards/public';
 import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
+import { WorkspaceStart } from 'opensearch-dashboards/public';
 import { WORKSPACE_OVERVIEW_APP_ID } from '../../constants';
 import { InternalApplicationStart } from '../../../application';
+import { formatUrlWithWorkspaceId } from '../../../utils/workspace';
 
 interface Props {
-  workspaces: WorkspacesStart;
+  workspaces: WorkspaceStart;
   getUrlForApp: InternalApplicationStart['getUrlForApp'];
 }
+
 function getfilteredWorkspaceList(
-  workspaces: WorkspacesStart,
+  workspaces: WorkspaceStart,
   workspaceList: WorkspaceAttribute[],
   currentWorkspace: WorkspaceAttribute | null
 ): WorkspaceAttribute[] {
@@ -33,8 +36,8 @@ function getfilteredWorkspaceList(
 }
 
 export function CollapsibleNavHeader({ workspaces, getUrlForApp }: Props) {
-  const workspaceList = useObservable(workspaces.client.workspaceList$, []);
-  const currentWorkspace = useObservable(workspaces.client.currentWorkspace$, null);
+  const workspaceList = useObservable(workspaces.workspaceList$, []);
+  const currentWorkspace = useObservable(workspaces.currentWorkspace$, null);
   const filteredWorkspaceList = getfilteredWorkspaceList(
     workspaces,
     workspaceList,
@@ -53,7 +56,7 @@ export function CollapsibleNavHeader({ workspaces, getUrlForApp }: Props) {
   };
 
   const workspaceToItem = (workspace: WorkspaceAttribute) => {
-    const href = workspaces?.formatUrlWithWorkspaceId(
+    const href = formatUrlWithWorkspaceId(
       getUrlForApp(WORKSPACE_OVERVIEW_APP_ID, {
         absolute: false,
       }),
