@@ -258,6 +258,15 @@ export class WorkspaceSavedObjectsClientWrapper {
                             workspaces: permittedWorkspaceIds,
                           },
                         },
+                        {
+                          bool: {
+                            must_not: {
+                              exists: {
+                                field: 'workspaces',
+                              },
+                            },
+                          },
+                        },
                       ],
                     },
                   },
