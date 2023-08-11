@@ -65,6 +65,7 @@ export interface SavedObjectsManagementPluginSetup {
   columns: SavedObjectsManagementColumnServiceSetup;
   namespaces: SavedObjectsManagementNamespaceServiceSetup;
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
+  registerLibrarySubApp: () => void;
 }
 
 export interface SavedObjectsManagementPluginStart {
@@ -168,7 +169,6 @@ export class SavedObjectsManagementPlugin
     const actionSetup = this.actionService.setup();
     const columnSetup = this.columnService.setup();
     const namespaceSetup = this.namespaceService.setup();
-    const isWorkspaceEnabled = core.uiSettings.get('workspace:enabled');
 
     if (home) {
       home.featureCatalogue.register({
@@ -205,10 +205,6 @@ export class SavedObjectsManagementPlugin
       },
     });
 
-    if (isWorkspaceEnabled) {
-      this.registerLibrarySubApp(core);
-    }
-
     // depends on `getStartServices`, should not be awaited
     registerServices(this.serviceRegistry, core.getStartServices);
 
@@ -217,6 +213,7 @@ export class SavedObjectsManagementPlugin
       columns: columnSetup,
       namespaces: namespaceSetup,
       serviceRegistry: this.serviceRegistry,
+      registerLibrarySubApp: () => this.registerLibrarySubApp(core),
     };
   }
 
