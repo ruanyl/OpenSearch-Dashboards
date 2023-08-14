@@ -7,9 +7,8 @@ import { WorkspaceAttribute } from 'opensearch-dashboards/public';
 import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import { WorkspaceStart } from 'opensearch-dashboards/public';
-import { WORKSPACE_OVERVIEW_APP_ID } from '../../constants';
 import { InternalApplicationStart } from '../../../application';
-import { formatUrlWithWorkspaceId } from '../../../utils/workspace';
+import { formatUrlWithWorkspaceId } from '../../../utils';
 
 interface Props {
   workspaces: WorkspaceStart;
@@ -36,6 +35,7 @@ function getfilteredWorkspaceList(
 }
 
 export function CollapsibleNavHeader({ workspaces, getUrlForApp }: Props) {
+  const workspaceOverviewAppId = 'workspace_overview';
   const workspaceList = useObservable(workspaces.workspaceList$, []);
   const currentWorkspace = useObservable(workspaces.currentWorkspace$, null);
   const filteredWorkspaceList = getfilteredWorkspaceList(
@@ -57,7 +57,7 @@ export function CollapsibleNavHeader({ workspaces, getUrlForApp }: Props) {
 
   const workspaceToItem = (workspace: WorkspaceAttribute) => {
     const href = formatUrlWithWorkspaceId(
-      getUrlForApp(WORKSPACE_OVERVIEW_APP_ID, {
+      getUrlForApp(workspaceOverviewAppId, {
         absolute: false,
       }),
       workspace.id

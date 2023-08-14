@@ -16,8 +16,6 @@ import {
   Plugin,
   WorkspaceAttribute,
   DEFAULT_APP_CATEGORIES,
-  HttpSetup,
-  ApplicationStart,
 } from '../../../core/public';
 import {
   WORKSPACE_LIST_APP_ID,
@@ -30,7 +28,6 @@ import { mountDropdownList } from './mount';
 import { SavedObjectsManagementPluginSetup } from '../../saved_objects_management/public';
 import { getWorkspaceColumn } from './components/utils/workspace_column';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
-import { formatUrlWithWorkspaceId } from './utils';
 import { WorkspaceClient } from './workspace_client';
 import { Services } from './application';
 
