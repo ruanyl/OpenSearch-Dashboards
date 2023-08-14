@@ -36,16 +36,19 @@ function getfilteredWorkspaceList(
 
 export function CollapsibleNavHeader({ workspaces, getUrlForApp }: Props) {
   const workspaceOverviewAppId = 'workspace_overview';
+
   const workspaceList = useObservable(workspaces.workspaceList$, []);
   const currentWorkspace = useObservable(workspaces.currentWorkspace$, null);
+  const workspaceEnabled = useObservable(workspaces.workspaceEnabled$, false);
   const filteredWorkspaceList = getfilteredWorkspaceList(
     workspaces,
     workspaceList,
     currentWorkspace
   );
-  const title = filteredWorkspaceList.length
-    ? filteredWorkspaceList[0].name
-    : 'OpenSearch Analytics';
+  const title =
+    workspaceEnabled && filteredWorkspaceList.length
+      ? filteredWorkspaceList[0].name
+      : 'OpenSearch Analytics';
   const [isPopoverOpen, setPopover] = useState(false);
   const onButtonClick = () => {
     setPopover(!isPopoverOpen);
