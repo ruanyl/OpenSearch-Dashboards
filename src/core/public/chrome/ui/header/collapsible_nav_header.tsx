@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import React, { useState } from 'react';
-import { WorkspaceAttribute } from 'opensearch-dashboards/public';
+import { HttpStart, WorkspaceAttribute } from 'opensearch-dashboards/public';
 import {
   EuiContextMenu,
   EuiPopover,
@@ -20,6 +20,7 @@ import { formatUrlWithWorkspaceId } from '../../../utils';
 
 interface Props {
   workspaces: WorkspaceStart;
+  basePath: HttpStart['basePath'];
   getUrlForApp: InternalApplicationStart['getUrlForApp'];
 }
 
@@ -28,7 +29,7 @@ function getFilteredWorkspaceList(
   workspaceList: WorkspaceAttribute[],
   currentWorkspace: WorkspaceAttribute | null
 ): WorkspaceAttribute[] {
-  // show top5 workspaces except management workspace
+  // list top5 workspaces except management workspace
   let filteredWorkspaceList = workspaceList
     .filter((workspace) => workspace.name !== 'Management')
     .slice(0, 5);
@@ -45,10 +46,14 @@ function getFilteredWorkspaceList(
   return filteredWorkspaceList;
 }
 
-export function CollapsibleNavHeader({ workspaces, getUrlForApp }: Props) {
+export function CollapsibleNavHeader({ workspaces, getUrlForApp, basePath }: Props) {
+  const workspaceListAppId = 'workspace_list';
+  const workspaceCreateAppId = 'workspace_create';
   const workspaceOverviewAppId = 'workspace_overview';
+
   const workspaceList = useObservable(workspaces.workspaceList$, []);
-  const currentWorkspace = useObservable(workspaces.currentWorkspace$, null);
+  const publicWorkspace = workspaceList.find((workspace) => workspace.name === 'public') ?? null;
+  const currentWorkspace = useObservable(workspaces.currentWorkspace$, null) ?? publicWorkspace;
   const workspaceEnabled = useObservable(workspaces.workspaceEnabled$, false);
   const filteredWorkspaceList = getFilteredWorkspaceList(
     workspaces,
@@ -73,7 +78,8 @@ export function CollapsibleNavHeader({ workspaces, getUrlForApp }: Props) {
       getUrlForApp(workspaceOverviewAppId, {
         absolute: false,
       }),
-      workspace.id
+      workspace.id,
+      basePath
     );
     const name = workspaceNameBolded ? (
       <EuiText style={{ fontWeight: 'bold' }}>{workspace.name}</EuiText>
@@ -86,6 +92,35 @@ export function CollapsibleNavHeader({ workspaces, getUrlForApp }: Props) {
       key: workspace.id,
       icon: <EuiIcon type="stopFilled" color={workspace.color ?? 'primary'} />,
     };
+  };
+
+  const getWorkspaceListItems = () => {
+    const workspaceListItems = filteredWorkspaceList.map((workspace, index) =>
+      workspaceToItem(workspace, index === 0)
+    );
+    workspaceListItems.push({
+      icon: 'plus',
+      name: 'Create workspaces',
+      href: formatUrlWithWorkspaceId(
+        getUrlForApp(workspaceCreateAppId, {
+          absolute: false,
+        }),
+        currentWorkspace?.id ?? 'public',
+        basePath
+      ),
+    });
+    workspaceListItems.push({
+      icon: 'folderClosed',
+      name: 'All workspaces',
+      href: formatUrlWithWorkspaceId(
+        getUrlForApp(workspaceListAppId, {
+          absolute: false,
+        }),
+        currentWorkspace?.id ?? 'public',
+        basePath
+      ),
+    });
+    return workspaceListItems;
   };
 
   const currentWorkspaceButton = (
@@ -134,15 +169,20 @@ export function CollapsibleNavHeader({ workspaces, getUrlForApp }: Props) {
             {
               name: 'Management',
               icon: 'managementApp',
+              href: formatUrlWithWorkspaceId(
+                getUrlForApp(workspaceOverviewAppId, {
+                  absolute: false,
+                }),
+                'management',
+                basePath
+              ),
             },
           ],
         },
         {
           id: 1,
           title: 'Workspaces',
-          items: filteredWorkspaceList.map((workspace, index) =>
-            workspaceToItem(workspace, index === 0)
-          ),
+          items: getWorkspaceListItems(),
         },
       ]
     : [];

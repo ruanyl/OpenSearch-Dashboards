@@ -221,7 +221,11 @@ export function CollapsibleNav({
       outsideClickCloses={false}
     >
       <EuiFlexItem className="eui-yScroll">
-        <CollapsibleNavHeader getUrlForApp={getUrlForApp} workspaces={workspaces} />
+        <CollapsibleNavHeader
+          getUrlForApp={getUrlForApp}
+          workspaces={workspaces}
+          basePath={basePath}
+        />
 
         {/* Recently viewed */}
         <EuiCollapsibleNavGroup
