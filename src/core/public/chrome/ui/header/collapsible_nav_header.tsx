@@ -4,7 +4,7 @@
  */
 import React, { useState } from 'react';
 import { WorkspaceAttribute } from 'opensearch-dashboards/public';
-import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import { EuiButton, EuiContextMenu, EuiPopover, EuiIcon } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import { WorkspaceStart } from 'opensearch-dashboards/public';
 import { InternalApplicationStart } from '../../../application';
@@ -36,7 +36,6 @@ function getfilteredWorkspaceList(
 
 export function CollapsibleNavHeader({ workspaces, getUrlForApp }: Props) {
   const workspaceOverviewAppId = 'workspace_overview';
-
   const workspaceList = useObservable(workspaces.workspaceList$, []);
   const currentWorkspace = useObservable(workspaces.currentWorkspace$, null);
   const workspaceEnabled = useObservable(workspaces.workspaceEnabled$, false);
@@ -45,7 +44,7 @@ export function CollapsibleNavHeader({ workspaces, getUrlForApp }: Props) {
     workspaceList,
     currentWorkspace
   );
-  const title =
+  const currentWorkspaceName =
     workspaceEnabled && filteredWorkspaceList.length
       ? filteredWorkspaceList[0].name
       : 'OpenSearch Analytics';
@@ -69,42 +68,53 @@ export function CollapsibleNavHeader({ workspaces, getUrlForApp }: Props) {
       href,
       key: workspace.id,
       name: workspace.name,
+      icon: <EuiIcon type="stopFilled" color={workspace.color ?? 'primary'} />,
     };
   };
 
-  const panels = [
-    {
-      id: 0,
-      title,
-      items: [
-        {
-          name: 'Workspaces',
-          icon: 'folderClosed',
-          panel: 1,
-        },
-        {
-          name: 'Management',
-          icon: 'folderClosed',
-        },
-      ],
-    },
-    {
-      id: 1,
-      title: 'Workspaces',
-      items: filteredWorkspaceList.map(workspaceToItem),
-    },
-  ];
-
-  const button = (
-    <EuiButton iconType="arrowDown" iconSide="right" onClick={onButtonClick}>
-      {title}
+  const currentWorkspaceButton = (
+    <EuiButton iconType="arrowDown" iconSide="right" size="m" onClick={onButtonClick}>
+      <EuiIcon type="logoOpenSearch" />
+      {currentWorkspaceName}
     </EuiButton>
   );
+
+  const currentWorkspaceTitle = (
+    <EuiButton iconType="logoOpenSearch" iconSide="left" size="m">
+      {currentWorkspaceName}
+      <EuiIcon type="cross" onClick={closePopover} />
+    </EuiButton>
+  );
+
+  const panels = workspaceEnabled
+    ? [
+        {
+          id: 0,
+          title: currentWorkspaceTitle,
+          items: [
+            {
+              name: 'Workspaces',
+              icon: 'folderClosed',
+              panel: 1,
+            },
+            {
+              name: 'Management',
+              icon: 'managementApp',
+            },
+          ],
+        },
+        {
+          id: 1,
+          title: 'Workspaces',
+          items: filteredWorkspaceList.map(workspaceToItem),
+        },
+      ]
+    : [];
 
   return (
     <EuiPopover
       id="contextMenuExample"
-      button={button}
+      button={currentWorkspaceButton}
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       panelPaddingSize="none"
