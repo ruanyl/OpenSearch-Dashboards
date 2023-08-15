@@ -27,7 +27,7 @@ interface Props {
 function getFilteredWorkspaceList(
   workspaces: WorkspaceStart,
   workspaceList: WorkspaceAttribute[],
-  currentWorkspace: WorkspaceAttribute | null
+  currentWorkspace: WorkspaceAttribute | null | undefined
 ): WorkspaceAttribute[] {
   // list top5 workspaces except management workspace
   let filteredWorkspaceList = workspaceList
@@ -51,20 +51,33 @@ export function CollapsibleNavHeader({ workspaces, getUrlForApp, basePath }: Pro
   const workspaceCreateAppId = 'workspace_create';
   const workspaceOverviewAppId = 'workspace_overview';
 
-  const workspaceList = useObservable(workspaces.workspaceList$, []);
-  const publicWorkspace = workspaceList.find((workspace) => workspace.name === 'public') ?? null;
-  const currentWorkspace = useObservable(workspaces.currentWorkspace$, null) ?? publicWorkspace;
   const workspaceEnabled = useObservable(workspaces.workspaceEnabled$, false);
+  const workspaceList = useObservable(workspaces.workspaceList$, []);
+  const publicWorkspace = workspaceList.find((workspace) => workspace.name === 'public');
+  const currentWorkspace = useObservable(workspaces.currentWorkspace$, null) ?? publicWorkspace;
   const filteredWorkspaceList = getFilteredWorkspaceList(
     workspaces,
     workspaceList,
     currentWorkspace
   );
-  const currentWorkspaceName =
-    workspaceEnabled && filteredWorkspaceList.length
-      ? filteredWorkspaceList[0].name
-      : 'OpenSearch Analytics';
+  const currentWorkspaceName = currentWorkspace?.name ?? 'public';
   const [isPopoverOpen, setPopover] = useState(false);
+
+  if (!workspaceEnabled) {
+    const defaultHeaderName = 'OpenSearch Analytics';
+    return (
+      <EuiCollapsibleNavGroup>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiIcon type="logoOpenSearch" size="l" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText style={{ fontWeight: 'bold' }}>{defaultHeaderName}</EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiCollapsibleNavGroup>
+    );
+  }
   const onButtonClick = () => {
     setPopover(!isPopoverOpen);
   };
@@ -132,11 +145,9 @@ export function CollapsibleNavHeader({ workspaces, getUrlForApp, basePath }: Pro
         <EuiFlexItem>
           <EuiText style={{ fontWeight: 'bold' }}>{currentWorkspaceName}</EuiText>
         </EuiFlexItem>
-        {workspaceEnabled && (
-          <EuiFlexItem>
-            <EuiIcon type="arrowDown" onClick={onButtonClick} />
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem>
+          <EuiIcon type="arrowDown" onClick={onButtonClick} />
+        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiCollapsibleNavGroup>
   );
@@ -155,37 +166,35 @@ export function CollapsibleNavHeader({ workspaces, getUrlForApp, basePath }: Pro
     </EuiFlexGroup>
   );
 
-  const panels = workspaceEnabled
-    ? [
+  const panels = [
+    {
+      id: 0,
+      title: currentWorkspaceTitle,
+      items: [
         {
-          id: 0,
-          title: currentWorkspaceTitle,
-          items: [
-            {
-              name: <EuiText style={{ fontWeight: 'bold' }}>{'Workspaces'}</EuiText>,
-              icon: 'folderClosed',
-              panel: 1,
-            },
-            {
-              name: 'Management',
-              icon: 'managementApp',
-              href: formatUrlWithWorkspaceId(
-                getUrlForApp(workspaceOverviewAppId, {
-                  absolute: false,
-                }),
-                'management',
-                basePath
-              ),
-            },
-          ],
+          name: <EuiText style={{ fontWeight: 'bold' }}>{'Workspaces'}</EuiText>,
+          icon: 'folderClosed',
+          panel: 1,
         },
         {
-          id: 1,
-          title: 'Workspaces',
-          items: getWorkspaceListItems(),
+          name: 'Management',
+          icon: 'managementApp',
+          href: formatUrlWithWorkspaceId(
+            getUrlForApp(workspaceOverviewAppId, {
+              absolute: false,
+            }),
+            'management',
+            basePath
+          ),
         },
-      ]
-    : [];
+      ],
+    },
+    {
+      id: 1,
+      title: 'Workspaces',
+      items: getWorkspaceListItems(),
+    },
+  ];
 
   return (
     <EuiPopover
