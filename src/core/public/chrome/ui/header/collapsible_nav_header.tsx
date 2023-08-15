@@ -32,7 +32,7 @@ interface Props {
 function getFilteredWorkspaceList(
   workspaces: WorkspaceStart,
   workspaceList: WorkspaceAttribute[],
-  currentWorkspace: WorkspaceAttribute | null | undefined
+  currentWorkspace: WorkspaceAttribute | null
 ): WorkspaceAttribute[] {
   // list top5 workspaces except management workspace
   let filteredWorkspaceList = workspaceList
@@ -54,14 +54,13 @@ function getFilteredWorkspaceList(
 export function CollapsibleNavHeader({ workspaces, getUrlForApp, basePath }: Props) {
   const workspaceEnabled = useObservable(workspaces.workspaceEnabled$, false);
   const workspaceList = useObservable(workspaces.workspaceList$, []);
-  const publicWorkspace = workspaceList.find((workspace) => workspace.name === 'public');
-  const currentWorkspace = useObservable(workspaces.currentWorkspace$, null) ?? publicWorkspace;
+  const currentWorkspace = useObservable(workspaces.currentWorkspace$, null);
   const filteredWorkspaceList = getFilteredWorkspaceList(
     workspaces,
     workspaceList,
     currentWorkspace
   );
-  const currentWorkspaceName = currentWorkspace?.name ?? 'public';
+  const currentWorkspaceName = currentWorkspace?.name ?? 'OpenSearch Analytics';
   const [isPopoverOpen, setPopover] = useState(false);
 
   if (!workspaceEnabled) {
@@ -110,7 +109,7 @@ export function CollapsibleNavHeader({ workspaces, getUrlForApp, basePath }: Pro
 
   const getWorkspaceListItems = () => {
     const workspaceListItems = filteredWorkspaceList.map((workspace, index) =>
-      workspaceToItem(workspace, index === 0)
+      workspaceToItem(workspace, currentWorkspace !== null && index === 0)
     );
     workspaceListItems.push({
       icon: 'plus',
