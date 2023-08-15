@@ -17,6 +17,11 @@ import useObservable from 'react-use/lib/useObservable';
 import { WorkspaceStart } from 'opensearch-dashboards/public';
 import { InternalApplicationStart } from '../../../application';
 import { formatUrlWithWorkspaceId } from '../../../utils';
+import {
+  WORKSPACE_CREATE_APP_ID,
+  WORKSPACE_LIST_APP_ID,
+  WORKSPACE_OVERVIEW_APP_ID,
+} from '../../constants';
 
 interface Props {
   workspaces: WorkspaceStart;
@@ -47,10 +52,6 @@ function getFilteredWorkspaceList(
 }
 
 export function CollapsibleNavHeader({ workspaces, getUrlForApp, basePath }: Props) {
-  const workspaceListAppId = 'workspace_list';
-  const workspaceCreateAppId = 'workspace_create';
-  const workspaceOverviewAppId = 'workspace_overview';
-
   const workspaceEnabled = useObservable(workspaces.workspaceEnabled$, false);
   const workspaceList = useObservable(workspaces.workspaceList$, []);
   const publicWorkspace = workspaceList.find((workspace) => workspace.name === 'public');
@@ -88,7 +89,7 @@ export function CollapsibleNavHeader({ workspaces, getUrlForApp, basePath }: Pro
 
   const workspaceToItem = (workspace: WorkspaceAttribute, workspaceNameBolded: boolean) => {
     const href = formatUrlWithWorkspaceId(
-      getUrlForApp(workspaceOverviewAppId, {
+      getUrlForApp(WORKSPACE_OVERVIEW_APP_ID, {
         absolute: false,
       }),
       workspace.id,
@@ -115,7 +116,7 @@ export function CollapsibleNavHeader({ workspaces, getUrlForApp, basePath }: Pro
       icon: 'plus',
       name: 'Create workspaces',
       href: formatUrlWithWorkspaceId(
-        getUrlForApp(workspaceCreateAppId, {
+        getUrlForApp(WORKSPACE_CREATE_APP_ID, {
           absolute: false,
         }),
         currentWorkspace?.id ?? 'public',
@@ -126,7 +127,7 @@ export function CollapsibleNavHeader({ workspaces, getUrlForApp, basePath }: Pro
       icon: 'folderClosed',
       name: 'All workspaces',
       href: formatUrlWithWorkspaceId(
-        getUrlForApp(workspaceListAppId, {
+        getUrlForApp(WORKSPACE_LIST_APP_ID, {
           absolute: false,
         }),
         currentWorkspace?.id ?? 'public',
@@ -180,7 +181,7 @@ export function CollapsibleNavHeader({ workspaces, getUrlForApp, basePath }: Pro
           name: 'Management',
           icon: 'managementApp',
           href: formatUrlWithWorkspaceId(
-            getUrlForApp(workspaceOverviewAppId, {
+            getUrlForApp(WORKSPACE_OVERVIEW_APP_ID, {
               absolute: false,
             }),
             'management',
