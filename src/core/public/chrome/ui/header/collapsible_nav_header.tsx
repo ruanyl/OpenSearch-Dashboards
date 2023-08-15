@@ -4,7 +4,15 @@
  */
 import React, { useState } from 'react';
 import { WorkspaceAttribute } from 'opensearch-dashboards/public';
-import { EuiButton, EuiContextMenu, EuiPopover, EuiIcon } from '@elastic/eui';
+import {
+  EuiContextMenu,
+  EuiPopover,
+  EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiCollapsibleNavGroup,
+} from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import { WorkspaceStart } from 'opensearch-dashboards/public';
 import { InternalApplicationStart } from '../../../application';
@@ -15,12 +23,15 @@ interface Props {
   getUrlForApp: InternalApplicationStart['getUrlForApp'];
 }
 
-function getfilteredWorkspaceList(
+function getFilteredWorkspaceList(
   workspaces: WorkspaceStart,
   workspaceList: WorkspaceAttribute[],
   currentWorkspace: WorkspaceAttribute | null
 ): WorkspaceAttribute[] {
-  let filteredWorkspaceList = workspaceList.slice(0, 5);
+  // show top5 workspaces except management workspace
+  let filteredWorkspaceList = workspaceList
+    .filter((workspace) => workspace.name !== 'Management')
+    .slice(0, 5);
   if (currentWorkspace) {
     // current workspace located at the top of workspace list
     filteredWorkspaceList = filteredWorkspaceList.filter(
@@ -39,7 +50,7 @@ export function CollapsibleNavHeader({ workspaces, getUrlForApp }: Props) {
   const workspaceList = useObservable(workspaces.workspaceList$, []);
   const currentWorkspace = useObservable(workspaces.currentWorkspace$, null);
   const workspaceEnabled = useObservable(workspaces.workspaceEnabled$, false);
-  const filteredWorkspaceList = getfilteredWorkspaceList(
+  const filteredWorkspaceList = getFilteredWorkspaceList(
     workspaces,
     workspaceList,
     currentWorkspace
@@ -57,33 +68,54 @@ export function CollapsibleNavHeader({ workspaces, getUrlForApp }: Props) {
     setPopover(false);
   };
 
-  const workspaceToItem = (workspace: WorkspaceAttribute) => {
+  const workspaceToItem = (workspace: WorkspaceAttribute, workspaceNameBolded: boolean) => {
     const href = formatUrlWithWorkspaceId(
       getUrlForApp(workspaceOverviewAppId, {
         absolute: false,
       }),
       workspace.id
     );
+    const name = workspaceNameBolded ? (
+      <EuiText style={{ fontWeight: 'bold' }}>{workspace.name}</EuiText>
+    ) : (
+      workspace.name
+    );
     return {
       href,
+      name,
       key: workspace.id,
-      name: workspace.name,
       icon: <EuiIcon type="stopFilled" color={workspace.color ?? 'primary'} />,
     };
   };
 
   const currentWorkspaceButton = (
-    <EuiButton iconType="arrowDown" iconSide="right" size="m" onClick={onButtonClick}>
-      <EuiIcon type="logoOpenSearch" />
-      {currentWorkspaceName}
-    </EuiButton>
+    <EuiCollapsibleNavGroup>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiIcon type="logoOpenSearch" />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText style={{ fontWeight: 'bold' }}>{currentWorkspaceName}</EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiIcon type="arrowDown" onClick={onButtonClick} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiCollapsibleNavGroup>
   );
 
   const currentWorkspaceTitle = (
-    <EuiButton iconType="logoOpenSearch" iconSide="left" size="m">
-      {currentWorkspaceName}
-      <EuiIcon type="cross" onClick={closePopover} />
-    </EuiButton>
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <EuiIcon type="logoOpenSearch" />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiText style={{ fontWeight: 'bold' }}>{currentWorkspaceName}</EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiIcon type="cross" onClick={closePopover} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 
   const panels = workspaceEnabled
@@ -93,7 +125,7 @@ export function CollapsibleNavHeader({ workspaces, getUrlForApp }: Props) {
           title: currentWorkspaceTitle,
           items: [
             {
-              name: 'Workspaces',
+              name: <EuiText style={{ fontWeight: 'bold' }}>{'Workspaces'}</EuiText>,
               icon: 'folderClosed',
               panel: 1,
             },
@@ -106,7 +138,9 @@ export function CollapsibleNavHeader({ workspaces, getUrlForApp }: Props) {
         {
           id: 1,
           title: 'Workspaces',
-          items: filteredWorkspaceList.map(workspaceToItem),
+          items: filteredWorkspaceList.map((workspace, index) =>
+            workspaceToItem(workspace, index === 0)
+          ),
         },
       ]
     : [];

@@ -220,9 +220,9 @@ export function CollapsibleNav({
       onClose={closeNav}
       outsideClickCloses={false}
     >
-      <CollapsibleNavHeader getUrlForApp={getUrlForApp} workspaces={workspaces} />
-
       <EuiFlexItem className="eui-yScroll">
+        <CollapsibleNavHeader getUrlForApp={getUrlForApp} workspaces={workspaces} />
+
         {/* Recently viewed */}
         <EuiCollapsibleNavGroup
           key="recentlyViewed"
