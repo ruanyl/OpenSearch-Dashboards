@@ -86,7 +86,7 @@ export function CollapsibleNavHeader({ workspaces, getUrlForApp, basePath }: Pro
     setPopover(false);
   };
 
-  const workspaceToItem = (workspace: WorkspaceAttribute, workspaceNameBolded: boolean) => {
+  const workspaceToItem = (workspace: WorkspaceAttribute, index: number) => {
     const href = formatUrlWithWorkspaceId(
       getUrlForApp(WORKSPACE_OVERVIEW_APP_ID, {
         absolute: false,
@@ -94,26 +94,29 @@ export function CollapsibleNavHeader({ workspaces, getUrlForApp, basePath }: Pro
       workspace.id,
       basePath
     );
-    const name = workspaceNameBolded ? (
-      <EuiText style={{ fontWeight: 'bold' }}>{workspace.name}</EuiText>
-    ) : (
-      workspace.name
-    );
+    const name =
+      currentWorkspace !== null && index === 0 ? (
+        <EuiText style={{ fontWeight: 'bold' }}>{workspace.name}</EuiText>
+      ) : (
+        workspace.name
+      );
     return {
       href,
       name,
-      key: workspace.id,
+      key: index.toString(),
       icon: <EuiIcon type="stopFilled" color={workspace.color ?? 'primary'} />,
     };
   };
 
   const getWorkspaceListItems = () => {
     const workspaceListItems = filteredWorkspaceList.map((workspace, index) =>
-      workspaceToItem(workspace, currentWorkspace !== null && index === 0)
+      workspaceToItem(workspace, index)
     );
+    const length = workspaceListItems.length;
     workspaceListItems.push({
-      icon: 'plus',
+      icon: <EuiIcon type="stopFilled" color={'primary'} />,
       name: 'Create workspaces',
+      key: length.toString(),
       href: formatUrlWithWorkspaceId(
         getUrlForApp(WORKSPACE_CREATE_APP_ID, {
           absolute: false,
@@ -123,8 +126,9 @@ export function CollapsibleNavHeader({ workspaces, getUrlForApp, basePath }: Pro
       ),
     });
     workspaceListItems.push({
-      icon: 'folderClosed',
+      icon: <EuiIcon type="stopFilled" color={'primary'} />,
       name: 'All workspaces',
+      key: (length + 1).toString(),
       href: formatUrlWithWorkspaceId(
         getUrlForApp(WORKSPACE_LIST_APP_ID, {
           absolute: false,
