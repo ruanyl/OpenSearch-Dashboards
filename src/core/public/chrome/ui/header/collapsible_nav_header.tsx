@@ -92,14 +92,16 @@ export function CollapsibleNavHeader({ workspaces, getUrlForApp }: Props) {
     <EuiCollapsibleNavGroup>
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiIcon type="logoOpenSearch" />
+          <EuiIcon type="logoOpenSearch" size="l" />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText style={{ fontWeight: 'bold' }}>{currentWorkspaceName}</EuiText>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiIcon type="arrowDown" onClick={onButtonClick} />
-        </EuiFlexItem>
+        {workspaceEnabled && (
+          <EuiFlexItem>
+            <EuiIcon type="arrowDown" onClick={onButtonClick} />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </EuiCollapsibleNavGroup>
   );
@@ -107,7 +109,7 @@ export function CollapsibleNavHeader({ workspaces, getUrlForApp }: Props) {
   const currentWorkspaceTitle = (
     <EuiFlexGroup>
       <EuiFlexItem>
-        <EuiIcon type="logoOpenSearch" />
+        <EuiIcon type="logoOpenSearch" size="l" />
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiText style={{ fontWeight: 'bold' }}>{currentWorkspaceName}</EuiText>
