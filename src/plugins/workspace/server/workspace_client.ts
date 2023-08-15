@@ -2,8 +2,9 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+import { i18n } from '@osd/i18n';
 import type { SavedObject, SavedObjectsClientContract, CoreSetup } from '../../../core/server';
-import { WORKSPACE_TYPE } from '../../../core/server';
+import { MANAGEMENT_WORKSPACE, PUBLIC_WORKSPACE, WORKSPACE_TYPE } from '../../../core/server';
 import {
   IWorkspaceDBImpl,
   WorkspaceAttribute,
@@ -137,17 +138,19 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
       };
     }
   }
-  public async delete(
-    requestDetail: IRequestDetail,
-    id: string,
-    force?: boolean
-  ): Promise<IResponse<boolean>> {
+  public async delete(requestDetail: IRequestDetail, id: string): Promise<IResponse<boolean>> {
     try {
+      if (id === PUBLIC_WORKSPACE || id === MANAGEMENT_WORKSPACE) {
+        return {
+          success: false,
+          error: i18n.translate('workspace.deleteReservedWorkspace.errorMessage', {
+            defaultMessage: 'reserved workspace is not allowed to delete: ' + id,
+          }),
+        };
+      }
       const savedObjectClient = this.getSavedObjectClientsFromRequestDetail(requestDetail);
       await savedObjectClient.delete(WORKSPACE_TYPE, id);
-      if (force) {
-        await savedObjectClient.deleteByWorkspace(id);
-      }
+      await savedObjectClient.deleteByWorkspace(id);
       return {
         success: true,
         result: true,

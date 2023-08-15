@@ -66,7 +66,7 @@ export interface IWorkspaceDBImpl {
     id: string,
     payload: Omit<WorkspaceAttributeWithPermission, 'id'>
   ): Promise<IResponse<boolean>>;
-  delete(requestDetail: IRequestDetail, id: string, force?: boolean): Promise<IResponse<boolean>>;
+  delete(requestDetail: IRequestDetail, id: string): Promise<IResponse<boolean>>;
   destroy(): Promise<IResponse<boolean>>;
 }
 

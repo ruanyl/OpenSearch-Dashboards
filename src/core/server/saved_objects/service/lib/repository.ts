@@ -1449,9 +1449,9 @@ export class SavedObjectsRepository {
   }
 
   /**
-   * Removes one or more namespaces from a given multi-namespace saved object. If no namespaces remain, the saved object is deleted
-   * entirely. This method and [`addToNamespaces`]{@link SavedObjectsRepository.addToNamespaces} are the only ways to change which Spaces a
-   * multi-namespace saved object is shared to.
+   * Removes one or more workspace from a given saved object. If no workspace remain, the saved object is deleted
+   * entirely. This method and [`addToWorkspaces`]{@link SavedObjectsRepository.addToWorkspaces} are the only ways to change which workspace a
+   * saved object is shared to.
    */
   async deleteFromWorkspaces(
     type: string,
@@ -1470,16 +1470,15 @@ export class SavedObjectsRepository {
     }
 
     const { refresh = DEFAULT_REFRESH_SETTING } = options;
-    // we do not need to normalize the namespace to its ID format, since it will be converted to a namespace string before being used
 
     const rawId = this._serializer.generateRawId(undefined, type, id);
     const savedObject = await this.get(type, id);
     const existingWorkspaces = savedObject.workspaces;
-    // if there are somehow no existing namespaces, allow the operation to proceed and delete this saved object
+    // if there are somehow no existing workspaces, allow the operation to proceed and delete this saved object
     const remainingWorkspaces = existingWorkspaces?.filter((x) => !workspaces.includes(x));
 
     if (remainingWorkspaces?.length) {
-      // if there is 1 or more namespace remaining, update the saved object
+      // if there is 1 or more workspace remaining, update the saved object
       const time = this._getCurrentTime();
 
       const doc = {

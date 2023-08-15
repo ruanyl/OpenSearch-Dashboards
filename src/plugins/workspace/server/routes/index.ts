@@ -225,14 +225,10 @@ export function registerRoutes({
         params: schema.object({
           id: schema.string(),
         }),
-        query: schema.object({
-          force: schema.maybe(schema.boolean({ defaultValue: false })),
-        }),
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const { id } = req.params;
-      const force = req.query.force;
 
       const result = await client.delete(
         {
@@ -240,8 +236,7 @@ export function registerRoutes({
           request: req,
           logger,
         },
-        id,
-        force
+        id
       );
       return res.ok({ body: result });
     })

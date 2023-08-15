@@ -228,8 +228,7 @@ export interface SavedObjectsDeleteFromNamespacesOptions extends SavedObjectsBas
   refresh?: MutatingOperationRefreshSetting;
 }
 
-export interface SavedObjectsDeleteFromWorkspacesOptions
-  extends Omit<SavedObjectsBaseOptions, 'namespace'> {
+export interface SavedObjectsDeleteFromWorkspacesOptions {
   /** The OpenSearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
 }
