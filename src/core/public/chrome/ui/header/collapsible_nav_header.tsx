@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import React, { useState } from 'react';
-import { HttpStart, WorkspaceAttribute } from 'opensearch-dashboards/public';
+import useObservable from 'react-use/lib/useObservable';
 import {
   EuiContextMenu,
   EuiPopover,
@@ -13,8 +13,12 @@ import {
   EuiText,
   EuiCollapsibleNavGroup,
 } from '@elastic/eui';
-import useObservable from 'react-use/lib/useObservable';
-import { WorkspaceStart } from 'opensearch-dashboards/public';
+import {
+  HttpStart,
+  WorkspaceStart,
+  WorkspaceAttribute,
+  MANAGEMENT_WORKSPACE,
+} from '../../../../public';
 import { InternalApplicationStart } from '../../../application';
 import { formatUrlWithWorkspaceId } from '../../../utils';
 import {
@@ -36,7 +40,7 @@ function getFilteredWorkspaceList(
 ): WorkspaceAttribute[] {
   // list top5 workspaces except management workspace
   let filteredWorkspaceList = workspaceList
-    .filter((workspace) => workspace.name !== 'Management')
+    .filter((workspace) => workspace.id !== MANAGEMENT_WORKSPACE)
     .slice(0, 5);
   if (currentWorkspace) {
     // current workspace located at the top of workspace list
@@ -114,26 +118,26 @@ export function CollapsibleNavHeader({ workspaces, getUrlForApp, basePath }: Pro
     );
     const length = workspaceListItems.length;
     workspaceListItems.push({
-      icon: <EuiIcon type="stopFilled" color={'primary'} />,
+      icon: <EuiIcon type="plus" />,
       name: 'Create workspaces',
       key: length.toString(),
       href: formatUrlWithWorkspaceId(
         getUrlForApp(WORKSPACE_CREATE_APP_ID, {
           absolute: false,
         }),
-        currentWorkspace?.id ?? 'public',
+        currentWorkspace?.id ?? '',
         basePath
       ),
     });
     workspaceListItems.push({
-      icon: <EuiIcon type="stopFilled" color={'primary'} />,
+      icon: <EuiIcon type="folderClosed" />,
       name: 'All workspaces',
       key: (length + 1).toString(),
       href: formatUrlWithWorkspaceId(
         getUrlForApp(WORKSPACE_LIST_APP_ID, {
           absolute: false,
         }),
-        currentWorkspace?.id ?? 'public',
+        currentWorkspace?.id ?? '',
         basePath
       ),
     });
