@@ -74,7 +74,9 @@ export function CollapsibleNavHeader({ workspaces, getUrlForApp, basePath }: Pro
             <EuiIcon type="logoOpenSearch" size="l" />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiText style={{ fontWeight: 'bold' }}>{defaultHeaderName}</EuiText>
+            <EuiText>
+              <strong> {defaultHeaderName} </strong>
+            </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiCollapsibleNavGroup>
@@ -98,7 +100,9 @@ export function CollapsibleNavHeader({ workspaces, getUrlForApp, basePath }: Pro
     );
     const name =
       currentWorkspace !== null && index === 0 ? (
-        <EuiText style={{ fontWeight: 'bold' }}>{workspace.name}</EuiText>
+        <EuiText>
+          <strong> {workspace.name} </strong>
+        </EuiText>
       ) : (
         workspace.name
       );
@@ -153,7 +157,9 @@ export function CollapsibleNavHeader({ workspaces, getUrlForApp, basePath }: Pro
           <EuiIcon type="logoOpenSearch" size="l" />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiText style={{ fontWeight: 'bold' }}>{currentWorkspaceName}</EuiText>
+          <EuiText>
+            <strong> {currentWorkspaceName} </strong>
+          </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiIcon type="arrowDown" onClick={onButtonClick} />
@@ -168,7 +174,9 @@ export function CollapsibleNavHeader({ workspaces, getUrlForApp, basePath }: Pro
         <EuiIcon type="logoOpenSearch" size="l" />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiText style={{ fontWeight: 'bold' }}>{currentWorkspaceName}</EuiText>
+        <EuiText>
+          <strong> {currentWorkspaceName} </strong>
+        </EuiText>
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiIcon type="cross" onClick={closePopover} />
@@ -183,10 +191,12 @@ export function CollapsibleNavHeader({ workspaces, getUrlForApp, basePath }: Pro
       items: [
         {
           name: (
-            <EuiText style={{ fontWeight: 'bold' }}>
-              {i18n.translate('core.ui.primaryNav.workspacePickerMenu.workspaceList', {
-                defaultMessage: 'Workspaces',
-              })}
+            <EuiText>
+              <strong>
+                {i18n.translate('core.ui.primaryNav.workspacePickerMenu.workspaceList', {
+                  defaultMessage: 'Workspaces',
+                })}
+              </strong>
             </EuiText>
           ),
           icon: 'folderClosed',
