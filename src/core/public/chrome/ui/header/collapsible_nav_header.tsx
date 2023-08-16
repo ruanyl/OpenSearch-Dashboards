@@ -64,11 +64,11 @@ export function CollapsibleNavHeader({ workspaces, getUrlForApp, basePath }: Pro
     workspaceList,
     currentWorkspace
   );
-  const currentWorkspaceName = currentWorkspace?.name ?? 'OpenSearch Analytics';
+  const defaultHeaderName = 'OpenSearch Analytics';
+  const currentWorkspaceName = currentWorkspace?.name ?? defaultHeaderName;
   const [isPopoverOpen, setPopover] = useState(false);
 
   if (!workspaceEnabled) {
-    const defaultHeaderName = 'OpenSearch Analytics';
     return (
       <EuiCollapsibleNavGroup>
         <EuiFlexGroup>
