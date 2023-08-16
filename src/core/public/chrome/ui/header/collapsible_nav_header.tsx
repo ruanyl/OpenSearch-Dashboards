@@ -35,7 +35,6 @@ interface Props {
 }
 
 function getFilteredWorkspaceList(
-  workspaces: WorkspaceStart,
   workspaceList: WorkspaceAttribute[],
   currentWorkspace: WorkspaceAttribute | null
 ): WorkspaceAttribute[] {
@@ -52,11 +51,7 @@ export function CollapsibleNavHeader({ workspaces, getUrlForApp, basePath }: Pro
   const workspaceEnabled = useObservable(workspaces.workspaceEnabled$, false);
   const workspaceList = useObservable(workspaces.workspaceList$, []);
   const currentWorkspace = useObservable(workspaces.currentWorkspace$, null);
-  const filteredWorkspaceList = getFilteredWorkspaceList(
-    workspaces,
-    workspaceList,
-    currentWorkspace
-  );
+  const filteredWorkspaceList = getFilteredWorkspaceList(workspaceList, currentWorkspace);
   const defaultHeaderName = i18n.translate(
     'core.ui.primaryNav.workspacePickerMenu.defaultHeaderName',
     {
