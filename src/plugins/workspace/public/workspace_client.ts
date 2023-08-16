@@ -159,11 +159,11 @@ export class WorkspaceClient {
       perPage: 999,
     });
 
-    this.workspaces.hasFetchedWorkspaceList$.next(true);
-
     if (result?.success) {
       this.workspaces.workspaceList$.next(result.result.workspaces);
     }
+
+    this.workspaces.hasFetchedWorkspaceList$.next(true);
   }
 
   public async enterWorkspace(id: string): Promise<IResponse<null>> {

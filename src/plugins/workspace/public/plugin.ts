@@ -71,6 +71,20 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
             },
           });
         })();
+      } else {
+        /**
+         * If the workspace id is valid and user is currently on workspace_fatal_error page,
+         * we should redirect user to overview page of workspace.
+         */
+        (async () => {
+          const [{ application }] = await core.getStartServices();
+          const currentAppIdSubscription = application.currentAppId$.subscribe((currentAppId) => {
+            if (currentAppId === WORKSPACE_FATAL_ERROR_APP_ID) {
+              application.navigateToApp(WORKSPACE_OVERVIEW_APP_ID);
+            }
+            currentAppIdSubscription.unsubscribe();
+          });
+        })();
       }
     }
     /**
@@ -193,7 +207,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     };
   }
 
-  private async _changeSavedObjectCurrentWorkspace() {
+  private _changeSavedObjectCurrentWorkspace() {
     if (this.coreStart) {
       return this.coreStart.workspaces.currentWorkspaceId$.subscribe((currentWorkspaceId) => {
         if (currentWorkspaceId) {
