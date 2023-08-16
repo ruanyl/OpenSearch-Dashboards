@@ -2,6 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+import { i18n } from '@osd/i18n';
 import React, { useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import {
@@ -64,7 +65,17 @@ export function CollapsibleNavHeader({ workspaces, getUrlForApp, basePath }: Pro
     workspaceList,
     currentWorkspace
   );
-  const defaultHeaderName = 'OpenSearch Analytics';
+  const defaultHeaderName = i18n.translate(
+    'core.ui.primaryNav.workspacePickerMenu.defaultHeaderName',
+    {
+      defaultMessage: 'OpenSearch Analytics',
+    }
+  );
+  const managementWorkspaceName =
+    workspaceList.find((workspace) => workspace.id === MANAGEMENT_WORKSPACE)?.name ??
+    i18n.translate('core.ui.primaryNav.workspacePickerMenu.managementWorkspaceName', {
+      defaultMessage: 'Management',
+    });
   const currentWorkspaceName = currentWorkspace?.name ?? defaultHeaderName;
   const [isPopoverOpen, setPopover] = useState(false);
 
@@ -119,7 +130,9 @@ export function CollapsibleNavHeader({ workspaces, getUrlForApp, basePath }: Pro
     const length = workspaceListItems.length;
     workspaceListItems.push({
       icon: <EuiIcon type="plus" />,
-      name: 'Create workspaces',
+      name: i18n.translate('core.ui.primaryNav.workspaceContextMenu.createWorkspace', {
+        defaultMessage: 'Create workspace',
+      }),
       key: length.toString(),
       href: formatUrlWithWorkspaceId(
         getUrlForApp(WORKSPACE_CREATE_APP_ID, {
@@ -131,7 +144,9 @@ export function CollapsibleNavHeader({ workspaces, getUrlForApp, basePath }: Pro
     });
     workspaceListItems.push({
       icon: <EuiIcon type="folderClosed" />,
-      name: 'All workspaces',
+      name: i18n.translate('core.ui.primaryNav.workspaceContextMenu.allWorkspace', {
+        defaultMessage: 'All workspaces',
+      }),
       key: (length + 1).toString(),
       href: formatUrlWithWorkspaceId(
         getUrlForApp(WORKSPACE_LIST_APP_ID, {
@@ -180,18 +195,24 @@ export function CollapsibleNavHeader({ workspaces, getUrlForApp, basePath }: Pro
       title: currentWorkspaceTitle,
       items: [
         {
-          name: <EuiText style={{ fontWeight: 'bold' }}>{'Workspaces'}</EuiText>,
+          name: (
+            <EuiText style={{ fontWeight: 'bold' }}>
+              {i18n.translate('core.ui.primaryNav.workspacePickerMenu.workspaceList', {
+                defaultMessage: 'Workspaces',
+              })}
+            </EuiText>
+          ),
           icon: 'folderClosed',
           panel: 1,
         },
         {
-          name: 'Management',
+          name: managementWorkspaceName,
           icon: 'managementApp',
           href: formatUrlWithWorkspaceId(
             getUrlForApp(WORKSPACE_OVERVIEW_APP_ID, {
               absolute: false,
             }),
-            'management',
+            MANAGEMENT_WORKSPACE,
             basePath
           ),
         },
