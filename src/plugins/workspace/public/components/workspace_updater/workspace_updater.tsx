@@ -98,8 +98,8 @@ export const WorkspaceUpdater = () => {
     return null;
   }
   const deleteWorkspace = async () => {
+    let result;
     if (currentWorkspace?.id) {
-      let result;
       try {
         result = await workspaceClient.delete(currentWorkspace?.id);
       } catch (error) {
@@ -127,7 +127,7 @@ export const WorkspaceUpdater = () => {
       }
     }
     setDeleteWorkspaceModalVisible(false);
-    if (http && application) {
+    if (http && application && result?.success) {
       const homeUrl = application.getUrlForApp('home', {
         path: '/',
         absolute: false,
