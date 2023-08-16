@@ -36,7 +36,6 @@ import {
   EuiListGroup,
   EuiListGroupItem,
   EuiShowFor,
-  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { groupBy, sortBy } from 'lodash';
@@ -49,7 +48,7 @@ import { AppCategory } from '../../../../types';
 import { InternalApplicationStart } from '../../../application';
 import { HttpStart } from '../../../http';
 import { OnIsLockedUpdate } from './';
-import { createEuiListItem, isModifiedOrPrevented, createRecentNavLink } from './nav_link';
+import { createEuiListItem, createRecentChromeNavLink } from './nav_link';
 import { ChromeBranding } from '../../chrome_service';
 import { CollapsibleNavHeader } from './collapsible_nav_header';
 
@@ -149,6 +148,9 @@ export function CollapsibleNav({
 }: Props) {
   const navLinks = useObservable(observables.navLinks$, []).filter((link) => !link.hidden);
   const recentlyAccessed = useObservable(observables.recentlyAccessed$, []);
+  navLinks.push(
+    ...recentlyAccessed.map((link) => createRecentChromeNavLink(link, navLinks, basePath))
+  );
   const appId = useObservable(observables.appId$, '');
   const lockRef = useRef<HTMLButtonElement>(null);
   const groupedNavLinks = groupBy(navLinks, (link) => link?.category?.id);
@@ -226,61 +228,6 @@ export function CollapsibleNav({
           workspaces={workspaces}
           basePath={basePath}
         />
-
-        {/* Recently viewed */}
-        <EuiCollapsibleNavGroup
-          key="recentlyViewed"
-          background="light"
-          title={i18n.translate('core.ui.recentlyViewed', { defaultMessage: 'Recently viewed' })}
-          isCollapsible={true}
-          initialIsOpen={getIsCategoryOpen('recentlyViewed', storage)}
-          onToggle={(isCategoryOpen) =>
-            setIsCategoryOpen('recentlyViewed', isCategoryOpen, storage)
-          }
-          data-test-subj="collapsibleNavGroup-recentlyViewed"
-        >
-          {recentlyAccessed.length > 0 ? (
-            <EuiListGroup
-              aria-label={i18n.translate('core.ui.recentlyViewedAriaLabel', {
-                defaultMessage: 'Recently viewed links',
-              })}
-              listItems={recentlyAccessed.map((link) => {
-                // TODO #64541
-                // Can remove icon from recent links completely
-                const { iconType, onClick, ...hydratedLink } = createRecentNavLink(
-                  link,
-                  navLinks,
-                  basePath,
-                  navigateToUrl
-                );
-
-                return {
-                  ...hydratedLink,
-                  'data-test-subj': 'collapsibleNavAppLink--recent',
-                  onClick: (event) => {
-                    if (!isModifiedOrPrevented(event)) {
-                      closeNav();
-                      onClick(event);
-                    }
-                  },
-                };
-              })}
-              maxWidth="none"
-              color="subdued"
-              gutterSize="none"
-              size="s"
-              className="osdCollapsibleNav__recentsListGroup"
-            />
-          ) : (
-            <EuiText size="s" color="subdued" style={{ padding: '0 8px 8px' }}>
-              <p>
-                {i18n.translate('core.ui.EmptyRecentlyViewed', {
-                  defaultMessage: 'No recently viewed items',
-                })}
-              </p>
-            </EuiText>
-          )}
-        </EuiCollapsibleNavGroup>
 
         {/* merged NavLinks */}
         {mergedNavLinks.map((item, i) => {
