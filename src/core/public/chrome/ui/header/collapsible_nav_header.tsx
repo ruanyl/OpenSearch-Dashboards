@@ -39,21 +39,13 @@ function getFilteredWorkspaceList(
   workspaceList: WorkspaceAttribute[],
   currentWorkspace: WorkspaceAttribute | null
 ): WorkspaceAttribute[] {
-  // list top5 workspaces except management workspace
-  let filteredWorkspaceList = workspaceList
-    .filter((workspace) => workspace.id !== MANAGEMENT_WORKSPACE)
-    .slice(0, 5);
-  if (currentWorkspace) {
-    // current workspace located at the top of workspace list
-    filteredWorkspaceList = filteredWorkspaceList.filter(
-      (workspace) => workspace.id !== currentWorkspace.id
-    );
-    filteredWorkspaceList.unshift(currentWorkspace);
-    if (filteredWorkspaceList.length > 5) {
-      filteredWorkspaceList.pop();
-    }
-  }
-  return filteredWorkspaceList;
+  // list top5 workspaces except management workspace, place current workspace at the top
+  return [
+    ...(currentWorkspace ? [currentWorkspace] : []),
+    ...workspaceList.filter(
+      (workspace) => workspace.id !== MANAGEMENT_WORKSPACE && workspace.id !== currentWorkspace?.id
+    ),
+  ].slice(0, 5);
 }
 
 export function CollapsibleNavHeader({ workspaces, getUrlForApp, basePath }: Props) {
