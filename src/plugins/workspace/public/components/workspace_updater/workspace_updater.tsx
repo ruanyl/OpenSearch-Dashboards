@@ -117,6 +117,7 @@ export const WorkspaceUpdater = () => {
             defaultMessage: 'Delete workspace successfully',
           }),
         });
+        setDeleteWorkspaceModalVisible(false);
         if (http && application) {
           const homeUrl = application.getUrlForApp('home', {
             path: '/',
@@ -136,7 +137,6 @@ export const WorkspaceUpdater = () => {
         });
       }
     }
-    setDeleteWorkspaceModalVisible(false);
   };
 
   const exitWorkspace = async () => {
