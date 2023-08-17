@@ -30,9 +30,11 @@ import { getWorkspaceColumn } from './components/utils/workspace_column';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
 import { WorkspaceClient } from './workspace_client';
 import { Services } from './application';
+import { IndexPatternManagementSetup } from '../../index_pattern_management/public';
 
 interface WorkspacePluginSetupDeps {
   savedObjectsManagement?: SavedObjectsManagementPluginSetup;
+  indexPatternManagement?: IndexPatternManagementSetup;
 }
 
 export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps> {
@@ -41,7 +43,10 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
   private getWorkspaceIdFromURL(): string | null {
     return getWorkspaceIdFromUrl(window.location.href);
   }
-  public async setup(core: CoreSetup, { savedObjectsManagement }: WorkspacePluginSetupDeps) {
+  public async setup(
+    core: CoreSetup,
+    { savedObjectsManagement, indexPatternManagement }: WorkspacePluginSetupDeps
+  ) {
     const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
     workspaceClient.init();
     core.workspaces.workspaceEnabled$.next(true);
@@ -69,6 +74,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
 
     // register apps for library object management
     savedObjectsManagement?.registerLibrarySubApp();
+    indexPatternManagement?.registerLibrarySubApp();
 
     type WorkspaceAppType = (params: AppMountParameters, services: Services) => () => void;
     const mountWorkspaceApp = async (params: AppMountParameters, renderApp: WorkspaceAppType) => {
@@ -141,7 +147,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     return {};
   }
 
-  private async _changeSavedObjectCurrentWorkspace() {
+  private _changeSavedObjectCurrentWorkspace() {
     if (this.coreStart) {
       return this.coreStart.workspaces.currentWorkspaceId$.subscribe((currentWorkspaceId) => {
         if (currentWorkspaceId) {
