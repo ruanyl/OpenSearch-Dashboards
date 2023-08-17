@@ -117,6 +117,16 @@ export const WorkspaceUpdater = () => {
             defaultMessage: 'Delete workspace successfully',
           }),
         });
+        if (http && application) {
+          const homeUrl = application.getUrlForApp('home', {
+            path: '/',
+            absolute: false,
+          });
+          const targetUrl = http.basePath.prepend(http.basePath.remove(homeUrl), {
+            withoutWorkspace: true,
+          });
+          await application.navigateToUrl(targetUrl);
+        }
       } else {
         notifications?.toasts.addDanger({
           title: i18n.translate('workspace.delete.failed', {
@@ -127,16 +137,6 @@ export const WorkspaceUpdater = () => {
       }
     }
     setDeleteWorkspaceModalVisible(false);
-    if (http && application) {
-      const homeUrl = application.getUrlForApp('home', {
-        path: '/',
-        absolute: false,
-      });
-      const targetUrl = http.basePath.prepend(http.basePath.remove(homeUrl), {
-        withoutWorkspace: true,
-      });
-      await application.navigateToUrl(targetUrl);
-    }
   };
 
   const exitWorkspace = async () => {
@@ -152,7 +152,18 @@ export const WorkspaceUpdater = () => {
       });
       return;
     }
-    if (!result?.success) {
+    if (result.success) {
+      if (http && application) {
+        const homeUrl = application.getUrlForApp('home', {
+          path: '/',
+          absolute: false,
+        });
+        const targetUrl = http.basePath.prepend(http.basePath.remove(homeUrl), {
+          withoutWorkspace: true,
+        });
+        await application.navigateToUrl(targetUrl);
+      }
+    } else {
       notifications?.toasts.addDanger({
         title: i18n.translate('workspace.exit.failed', {
           defaultMessage: 'Failed to exit workspace',
@@ -160,16 +171,6 @@ export const WorkspaceUpdater = () => {
         text: result?.error,
       });
       return;
-    }
-    if (http && application) {
-      const homeUrl = application.getUrlForApp('home', {
-        path: '/',
-        absolute: false,
-      });
-      const targetUrl = http.basePath.prepend(http.basePath.remove(homeUrl), {
-        withoutWorkspace: true,
-      });
-      await application.navigateToUrl(targetUrl);
     }
   };
 
