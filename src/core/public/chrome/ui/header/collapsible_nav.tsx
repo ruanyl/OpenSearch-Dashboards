@@ -48,7 +48,7 @@ import { AppCategory } from '../../../../types';
 import { InternalApplicationStart } from '../../../application';
 import { HttpStart } from '../../../http';
 import { OnIsLockedUpdate } from './';
-import { createEuiListItem, createRecentChromeNavLink } from './nav_link';
+import { createEuiListItem, createRecentChromeNavLink, emptyRecentlyVisited } from './nav_link';
 import { ChromeBranding } from '../../chrome_service';
 import { CollapsibleNavHeader } from './collapsible_nav_header';
 
@@ -148,9 +148,13 @@ export function CollapsibleNav({
 }: Props) {
   const navLinks = useObservable(observables.navLinks$, []).filter((link) => !link.hidden);
   const recentlyAccessed = useObservable(observables.recentlyAccessed$, []);
-  navLinks.push(
-    ...recentlyAccessed.map((link) => createRecentChromeNavLink(link, navLinks, basePath))
-  );
+  if (recentlyAccessed.length) {
+    navLinks.push(
+      ...recentlyAccessed.map((link) => createRecentChromeNavLink(link, navLinks, basePath))
+    );
+  } else {
+    navLinks.push(emptyRecentlyVisited);
+  }
   const appId = useObservable(observables.appId$, '');
   const lockRef = useRef<HTMLButtonElement>(null);
   const groupedNavLinks = groupBy(navLinks, (link) => link?.category?.id);

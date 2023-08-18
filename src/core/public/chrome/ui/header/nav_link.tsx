@@ -129,6 +129,7 @@ export function createRecentChromeNavLink(
     });
   }
 
+  // As RecentChromeNavLink is only used in function createEuiListItem, value for baseUrl does not affect
   return {
     href,
     baseUrl: href,
@@ -138,3 +139,15 @@ export function createRecentChromeNavLink(
     title: titleAndAriaLabel,
   };
 }
+
+// As this link is disabled, values for id, href and baseUrl does not affect
+export const emptyRecentlyVisited: ChromeNavLink = {
+  href: '',
+  baseUrl: '',
+  id: '',
+  disabled: true,
+  category: recentlyVisitedCategory,
+  title: i18n.translate('core.ui.EmptyRecentlyVisitied', {
+    defaultMessage: 'No recently visited items',
+  }),
+};
