@@ -19,7 +19,7 @@ import {
 import {
   ApplicationStart,
   HttpSetup,
-  MANAGEMENT_WORKSPACE,
+  MANAGEMENT_WORKSPACE_ID,
   WorkspaceAttribute,
   WorkspaceObservables,
 } from '../../../../../core/public';
@@ -44,7 +44,8 @@ function getFilteredWorkspaceList(
   return [
     ...(currentWorkspace ? [currentWorkspace] : []),
     ...workspaceList.filter(
-      (workspace) => workspace.id !== MANAGEMENT_WORKSPACE && workspace.id !== currentWorkspace?.id
+      (workspace) =>
+        workspace.id !== MANAGEMENT_WORKSPACE_ID && workspace.id !== currentWorkspace?.id
     ),
   ].slice(0, 5);
 }
@@ -61,7 +62,7 @@ export const WorkspaceMenu = ({ basePath, getUrlForApp, observables }: Props) =>
     }
   );
   const managementWorkspaceName =
-    workspaceList.find((workspace) => workspace.id === MANAGEMENT_WORKSPACE)?.name ??
+    workspaceList.find((workspace) => workspace.id === MANAGEMENT_WORKSPACE_ID)?.name ??
     i18n.translate('core.ui.primaryNav.workspacePickerMenu.managementWorkspaceName', {
       defaultMessage: 'Management',
     });
@@ -195,7 +196,7 @@ export const WorkspaceMenu = ({ basePath, getUrlForApp, observables }: Props) =>
             getUrlForApp(WORKSPACE_OVERVIEW_APP_ID, {
               absolute: false,
             }),
-            MANAGEMENT_WORKSPACE,
+            MANAGEMENT_WORKSPACE_ID,
             basePath
           ),
         },

@@ -356,6 +356,6 @@ export {
   WorkspaceObservables,
 } from './workspace';
 
-export { WorkspacePermissionMode, PUBLIC_WORKSPACE, MANAGEMENT_WORKSPACE } from '../utils';
+export { WorkspacePermissionMode, PUBLIC_WORKSPACE_ID, MANAGEMENT_WORKSPACE_ID } from '../utils';
 
 export { getWorkspaceIdFromUrl, WORKSPACE_TYPE } from './utils';
