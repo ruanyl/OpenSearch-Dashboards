@@ -122,6 +122,9 @@ export class IndexPatternManagementPlugin
     });
 
     const registerLibrarySubApp = () => {
+      // disable it under Dashboards Management
+      opensearchDashboardsSection.getApp(IPM_APP_ID)?.disable();
+      // register it under Library
       core.application.register({
         id: IPM_APP_ID,
         title: sectionsHeader,
