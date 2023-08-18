@@ -149,16 +149,15 @@ export class WorkspaceSavedObjectsClientWrapper {
     }
     let permitted = false;
     for (const workspaceId of workspaces) {
-      if (
-        await this.permissionControl.validate(
-          request,
-          {
-            type: WORKSPACE_TYPE,
-            id: workspaceId,
-          },
-          this.formatWorkspacePermissionModeToStringArray(permissionMode)
-        )
-      ) {
+      const validateResult = await this.permissionControl.validate(
+        request,
+        {
+          type: WORKSPACE_TYPE,
+          id: workspaceId,
+        },
+        this.formatWorkspacePermissionModeToStringArray(permissionMode)
+      );
+      if (validateResult?.result) {
         permitted = true;
         break;
       }
@@ -404,6 +403,16 @@ export class WorkspaceSavedObjectsClientWrapper {
                         {
                           terms: {
                             workspaces: permittedWorkspaceIds,
+                          },
+                        },
+                        // TODO: remove this child clause when home workspace proposal is finalized.
+                        {
+                          bool: {
+                            must_not: {
+                              exists: {
+                                field: 'workspaces',
+                              },
+                            },
                           },
                         },
                       ],

@@ -20,7 +20,7 @@ import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react
 import { WorkspaceForm, WorkspaceFormData } from '../workspace_creator/workspace_form';
 import { WORKSPACE_OVERVIEW_APP_ID, WORKSPACE_OP_TYPE_UPDATE } from '../../../common/constants';
 import { DeleteWorkspaceModal } from '../delete_workspace_modal';
-import { formatUrlWithWorkspaceId } from '../../utils';
+import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { WorkspaceClient } from '../../workspace_client';
 
 export const WorkspaceUpdater = () => {
@@ -117,6 +117,17 @@ export const WorkspaceUpdater = () => {
             defaultMessage: 'Delete workspace successfully',
           }),
         });
+        setDeleteWorkspaceModalVisible(false);
+        if (http && application) {
+          const homeUrl = application.getUrlForApp('home', {
+            path: '/',
+            absolute: false,
+          });
+          const targetUrl = http.basePath.prepend(http.basePath.remove(homeUrl), {
+            withoutWorkspace: true,
+          });
+          await application.navigateToUrl(targetUrl);
+        }
       } else {
         notifications?.toasts.addDanger({
           title: i18n.translate('workspace.delete.failed', {
@@ -125,17 +136,6 @@ export const WorkspaceUpdater = () => {
           text: result?.error,
         });
       }
-    }
-    setDeleteWorkspaceModalVisible(false);
-    if (http && application) {
-      const homeUrl = application.getUrlForApp('home', {
-        path: '/',
-        absolute: false,
-      });
-      const targetUrl = http.basePath.prepend(http.basePath.remove(homeUrl), {
-        withoutWorkspace: true,
-      });
-      await application.navigateToUrl(targetUrl);
     }
   };
 
@@ -152,7 +152,18 @@ export const WorkspaceUpdater = () => {
       });
       return;
     }
-    if (!result?.success) {
+    if (result.success) {
+      if (http && application) {
+        const homeUrl = application.getUrlForApp('home', {
+          path: '/',
+          absolute: false,
+        });
+        const targetUrl = http.basePath.prepend(http.basePath.remove(homeUrl), {
+          withoutWorkspace: true,
+        });
+        await application.navigateToUrl(targetUrl);
+      }
+    } else {
       notifications?.toasts.addDanger({
         title: i18n.translate('workspace.exit.failed', {
           defaultMessage: 'Failed to exit workspace',
@@ -160,16 +171,6 @@ export const WorkspaceUpdater = () => {
         text: result?.error,
       });
       return;
-    }
-    if (http && application) {
-      const homeUrl = application.getUrlForApp('home', {
-        path: '/',
-        absolute: false,
-      });
-      const targetUrl = http.basePath.prepend(http.basePath.remove(homeUrl), {
-        withoutWorkspace: true,
-      });
-      await application.navigateToUrl(targetUrl);
     }
   };
 
