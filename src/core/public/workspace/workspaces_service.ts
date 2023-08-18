@@ -33,7 +33,7 @@ export interface WorkspaceSetup extends WorkspaceObservables {
 }
 
 export interface WorkspaceStart extends WorkspaceObservables {
-  renderWorkspaceMenu: WorkspaceMenuRenderFn;
+  renderWorkspaceMenu: () => JSX.Element | null;
 }
 
 export interface WorkspaceAttribute {
