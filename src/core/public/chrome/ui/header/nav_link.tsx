@@ -140,7 +140,7 @@ export function createRecentChromeNavLink(
   };
 }
 
-// As this link is disabled, values for id, href and baseUrl does not affect
+// As emptyRecentlyVisited is disabled, values for id, href and baseUrl does not affect
 export const emptyRecentlyVisited: ChromeNavLink = {
   href: '',
   baseUrl: '',
