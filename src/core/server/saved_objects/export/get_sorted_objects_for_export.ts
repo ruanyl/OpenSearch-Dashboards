@@ -144,12 +144,12 @@ async function fetchObjectsToExport({
 }
 
 /**
- * Generates sorted saved object stream to be used for export.
+ * Generates sorted saved object to be used for export.
  * See the {@link SavedObjectsExportOptions | options} for more detailed information.
  *
  * @public
  */
-export async function exportSavedObjectsToStream({
+export async function exportSavedObjects({
   types,
   objects,
   search,
@@ -190,5 +190,15 @@ export async function exportSavedObjectsToStream({
     missingRefCount: missingReferences.length,
     missingReferences,
   };
-  return createListStream([...redactedObjects, ...(excludeExportDetails ? [] : [exportDetails])]);
+  return [...redactedObjects, ...(excludeExportDetails ? [] : [exportDetails])];
+}
+
+/**
+ * Generates sorted saved object stream to be used for export.
+ * See the {@link SavedObjectsExportOptions | options} for more detailed information.
+ *
+ * @public
+ */
+export async function exportSavedObjectsToStream(props: SavedObjectsExportOptions) {
+  return createListStream(exportSavedObjects(props));
 }

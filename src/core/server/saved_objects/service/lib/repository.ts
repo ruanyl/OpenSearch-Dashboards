@@ -222,16 +222,6 @@ export class SavedObjectsRepository {
   }
 
   /**
-   * This function will compute the exclude workspaces from baseWorkspaces
-   */
-  private filterWorkspacesAccordingToBaseWorkspaces(
-    targetWorkspaces?: string[],
-    baseWorkspaces?: string[]
-  ): string[] {
-    return targetWorkspaces?.filter((item) => !baseWorkspaces?.includes(item)) || [];
-  }
-
-  /**
    * Persists an object
    *
    * @param {string} type
@@ -509,7 +499,7 @@ export class SavedObjectsRepository {
           const transformedObject = this._serializer.rawToSavedObject(
             findObject as SavedObjectsRawDoc
           ) as SavedObject;
-          const filteredWorkspaces = this.filterWorkspacesAccordingToBaseWorkspaces(
+          const filteredWorkspaces = SavedObjectsUtils.filterWorkspacesAccordingToBaseWorkspaces(
             options.workspaces,
             transformedObject.workspaces
           );
@@ -644,7 +634,7 @@ export class SavedObjectsRepository {
     const bulkGetDocs = expectedBulkGetResults.filter(isRight).map(({ value: { type, id } }) => ({
       _id: this._serializer.generateRawId(namespace, type, id),
       _index: this.getIndexForType(type),
-      _source: ['type', 'namespaces'],
+      _source: ['type', 'namespaces', 'workspaces'],
     }));
     const bulkGetResponse = bulkGetDocs.length
       ? await this.client.mget(
@@ -667,17 +657,24 @@ export class SavedObjectsRepository {
       const { type, id, opensearchRequestIndex } = expectedResult.value;
       const doc = bulkGetResponse?.body.docs[opensearchRequestIndex];
       if (doc?.found) {
-        errors.push({
-          id,
-          type,
-          error: {
-            ...errorContent(SavedObjectsErrorHelpers.createConflictError(type, id)),
-            // @ts-expect-error MultiGetHit._source is optional
-            ...(!this.rawDocExistsInNamespace(doc!, namespace) && {
-              metadata: { isNotOverwritable: true },
-            }),
-          },
-        });
+        const transformedObject = this._serializer.rawToSavedObject(doc as SavedObjectsRawDoc);
+        const filteredWorkspaces = SavedObjectsUtils.filterWorkspacesAccordingToBaseWorkspaces(
+          options.workspaces,
+          transformedObject.workspaces
+        );
+        if (!filteredWorkspaces.length) {
+          errors.push({
+            id,
+            type,
+            error: {
+              ...errorContent(SavedObjectsErrorHelpers.createConflictError(type, id)),
+              // @ts-expect-error MultiGetHit._source is optional
+              ...(!this.rawDocExistsInNamespace(doc!, namespace) && {
+                metadata: { isNotOverwritable: true },
+              }),
+            },
+          });
+        }
       }
     });
 
