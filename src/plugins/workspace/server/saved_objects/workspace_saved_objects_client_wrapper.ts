@@ -100,8 +100,6 @@ export class WorkspaceSavedObjectsClientWrapper {
   ) {
     // PermissionMode here is an array which is merged by workspace type required permission and other saved object required permission.
     // So we only need to do one permission check no matter its type.
-    let permitted = true;
-
     for (const { id, type } of objects) {
       const validateResult = await this.permissionControl.validate(
         request,
@@ -112,10 +110,9 @@ export class WorkspaceSavedObjectsClientWrapper {
         this.formatWorkspacePermissionModeToStringArray(permissionMode)
       );
       if (!validateResult?.result) {
-        permitted = false;
-        break;
+        return false;
       }
-      return permitted;
+      return true;
     }
   }
 
@@ -156,7 +153,6 @@ export class WorkspaceSavedObjectsClientWrapper {
     if (!workspaces || workspaces.length === 0) {
       return false;
     }
-    let permitted = false;
     for (const workspaceId of workspaces) {
       const validateResult = await this.permissionControl.validate(
         request,
@@ -167,11 +163,10 @@ export class WorkspaceSavedObjectsClientWrapper {
         this.formatWorkspacePermissionModeToStringArray(permissionMode)
       );
       if (validateResult?.result) {
-        permitted = true;
-        break;
+        return true;
       }
     }
-    return permitted;
+    return false;
   }
 
   private isDashboardAdmin(request: OpenSearchDashboardsRequest): boolean {
@@ -209,7 +204,11 @@ export class WorkspaceSavedObjectsClientWrapper {
         const objectsPermitted = await this.validateMultiObjectsPermissions(
           [{ type, id }],
           wrapperOptions.request,
-          [WorkspacePermissionMode.Management, WorkspacePermissionMode.Write]
+          [
+            WorkspacePermissionMode.Management,
+            WorkspacePermissionMode.LibraryWrite,
+            WorkspacePermissionMode.Write,
+          ]
         );
         if (!objectsPermitted) {
           throw generateSavedObjectsPermissionError();
@@ -233,6 +232,7 @@ export class WorkspaceSavedObjectsClientWrapper {
       if (!workspacePermitted) {
         await this.validateSingleObjectPermissions(id, type, wrapperOptions.request, [
           WorkspacePermissionMode.Management,
+          WorkspacePermissionMode.LibraryWrite,
           WorkspacePermissionMode.Write,
         ]);
       }
@@ -255,7 +255,11 @@ export class WorkspaceSavedObjectsClientWrapper {
             object.id,
             object.type,
             wrapperOptions.request,
-            [WorkspacePermissionMode.Management, WorkspacePermissionMode.Write]
+            [
+              WorkspacePermissionMode.Management,
+              WorkspacePermissionMode.LibraryWrite,
+              WorkspacePermissionMode.Write,
+            ]
           );
         }
       }
