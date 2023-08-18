@@ -124,6 +124,10 @@ export class WorkspaceSavedObjectsClientWrapper {
     request: OpenSearchDashboardsRequest,
     permissionMode: WorkspacePermissionMode | WorkspacePermissionMode[]
   ) {
+    // for attributes and options passed in this function, the num of workspaces may be 0.This case should not be passed permission check.
+    if (workspacesIds.length === 0) {
+      return false;
+    }
     const workspaces = workspacesIds.map((id) => ({ id, type: WORKSPACE_TYPE }));
     return await this.validateMultiObjectsPermissions(workspaces, request, permissionMode);
   }
@@ -148,8 +152,9 @@ export class WorkspaceSavedObjectsClientWrapper {
     request: OpenSearchDashboardsRequest,
     permissionMode: WorkspacePermissionMode | WorkspacePermissionMode[]
   ) {
-    if (!workspaces) {
-      return;
+    // for attributes and options passed in this function, the num of workspaces attribute may be 0.This case should not be passed permission check.
+    if (!workspaces || workspaces.length === 0) {
+      return false;
     }
     let permitted = false;
     for (const workspaceId of workspaces) {
