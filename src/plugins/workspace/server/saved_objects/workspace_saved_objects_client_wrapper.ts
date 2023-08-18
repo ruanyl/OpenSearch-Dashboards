@@ -120,6 +120,10 @@ export class WorkspaceSavedObjectsClientWrapper {
     request: OpenSearchDashboardsRequest,
     permissionMode: WorkspacePermissionMode | WorkspacePermissionMode[]
   ) {
+    // for attributes and options passed in this function, the num of workspaces may be 0.This case should not be passed permission check.
+    if (workspacesIds.length === 0) {
+      return false;
+    }
     const workspaces = workspacesIds.map((id) => ({ id, type: WORKSPACE_TYPE }));
     return await this.validateMultiObjectsPermissions(workspaces, request, permissionMode);
   }
@@ -144,8 +148,9 @@ export class WorkspaceSavedObjectsClientWrapper {
     request: OpenSearchDashboardsRequest,
     permissionMode: WorkspacePermissionMode | WorkspacePermissionMode[]
   ) {
-    if (!workspaces) {
-      return;
+    // for attributes and options passed in this function, the num of workspaces attribute may be 0.This case should not be passed permission check.
+    if (!workspaces || workspaces.length === 0) {
+      return false;
     }
     let permitted = false;
     for (const workspaceId of workspaces) {
@@ -185,7 +190,7 @@ export class WorkspaceSavedObjectsClientWrapper {
       const workspacePermitted = await this.validateMultiWorkspacesPermissions(
         objectToDeleted.workspaces!,
         wrapperOptions.request,
-        WorkspacePermissionMode.Management
+        [WorkspacePermissionMode.Management, WorkspacePermissionMode.LibraryWrite]
       );
 
       if (!workspacePermitted) {
@@ -289,7 +294,7 @@ export class WorkspaceSavedObjectsClientWrapper {
       const workspacePermitted = await this.validateAtLeastOnePermittedWorkspaces(
         objectToGet.workspaces,
         wrapperOptions.request,
-        WorkspacePermissionMode.Read
+        [WorkspacePermissionMode.Read]
       );
 
       if (!workspacePermitted) {
