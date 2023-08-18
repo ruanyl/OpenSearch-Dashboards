@@ -71,45 +71,43 @@ export class WorkspaceSavedObjectsClientWrapper {
     request: OpenSearchDashboardsRequest,
     permissionMode: WorkspacePermissionMode | WorkspacePermissionMode[]
   ) {
-    //PermissionMode here is an array which is merged by workspace type required permission and other saved object required permission.
-    //So we only need to do one permission check no matter its type.
+    // PermissionMode here is an array which is merged by workspace type required permission and other saved object required permission.
+    // So we only need to do one permission check no matter its type.
     if (!id) {
       return;
     }
-    if (
-      !(await this.permissionControl.validate(
+    const validateResult = await this.permissionControl.validate(
+      request,
+      {
+        type,
+        id,
+      },
+      this.formatWorkspacePermissionModeToStringArray(permissionMode)
+    );
+    if (!validateResult?.result) {
+      throw generateWorkspacePermissionError();
+    }
+  }
+
+  private async validateMultiObjectsPermissions(
+    objects: Array<Pick<SavedObject, 'id' | 'type'>>,
+    request: OpenSearchDashboardsRequest,
+    permissionMode: WorkspacePermissionMode | WorkspacePermissionMode[]
+  ) {
+    // PermissionMode here is an array which is merged by workspace type required permission and other saved object required permission.
+    // So we only need to do one permission check no matter its type.
+    let permitted = true;
+
+    for (const { id, type } of objects) {
+      const validateResult = await this.permissionControl.validate(
         request,
         {
           type,
           id,
         },
         this.formatWorkspacePermissionModeToStringArray(permissionMode)
-      ))
-    ) {
-      throw generateWorkspacePermissionError();
-    }
-  }
-
-  private async validateMultiObjectsPermissions(
-    objects: Pick<SavedObject, 'id' | 'type'>[],
-    request: OpenSearchDashboardsRequest,
-    permissionMode: WorkspacePermissionMode | WorkspacePermissionMode[]
-  ) {
-    //PermissionMode here is an array which is merged by workspace type required permission and other saved object required permission.
-    //So we only need to do one permission check no matter its type.
-    let permitted = true;
-
-    for (const { id, type } of objects) {
-      if (
-        !(await this.permissionControl.validate(
-          request,
-          {
-            type,
-            id,
-          },
-          this.formatWorkspacePermissionModeToStringArray(permissionMode)
-        ))
-      ) {
+      );
+      if (!validateResult?.result) {
         permitted = false;
         break;
       }
