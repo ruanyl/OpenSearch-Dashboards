@@ -81,7 +81,6 @@ export class WorkspaceService implements CoreService<WorkspaceSetup, WorkspaceSt
       ...observables,
       renderWorkspaceMenu: () => {
         if (this._renderWorkspaceMenu) {
-          application;
           return this._renderWorkspaceMenu({
             basePath: http.basePath,
             getUrlForApp: application.getUrlForApp,

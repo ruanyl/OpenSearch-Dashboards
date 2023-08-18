@@ -3,9 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ApplicationStart, HttpSetup, WorkspaceObservables } from '../../../core/public';
 import React from 'react';
+
 import { WorkspaceMenu } from './components/workspace_menu/workspace_menu';
+import { ApplicationStart, HttpSetup, WorkspaceObservables } from '../../../core/public';
 
 export function renderWorkspaceMenu({
   basePath,
