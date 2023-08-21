@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { featureMatchesConfig } from './utils';
 
 describe('workspace utils: featureMatchesConfig', () => {
