@@ -38,8 +38,9 @@ import { relativeToAbsolute } from '../../nav_links/to_nav_link';
 export const isModifiedOrPrevented = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) =>
   event.metaKey || event.altKey || event.ctrlKey || event.shiftKey || event.defaultPrevented;
 
+export type ChromeOrRecentNavLink = ChromeNavLink | RecentNavLink;
 interface Props {
-  link: ChromeNavLink;
+  link: ChromeNavLink | RecentNavLink;
   appId?: string;
   basePath?: HttpStart['basePath'];
   dataTestSubj: string;
@@ -90,6 +91,8 @@ export function createEuiListItem({
   };
 }
 
+export type RecentNavLink = Omit<ChromeNavLink, 'baseUrl'>;
+
 const recentlyVisitedCategory: AppCategory = {
   id: 'recentlyVisited',
   label: i18n.translate('core.ui.recentlyVisited.label', {
@@ -113,7 +116,7 @@ export function createRecentChromeNavLink(
   recentLink: ChromeRecentlyAccessedHistoryItem,
   navLinks: ChromeNavLink[],
   basePath: HttpStart['basePath']
-): ChromeNavLink {
+): RecentNavLink {
   const { link, label } = recentLink;
   const href = relativeToAbsolute(basePath.prepend(link));
   const navLink = navLinks.find((nl) => href.startsWith(nl.baseUrl));
@@ -129,10 +132,8 @@ export function createRecentChromeNavLink(
     });
   }
 
-  // As RecentChromeNavLink is only used in function createEuiListItem, value for baseUrl does not affect
   return {
     href,
-    baseUrl: href,
     id: recentLink.id,
     externalLink: true,
     category: recentlyVisitedCategory,
@@ -141,13 +142,12 @@ export function createRecentChromeNavLink(
 }
 
 // As emptyRecentlyVisited is disabled, values for id, href and baseUrl does not affect
-export const emptyRecentlyVisited: ChromeNavLink = {
-  href: '',
-  baseUrl: '',
+export const emptyRecentlyVisited: RecentNavLink = {
   id: '',
+  href: '',
   disabled: true,
   category: recentlyVisitedCategory,
-  title: i18n.translate('core.ui.EmptyRecentlyVisitied', {
+  title: i18n.translate('core.ui.EmptyRecentlyVisited', {
     defaultMessage: 'No recently visited items',
   }),
 };

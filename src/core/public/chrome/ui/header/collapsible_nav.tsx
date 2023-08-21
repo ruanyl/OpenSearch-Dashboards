@@ -48,11 +48,16 @@ import { AppCategory } from '../../../../types';
 import { InternalApplicationStart } from '../../../application';
 import { HttpStart } from '../../../http';
 import { OnIsLockedUpdate } from './';
-import { createEuiListItem, createRecentChromeNavLink, emptyRecentlyVisited } from './nav_link';
+import {
+  createEuiListItem,
+  createRecentChromeNavLink,
+  emptyRecentlyVisited,
+  ChromeOrRecentNavLink,
+} from './nav_link';
 import { ChromeBranding } from '../../chrome_service';
 import { CollapsibleNavHeader } from './collapsible_nav_header';
 
-function getAllCategories(allCategorizedLinks: Record<string, ChromeNavLink[]>) {
+function getAllCategories(allCategorizedLinks: Record<string, ChromeOrRecentNavLink[]>) {
   const allCategories = {} as Record<string, AppCategory | undefined>;
 
   for (const [key, value] of Object.entries(allCategorizedLinks)) {
@@ -63,7 +68,7 @@ function getAllCategories(allCategorizedLinks: Record<string, ChromeNavLink[]>) 
 }
 
 function getOrderedCategories(
-  mainCategories: Record<string, ChromeNavLink[]>,
+  mainCategories: Record<string, ChromeOrRecentNavLink[]>,
   categoryDictionary: ReturnType<typeof getAllCategories>
 ) {
   return sortBy(
@@ -74,9 +79,9 @@ function getOrderedCategories(
 
 function getMergedNavLinks(
   orderedCategories: string[],
-  uncategorizedLinks: ChromeNavLink[],
+  uncategorizedLinks: ChromeOrRecentNavLink[],
   categoryDictionary: ReturnType<typeof getAllCategories>
-): Array<string | ChromeNavLink> {
+): Array<string | ChromeOrRecentNavLink> {
   const uncategorizedLinksWithOrder = sortBy(
     uncategorizedLinks.filter((link) => link.order !== null),
     'order'
@@ -148,16 +153,17 @@ export function CollapsibleNav({
 }: Props) {
   const navLinks = useObservable(observables.navLinks$, []).filter((link) => !link.hidden);
   const recentlyAccessed = useObservable(observables.recentlyAccessed$, []);
+  const allNavLinks: ChromeOrRecentNavLink[] = [...navLinks];
   if (recentlyAccessed.length) {
-    navLinks.push(
+    allNavLinks.push(
       ...recentlyAccessed.map((link) => createRecentChromeNavLink(link, navLinks, basePath))
     );
   } else {
-    navLinks.push(emptyRecentlyVisited);
+    allNavLinks.push(emptyRecentlyVisited);
   }
   const appId = useObservable(observables.appId$, '');
   const lockRef = useRef<HTMLButtonElement>(null);
-  const groupedNavLinks = groupBy(navLinks, (link) => link?.category?.id);
+  const groupedNavLinks = groupBy(allNavLinks, (link) => link?.category?.id);
   const { undefined: uncategorizedLinks = [], ...allCategorizedLinks } = groupedNavLinks;
   const categoryDictionary = getAllCategories(allCategorizedLinks);
   const orderedCategories = getOrderedCategories(allCategorizedLinks, categoryDictionary);
@@ -167,7 +173,7 @@ export function CollapsibleNav({
     categoryDictionary
   );
 
-  const readyForEUI = (link: ChromeNavLink, needsIcon: boolean = false) => {
+  const readyForEUI = (link: ChromeOrRecentNavLink, needsIcon: boolean = false) => {
     return createEuiListItem({
       link,
       appId,
