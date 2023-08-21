@@ -93,7 +93,7 @@ export class WorkspaceSavedObjectsClientWrapper {
     }
   }
 
-  //validate the permission of multi workspace type saved object
+  // validate the permission of multi workspace type saved object
   private async validateMultiWorkspacesPermissions(
     workspacesIds: string[],
     request: OpenSearchDashboardsRequest,
@@ -107,7 +107,7 @@ export class WorkspaceSavedObjectsClientWrapper {
     return await this.validateObjectsPermissions(workspaces, request, permissionMode);
   }
 
-  //validate attributes whether contain workspace attribute,if yes, validate the permission of workspace
+  // validate attributes whether contain workspace attribute,if yes, validate the permission of workspace
   private async validateWorkspaceAttributesPermitted<T = unknown>(
     attributes: Partial<T> | T,
     request: OpenSearchDashboardsRequest,
