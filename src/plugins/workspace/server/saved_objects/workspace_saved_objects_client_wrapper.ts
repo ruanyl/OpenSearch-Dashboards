@@ -69,31 +69,8 @@ export class WorkspaceSavedObjectsClientWrapper {
 
     return [permission];
   }
-  private async validateSingleObjectPermissions(
-    id: string | undefined,
-    type: string,
-    request: OpenSearchDashboardsRequest,
-    permissionMode: WorkspacePermissionMode | WorkspacePermissionMode[]
-  ) {
-    // PermissionMode here is an array which is merged by workspace type required permission and other saved object required permission.
-    // So we only need to do one permission check no matter its type.
-    if (!id) {
-      return;
-    }
-    const validateResult = await this.permissionControl.validate(
-      request,
-      {
-        type,
-        id,
-      },
-      this.formatWorkspacePermissionModeToStringArray(permissionMode)
-    );
-    if (!validateResult?.result) {
-      throw generateWorkspacePermissionError();
-    }
-  }
 
-  private async validateMultiObjectsPermissions(
+  private async validateObjectsPermissions(
     objects: Array<Pick<SavedObject, 'id' | 'type'>>,
     request: OpenSearchDashboardsRequest,
     permissionMode: WorkspacePermissionMode | WorkspacePermissionMode[]
@@ -116,6 +93,7 @@ export class WorkspaceSavedObjectsClientWrapper {
     }
   }
 
+  //validate the permission of multi workspace type saved object
   private async validateMultiWorkspacesPermissions(
     workspacesIds: string[],
     request: OpenSearchDashboardsRequest,
@@ -126,9 +104,10 @@ export class WorkspaceSavedObjectsClientWrapper {
       return false;
     }
     const workspaces = workspacesIds.map((id) => ({ id, type: WORKSPACE_TYPE }));
-    return await this.validateMultiObjectsPermissions(workspaces, request, permissionMode);
+    return await this.validateObjectsPermissions(workspaces, request, permissionMode);
   }
 
+  //validate attributes whether contain workspace attribute,if yes, validate the permission of workspace
   private async validateWorkspaceAttributesPermitted<T = unknown>(
     attributes: Partial<T> | T,
     request: OpenSearchDashboardsRequest,
@@ -201,7 +180,7 @@ export class WorkspaceSavedObjectsClientWrapper {
       );
 
       if (!workspacePermitted) {
-        const objectsPermitted = await this.validateMultiObjectsPermissions(
+        const objectsPermitted = await this.validateObjectsPermissions(
           [{ type, id }],
           wrapperOptions.request,
           [
@@ -230,11 +209,18 @@ export class WorkspaceSavedObjectsClientWrapper {
       );
 
       if (!workspacePermitted) {
-        await this.validateSingleObjectPermissions(id, type, wrapperOptions.request, [
-          WorkspacePermissionMode.Management,
-          WorkspacePermissionMode.LibraryWrite,
-          WorkspacePermissionMode.Write,
-        ]);
+        const objectsPermitted = await this.validateObjectsPermissions(
+          [{ id, type }],
+          wrapperOptions.request,
+          [
+            WorkspacePermissionMode.Management,
+            WorkspacePermissionMode.LibraryWrite,
+            WorkspacePermissionMode.Write,
+          ]
+        );
+        if (!objectsPermitted) {
+          throw generateSavedObjectsPermissionError();
+        }
       }
       return await wrapperOptions.client.update(type, id, attributes, options);
     };
@@ -251,9 +237,8 @@ export class WorkspaceSavedObjectsClientWrapper {
         );
 
         if (!workspacePermitted) {
-          await this.validateSingleObjectPermissions(
-            object.id,
-            object.type,
+          const objectsPermitted = await this.validateObjectsPermissions(
+            [{ id: object.id, type: object.type }],
             wrapperOptions.request,
             [
               WorkspacePermissionMode.Management,
@@ -261,6 +246,9 @@ export class WorkspaceSavedObjectsClientWrapper {
               WorkspacePermissionMode.Write,
             ]
           );
+          if (!objectsPermitted) {
+            throw generateSavedObjectsPermissionError();
+          }
         }
       }
 
@@ -318,13 +306,20 @@ export class WorkspaceSavedObjectsClientWrapper {
       );
 
       if (!workspacePermitted) {
-        await this.validateSingleObjectPermissions(id, type, wrapperOptions.request, [
-          WorkspacePermissionMode.LibraryRead,
-          WorkspacePermissionMode.LibraryWrite,
-          WorkspacePermissionMode.Management,
-          WorkspacePermissionMode.Read,
-          WorkspacePermissionMode.Write,
-        ]);
+        const objectsPermitted = await this.validateObjectsPermissions(
+          [{ id, type }],
+          wrapperOptions.request,
+          [
+            WorkspacePermissionMode.LibraryRead,
+            WorkspacePermissionMode.LibraryWrite,
+            WorkspacePermissionMode.Management,
+            WorkspacePermissionMode.Read,
+            WorkspacePermissionMode.Write,
+          ]
+        );
+        if (!objectsPermitted) {
+          throw generateSavedObjectsPermissionError();
+        }
       }
       return objectToGet;
     };
