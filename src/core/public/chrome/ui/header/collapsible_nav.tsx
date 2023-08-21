@@ -52,12 +52,12 @@ import {
   createEuiListItem,
   createRecentChromeNavLink,
   emptyRecentlyVisited,
-  ChromeOrRecentNavLink,
+  CollapsibleNavLink,
 } from './nav_link';
 import { ChromeBranding } from '../../chrome_service';
 import { CollapsibleNavHeader } from './collapsible_nav_header';
 
-function getAllCategories(allCategorizedLinks: Record<string, ChromeOrRecentNavLink[]>) {
+function getAllCategories(allCategorizedLinks: Record<string, CollapsibleNavLink[]>) {
   const allCategories = {} as Record<string, AppCategory | undefined>;
 
   for (const [key, value] of Object.entries(allCategorizedLinks)) {
@@ -68,7 +68,7 @@ function getAllCategories(allCategorizedLinks: Record<string, ChromeOrRecentNavL
 }
 
 function getOrderedCategories(
-  mainCategories: Record<string, ChromeOrRecentNavLink[]>,
+  mainCategories: Record<string, CollapsibleNavLink[]>,
   categoryDictionary: ReturnType<typeof getAllCategories>
 ) {
   return sortBy(
@@ -79,9 +79,9 @@ function getOrderedCategories(
 
 function getMergedNavLinks(
   orderedCategories: string[],
-  uncategorizedLinks: ChromeOrRecentNavLink[],
+  uncategorizedLinks: CollapsibleNavLink[],
   categoryDictionary: ReturnType<typeof getAllCategories>
-): Array<string | ChromeOrRecentNavLink> {
+): Array<string | CollapsibleNavLink> {
   const uncategorizedLinksWithOrder = sortBy(
     uncategorizedLinks.filter((link) => link.order !== null),
     'order'
@@ -153,7 +153,7 @@ export function CollapsibleNav({
 }: Props) {
   const navLinks = useObservable(observables.navLinks$, []).filter((link) => !link.hidden);
   const recentlyAccessed = useObservable(observables.recentlyAccessed$, []);
-  const allNavLinks: ChromeOrRecentNavLink[] = [...navLinks];
+  const allNavLinks: CollapsibleNavLink[] = [...navLinks];
   if (recentlyAccessed.length) {
     allNavLinks.push(
       ...recentlyAccessed.map((link) => createRecentChromeNavLink(link, navLinks, basePath))
@@ -173,7 +173,7 @@ export function CollapsibleNav({
     categoryDictionary
   );
 
-  const readyForEUI = (link: ChromeOrRecentNavLink, needsIcon: boolean = false) => {
+  const readyForEUI = (link: CollapsibleNavLink, needsIcon: boolean = false) => {
     return createEuiListItem({
       link,
       appId,

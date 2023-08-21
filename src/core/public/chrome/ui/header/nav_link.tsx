@@ -38,7 +38,7 @@ import { relativeToAbsolute } from '../../nav_links/to_nav_link';
 export const isModifiedOrPrevented = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) =>
   event.metaKey || event.altKey || event.ctrlKey || event.shiftKey || event.defaultPrevented;
 
-export type ChromeOrRecentNavLink = ChromeNavLink | RecentNavLink;
+export type CollapsibleNavLink = ChromeNavLink | RecentNavLink;
 interface Props {
   link: ChromeNavLink | RecentNavLink;
   appId?: string;
