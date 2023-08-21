@@ -133,7 +133,7 @@ export class SavedObjectsManagementPlugin
      * Register saved objects overview & saved search & saved query here
      */
     core.application.register({
-      id: 'objects_overview',
+      id: 'objects_all',
       appRoute: '/app/objects',
       exactRoute: true,
       title: ALL_LIBRARY_OBJECTS_WORDINGS,
