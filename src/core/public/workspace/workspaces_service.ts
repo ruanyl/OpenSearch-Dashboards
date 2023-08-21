@@ -97,5 +97,6 @@ export class WorkspaceService implements CoreService<WorkspaceSetup, WorkspaceSt
     this.currentWorkspaceId$.unsubscribe();
     this.workspaceList$.unsubscribe();
     this.workspaceEnabled$.unsubscribe();
+    this._renderWorkspaceMenu = null;
   }
 }
