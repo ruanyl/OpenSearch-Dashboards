@@ -543,9 +543,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       return null;
     }
     const { applications } = this.props;
-    const newIndexPatternUrl = applications.getUrlForApp('management', {
-      path: 'opensearch-dashboards/indexPatterns',
-    });
+    const newIndexPatternUrl = applications.getUrlForApp('indexPatterns');
 
     return (
       <Flyout
