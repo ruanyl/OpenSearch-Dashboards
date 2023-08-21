@@ -59,6 +59,7 @@ const isWorkspacesLikeAttributes = (attributes: unknown): attributes is Attribut
   Array.isArray((attributes as { workspaces: unknown }).workspaces);
 
 export class WorkspaceSavedObjectsClientWrapper {
+  private config?: ConfigSchema;
   private formatWorkspacePermissionModeToStringArray(
     permission: WorkspacePermissionMode | WorkspacePermissionMode[]
   ): string[] {
@@ -143,8 +144,8 @@ export class WorkspaceSavedObjectsClientWrapper {
     }
   }
 
-  private async isDashboardAdmin(request: OpenSearchDashboardsRequest): Promise<boolean> {
-    const config: ConfigSchema = await this.options.config$.pipe(first()).toPromise();
+  private isDashboardAdmin(request: OpenSearchDashboardsRequest): boolean {
+    const config = this.config || ({} as ConfigSchema);
     const principals = this.permissionControl.getPrincipalsFromRequest(request);
     const adminBackendRoles = config?.dashboardAdmin?.backendRoles || [];
     const matchAny = principals?.groups?.some((item) => adminBackendRoles.includes(item)) || false;
@@ -167,10 +168,6 @@ export class WorkspaceSavedObjectsClientWrapper {
       id: string,
       options: SavedObjectsDeleteOptions = {}
     ) => {
-      const isDashboardAdmin = await this.isDashboardAdmin(wrapperOptions.request);
-      if (isDashboardAdmin) {
-        return wrapperOptions.client.delete(type, id, options);
-      }
       if (this.isRelatedToWorkspace(type)) {
         await this.validateSingleWorkspacePermissions(id, wrapperOptions.request, [
           WorkspacePermissionMode.Management,
@@ -192,10 +189,6 @@ export class WorkspaceSavedObjectsClientWrapper {
       attributes: Partial<T>,
       options: SavedObjectsUpdateOptions = {}
     ): Promise<SavedObjectsUpdateResponse<T>> => {
-      const isDashboardAdmin = await this.isDashboardAdmin(wrapperOptions.request);
-      if (isDashboardAdmin) {
-        return wrapperOptions.client.update(type, id, attributes, options);
-      }
       if (this.isRelatedToWorkspace(type)) {
         await this.validateSingleWorkspacePermissions(id, wrapperOptions.request, [
           WorkspacePermissionMode.Management,
@@ -208,10 +201,6 @@ export class WorkspaceSavedObjectsClientWrapper {
       objects: Array<SavedObjectsBulkUpdateObject<T>>,
       options?: SavedObjectsBulkUpdateOptions
     ): Promise<SavedObjectsBulkUpdateResponse<T>> => {
-      const isDashboardAdmin = await this.isDashboardAdmin(wrapperOptions.request);
-      if (isDashboardAdmin) {
-        return wrapperOptions.client.bulkUpdate(objects, options);
-      }
       const workspaceIds = objects.reduce<string[]>((acc, cur) => {
         if (this.isRelatedToWorkspace(cur.type)) {
           acc.push(cur.id);
@@ -234,10 +223,6 @@ export class WorkspaceSavedObjectsClientWrapper {
       objects: Array<SavedObjectsBulkCreateObject<T>>,
       options: SavedObjectsCreateOptions = {}
     ): Promise<SavedObjectsBulkResponse<T>> => {
-      const isDashboardAdmin = await this.isDashboardAdmin(wrapperOptions.request);
-      if (isDashboardAdmin) {
-        return wrapperOptions.client.bulkCreate(objects, options);
-      }
       if (options.workspaces) {
         await this.validateMultiWorkspacesPermissions(options.workspaces, wrapperOptions.request, [
           WorkspacePermissionMode.Write,
@@ -252,10 +237,6 @@ export class WorkspaceSavedObjectsClientWrapper {
       attributes: T,
       options?: SavedObjectsCreateOptions
     ) => {
-      const isDashboardAdmin = await this.isDashboardAdmin(wrapperOptions.request);
-      if (isDashboardAdmin) {
-        return wrapperOptions.client.create(type, attributes, options);
-      }
       if (isWorkspacesLikeAttributes(attributes)) {
         await this.validateMultiWorkspacesPermissions(
           attributes.workspaces,
@@ -271,10 +252,6 @@ export class WorkspaceSavedObjectsClientWrapper {
       id: string,
       options: SavedObjectsBaseOptions = {}
     ): Promise<SavedObject<T>> => {
-      const isDashboardAdmin = await this.isDashboardAdmin(wrapperOptions.request);
-      if (isDashboardAdmin) {
-        return wrapperOptions.client.get(type, id, options);
-      }
       const objectToGet = await wrapperOptions.client.get<T>(type, id, options);
       await this.validateAtLeastOnePermittedWorkspaces(
         objectToGet.workspaces,
@@ -288,10 +265,6 @@ export class WorkspaceSavedObjectsClientWrapper {
       objects: SavedObjectsBulkGetObject[] = [],
       options: SavedObjectsBaseOptions = {}
     ): Promise<SavedObjectsBulkResponse<T>> => {
-      const isDashboardAdmin = await this.isDashboardAdmin(wrapperOptions.request);
-      if (isDashboardAdmin) {
-        return wrapperOptions.client.bulkGet(objects, options);
-      }
       const objectToBulkGet = await wrapperOptions.client.bulkGet<T>(objects, options);
       for (const object of objectToBulkGet.saved_objects) {
         await this.validateAtLeastOnePermittedWorkspaces(
@@ -306,15 +279,9 @@ export class WorkspaceSavedObjectsClientWrapper {
     const findWithWorkspacePermissionControl = async <T = unknown>(
       options: SavedObjectsFindOptions
     ) => {
-      const isDashboardAdmin = await this.isDashboardAdmin(wrapperOptions.request);
       const principals = this.permissionControl.getPrincipalsFromRequest(wrapperOptions.request);
 
-      if (isDashboardAdmin) {
-        /**
-         * For dashbaord admin, we will fetch all the records no matter
-         * what the ACL is or if there is workspaces attribute.
-         */
-      } else if (this.isRelatedToWorkspace(options.type)) {
+      if (this.isRelatedToWorkspace(options.type)) {
         const queryDSLForQueryingWorkspaces = ACL.genereateGetPermittedSavedObjectsQueryDSL(
           [
             WorkspacePermissionMode.LibraryRead,
@@ -400,10 +367,6 @@ export class WorkspaceSavedObjectsClientWrapper {
       targetWorkspaces: string[],
       options: SavedObjectsAddToWorkspacesOptions = {}
     ) => {
-      const isDashboardAdmin = await this.isDashboardAdmin(wrapperOptions.request);
-      if (isDashboardAdmin) {
-        return wrapperOptions.client.addToWorkspaces(objects, targetWorkspaces, options);
-      }
       // target workspaces
       await this.validateMultiWorkspacesPermissions(targetWorkspaces, wrapperOptions.request, [
         WorkspacePermissionMode.LibraryWrite,
@@ -425,6 +388,12 @@ export class WorkspaceSavedObjectsClientWrapper {
 
       return await wrapperOptions.client.addToWorkspaces(objects, targetWorkspaces, options);
     };
+
+    const isDashboardAdmin = this.isDashboardAdmin(wrapperOptions.request);
+
+    if (isDashboardAdmin) {
+      return wrapperOptions.client;
+    }
 
     return {
       ...wrapperOptions.client,
@@ -449,5 +418,15 @@ export class WorkspaceSavedObjectsClientWrapper {
     private readonly options: {
       config$: Observable<ConfigSchema>;
     }
-  ) {}
+  ) {
+    this.options.config$.subscribe((config) => {
+      this.config = config;
+    });
+    this.options.config$
+      .pipe(first())
+      .toPromise()
+      .then((config) => {
+        this.config = config;
+      });
+  }
 }
