@@ -49,7 +49,7 @@ export const featureMatchesConfig = (featureConfigs: string[]) => ({
 }) => {
   let matched = false;
 
-  for (let featureConfig of featureConfigs) {
+  for (const featureConfig of featureConfigs) {
     // '*' matches any feature
     if (featureConfig === '*') {
       matched = true;
