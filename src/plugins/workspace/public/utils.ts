@@ -55,7 +55,7 @@ export const featureMatchesConfig = (featureConfigs: string[]) => ({
       matched = true;
     }
 
-    // The config matches a category
+    // The config starts with `@` matches a category
     if (category && featureConfig === `@${category.id}`) {
       matched = true;
     }
@@ -65,6 +65,7 @@ export const featureMatchesConfig = (featureConfigs: string[]) => ({
       matched = true;
     }
 
+    // If a config starts with `!`, such feature or category will be excluded
     if (featureConfig.startsWith('!')) {
       if (category && featureConfig === `!@${category.id}`) {
         matched = false;
