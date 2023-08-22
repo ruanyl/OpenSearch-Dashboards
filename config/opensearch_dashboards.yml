@@ -265,3 +265,10 @@
 
 # Set the value of this setting to false to hide the help menu link to the OpenSearch Dashboards user survey
 # opensearchDashboards.survey.url: "https://survey.opensearch.org"
+
+# Set the value of this setting to true to enable plugin augmentation on Dashboard
+# vis_augmenter.pluginAugmentationEnabled: true
+
+# Set the backend roles, whoever has the backend roles defined in this config will be regard as dashboard admin.
+# Dashboard admin will have the access to all the workspaces and objects inside OpenSearch Dashboards.
+# workspace.dashboardAdmin.backendRoles: ["dashboard_admin"]
