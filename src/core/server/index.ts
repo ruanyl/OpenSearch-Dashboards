@@ -218,6 +218,7 @@ export {
   SessionStorageFactory,
   DestructiveRouteMethod,
   SafeRouteMethod,
+  ensureRawRequest,
 } from './http';
 
 export {
@@ -352,12 +353,12 @@ export {
   MetricsServiceStart,
 } from './metrics';
 
-export { AppCategory } from '../types';
+export { AppCategory, WorkspaceAttribute } from '../types';
 export {
   DEFAULT_APP_CATEGORIES,
   WorkspacePermissionMode,
-  PUBLIC_WORKSPACE,
-  MANAGEMENT_WORKSPACE,
+  PUBLIC_WORKSPACE_ID,
+  MANAGEMENT_WORKSPACE_ID,
 } from '../utils';
 
 export {

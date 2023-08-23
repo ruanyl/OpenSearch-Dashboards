@@ -5,6 +5,8 @@
 
 import { i18n } from '@osd/i18n';
 import Boom from '@hapi/boom';
+import { Observable } from 'rxjs';
+import { first } from 'rxjs/operators';
 
 import {
   OpenSearchDashboardsRequest,
@@ -29,6 +31,7 @@ import {
   ACL,
   WorkspacePermissionMode,
 } from '../../../../core/server';
+import { ConfigSchema } from '../../config';
 
 // Can't throw unauthorized for now, the page will be refreshed if unauthorized
 const generateWorkspacePermissionError = () =>
@@ -56,6 +59,7 @@ const isWorkspacesLikeAttributes = (attributes: unknown): attributes is Attribut
   Array.isArray((attributes as { workspaces: unknown }).workspaces);
 
 export class WorkspaceSavedObjectsClientWrapper {
+  private config?: ConfigSchema;
   private formatWorkspacePermissionModeToStringArray(
     permission: WorkspacePermissionMode | WorkspacePermissionMode[]
   ): string[] {
@@ -73,16 +77,15 @@ export class WorkspaceSavedObjectsClientWrapper {
     if (!workspaceId) {
       return;
     }
-    if (
-      !(await this.permissionControl.validate(
-        request,
-        {
-          type: WORKSPACE_TYPE,
-          id: workspaceId,
-        },
-        this.formatWorkspacePermissionModeToStringArray(permissionMode)
-      ))
-    ) {
+    const validateResult = await this.permissionControl.validate(
+      request,
+      {
+        type: WORKSPACE_TYPE,
+        id: workspaceId,
+      },
+      this.formatWorkspacePermissionModeToStringArray(permissionMode)
+    );
+    if (!validateResult?.result) {
       throw generateWorkspacePermissionError();
     }
   }
@@ -96,16 +99,15 @@ export class WorkspaceSavedObjectsClientWrapper {
       return;
     }
     for (const workspaceId of workspaces) {
-      if (
-        !(await this.permissionControl.validate(
-          request,
-          {
-            type: WORKSPACE_TYPE,
-            id: workspaceId,
-          },
-          this.formatWorkspacePermissionModeToStringArray(permissionMode)
-        ))
-      ) {
+      const validateResult = await this.permissionControl.validate(
+        request,
+        {
+          type: WORKSPACE_TYPE,
+          id: workspaceId,
+        },
+        this.formatWorkspacePermissionModeToStringArray(permissionMode)
+      );
+      if (!validateResult?.result) {
         throw generateWorkspacePermissionError();
       }
     }
@@ -121,16 +123,15 @@ export class WorkspaceSavedObjectsClientWrapper {
     }
     let permitted = false;
     for (const workspaceId of workspaces) {
-      if (
-        await this.permissionControl.validate(
-          request,
-          {
-            type: WORKSPACE_TYPE,
-            id: workspaceId,
-          },
-          this.formatWorkspacePermissionModeToStringArray(permissionMode)
-        )
-      ) {
+      const validateResult = await this.permissionControl.validate(
+        request,
+        {
+          type: WORKSPACE_TYPE,
+          id: workspaceId,
+        },
+        this.formatWorkspacePermissionModeToStringArray(permissionMode)
+      );
+      if (validateResult?.result) {
         permitted = true;
         break;
       }
@@ -138,6 +139,14 @@ export class WorkspaceSavedObjectsClientWrapper {
     if (!permitted) {
       throw generateWorkspacePermissionError();
     }
+  }
+
+  private isDashboardAdmin(request: OpenSearchDashboardsRequest): boolean {
+    const config = this.config || ({} as ConfigSchema);
+    const principals = this.permissionControl.getPrincipalsFromRequest(request);
+    const adminBackendRoles = config?.dashboardAdmin?.backendRoles || [];
+    const matchAny = principals?.groups?.some((item) => adminBackendRoles.includes(item)) || false;
+    return matchAny;
   }
 
   /**
@@ -166,7 +175,7 @@ export class WorkspaceSavedObjectsClientWrapper {
       await this.validateMultiWorkspacesPermissions(
         objectToDeleted.workspaces,
         wrapperOptions.request,
-        WorkspacePermissionMode.Management
+        [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Management]
       );
       return await wrapperOptions.client.delete(type, id, options);
     };
@@ -229,7 +238,7 @@ export class WorkspaceSavedObjectsClientWrapper {
         await this.validateMultiWorkspacesPermissions(
           attributes.workspaces,
           wrapperOptions.request,
-          WorkspacePermissionMode.Management
+          [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Management]
         );
       }
       return await wrapperOptions.client.create(type, attributes, options);
@@ -244,7 +253,11 @@ export class WorkspaceSavedObjectsClientWrapper {
       await this.validateAtLeastOnePermittedWorkspaces(
         objectToGet.workspaces,
         wrapperOptions.request,
-        WorkspacePermissionMode.Read
+        [
+          WorkspacePermissionMode.LibraryRead,
+          WorkspacePermissionMode.LibraryWrite,
+          WorkspacePermissionMode.Management,
+        ]
       );
       return objectToGet;
     };
@@ -258,7 +271,11 @@ export class WorkspaceSavedObjectsClientWrapper {
         await this.validateAtLeastOnePermittedWorkspaces(
           object.workspaces,
           wrapperOptions.request,
-          WorkspacePermissionMode.Read
+          [
+            WorkspacePermissionMode.LibraryRead,
+            WorkspacePermissionMode.LibraryWrite,
+            WorkspacePermissionMode.Management,
+          ]
         );
       }
       return objectToBulkGet;
@@ -388,6 +405,12 @@ export class WorkspaceSavedObjectsClientWrapper {
       return await wrapperOptions.client.addToWorkspaces(objects, targetWorkspaces, options);
     };
 
+    const isDashboardAdmin = this.isDashboardAdmin(wrapperOptions.request);
+
+    if (isDashboardAdmin) {
+      return wrapperOptions.client;
+    }
+
     return {
       ...wrapperOptions.client,
       get: getWithWorkspacePermissionControl,
@@ -406,5 +429,20 @@ export class WorkspaceSavedObjectsClientWrapper {
     };
   };
 
-  constructor(private readonly permissionControl: SavedObjectsPermissionControlContract) {}
+  constructor(
+    private readonly permissionControl: SavedObjectsPermissionControlContract,
+    private readonly options: {
+      config$: Observable<ConfigSchema>;
+    }
+  ) {
+    this.options.config$.subscribe((config) => {
+      this.config = config;
+    });
+    this.options.config$
+      .pipe(first())
+      .toPromise()
+      .then((config) => {
+        this.config = config;
+      });
+  }
 }

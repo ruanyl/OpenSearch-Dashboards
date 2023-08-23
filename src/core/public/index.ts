@@ -103,6 +103,7 @@ export {
   StringValidation,
   StringValidationRegex,
   StringValidationRegexString,
+  WorkspaceAttribute,
 } from '../types';
 
 export {
@@ -348,8 +349,13 @@ export {
 
 export { __osdBootstrap__ } from './osd_bootstrap';
 
-export { WorkspaceStart, WorkspaceService, WorkspaceAttribute } from './workspace';
+export {
+  WorkspaceStart,
+  WorkspaceSetup,
+  WorkspaceService,
+  WorkspaceObservables,
+} from './workspace';
 
-export { WorkspacePermissionMode, PUBLIC_WORKSPACE, MANAGEMENT_WORKSPACE } from '../utils';
+export { WorkspacePermissionMode, PUBLIC_WORKSPACE_ID, MANAGEMENT_WORKSPACE_ID } from '../utils';
 
 export { getWorkspaceIdFromUrl, WORKSPACE_TYPE } from './utils';

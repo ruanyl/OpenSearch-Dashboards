@@ -6,9 +6,7 @@
 import React, { useCallback } from 'react';
 import { EuiPage, EuiPageBody, EuiPageHeader, EuiPageContent } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-
-import { useOpenSearchDashboards } from '../../../../../plugins/opensearch_dashboards_react/public';
-
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { WorkspaceForm, WorkspaceFormData } from './workspace_form';
 import { WORKSPACE_OVERVIEW_APP_ID, WORKSPACE_OP_TYPE_CREATE } from '../../../common/constants';
 import { formatUrlWithWorkspaceId } from '../../utils';
