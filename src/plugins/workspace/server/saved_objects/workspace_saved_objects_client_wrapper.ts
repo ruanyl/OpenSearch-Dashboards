@@ -83,7 +83,7 @@ export class WorkspaceSavedObjectsClientWrapper {
     }
   }
 
-  // validate the permission of multi workspace type saved object
+  // validate if the `request` has the specified permission(`permissionMode`) to the given `workspaceIds`
   private async validateMultiWorkspacesPermissions(
     workspacesIds: string[],
     request: OpenSearchDashboardsRequest,
