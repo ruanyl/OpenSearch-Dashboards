@@ -30,7 +30,6 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { SavedObject, SavedObjectsClientContract } from '../types';
-import { exportSavedObjects } from '../export';
 import { SavedObjectsUtils } from '../service';
 
 /**
@@ -51,20 +50,23 @@ export const regenerateIdsWithReference = async (props: {
   workspaces?: string[];
   objectLimit: number;
 }): Promise<Map<string, { id?: string; omitOriginId?: boolean }>> => {
-  const { savedObjects, savedObjectsClient, workspaces, objectLimit } = props;
+  const { savedObjects, savedObjectsClient, workspaces } = props;
   if (!workspaces || !workspaces.length) {
     return savedObjects.reduce((acc, object) => {
       return acc.set(`${object.type}:${object.id}`, { id: object.id, omitOriginId: false });
     }, new Map<string, { id: string; omitOriginId?: boolean }>());
   }
 
-  const allSavedObjects = (await exportSavedObjects({
-    objects: savedObjects.map((item) => ({ type: item.type, id: item.id })),
-    savedObjectsClient,
-    exportSizeLimit: objectLimit,
-    excludeExportDetails: true,
-  })) as SavedObject[];
-  return allSavedObjects.reduce((acc, object) => {
+  const bulkGetResult = await savedObjectsClient.bulkGet(
+    savedObjects.map((item) => ({ type: item.type, id: item.id }))
+  );
+
+  return bulkGetResult.saved_objects.reduce((acc, object) => {
+    if (object.error?.statusCode === 404) {
+      acc.set(`${object.type}:${object.id}`, { id: object.id, omitOriginId: true });
+      return acc;
+    }
+
     const filteredWorkspaces = SavedObjectsUtils.filterWorkspacesAccordingToBaseWorkspaces(
       workspaces,
       object.workspaces
