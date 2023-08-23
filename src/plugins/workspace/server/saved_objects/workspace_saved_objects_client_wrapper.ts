@@ -79,8 +79,8 @@ export class WorkspaceSavedObjectsClientWrapper {
       if (!validateResult?.result) {
         return false;
       }
-      return true;
     }
+     return true;
   }
 
   // validate if the `request` has the specified permission(`permissionMode`) to the given `workspaceIds`
