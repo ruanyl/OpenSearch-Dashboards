@@ -22,3 +22,5 @@ export const configSchema = schema.object({
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;
+
+export const FEATURE_FLAG_KEY_IN_UI_SETTING = 'workspace_enabled';

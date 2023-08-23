@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { i18n } from '@osd/i18n';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 import {
   PluginInitializerContext,
@@ -26,13 +26,16 @@ import { IWorkspaceDBImpl } from './types';
 import { WorkspaceClientWithSavedObject } from './workspace_client';
 import { WorkspaceSavedObjectsClientWrapper } from './saved_objects';
 import { registerRoutes } from './routes';
-import { ConfigSchema } from '../config';
 import { WORKSPACE_OVERVIEW_APP_ID } from '../common/constants';
+import { ConfigSchema, FEATURE_FLAG_KEY_IN_UI_SETTING } from '../config';
 
 export class WorkspacePlugin implements Plugin<{}, {}> {
   private readonly logger: Logger;
   private client?: IWorkspaceDBImpl;
+  private coreStart?: CoreStart;
   private config$: Observable<ConfigSchema>;
+  private enabled$: BehaviorSubject<boolean> = new BehaviorSubject(false);
+  private loopRequestTimer?: NodeJS.Timeout;
 
   private proxyWorkspaceTrafficToRealHandler(setupDeps: CoreSetup) {
     /**
@@ -89,6 +92,8 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
 
     return {
       client: this.client,
+      enabled$: this.enabled$,
+      sesetWorkspaceFeatureFlag: this.setWorkspaceFeatureFlag,
     };
   }
 
@@ -120,8 +125,11 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
     }
   }
 
-  private async setupWorkspaces(startDeps: CoreStart) {
-    const internalRepository = startDeps.savedObjects.createInternalRepository();
+  private async setupWorkspaces() {
+    if (!this.coreStart) {
+      throw new Error('UI setting client can not be found');
+    }
+    const internalRepository = this.coreStart.savedObjects.createInternalRepository();
     const publicWorkspaceACL = new ACL().addPermission(
       [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.LibraryWrite],
       {
@@ -158,15 +166,65 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
     ]);
   }
 
+  private async getUISettingClient() {
+    if (!this.coreStart) {
+      throw new Error('UI setting client can not be found');
+    }
+    const { uiSettings, savedObjects } = this.coreStart as CoreStart;
+    const internalRepository = savedObjects.createInternalRepository();
+    const savedObjectClient = new SavedObjectsClient(internalRepository);
+    return uiSettings.asScopedToClient(savedObjectClient);
+  }
+
+  private async setWorkspaceFeatureFlag(featureFlag: boolean) {
+    const uiSettingClient = await this.getUISettingClient();
+    await uiSettingClient.set(FEATURE_FLAG_KEY_IN_UI_SETTING, featureFlag);
+    this.enabled$.next(featureFlag);
+  }
+
+  private async setupWorkspaceFeatureFlag() {
+    const uiSettingClient = await this.getUISettingClient();
+    const workspaceEnabled = await uiSettingClient.get(FEATURE_FLAG_KEY_IN_UI_SETTING);
+    this.enabled$.next(!!workspaceEnabled);
+    return workspaceEnabled;
+  }
+
+  private async checkFeatureFlag() {
+    const uiSettingClient = await this.getUISettingClient();
+    const workspaceEnabled = await uiSettingClient.get(FEATURE_FLAG_KEY_IN_UI_SETTING);
+    if (workspaceEnabled !== this.enabled$.getValue()) {
+      this.enabled$.next(workspaceEnabled);
+    }
+  }
+
+  /**
+   * loop check the flag in ui setting and cache.
+   */
+  private setupFeatureFlagCheckTimer() {
+    this.loopRequestTimer = setTimeout(async () => {
+      await this.checkFeatureFlag();
+      this.setupFeatureFlagCheckTimer();
+    }, 10000);
+  }
+
   public start(core: CoreStart) {
     this.logger.debug('Starting SavedObjects service');
 
-    this.setupWorkspaces(core);
+    this.coreStart = core;
+
+    this.setupWorkspaces();
+    this.setupWorkspaceFeatureFlag();
+    this.setupFeatureFlagCheckTimer();
 
     return {
       client: this.client as IWorkspaceDBImpl,
+      enabled$: this.enabled$,
+      sesetWorkspaceFeatureFlag: this.setWorkspaceFeatureFlag,
     };
   }
 
-  public stop() {}
+  public stop() {
+    this.enabled$.unsubscribe();
+    clearTimeout(this.loopRequestTimer);
+  }
 }
