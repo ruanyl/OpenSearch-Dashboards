@@ -148,7 +148,7 @@ export class WorkspaceSavedObjectsClientWrapper {
     ) => {
       const objectToDeleted = await wrapperOptions.client.get(type, id, options);
       const workspacePermitted = await this.validateMultiWorkspacesPermissions(
-        objectToDeleted.workspaces!,
+        objectToDeleted.workspaces ?? [],
         wrapperOptions.request,
         [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Management]
       );
@@ -239,7 +239,7 @@ export class WorkspaceSavedObjectsClientWrapper {
       objects: Array<SavedObjectsBulkCreateObject<T>>,
       options: SavedObjectsCreateOptions = {}
     ): Promise<SavedObjectsBulkResponse<T>> => {
-      if (options.workspaces) {
+      if (options?.workspaces && options.workspaces.length > 0) {
         const permitted = await this.validateMultiWorkspacesPermissions(
           options.workspaces,
           wrapperOptions.request,
