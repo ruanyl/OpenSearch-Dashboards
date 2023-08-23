@@ -80,7 +80,7 @@ export class WorkspaceSavedObjectsClientWrapper {
         return false;
       }
     }
-     return true;
+    return true;
   }
 
   // validate if the `request` has the specified permission(`permissionMode`) to the given `workspaceIds`
@@ -170,13 +170,10 @@ export class WorkspaceSavedObjectsClientWrapper {
       return await wrapperOptions.client.delete(type, id, options);
     };
 
-    // validate single object update with workspace permission, which is used for update and bulkUpdate
+    // validate `objectToUpdate` if can update with workspace permission, which is used for update and bulkUpdate
     const validateUpdateWithWorkspacePermission = async <T = unknown>(
-      type: string,
-      id: string,
-      options: SavedObjectsUpdateOptions = {}
+      objectToUpdate: SavedObject<T>
     ): Promise<boolean> => {
-      const objectToUpdate = await wrapperOptions.client.get<T>(type, id, options);
       let workspacePermitted = false;
       if (objectToUpdate.workspaces && objectToUpdate.workspaces.length > 0) {
         workspacePermitted =
@@ -190,6 +187,7 @@ export class WorkspaceSavedObjectsClientWrapper {
       if (workspacePermitted) {
         return true;
       } else {
+        const { id, type } = objectToUpdate;
         const objectsPermitted = await this.validateObjectsPermissions(
           [{ id, type }],
           wrapperOptions.request,
@@ -209,7 +207,8 @@ export class WorkspaceSavedObjectsClientWrapper {
       attributes: Partial<T>,
       options: SavedObjectsUpdateOptions = {}
     ): Promise<SavedObjectsUpdateResponse<T>> => {
-      const permitted = await validateUpdateWithWorkspacePermission(type, id, options);
+      const objectToUpdate = await wrapperOptions.client.get<T>(type, id, options);
+      const permitted = await validateUpdateWithWorkspacePermission(objectToUpdate);
       if (!permitted) {
         throw generateSavedObjectsPermissionError();
       }
@@ -220,13 +219,10 @@ export class WorkspaceSavedObjectsClientWrapper {
       objects: Array<SavedObjectsBulkUpdateObject<T>>,
       options?: SavedObjectsBulkUpdateOptions
     ): Promise<SavedObjectsBulkUpdateResponse<T>> => {
-      for (const object of objects) {
-        const permitted = await validateUpdateWithWorkspacePermission(
-          object.type,
-          object.id,
-          options
-        );
+      const objectsToUpdate = await wrapperOptions.client.bulkGet<T>(objects, options);
 
+      for (const object of objectsToUpdate.saved_objects) {
+        const permitted = await validateUpdateWithWorkspacePermission(object);
         if (!permitted) {
           throw generateSavedObjectsPermissionError();
         }
