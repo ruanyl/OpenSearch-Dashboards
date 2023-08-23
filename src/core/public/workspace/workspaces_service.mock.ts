@@ -25,6 +25,7 @@ const createWorkspacesStartContractMock = () => ({
   currentWorkspaceId$,
   workspaceList$,
   currentWorkspace$,
+  hasFetchedWorkspaceList$,
   workspaceEnabled$,
   renderWorkspaceMenu: jest.fn(),
 });
