@@ -177,7 +177,7 @@ export class WorkspaceSavedObjectsClientWrapper {
       let workspacePermitted = false;
       if (objectToUpdate.workspaces && objectToUpdate.workspaces.length > 0) {
         workspacePermitted =
-          (await this.validateMultiWorkspacesPermissions(
+          (await this.validateAtLeastOnePermittedWorkspaces(
             objectToUpdate.workspaces,
             wrapperOptions.request,
             [WorkspacePermissionMode.Management, WorkspacePermissionMode.LibraryWrite]
