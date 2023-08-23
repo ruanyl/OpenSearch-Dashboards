@@ -126,7 +126,7 @@ type LinksUpdater = (navLinks: Map<string, NavLinkWrapper>) => Map<string, NavLi
 
 export class NavLinksService {
   private readonly stop$ = new ReplaySubject(1);
-  private filteredNavLinks$ = new BehaviorSubject<ReadonlyMap<string, ChromeNavLink>>(new Map());
+  private filteredNavLinks$ = new BehaviorSubject<ReadonlyMap<string, ChromeNavLink> | null>(null);
 
   public start({ application, http }: StartDeps): ChromeNavLinks {
     const appLinks$ = application.applications$.pipe(
@@ -169,7 +169,9 @@ export class NavLinksService {
       getFilteredNavLinks$: () => {
         return combineLatest([navLinks$, this.filteredNavLinks$]).pipe(
           map(([navLinks, filteredNavLinks]) =>
-            filteredNavLinks.size ? sortChromeNavLinks(filteredNavLinks) : sortNavLinks(navLinks)
+            filteredNavLinks === null
+              ? sortNavLinks(navLinks)
+              : sortChromeNavLinks(filteredNavLinks)
           ),
           takeUntil(this.stop$)
         );
