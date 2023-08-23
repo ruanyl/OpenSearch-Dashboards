@@ -74,7 +74,7 @@ export const regenerateIdsWithReference = async (props: {
     if (filteredWorkspaces.length) {
       acc.set(`${object.type}:${object.id}`, { id: uuidv4(), omitOriginId: true });
     } else {
-      acc.set(`${object.type}:${object.id}`, { id: object.id, omitOriginId: true });
+      acc.set(`${object.type}:${object.id}`, { id: object.id, omitOriginId: false });
     }
     return acc;
   }, new Map<string, { id: string; omitOriginId?: boolean }>());
