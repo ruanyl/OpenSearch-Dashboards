@@ -14,14 +14,18 @@ import {
 import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { formatUrlWithWorkspaceId } from '../../utils';
 
 export function WorkspaceFatalError(props: { error?: string }) {
   const {
-    services: { workspaces, application },
+    services: { application, http },
   } = useOpenSearchDashboards();
   const goBackToHome = () => {
-    window.location.href =
-      workspaces?.formatUrlWithWorkspaceId(application?.getUrlForApp('home') || '', '') || '';
+    window.location.href = formatUrlWithWorkspaceId(
+      application?.getUrlForApp('home') || '',
+      '',
+      http?.basePath
+    );
   };
   return (
     <EuiPage style={{ minHeight: '100vh' }}>
