@@ -22,7 +22,7 @@ import { EditDataSourceWithRouter } from '../components/edit_data_source';
 import { PageWrapper } from '../components/page_wrapper';
 import { reactRouterNavigate } from '../../../opensearch_dashboards_react/public';
 
-export async function mountManagementSection(
+export async function mountDataSourcesManagementSection(
   getStartServices: StartServicesAccessor<DataSourceManagementStartDependencies>,
   params: AppMountParameters
 ) {

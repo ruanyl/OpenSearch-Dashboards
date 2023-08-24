@@ -42,9 +42,9 @@ export class DataSourceManagementPlugin
       order: 1,
       category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
       mount: async (params: AppMountParameters) => {
-        const { mountManagementSection } = await import('./management_app');
+        const { mountDataSourcesManagementSection } = await import('./management_app');
 
-        return mountManagementSection(
+        return mountDataSourcesManagementSection(
           core.getStartServices as StartServicesAccessor<DataSourceManagementStartDependencies>,
           params
         );
