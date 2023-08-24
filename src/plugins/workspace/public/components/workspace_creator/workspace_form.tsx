@@ -36,7 +36,11 @@ import {
   DEFAULT_APP_CATEGORIES,
 } from '../../../../../core/public';
 import { useApplications } from '../../hooks';
-import { WORKSPACE_OP_TYPE_CREATE, WORKSPACE_OP_TYPE_UPDATE } from '../../../common/constants';
+import {
+  WORKSPACE_OP_TYPE_CREATE,
+  WORKSPACE_OP_TYPE_UPDATE,
+  DEFAULT_CHECKED_FEATURES_IDS,
+} from '../../../common/constants';
 import {
   isFeatureDependBySelectedFeatures,
   getFinalFeatureIdsByDependency,
@@ -84,6 +88,10 @@ const isValidWorkspacePermissionSetting = (
   setting.modes.length > 0 &&
   ((setting.type === 'user' && !!setting.userId) || (setting.type === 'group' && !!setting.group));
 
+const isDefaultCheckedFeatureId = (id: string) => {
+  return DEFAULT_CHECKED_FEATURES_IDS.indexOf(id) > -1;
+};
+
 const workspaceHtmlIdGenerator = htmlIdGenerator();
 
 const defaultVISThemeOptions = [{ label: 'Categorical', value: 'categorical' }];
@@ -109,7 +117,9 @@ export const WorkspaceForm = ({
   const [icon, setIcon] = useState(defaultValues?.icon);
   const [defaultVISTheme, setDefaultVISTheme] = useState(defaultValues?.defaultVISTheme);
 
-  const [selectedFeatureIds, setSelectedFeatureIds] = useState(defaultValues?.features || []);
+  const [selectedFeatureIds, setSelectedFeatureIds] = useState(
+    defaultValues?.features || DEFAULT_CHECKED_FEATURES_IDS
+  );
   const [permissionSettings, setPermissionSettings] = useState<
     Array<Partial<WorkspacePermissionSetting>>
   >(
@@ -402,6 +412,12 @@ export const WorkspaceForm = ({
                     features.length > 0 ? `(${selectedIds.length}/${features.length})` : ''
                   }`}
                   checked={selectedIds.length > 0}
+                  disabled={
+                    isWorkspaceFeatureGroup(featureOrGroup)
+                      ? false
+                      : //If this feature isn't checked, will not disable to allow check to compatible dirty data.
+                        isDefaultCheckedFeatureId(featureOrGroup.id) && selectedIds.length > 0
+                  }
                   indeterminate={
                     isWorkspaceFeatureGroup(featureOrGroup) &&
                     selectedIds.length > 0 &&
