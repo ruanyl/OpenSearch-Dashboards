@@ -14,6 +14,7 @@ import {
   HttpSetup,
 } from 'src/core/public';
 import { ManagementAppMountParams } from 'src/plugins/management/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { SavedObjectAttributes } from 'src/core/types';
 import { i18n } from '@osd/i18n';
 import { OpenSearchDashboardsReactContextValue } from '../../opensearch_dashboards_react/public';
@@ -97,4 +98,8 @@ export interface SigV4Content extends SavedObjectAttributes {
   accessKey: string;
   secretKey: string;
   region: string;
+}
+
+export interface DataSourceManagementStartDependencies {
+  data: DataPublicPluginStart;
 }
