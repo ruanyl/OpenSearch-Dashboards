@@ -93,7 +93,7 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
     return {
       client: this.client,
       enabled$: this.enabled$,
-      sesetWorkspaceFeatureFlag: this.setWorkspaceFeatureFlag,
+      setWorkspaceFeatureFlag: this.setWorkspaceFeatureFlag,
     };
   }
 
@@ -189,37 +189,23 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
     return workspaceEnabled;
   }
 
-  private async checkFeatureFlag() {
-    const uiSettingClient = await this.getUISettingClient();
-    const workspaceEnabled = await uiSettingClient.get(FEATURE_FLAG_KEY_IN_UI_SETTING);
-    if (workspaceEnabled !== this.enabled$.getValue()) {
-      this.enabled$.next(workspaceEnabled);
-    }
-  }
-
-  /**
-   * loop check the flag in ui setting and cache.
-   */
-  private setupFeatureFlagCheckTimer() {
-    this.loopRequestTimer = setTimeout(async () => {
-      await this.checkFeatureFlag();
-      this.setupFeatureFlagCheckTimer();
-    }, 10000);
-  }
-
   public start(core: CoreStart) {
     this.logger.debug('Starting SavedObjects service');
 
     this.coreStart = core;
 
-    this.setupWorkspaces();
     this.setupWorkspaceFeatureFlag();
-    this.setupFeatureFlagCheckTimer();
+
+    this.enabled$.subscribe((enabled) => {
+      if (enabled) {
+        this.setupWorkspaces();
+      }
+    });
 
     return {
       client: this.client as IWorkspaceDBImpl,
       enabled$: this.enabled$,
-      sesetWorkspaceFeatureFlag: this.setWorkspaceFeatureFlag,
+      setWorkspaceFeatureFlag: this.setWorkspaceFeatureFlag,
     };
   }
 
