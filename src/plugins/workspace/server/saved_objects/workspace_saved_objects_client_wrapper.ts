@@ -5,7 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 import Boom from '@hapi/boom';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 
 import {
@@ -478,7 +478,7 @@ export class WorkspaceSavedObjectsClientWrapper {
 
     const isDashboardAdmin = this.isDashboardAdmin(wrapperOptions.request);
 
-    if (isDashboardAdmin) {
+    if (isDashboardAdmin || !this.options.enabled$.getValue()) {
       return wrapperOptions.client;
     }
 
@@ -504,6 +504,7 @@ export class WorkspaceSavedObjectsClientWrapper {
     private readonly permissionControl: SavedObjectsPermissionControlContract,
     private readonly options: {
       config$: Observable<ConfigSchema>;
+      enabled$: BehaviorSubject<boolean>;
     }
   ) {
     this.options.config$.subscribe((config) => {

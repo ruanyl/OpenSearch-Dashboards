@@ -329,6 +329,14 @@ export class WorkspaceClient {
     return result;
   }
 
+  public async getFeatureFlag(): Promise<IResponse<boolean>> {
+    const result = await this.safeFetch(this.getPath(['is_workspace_enabled']), {
+      method: 'get',
+    });
+
+    return result;
+  }
+
   public stop() {
     this.workspaces.workspaceList$.unsubscribe();
     this.workspaces.currentWorkspaceId$.unsubscribe();

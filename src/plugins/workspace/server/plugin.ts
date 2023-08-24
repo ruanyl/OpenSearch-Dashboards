@@ -37,11 +37,18 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
   private enabled$: BehaviorSubject<boolean> = new BehaviorSubject(false);
   private loopRequestTimer?: NodeJS.Timeout;
 
+  private get isEnabled() {
+    return this.enabled$.getValue();
+  }
+
   private proxyWorkspaceTrafficToRealHandler(setupDeps: CoreSetup) {
     /**
      * Proxy all {basePath}/w/{workspaceId}{osdPath*} paths to {basePath}{osdPath*}
      */
     setupDeps.http.registerOnPreRouting(async (request, response, toolkit) => {
+      if (!this.isEnabled) {
+        return toolkit.next();
+      }
       const regexp = /\/w\/([^\/]*)/;
       const matchedResult = request.url.pathname.match(regexp);
 
@@ -69,6 +76,7 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
       core.savedObjects.permissionControl,
       {
         config$: this.config$,
+        enabled$: this.enabled$,
       }
     );
 
@@ -84,6 +92,7 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
       http: core.http,
       logger: this.logger,
       client: this.client as IWorkspaceDBImpl,
+      enabled$: this.enabled$,
     });
 
     core.savedObjects.setClientFactoryProvider((repositoryFactory) => () =>
