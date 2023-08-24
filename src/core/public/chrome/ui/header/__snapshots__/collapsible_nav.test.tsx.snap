@@ -91,6 +91,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
       "thrownError": null,
     }
   }
+  getUrlForApp={[MockFunction]}
   homeHref="/"
   id="collapsibe-nav"
   isLocked={false}
@@ -103,7 +104,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
           "baseUrl": "/",
           "category": Object {
             "id": "opensearchDashboards",
-            "label": "Library",
+            "label": "OpenSearch Dashboards",
             "order": 1000,
           },
           "data-test-subj": "discover",
@@ -158,7 +159,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
           "baseUrl": "/",
           "category": Object {
             "id": "opensearchDashboards",
-            "label": "Library",
+            "label": "OpenSearch Dashboards",
             "order": 1000,
           },
           "data-test-subj": "visualize",
@@ -171,7 +172,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
           "baseUrl": "/",
           "category": Object {
             "id": "opensearchDashboards",
-            "label": "Library",
+            "label": "OpenSearch Dashboards",
             "order": 1000,
           },
           "data-test-subj": "dashboard",
@@ -320,6 +321,122 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
       "values": Array [],
     }
   }
+  workspaces={
+    Object {
+      "currentWorkspace$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": null,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "currentWorkspaceId$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": "",
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "renderWorkspaceMenu": [MockFunction],
+      "workspaceEnabled$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": false,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [
+          Subscriber {
+            "_parentOrParents": null,
+            "_subscriptions": Array [
+              SubjectSubscription {
+                "_parentOrParents": [Circular],
+                "_subscriptions": null,
+                "closed": false,
+                "subject": [Circular],
+                "subscriber": [Circular],
+              },
+            ],
+            "closed": false,
+            "destination": SafeSubscriber {
+              "_complete": undefined,
+              "_context": [Circular],
+              "_error": undefined,
+              "_next": [Function],
+              "_parentOrParents": null,
+              "_parentSubscriber": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "destination": Object {
+                "closed": true,
+                "complete": [Function],
+                "error": [Function],
+                "next": [Function],
+              },
+              "isStopped": false,
+              "syncErrorThrowable": false,
+              "syncErrorThrown": false,
+              "syncErrorValue": null,
+            },
+            "isStopped": false,
+            "syncErrorThrowable": true,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          Subscriber {
+            "_parentOrParents": null,
+            "_subscriptions": Array [
+              SubjectSubscription {
+                "_parentOrParents": [Circular],
+                "_subscriptions": null,
+                "closed": false,
+                "subject": [Circular],
+                "subscriber": [Circular],
+              },
+            ],
+            "closed": false,
+            "destination": SafeSubscriber {
+              "_complete": undefined,
+              "_context": [Circular],
+              "_error": undefined,
+              "_next": [Function],
+              "_parentOrParents": null,
+              "_parentSubscriber": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "destination": Object {
+                "closed": true,
+                "complete": [Function],
+                "error": [Function],
+                "next": [Function],
+              },
+              "isStopped": false,
+              "syncErrorThrowable": false,
+              "syncErrorThrown": false,
+              "syncErrorValue": null,
+            },
+            "isStopped": false,
+            "syncErrorThrowable": true,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+        ],
+        "thrownError": null,
+      },
+      "workspaceList$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": Array [],
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+    }
+  }
 >
   <EuiCollapsibleNav
     aria-label="Primary"
@@ -364,14 +481,183 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
           <div
             className="euiFlexItem eui-yScroll"
           >
+            <CollapsibleNavHeader
+              workspaces={
+                Object {
+                  "currentWorkspace$": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": null,
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
+                  "currentWorkspaceId$": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": "",
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
+                  "renderWorkspaceMenu": [MockFunction],
+                  "workspaceEnabled$": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": false,
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [
+                      Subscriber {
+                        "_parentOrParents": null,
+                        "_subscriptions": Array [
+                          SubjectSubscription {
+                            "_parentOrParents": [Circular],
+                            "_subscriptions": null,
+                            "closed": false,
+                            "subject": [Circular],
+                            "subscriber": [Circular],
+                          },
+                        ],
+                        "closed": false,
+                        "destination": SafeSubscriber {
+                          "_complete": undefined,
+                          "_context": [Circular],
+                          "_error": undefined,
+                          "_next": [Function],
+                          "_parentOrParents": null,
+                          "_parentSubscriber": [Circular],
+                          "_subscriptions": null,
+                          "closed": false,
+                          "destination": Object {
+                            "closed": true,
+                            "complete": [Function],
+                            "error": [Function],
+                            "next": [Function],
+                          },
+                          "isStopped": false,
+                          "syncErrorThrowable": false,
+                          "syncErrorThrown": false,
+                          "syncErrorValue": null,
+                        },
+                        "isStopped": false,
+                        "syncErrorThrowable": true,
+                        "syncErrorThrown": false,
+                        "syncErrorValue": null,
+                      },
+                      Subscriber {
+                        "_parentOrParents": null,
+                        "_subscriptions": Array [
+                          SubjectSubscription {
+                            "_parentOrParents": [Circular],
+                            "_subscriptions": null,
+                            "closed": false,
+                            "subject": [Circular],
+                            "subscriber": [Circular],
+                          },
+                        ],
+                        "closed": false,
+                        "destination": SafeSubscriber {
+                          "_complete": undefined,
+                          "_context": [Circular],
+                          "_error": undefined,
+                          "_next": [Function],
+                          "_parentOrParents": null,
+                          "_parentSubscriber": [Circular],
+                          "_subscriptions": null,
+                          "closed": false,
+                          "destination": Object {
+                            "closed": true,
+                            "complete": [Function],
+                            "error": [Function],
+                            "next": [Function],
+                          },
+                          "isStopped": false,
+                          "syncErrorThrowable": false,
+                          "syncErrorThrown": false,
+                          "syncErrorValue": null,
+                        },
+                        "isStopped": false,
+                        "syncErrorThrowable": true,
+                        "syncErrorThrown": false,
+                        "syncErrorValue": null,
+                      },
+                    ],
+                    "thrownError": null,
+                  },
+                  "workspaceList$": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": Array [],
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
+                }
+              }
+            >
+              <EuiCollapsibleNavGroup>
+                <div
+                  className="euiCollapsibleNavGroup"
+                  id="mockId"
+                >
+                  <div
+                    className="euiCollapsibleNavGroup__children"
+                  >
+                    <EuiFlexGroup>
+                      <div
+                        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                      >
+                        <EuiFlexItem>
+                          <div
+                            className="euiFlexItem"
+                          >
+                            <EuiIcon
+                              size="l"
+                              type="logoOpenSearch"
+                            >
+                              <span
+                                data-euiicon-type="logoOpenSearch"
+                                size="l"
+                              />
+                            </EuiIcon>
+                          </div>
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <div
+                            className="euiFlexItem"
+                          >
+                            <EuiText>
+                              <div
+                                className="euiText euiText--medium"
+                              >
+                                <strong>
+                                   
+                                  OpenSearch Analytics
+                                   
+                                </strong>
+                              </div>
+                            </EuiText>
+                          </div>
+                        </EuiFlexItem>
+                      </div>
+                    </EuiFlexGroup>
+                  </div>
+                </div>
+              </EuiCollapsibleNavGroup>
+            </CollapsibleNavHeader>
             <EuiCollapsibleNavGroup
-              background="light"
-              data-test-subj="collapsibleNavGroup-recentlyViewed"
+              data-test-opensearch-logo="clock"
+              data-test-subj="collapsibleNavGroup-recentlyVisited"
+              iconType="clock"
               initialIsOpen={true}
               isCollapsible={true}
-              key="recentlyViewed"
+              key="recentlyVisited"
               onToggle={[Function]}
-              title="Recently viewed"
+              title="Recently Visited"
             >
               <EuiAccordion
                 arrowDisplay="right"
@@ -382,6 +668,14 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                     gutterSize="m"
                     responsive={false}
                   >
+                    <EuiFlexItem
+                      grow={false}
+                    >
+                      <EuiIcon
+                        size="l"
+                        type="clock"
+                      />
+                    </EuiFlexItem>
                     <EuiFlexItem>
                       <EuiTitle
                         size="xxs"
@@ -390,14 +684,15 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                           className="euiCollapsibleNavGroup__title"
                           id="mockId__title"
                         >
-                          Recently viewed
+                          Recently Visited
                         </h3>
                       </EuiTitle>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 }
-                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
-                data-test-subj="collapsibleNavGroup-recentlyViewed"
+                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                data-test-opensearch-logo="clock"
+                data-test-subj="collapsibleNavGroup-recentlyVisited"
                 id="mockId"
                 initialIsOpen={true}
                 isLoading={false}
@@ -406,8 +701,9 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                 paddingSize="none"
               >
                 <div
-                  className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
-                  data-test-subj="collapsibleNavGroup-recentlyViewed"
+                  className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                  data-test-opensearch-logo="clock"
+                  data-test-subj="collapsibleNavGroup-recentlyVisited"
                   onToggle={[Function]}
                 >
                   <div
@@ -447,6 +743,23 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                           <div
                             className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
                           >
+                            <EuiFlexItem
+                              grow={false}
+                            >
+                              <div
+                                className="euiFlexItem euiFlexItem--flexGrowZero"
+                              >
+                                <EuiIcon
+                                  size="l"
+                                  type="clock"
+                                >
+                                  <span
+                                    data-euiicon-type="clock"
+                                    size="l"
+                                  />
+                                </EuiIcon>
+                              </div>
+                            </EuiFlexItem>
                             <EuiFlexItem>
                               <div
                                 className="euiFlexItem"
@@ -458,7 +771,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                     className="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
                                     id="mockId__title"
                                   >
-                                    Recently viewed
+                                    Recently Visited
                                   </h3>
                                 </EuiTitle>
                               </div>
@@ -486,27 +799,26 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                             className="euiCollapsibleNavGroup__children"
                           >
                             <EuiListGroup
-                              aria-label="Recently viewed links"
-                              className="osdCollapsibleNav__recentsListGroup"
+                              aria-label="Primary navigation links, Recently Visited"
                               color="subdued"
                               gutterSize="none"
                               listItems={
                                 Array [
                                   Object {
-                                    "aria-label": "recent 1",
-                                    "data-test-subj": "collapsibleNavAppLink--recent",
+                                    "data-test-subj": "collapsibleNavAppLink",
                                     "href": "http://localhost/recent%201",
+                                    "isActive": false,
+                                    "isDisabled": undefined,
                                     "label": "recent 1",
                                     "onClick": [Function],
-                                    "title": "recent 1",
                                   },
                                   Object {
-                                    "aria-label": "recent 2",
-                                    "data-test-subj": "collapsibleNavAppLink--recent",
+                                    "data-test-subj": "collapsibleNavAppLink",
                                     "href": "http://localhost/recent%202",
+                                    "isActive": false,
+                                    "isDisabled": undefined,
                                     "label": "recent 2",
                                     "onClick": [Function],
-                                    "title": "recent 2",
                                   },
                                 ]
                               }
@@ -514,8 +826,8 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                               size="s"
                             >
                               <ul
-                                aria-label="Recently viewed links"
-                                className="euiListGroup osdCollapsibleNav__recentsListGroup"
+                                aria-label="Primary navigation links, Recently Visited"
+                                className="euiListGroup"
                                 style={
                                   Object {
                                     "maxWidth": "none",
@@ -523,29 +835,26 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                 }
                               >
                                 <EuiListGroupItem
-                                  aria-label="recent 1"
                                   color="subdued"
-                                  data-test-subj="collapsibleNavAppLink--recent"
+                                  data-test-subj="collapsibleNavAppLink"
                                   href="http://localhost/recent%201"
+                                  isActive={false}
                                   key="title-0"
                                   label="recent 1"
                                   onClick={[Function]}
                                   showToolTip={false}
                                   size="s"
-                                  title="recent 1"
                                   wrapText={false}
                                 >
                                   <li
                                     className="euiListGroupItem euiListGroupItem--small euiListGroupItem--subdued euiListGroupItem-isClickable"
                                   >
                                     <a
-                                      aria-label="recent 1"
                                       className="euiListGroupItem__button"
-                                      data-test-subj="collapsibleNavAppLink--recent"
+                                      data-test-subj="collapsibleNavAppLink"
                                       href="http://localhost/recent%201"
                                       onClick={[Function]}
                                       rel="noreferrer"
-                                      title="recent 1"
                                     >
                                       <span
                                         className="euiListGroupItem__label"
@@ -557,29 +866,26 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                   </li>
                                 </EuiListGroupItem>
                                 <EuiListGroupItem
-                                  aria-label="recent 2"
                                   color="subdued"
-                                  data-test-subj="collapsibleNavAppLink--recent"
+                                  data-test-subj="collapsibleNavAppLink"
                                   href="http://localhost/recent%202"
+                                  isActive={false}
                                   key="title-1"
                                   label="recent 2"
                                   onClick={[Function]}
                                   showToolTip={false}
                                   size="s"
-                                  title="recent 2"
                                   wrapText={false}
                                 >
                                   <li
                                     className="euiListGroupItem euiListGroupItem--small euiListGroupItem--subdued euiListGroupItem-isClickable"
                                   >
                                     <a
-                                      aria-label="recent 2"
                                       className="euiListGroupItem__button"
-                                      data-test-subj="collapsibleNavAppLink--recent"
+                                      data-test-subj="collapsibleNavAppLink"
                                       href="http://localhost/recent%202"
                                       onClick={[Function]}
                                       rel="noreferrer"
-                                      title="recent 2"
                                     >
                                       <span
                                         className="euiListGroupItem__label"
@@ -608,7 +914,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
               isCollapsible={true}
               key="opensearchDashboards"
               onToggle={[Function]}
-              title="Library"
+              title="OpenSearch Dashboards"
             >
               <EuiAccordion
                 arrowDisplay="right"
@@ -635,7 +941,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                           className="euiCollapsibleNavGroup__title"
                           id="mockId__title"
                         >
-                          Library
+                          OpenSearch Dashboards
                         </h3>
                       </EuiTitle>
                     </EuiFlexItem>
@@ -722,7 +1028,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                     className="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
                                     id="mockId__title"
                                   >
-                                    Library
+                                    OpenSearch Dashboards
                                   </h3>
                                 </EuiTitle>
                               </div>
@@ -750,7 +1056,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                             className="euiCollapsibleNavGroup__children"
                           >
                             <EuiListGroup
-                              aria-label="Primary navigation links, Library"
+                              aria-label="Primary navigation links, OpenSearch Dashboards"
                               color="subdued"
                               gutterSize="none"
                               listItems={
@@ -785,7 +1091,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                               size="s"
                             >
                               <ul
-                                aria-label="Primary navigation links, Library"
+                                aria-label="Primary navigation links, OpenSearch Dashboards"
                                 className="euiListGroup"
                                 style={
                                   Object {
@@ -1591,7 +1897,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
             </EuiCollapsibleNavGroup>
             <EuiCollapsibleNavGroup
               data-test-subj="collapsibleNavGroup-noCategory"
-              key="0"
+              key="5"
             >
               <div
                 className="euiCollapsibleNavGroup"
@@ -1813,15 +2119,7 @@ exports[`CollapsibleNav renders the default nav 1`] = `
   customNavLink$={
     BehaviorSubject {
       "_isScalar": false,
-      "_value": Object {
-        "baseUrl": "/",
-        "category": undefined,
-        "data-test-subj": "Custom link",
-        "href": "Custom link",
-        "id": "Custom link",
-        "isActive": true,
-        "title": "Custom link",
-      },
+      "_value": undefined,
       "closed": false,
       "hasError": false,
       "isStopped": false,
@@ -1829,6 +2127,7 @@ exports[`CollapsibleNav renders the default nav 1`] = `
       "thrownError": null,
     }
   }
+  getUrlForApp={[MockFunction]}
   homeHref="/"
   id="collapsibe-nav"
   isLocked={false}
@@ -1942,6 +2241,47 @@ exports[`CollapsibleNav renders the default nav 1`] = `
       "values": Array [],
     }
   }
+  workspaces={
+    Object {
+      "currentWorkspace$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": null,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "currentWorkspaceId$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": "",
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "renderWorkspaceMenu": [MockFunction],
+      "workspaceEnabled$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": false,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "workspaceList$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": Array [],
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+    }
+  }
 >
   <EuiCollapsibleNav
     aria-label="Primary"
@@ -2030,15 +2370,7 @@ exports[`CollapsibleNav renders the default nav 2`] = `
   customNavLink$={
     BehaviorSubject {
       "_isScalar": false,
-      "_value": Object {
-        "baseUrl": "/",
-        "category": undefined,
-        "data-test-subj": "Custom link",
-        "href": "Custom link",
-        "id": "Custom link",
-        "isActive": true,
-        "title": "Custom link",
-      },
+      "_value": undefined,
       "closed": false,
       "hasError": false,
       "isStopped": false,
@@ -2046,6 +2378,7 @@ exports[`CollapsibleNav renders the default nav 2`] = `
       "thrownError": null,
     }
   }
+  getUrlForApp={[MockFunction]}
   homeHref="/"
   id="collapsibe-nav"
   isLocked={false}
@@ -2160,6 +2493,47 @@ exports[`CollapsibleNav renders the default nav 2`] = `
       "values": Array [],
     }
   }
+  workspaces={
+    Object {
+      "currentWorkspace$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": null,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "currentWorkspaceId$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": "",
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "renderWorkspaceMenu": [MockFunction],
+      "workspaceEnabled$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": false,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "workspaceList$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": Array [],
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+    }
+  }
 >
   <EuiCollapsibleNav
     aria-label="Primary"
@@ -2248,15 +2622,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
   customNavLink$={
     BehaviorSubject {
       "_isScalar": false,
-      "_value": Object {
-        "baseUrl": "/",
-        "category": undefined,
-        "data-test-subj": "Custom link",
-        "href": "Custom link",
-        "id": "Custom link",
-        "isActive": true,
-        "title": "Custom link",
-      },
+      "_value": undefined,
       "closed": false,
       "hasError": false,
       "isStopped": false,
@@ -2264,6 +2630,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
       "thrownError": null,
     }
   }
+  getUrlForApp={[MockFunction]}
   homeHref="/"
   id="collapsibe-nav"
   isLocked={true}
@@ -2378,6 +2745,85 @@ exports[`CollapsibleNav renders the default nav 3`] = `
       "values": Array [],
     }
   }
+  workspaces={
+    Object {
+      "currentWorkspace$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": null,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "currentWorkspaceId$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": "",
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "renderWorkspaceMenu": [MockFunction],
+      "workspaceEnabled$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": false,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [
+          Subscriber {
+            "_parentOrParents": null,
+            "_subscriptions": Array [
+              SubjectSubscription {
+                "_parentOrParents": [Circular],
+                "_subscriptions": null,
+                "closed": false,
+                "subject": [Circular],
+                "subscriber": [Circular],
+              },
+            ],
+            "closed": false,
+            "destination": SafeSubscriber {
+              "_complete": undefined,
+              "_context": [Circular],
+              "_error": undefined,
+              "_next": [Function],
+              "_parentOrParents": null,
+              "_parentSubscriber": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "destination": Object {
+                "closed": true,
+                "complete": [Function],
+                "error": [Function],
+                "next": [Function],
+              },
+              "isStopped": false,
+              "syncErrorThrowable": false,
+              "syncErrorThrown": false,
+              "syncErrorValue": null,
+            },
+            "isStopped": false,
+            "syncErrorThrowable": true,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+        ],
+        "thrownError": null,
+      },
+      "workspaceList$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": Array [],
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+    }
+  }
 >
   <EuiCollapsibleNav
     aria-label="Primary"
@@ -2417,14 +2863,146 @@ exports[`CollapsibleNav renders the default nav 3`] = `
           <div
             className="euiFlexItem eui-yScroll"
           >
+            <CollapsibleNavHeader
+              workspaces={
+                Object {
+                  "currentWorkspace$": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": null,
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
+                  "currentWorkspaceId$": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": "",
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
+                  "renderWorkspaceMenu": [MockFunction],
+                  "workspaceEnabled$": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": false,
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [
+                      Subscriber {
+                        "_parentOrParents": null,
+                        "_subscriptions": Array [
+                          SubjectSubscription {
+                            "_parentOrParents": [Circular],
+                            "_subscriptions": null,
+                            "closed": false,
+                            "subject": [Circular],
+                            "subscriber": [Circular],
+                          },
+                        ],
+                        "closed": false,
+                        "destination": SafeSubscriber {
+                          "_complete": undefined,
+                          "_context": [Circular],
+                          "_error": undefined,
+                          "_next": [Function],
+                          "_parentOrParents": null,
+                          "_parentSubscriber": [Circular],
+                          "_subscriptions": null,
+                          "closed": false,
+                          "destination": Object {
+                            "closed": true,
+                            "complete": [Function],
+                            "error": [Function],
+                            "next": [Function],
+                          },
+                          "isStopped": false,
+                          "syncErrorThrowable": false,
+                          "syncErrorThrown": false,
+                          "syncErrorValue": null,
+                        },
+                        "isStopped": false,
+                        "syncErrorThrowable": true,
+                        "syncErrorThrown": false,
+                        "syncErrorValue": null,
+                      },
+                    ],
+                    "thrownError": null,
+                  },
+                  "workspaceList$": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": Array [],
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
+                }
+              }
+            >
+              <EuiCollapsibleNavGroup>
+                <div
+                  className="euiCollapsibleNavGroup"
+                  id="mockId"
+                >
+                  <div
+                    className="euiCollapsibleNavGroup__children"
+                  >
+                    <EuiFlexGroup>
+                      <div
+                        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                      >
+                        <EuiFlexItem>
+                          <div
+                            className="euiFlexItem"
+                          >
+                            <EuiIcon
+                              size="l"
+                              type="logoOpenSearch"
+                            >
+                              <span
+                                data-euiicon-type="logoOpenSearch"
+                                size="l"
+                              />
+                            </EuiIcon>
+                          </div>
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <div
+                            className="euiFlexItem"
+                          >
+                            <EuiText>
+                              <div
+                                className="euiText euiText--medium"
+                              >
+                                <strong>
+                                   
+                                  OpenSearch Analytics
+                                   
+                                </strong>
+                              </div>
+                            </EuiText>
+                          </div>
+                        </EuiFlexItem>
+                      </div>
+                    </EuiFlexGroup>
+                  </div>
+                </div>
+              </EuiCollapsibleNavGroup>
+            </CollapsibleNavHeader>
             <EuiCollapsibleNavGroup
-              background="light"
-              data-test-subj="collapsibleNavGroup-recentlyViewed"
+              data-test-opensearch-logo="clock"
+              data-test-subj="collapsibleNavGroup-recentlyVisited"
+              iconType="clock"
               initialIsOpen={true}
               isCollapsible={true}
-              key="recentlyViewed"
+              key="recentlyVisited"
               onToggle={[Function]}
-              title="Recently viewed"
+              title="Recently Visited"
             >
               <EuiAccordion
                 arrowDisplay="right"
@@ -2435,6 +3013,14 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                     gutterSize="m"
                     responsive={false}
                   >
+                    <EuiFlexItem
+                      grow={false}
+                    >
+                      <EuiIcon
+                        size="l"
+                        type="clock"
+                      />
+                    </EuiFlexItem>
                     <EuiFlexItem>
                       <EuiTitle
                         size="xxs"
@@ -2443,14 +3029,15 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                           className="euiCollapsibleNavGroup__title"
                           id="mockId__title"
                         >
-                          Recently viewed
+                          Recently Visited
                         </h3>
                       </EuiTitle>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 }
-                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
-                data-test-subj="collapsibleNavGroup-recentlyViewed"
+                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                data-test-opensearch-logo="clock"
+                data-test-subj="collapsibleNavGroup-recentlyVisited"
                 id="mockId"
                 initialIsOpen={true}
                 isLoading={false}
@@ -2459,8 +3046,9 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                 paddingSize="none"
               >
                 <div
-                  className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
-                  data-test-subj="collapsibleNavGroup-recentlyViewed"
+                  className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                  data-test-opensearch-logo="clock"
+                  data-test-subj="collapsibleNavGroup-recentlyVisited"
                   onToggle={[Function]}
                 >
                   <div
@@ -2500,6 +3088,23 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                           <div
                             className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
                           >
+                            <EuiFlexItem
+                              grow={false}
+                            >
+                              <div
+                                className="euiFlexItem euiFlexItem--flexGrowZero"
+                              >
+                                <EuiIcon
+                                  size="l"
+                                  type="clock"
+                                >
+                                  <span
+                                    data-euiicon-type="clock"
+                                    size="l"
+                                  />
+                                </EuiIcon>
+                              </div>
+                            </EuiFlexItem>
                             <EuiFlexItem>
                               <div
                                 className="euiFlexItem"
@@ -2511,7 +3116,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                                     className="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
                                     id="mockId__title"
                                   >
-                                    Recently viewed
+                                    Recently Visited
                                   </h3>
                                 </EuiTitle>
                               </div>
@@ -2538,37 +3143,68 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                           <div
                             className="euiCollapsibleNavGroup__children"
                           >
-                            <EuiText
+                            <EuiListGroup
+                              aria-label="Primary navigation links, Recently Visited"
                               color="subdued"
-                              size="s"
-                              style={
-                                Object {
-                                  "padding": "0 8px 8px",
-                                }
+                              gutterSize="none"
+                              listItems={
+                                Array [
+                                  Object {
+                                    "data-test-subj": "collapsibleNavAppLink",
+                                    "href": "",
+                                    "isActive": false,
+                                    "isDisabled": true,
+                                    "label": "No recently visited items",
+                                    "onClick": [Function],
+                                  },
+                                ]
                               }
+                              maxWidth="none"
+                              size="s"
                             >
-                              <div
-                                className="euiText euiText--small"
+                              <ul
+                                aria-label="Primary navigation links, Recently Visited"
+                                className="euiListGroup"
                                 style={
                                   Object {
-                                    "padding": "0 8px 8px",
+                                    "maxWidth": "none",
                                   }
                                 }
                               >
-                                <EuiTextColor
+                                <EuiListGroupItem
                                   color="subdued"
-                                  component="div"
+                                  data-test-subj="collapsibleNavAppLink"
+                                  href=""
+                                  isActive={false}
+                                  isDisabled={true}
+                                  key="title-0"
+                                  label="No recently visited items"
+                                  onClick={[Function]}
+                                  showToolTip={false}
+                                  size="s"
+                                  wrapText={false}
                                 >
-                                  <div
-                                    className="euiTextColor euiTextColor--subdued"
+                                  <li
+                                    className="euiListGroupItem euiListGroupItem--small euiListGroupItem--subdued euiListGroupItem-isDisabled euiListGroupItem-isClickable"
                                   >
-                                    <p>
-                                      No recently viewed items
-                                    </p>
-                                  </div>
-                                </EuiTextColor>
-                              </div>
-                            </EuiText>
+                                    <button
+                                      className="euiListGroupItem__button"
+                                      data-test-subj="collapsibleNavAppLink"
+                                      disabled={true}
+                                      onClick={[Function]}
+                                      type="button"
+                                    >
+                                      <span
+                                        className="euiListGroupItem__label"
+                                        title="No recently visited items"
+                                      >
+                                        No recently visited items
+                                      </span>
+                                    </button>
+                                  </li>
+                                </EuiListGroupItem>
+                              </ul>
+                            </EuiListGroup>
                           </div>
                         </div>
                       </div>
@@ -2750,15 +3386,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 1`] = 
   customNavLink$={
     BehaviorSubject {
       "_isScalar": false,
-      "_value": Object {
-        "baseUrl": "/",
-        "category": undefined,
-        "data-test-subj": "Custom link",
-        "href": "Custom link",
-        "id": "Custom link",
-        "isActive": true,
-        "title": "Custom link",
-      },
+      "_value": undefined,
       "closed": false,
       "hasError": false,
       "isStopped": false,
@@ -2766,6 +3394,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 1`] = 
       "thrownError": null,
     }
   }
+  getUrlForApp={[MockFunction]}
   homeHref="/"
   id="collapsibe-nav"
   isLocked={false}
@@ -2778,7 +3407,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 1`] = 
           "baseUrl": "/",
           "category": Object {
             "id": "opensearchDashboards",
-            "label": "Library",
+            "label": "OpenSearch Dashboards",
             "order": 1000,
           },
           "data-test-subj": "discover",
@@ -2913,6 +3542,196 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 1`] = 
       "values": Array [],
     }
   }
+  workspaces={
+    Object {
+      "currentWorkspace$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": null,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "currentWorkspaceId$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": "",
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "renderWorkspaceMenu": [MockFunction],
+      "workspaceEnabled$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": false,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [
+          Subscriber {
+            "_parentOrParents": null,
+            "_subscriptions": Array [
+              SubjectSubscription {
+                "_parentOrParents": [Circular],
+                "_subscriptions": null,
+                "closed": false,
+                "subject": [Circular],
+                "subscriber": [Circular],
+              },
+            ],
+            "closed": false,
+            "destination": SafeSubscriber {
+              "_complete": undefined,
+              "_context": [Circular],
+              "_error": undefined,
+              "_next": [Function],
+              "_parentOrParents": null,
+              "_parentSubscriber": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "destination": Object {
+                "closed": true,
+                "complete": [Function],
+                "error": [Function],
+                "next": [Function],
+              },
+              "isStopped": false,
+              "syncErrorThrowable": false,
+              "syncErrorThrown": false,
+              "syncErrorValue": null,
+            },
+            "isStopped": false,
+            "syncErrorThrowable": true,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          Subscriber {
+            "_parentOrParents": null,
+            "_subscriptions": Array [
+              SubjectSubscription {
+                "_parentOrParents": [Circular],
+                "_subscriptions": null,
+                "closed": false,
+                "subject": [Circular],
+                "subscriber": [Circular],
+              },
+            ],
+            "closed": false,
+            "destination": SafeSubscriber {
+              "_complete": undefined,
+              "_context": [Circular],
+              "_error": undefined,
+              "_next": [Function],
+              "_parentOrParents": null,
+              "_parentSubscriber": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "destination": Object {
+                "closed": true,
+                "complete": [Function],
+                "error": [Function],
+                "next": [Function],
+              },
+              "isStopped": false,
+              "syncErrorThrowable": false,
+              "syncErrorThrown": false,
+              "syncErrorValue": null,
+            },
+            "isStopped": false,
+            "syncErrorThrowable": true,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          Subscriber {
+            "_parentOrParents": null,
+            "_subscriptions": Array [
+              SubjectSubscription {
+                "_parentOrParents": [Circular],
+                "_subscriptions": null,
+                "closed": false,
+                "subject": [Circular],
+                "subscriber": [Circular],
+              },
+            ],
+            "closed": false,
+            "destination": SafeSubscriber {
+              "_complete": undefined,
+              "_context": [Circular],
+              "_error": undefined,
+              "_next": [Function],
+              "_parentOrParents": null,
+              "_parentSubscriber": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "destination": Object {
+                "closed": true,
+                "complete": [Function],
+                "error": [Function],
+                "next": [Function],
+              },
+              "isStopped": false,
+              "syncErrorThrowable": false,
+              "syncErrorThrown": false,
+              "syncErrorValue": null,
+            },
+            "isStopped": false,
+            "syncErrorThrowable": true,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          Subscriber {
+            "_parentOrParents": null,
+            "_subscriptions": Array [
+              SubjectSubscription {
+                "_parentOrParents": [Circular],
+                "_subscriptions": null,
+                "closed": false,
+                "subject": [Circular],
+                "subscriber": [Circular],
+              },
+            ],
+            "closed": false,
+            "destination": SafeSubscriber {
+              "_complete": undefined,
+              "_context": [Circular],
+              "_error": undefined,
+              "_next": [Function],
+              "_parentOrParents": null,
+              "_parentSubscriber": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "destination": Object {
+                "closed": true,
+                "complete": [Function],
+                "error": [Function],
+                "next": [Function],
+              },
+              "isStopped": false,
+              "syncErrorThrowable": false,
+              "syncErrorThrown": false,
+              "syncErrorValue": null,
+            },
+            "isStopped": false,
+            "syncErrorThrowable": true,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+        ],
+        "thrownError": null,
+      },
+      "workspaceList$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": Array [],
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+    }
+  }
 >
   <EuiCollapsibleNav
     aria-label="Primary"
@@ -2957,14 +3776,257 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 1`] = 
           <div
             className="euiFlexItem eui-yScroll"
           >
+            <CollapsibleNavHeader
+              workspaces={
+                Object {
+                  "currentWorkspace$": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": null,
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
+                  "currentWorkspaceId$": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": "",
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
+                  "renderWorkspaceMenu": [MockFunction],
+                  "workspaceEnabled$": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": false,
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [
+                      Subscriber {
+                        "_parentOrParents": null,
+                        "_subscriptions": Array [
+                          SubjectSubscription {
+                            "_parentOrParents": [Circular],
+                            "_subscriptions": null,
+                            "closed": false,
+                            "subject": [Circular],
+                            "subscriber": [Circular],
+                          },
+                        ],
+                        "closed": false,
+                        "destination": SafeSubscriber {
+                          "_complete": undefined,
+                          "_context": [Circular],
+                          "_error": undefined,
+                          "_next": [Function],
+                          "_parentOrParents": null,
+                          "_parentSubscriber": [Circular],
+                          "_subscriptions": null,
+                          "closed": false,
+                          "destination": Object {
+                            "closed": true,
+                            "complete": [Function],
+                            "error": [Function],
+                            "next": [Function],
+                          },
+                          "isStopped": false,
+                          "syncErrorThrowable": false,
+                          "syncErrorThrown": false,
+                          "syncErrorValue": null,
+                        },
+                        "isStopped": false,
+                        "syncErrorThrowable": true,
+                        "syncErrorThrown": false,
+                        "syncErrorValue": null,
+                      },
+                      Subscriber {
+                        "_parentOrParents": null,
+                        "_subscriptions": Array [
+                          SubjectSubscription {
+                            "_parentOrParents": [Circular],
+                            "_subscriptions": null,
+                            "closed": false,
+                            "subject": [Circular],
+                            "subscriber": [Circular],
+                          },
+                        ],
+                        "closed": false,
+                        "destination": SafeSubscriber {
+                          "_complete": undefined,
+                          "_context": [Circular],
+                          "_error": undefined,
+                          "_next": [Function],
+                          "_parentOrParents": null,
+                          "_parentSubscriber": [Circular],
+                          "_subscriptions": null,
+                          "closed": false,
+                          "destination": Object {
+                            "closed": true,
+                            "complete": [Function],
+                            "error": [Function],
+                            "next": [Function],
+                          },
+                          "isStopped": false,
+                          "syncErrorThrowable": false,
+                          "syncErrorThrown": false,
+                          "syncErrorValue": null,
+                        },
+                        "isStopped": false,
+                        "syncErrorThrowable": true,
+                        "syncErrorThrown": false,
+                        "syncErrorValue": null,
+                      },
+                      Subscriber {
+                        "_parentOrParents": null,
+                        "_subscriptions": Array [
+                          SubjectSubscription {
+                            "_parentOrParents": [Circular],
+                            "_subscriptions": null,
+                            "closed": false,
+                            "subject": [Circular],
+                            "subscriber": [Circular],
+                          },
+                        ],
+                        "closed": false,
+                        "destination": SafeSubscriber {
+                          "_complete": undefined,
+                          "_context": [Circular],
+                          "_error": undefined,
+                          "_next": [Function],
+                          "_parentOrParents": null,
+                          "_parentSubscriber": [Circular],
+                          "_subscriptions": null,
+                          "closed": false,
+                          "destination": Object {
+                            "closed": true,
+                            "complete": [Function],
+                            "error": [Function],
+                            "next": [Function],
+                          },
+                          "isStopped": false,
+                          "syncErrorThrowable": false,
+                          "syncErrorThrown": false,
+                          "syncErrorValue": null,
+                        },
+                        "isStopped": false,
+                        "syncErrorThrowable": true,
+                        "syncErrorThrown": false,
+                        "syncErrorValue": null,
+                      },
+                      Subscriber {
+                        "_parentOrParents": null,
+                        "_subscriptions": Array [
+                          SubjectSubscription {
+                            "_parentOrParents": [Circular],
+                            "_subscriptions": null,
+                            "closed": false,
+                            "subject": [Circular],
+                            "subscriber": [Circular],
+                          },
+                        ],
+                        "closed": false,
+                        "destination": SafeSubscriber {
+                          "_complete": undefined,
+                          "_context": [Circular],
+                          "_error": undefined,
+                          "_next": [Function],
+                          "_parentOrParents": null,
+                          "_parentSubscriber": [Circular],
+                          "_subscriptions": null,
+                          "closed": false,
+                          "destination": Object {
+                            "closed": true,
+                            "complete": [Function],
+                            "error": [Function],
+                            "next": [Function],
+                          },
+                          "isStopped": false,
+                          "syncErrorThrowable": false,
+                          "syncErrorThrown": false,
+                          "syncErrorValue": null,
+                        },
+                        "isStopped": false,
+                        "syncErrorThrowable": true,
+                        "syncErrorThrown": false,
+                        "syncErrorValue": null,
+                      },
+                    ],
+                    "thrownError": null,
+                  },
+                  "workspaceList$": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": Array [],
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
+                }
+              }
+            >
+              <EuiCollapsibleNavGroup>
+                <div
+                  className="euiCollapsibleNavGroup"
+                  id="mockId"
+                >
+                  <div
+                    className="euiCollapsibleNavGroup__children"
+                  >
+                    <EuiFlexGroup>
+                      <div
+                        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                      >
+                        <EuiFlexItem>
+                          <div
+                            className="euiFlexItem"
+                          >
+                            <EuiIcon
+                              size="l"
+                              type="logoOpenSearch"
+                            >
+                              <span
+                                data-euiicon-type="logoOpenSearch"
+                                size="l"
+                              />
+                            </EuiIcon>
+                          </div>
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <div
+                            className="euiFlexItem"
+                          >
+                            <EuiText>
+                              <div
+                                className="euiText euiText--medium"
+                              >
+                                <strong>
+                                   
+                                  OpenSearch Analytics
+                                   
+                                </strong>
+                              </div>
+                            </EuiText>
+                          </div>
+                        </EuiFlexItem>
+                      </div>
+                    </EuiFlexGroup>
+                  </div>
+                </div>
+              </EuiCollapsibleNavGroup>
+            </CollapsibleNavHeader>
             <EuiCollapsibleNavGroup
-              background="light"
-              data-test-subj="collapsibleNavGroup-recentlyViewed"
+              data-test-opensearch-logo="clock"
+              data-test-subj="collapsibleNavGroup-recentlyVisited"
+              iconType="clock"
               initialIsOpen={true}
               isCollapsible={true}
-              key="recentlyViewed"
+              key="recentlyVisited"
               onToggle={[Function]}
-              title="Recently viewed"
+              title="Recently Visited"
             >
               <EuiAccordion
                 arrowDisplay="right"
@@ -2975,6 +4037,14 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 1`] = 
                     gutterSize="m"
                     responsive={false}
                   >
+                    <EuiFlexItem
+                      grow={false}
+                    >
+                      <EuiIcon
+                        size="l"
+                        type="clock"
+                      />
+                    </EuiFlexItem>
                     <EuiFlexItem>
                       <EuiTitle
                         size="xxs"
@@ -2983,14 +4053,15 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 1`] = 
                           className="euiCollapsibleNavGroup__title"
                           id="mockId__title"
                         >
-                          Recently viewed
+                          Recently Visited
                         </h3>
                       </EuiTitle>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 }
-                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
-                data-test-subj="collapsibleNavGroup-recentlyViewed"
+                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                data-test-opensearch-logo="clock"
+                data-test-subj="collapsibleNavGroup-recentlyVisited"
                 id="mockId"
                 initialIsOpen={true}
                 isLoading={false}
@@ -2999,8 +4070,9 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 1`] = 
                 paddingSize="none"
               >
                 <div
-                  className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
-                  data-test-subj="collapsibleNavGroup-recentlyViewed"
+                  className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                  data-test-opensearch-logo="clock"
+                  data-test-subj="collapsibleNavGroup-recentlyVisited"
                   onToggle={[Function]}
                 >
                   <div
@@ -3040,6 +4112,23 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 1`] = 
                           <div
                             className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
                           >
+                            <EuiFlexItem
+                              grow={false}
+                            >
+                              <div
+                                className="euiFlexItem euiFlexItem--flexGrowZero"
+                              >
+                                <EuiIcon
+                                  size="l"
+                                  type="clock"
+                                >
+                                  <span
+                                    data-euiicon-type="clock"
+                                    size="l"
+                                  />
+                                </EuiIcon>
+                              </div>
+                            </EuiFlexItem>
                             <EuiFlexItem>
                               <div
                                 className="euiFlexItem"
@@ -3051,7 +4140,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 1`] = 
                                     className="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
                                     id="mockId__title"
                                   >
-                                    Recently viewed
+                                    Recently Visited
                                   </h3>
                                 </EuiTitle>
                               </div>
@@ -3079,19 +4168,18 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 1`] = 
                             className="euiCollapsibleNavGroup__children"
                           >
                             <EuiListGroup
-                              aria-label="Recently viewed links"
-                              className="osdCollapsibleNav__recentsListGroup"
+                              aria-label="Primary navigation links, Recently Visited"
                               color="subdued"
                               gutterSize="none"
                               listItems={
                                 Array [
                                   Object {
-                                    "aria-label": "recent",
-                                    "data-test-subj": "collapsibleNavAppLink--recent",
+                                    "data-test-subj": "collapsibleNavAppLink",
                                     "href": "http://localhost/recent",
+                                    "isActive": false,
+                                    "isDisabled": undefined,
                                     "label": "recent",
                                     "onClick": [Function],
-                                    "title": "recent",
                                   },
                                 ]
                               }
@@ -3099,8 +4187,8 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 1`] = 
                               size="s"
                             >
                               <ul
-                                aria-label="Recently viewed links"
-                                className="euiListGroup osdCollapsibleNav__recentsListGroup"
+                                aria-label="Primary navigation links, Recently Visited"
+                                className="euiListGroup"
                                 style={
                                   Object {
                                     "maxWidth": "none",
@@ -3108,29 +4196,26 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 1`] = 
                                 }
                               >
                                 <EuiListGroupItem
-                                  aria-label="recent"
                                   color="subdued"
-                                  data-test-subj="collapsibleNavAppLink--recent"
+                                  data-test-subj="collapsibleNavAppLink"
                                   href="http://localhost/recent"
+                                  isActive={false}
                                   key="title-0"
                                   label="recent"
                                   onClick={[Function]}
                                   showToolTip={false}
                                   size="s"
-                                  title="recent"
                                   wrapText={false}
                                 >
                                   <li
                                     className="euiListGroupItem euiListGroupItem--small euiListGroupItem--subdued euiListGroupItem-isClickable"
                                   >
                                     <a
-                                      aria-label="recent"
                                       className="euiListGroupItem__button"
-                                      data-test-subj="collapsibleNavAppLink--recent"
+                                      data-test-subj="collapsibleNavAppLink"
                                       href="http://localhost/recent"
                                       onClick={[Function]}
                                       rel="noreferrer"
-                                      title="recent"
                                     >
                                       <span
                                         className="euiListGroupItem__label"
@@ -3159,7 +4244,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 1`] = 
               isCollapsible={true}
               key="opensearchDashboards"
               onToggle={[Function]}
-              title="Library"
+              title="OpenSearch Dashboards"
             >
               <EuiAccordion
                 arrowDisplay="right"
@@ -3186,7 +4271,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 1`] = 
                           className="euiCollapsibleNavGroup__title"
                           id="mockId__title"
                         >
-                          Library
+                          OpenSearch Dashboards
                         </h3>
                       </EuiTitle>
                     </EuiFlexItem>
@@ -3273,7 +4358,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 1`] = 
                                     className="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
                                     id="mockId__title"
                                   >
-                                    Library
+                                    OpenSearch Dashboards
                                   </h3>
                                 </EuiTitle>
                               </div>
@@ -3301,7 +4386,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 1`] = 
                             className="euiCollapsibleNavGroup__children"
                           >
                             <EuiListGroup
-                              aria-label="Primary navigation links, Library"
+                              aria-label="Primary navigation links, OpenSearch Dashboards"
                               color="subdued"
                               gutterSize="none"
                               listItems={
@@ -3320,7 +4405,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 1`] = 
                               size="s"
                             >
                               <ul
-                                aria-label="Primary navigation links, Library"
+                                aria-label="Primary navigation links, OpenSearch Dashboards"
                                 className="euiListGroup"
                                 style={
                                   Object {
@@ -3759,15 +4844,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 2`] = 
   customNavLink$={
     BehaviorSubject {
       "_isScalar": false,
-      "_value": Object {
-        "baseUrl": "/",
-        "category": undefined,
-        "data-test-subj": "Custom link",
-        "href": "Custom link",
-        "id": "Custom link",
-        "isActive": true,
-        "title": "Custom link",
-      },
+      "_value": undefined,
       "closed": false,
       "hasError": false,
       "isStopped": false,
@@ -3775,6 +4852,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 2`] = 
       "thrownError": null,
     }
   }
+  getUrlForApp={[MockFunction]}
   homeHref="/"
   id="collapsibe-nav"
   isLocked={false}
@@ -3787,7 +4865,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 2`] = 
           "baseUrl": "/",
           "category": Object {
             "id": "opensearchDashboards",
-            "label": "Library",
+            "label": "OpenSearch Dashboards",
             "order": 1000,
           },
           "data-test-subj": "discover",
@@ -3922,6 +5000,196 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 2`] = 
       "values": Array [],
     }
   }
+  workspaces={
+    Object {
+      "currentWorkspace$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": null,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "currentWorkspaceId$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": "",
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "renderWorkspaceMenu": [MockFunction],
+      "workspaceEnabled$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": false,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [
+          Subscriber {
+            "_parentOrParents": null,
+            "_subscriptions": Array [
+              SubjectSubscription {
+                "_parentOrParents": [Circular],
+                "_subscriptions": null,
+                "closed": false,
+                "subject": [Circular],
+                "subscriber": [Circular],
+              },
+            ],
+            "closed": false,
+            "destination": SafeSubscriber {
+              "_complete": undefined,
+              "_context": [Circular],
+              "_error": undefined,
+              "_next": [Function],
+              "_parentOrParents": null,
+              "_parentSubscriber": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "destination": Object {
+                "closed": true,
+                "complete": [Function],
+                "error": [Function],
+                "next": [Function],
+              },
+              "isStopped": false,
+              "syncErrorThrowable": false,
+              "syncErrorThrown": false,
+              "syncErrorValue": null,
+            },
+            "isStopped": false,
+            "syncErrorThrowable": true,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          Subscriber {
+            "_parentOrParents": null,
+            "_subscriptions": Array [
+              SubjectSubscription {
+                "_parentOrParents": [Circular],
+                "_subscriptions": null,
+                "closed": false,
+                "subject": [Circular],
+                "subscriber": [Circular],
+              },
+            ],
+            "closed": false,
+            "destination": SafeSubscriber {
+              "_complete": undefined,
+              "_context": [Circular],
+              "_error": undefined,
+              "_next": [Function],
+              "_parentOrParents": null,
+              "_parentSubscriber": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "destination": Object {
+                "closed": true,
+                "complete": [Function],
+                "error": [Function],
+                "next": [Function],
+              },
+              "isStopped": false,
+              "syncErrorThrowable": false,
+              "syncErrorThrown": false,
+              "syncErrorValue": null,
+            },
+            "isStopped": false,
+            "syncErrorThrowable": true,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          Subscriber {
+            "_parentOrParents": null,
+            "_subscriptions": Array [
+              SubjectSubscription {
+                "_parentOrParents": [Circular],
+                "_subscriptions": null,
+                "closed": false,
+                "subject": [Circular],
+                "subscriber": [Circular],
+              },
+            ],
+            "closed": false,
+            "destination": SafeSubscriber {
+              "_complete": undefined,
+              "_context": [Circular],
+              "_error": undefined,
+              "_next": [Function],
+              "_parentOrParents": null,
+              "_parentSubscriber": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "destination": Object {
+                "closed": true,
+                "complete": [Function],
+                "error": [Function],
+                "next": [Function],
+              },
+              "isStopped": false,
+              "syncErrorThrowable": false,
+              "syncErrorThrown": false,
+              "syncErrorValue": null,
+            },
+            "isStopped": false,
+            "syncErrorThrowable": true,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          Subscriber {
+            "_parentOrParents": null,
+            "_subscriptions": Array [
+              SubjectSubscription {
+                "_parentOrParents": [Circular],
+                "_subscriptions": null,
+                "closed": false,
+                "subject": [Circular],
+                "subscriber": [Circular],
+              },
+            ],
+            "closed": false,
+            "destination": SafeSubscriber {
+              "_complete": undefined,
+              "_context": [Circular],
+              "_error": undefined,
+              "_next": [Function],
+              "_parentOrParents": null,
+              "_parentSubscriber": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "destination": Object {
+                "closed": true,
+                "complete": [Function],
+                "error": [Function],
+                "next": [Function],
+              },
+              "isStopped": false,
+              "syncErrorThrowable": false,
+              "syncErrorThrown": false,
+              "syncErrorValue": null,
+            },
+            "isStopped": false,
+            "syncErrorThrowable": true,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+        ],
+        "thrownError": null,
+      },
+      "workspaceList$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": Array [],
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+    }
+  }
 >
   <EuiCollapsibleNav
     aria-label="Primary"
@@ -3966,14 +5234,257 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 2`] = 
           <div
             className="euiFlexItem eui-yScroll"
           >
+            <CollapsibleNavHeader
+              workspaces={
+                Object {
+                  "currentWorkspace$": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": null,
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
+                  "currentWorkspaceId$": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": "",
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
+                  "renderWorkspaceMenu": [MockFunction],
+                  "workspaceEnabled$": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": false,
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [
+                      Subscriber {
+                        "_parentOrParents": null,
+                        "_subscriptions": Array [
+                          SubjectSubscription {
+                            "_parentOrParents": [Circular],
+                            "_subscriptions": null,
+                            "closed": false,
+                            "subject": [Circular],
+                            "subscriber": [Circular],
+                          },
+                        ],
+                        "closed": false,
+                        "destination": SafeSubscriber {
+                          "_complete": undefined,
+                          "_context": [Circular],
+                          "_error": undefined,
+                          "_next": [Function],
+                          "_parentOrParents": null,
+                          "_parentSubscriber": [Circular],
+                          "_subscriptions": null,
+                          "closed": false,
+                          "destination": Object {
+                            "closed": true,
+                            "complete": [Function],
+                            "error": [Function],
+                            "next": [Function],
+                          },
+                          "isStopped": false,
+                          "syncErrorThrowable": false,
+                          "syncErrorThrown": false,
+                          "syncErrorValue": null,
+                        },
+                        "isStopped": false,
+                        "syncErrorThrowable": true,
+                        "syncErrorThrown": false,
+                        "syncErrorValue": null,
+                      },
+                      Subscriber {
+                        "_parentOrParents": null,
+                        "_subscriptions": Array [
+                          SubjectSubscription {
+                            "_parentOrParents": [Circular],
+                            "_subscriptions": null,
+                            "closed": false,
+                            "subject": [Circular],
+                            "subscriber": [Circular],
+                          },
+                        ],
+                        "closed": false,
+                        "destination": SafeSubscriber {
+                          "_complete": undefined,
+                          "_context": [Circular],
+                          "_error": undefined,
+                          "_next": [Function],
+                          "_parentOrParents": null,
+                          "_parentSubscriber": [Circular],
+                          "_subscriptions": null,
+                          "closed": false,
+                          "destination": Object {
+                            "closed": true,
+                            "complete": [Function],
+                            "error": [Function],
+                            "next": [Function],
+                          },
+                          "isStopped": false,
+                          "syncErrorThrowable": false,
+                          "syncErrorThrown": false,
+                          "syncErrorValue": null,
+                        },
+                        "isStopped": false,
+                        "syncErrorThrowable": true,
+                        "syncErrorThrown": false,
+                        "syncErrorValue": null,
+                      },
+                      Subscriber {
+                        "_parentOrParents": null,
+                        "_subscriptions": Array [
+                          SubjectSubscription {
+                            "_parentOrParents": [Circular],
+                            "_subscriptions": null,
+                            "closed": false,
+                            "subject": [Circular],
+                            "subscriber": [Circular],
+                          },
+                        ],
+                        "closed": false,
+                        "destination": SafeSubscriber {
+                          "_complete": undefined,
+                          "_context": [Circular],
+                          "_error": undefined,
+                          "_next": [Function],
+                          "_parentOrParents": null,
+                          "_parentSubscriber": [Circular],
+                          "_subscriptions": null,
+                          "closed": false,
+                          "destination": Object {
+                            "closed": true,
+                            "complete": [Function],
+                            "error": [Function],
+                            "next": [Function],
+                          },
+                          "isStopped": false,
+                          "syncErrorThrowable": false,
+                          "syncErrorThrown": false,
+                          "syncErrorValue": null,
+                        },
+                        "isStopped": false,
+                        "syncErrorThrowable": true,
+                        "syncErrorThrown": false,
+                        "syncErrorValue": null,
+                      },
+                      Subscriber {
+                        "_parentOrParents": null,
+                        "_subscriptions": Array [
+                          SubjectSubscription {
+                            "_parentOrParents": [Circular],
+                            "_subscriptions": null,
+                            "closed": false,
+                            "subject": [Circular],
+                            "subscriber": [Circular],
+                          },
+                        ],
+                        "closed": false,
+                        "destination": SafeSubscriber {
+                          "_complete": undefined,
+                          "_context": [Circular],
+                          "_error": undefined,
+                          "_next": [Function],
+                          "_parentOrParents": null,
+                          "_parentSubscriber": [Circular],
+                          "_subscriptions": null,
+                          "closed": false,
+                          "destination": Object {
+                            "closed": true,
+                            "complete": [Function],
+                            "error": [Function],
+                            "next": [Function],
+                          },
+                          "isStopped": false,
+                          "syncErrorThrowable": false,
+                          "syncErrorThrown": false,
+                          "syncErrorValue": null,
+                        },
+                        "isStopped": false,
+                        "syncErrorThrowable": true,
+                        "syncErrorThrown": false,
+                        "syncErrorValue": null,
+                      },
+                    ],
+                    "thrownError": null,
+                  },
+                  "workspaceList$": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": Array [],
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
+                }
+              }
+            >
+              <EuiCollapsibleNavGroup>
+                <div
+                  className="euiCollapsibleNavGroup"
+                  id="mockId"
+                >
+                  <div
+                    className="euiCollapsibleNavGroup__children"
+                  >
+                    <EuiFlexGroup>
+                      <div
+                        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                      >
+                        <EuiFlexItem>
+                          <div
+                            className="euiFlexItem"
+                          >
+                            <EuiIcon
+                              size="l"
+                              type="logoOpenSearch"
+                            >
+                              <span
+                                data-euiicon-type="logoOpenSearch"
+                                size="l"
+                              />
+                            </EuiIcon>
+                          </div>
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <div
+                            className="euiFlexItem"
+                          >
+                            <EuiText>
+                              <div
+                                className="euiText euiText--medium"
+                              >
+                                <strong>
+                                   
+                                  OpenSearch Analytics
+                                   
+                                </strong>
+                              </div>
+                            </EuiText>
+                          </div>
+                        </EuiFlexItem>
+                      </div>
+                    </EuiFlexGroup>
+                  </div>
+                </div>
+              </EuiCollapsibleNavGroup>
+            </CollapsibleNavHeader>
             <EuiCollapsibleNavGroup
-              background="light"
-              data-test-subj="collapsibleNavGroup-recentlyViewed"
+              data-test-opensearch-logo="clock"
+              data-test-subj="collapsibleNavGroup-recentlyVisited"
+              iconType="clock"
               initialIsOpen={true}
               isCollapsible={true}
-              key="recentlyViewed"
+              key="recentlyVisited"
               onToggle={[Function]}
-              title="Recently viewed"
+              title="Recently Visited"
             >
               <EuiAccordion
                 arrowDisplay="right"
@@ -3984,6 +5495,14 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 2`] = 
                     gutterSize="m"
                     responsive={false}
                   >
+                    <EuiFlexItem
+                      grow={false}
+                    >
+                      <EuiIcon
+                        size="l"
+                        type="clock"
+                      />
+                    </EuiFlexItem>
                     <EuiFlexItem>
                       <EuiTitle
                         size="xxs"
@@ -3992,14 +5511,15 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 2`] = 
                           className="euiCollapsibleNavGroup__title"
                           id="mockId__title"
                         >
-                          Recently viewed
+                          Recently Visited
                         </h3>
                       </EuiTitle>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 }
-                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
-                data-test-subj="collapsibleNavGroup-recentlyViewed"
+                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                data-test-opensearch-logo="clock"
+                data-test-subj="collapsibleNavGroup-recentlyVisited"
                 id="mockId"
                 initialIsOpen={true}
                 isLoading={false}
@@ -4008,8 +5528,9 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 2`] = 
                 paddingSize="none"
               >
                 <div
-                  className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
-                  data-test-subj="collapsibleNavGroup-recentlyViewed"
+                  className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                  data-test-opensearch-logo="clock"
+                  data-test-subj="collapsibleNavGroup-recentlyVisited"
                   onToggle={[Function]}
                 >
                   <div
@@ -4049,6 +5570,23 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 2`] = 
                           <div
                             className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
                           >
+                            <EuiFlexItem
+                              grow={false}
+                            >
+                              <div
+                                className="euiFlexItem euiFlexItem--flexGrowZero"
+                              >
+                                <EuiIcon
+                                  size="l"
+                                  type="clock"
+                                >
+                                  <span
+                                    data-euiicon-type="clock"
+                                    size="l"
+                                  />
+                                </EuiIcon>
+                              </div>
+                            </EuiFlexItem>
                             <EuiFlexItem>
                               <div
                                 className="euiFlexItem"
@@ -4060,7 +5598,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 2`] = 
                                     className="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
                                     id="mockId__title"
                                   >
-                                    Recently viewed
+                                    Recently Visited
                                   </h3>
                                 </EuiTitle>
                               </div>
@@ -4088,19 +5626,18 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 2`] = 
                             className="euiCollapsibleNavGroup__children"
                           >
                             <EuiListGroup
-                              aria-label="Recently viewed links"
-                              className="osdCollapsibleNav__recentsListGroup"
+                              aria-label="Primary navigation links, Recently Visited"
                               color="subdued"
                               gutterSize="none"
                               listItems={
                                 Array [
                                   Object {
-                                    "aria-label": "recent",
-                                    "data-test-subj": "collapsibleNavAppLink--recent",
+                                    "data-test-subj": "collapsibleNavAppLink",
                                     "href": "http://localhost/recent",
+                                    "isActive": false,
+                                    "isDisabled": undefined,
                                     "label": "recent",
                                     "onClick": [Function],
-                                    "title": "recent",
                                   },
                                 ]
                               }
@@ -4108,8 +5645,8 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 2`] = 
                               size="s"
                             >
                               <ul
-                                aria-label="Recently viewed links"
-                                className="euiListGroup osdCollapsibleNav__recentsListGroup"
+                                aria-label="Primary navigation links, Recently Visited"
+                                className="euiListGroup"
                                 style={
                                   Object {
                                     "maxWidth": "none",
@@ -4117,29 +5654,26 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 2`] = 
                                 }
                               >
                                 <EuiListGroupItem
-                                  aria-label="recent"
                                   color="subdued"
-                                  data-test-subj="collapsibleNavAppLink--recent"
+                                  data-test-subj="collapsibleNavAppLink"
                                   href="http://localhost/recent"
+                                  isActive={false}
                                   key="title-0"
                                   label="recent"
                                   onClick={[Function]}
                                   showToolTip={false}
                                   size="s"
-                                  title="recent"
                                   wrapText={false}
                                 >
                                   <li
                                     className="euiListGroupItem euiListGroupItem--small euiListGroupItem--subdued euiListGroupItem-isClickable"
                                   >
                                     <a
-                                      aria-label="recent"
                                       className="euiListGroupItem__button"
-                                      data-test-subj="collapsibleNavAppLink--recent"
+                                      data-test-subj="collapsibleNavAppLink"
                                       href="http://localhost/recent"
                                       onClick={[Function]}
                                       rel="noreferrer"
-                                      title="recent"
                                     >
                                       <span
                                         className="euiListGroupItem__label"
@@ -4168,7 +5702,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 2`] = 
               isCollapsible={true}
               key="opensearchDashboards"
               onToggle={[Function]}
-              title="Library"
+              title="OpenSearch Dashboards"
             >
               <EuiAccordion
                 arrowDisplay="right"
@@ -4195,7 +5729,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 2`] = 
                           className="euiCollapsibleNavGroup__title"
                           id="mockId__title"
                         >
-                          Library
+                          OpenSearch Dashboards
                         </h3>
                       </EuiTitle>
                     </EuiFlexItem>
@@ -4282,7 +5816,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 2`] = 
                                     className="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
                                     id="mockId__title"
                                   >
-                                    Library
+                                    OpenSearch Dashboards
                                   </h3>
                                 </EuiTitle>
                               </div>
@@ -4310,7 +5844,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 2`] = 
                             className="euiCollapsibleNavGroup__children"
                           >
                             <EuiListGroup
-                              aria-label="Primary navigation links, Library"
+                              aria-label="Primary navigation links, OpenSearch Dashboards"
                               color="subdued"
                               gutterSize="none"
                               listItems={
@@ -4329,7 +5863,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 2`] = 
                               size="s"
                             >
                               <ul
-                                aria-label="Primary navigation links, Library"
+                                aria-label="Primary navigation links, OpenSearch Dashboards"
                                 className="euiListGroup"
                                 style={
                                   Object {
@@ -4766,15 +6300,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 3`] = 
   customNavLink$={
     BehaviorSubject {
       "_isScalar": false,
-      "_value": Object {
-        "baseUrl": "/",
-        "category": undefined,
-        "data-test-subj": "Custom link",
-        "href": "Custom link",
-        "id": "Custom link",
-        "isActive": true,
-        "title": "Custom link",
-      },
+      "_value": undefined,
       "closed": false,
       "hasError": false,
       "isStopped": false,
@@ -4782,6 +6308,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 3`] = 
       "thrownError": null,
     }
   }
+  getUrlForApp={[MockFunction]}
   homeHref="/"
   id="collapsibe-nav"
   isLocked={false}
@@ -4794,7 +6321,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 3`] = 
           "baseUrl": "/",
           "category": Object {
             "id": "opensearchDashboards",
-            "label": "Library",
+            "label": "OpenSearch Dashboards",
             "order": 1000,
           },
           "data-test-subj": "discover",
@@ -4929,6 +6456,196 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 3`] = 
       "values": Array [],
     }
   }
+  workspaces={
+    Object {
+      "currentWorkspace$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": null,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "currentWorkspaceId$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": "",
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "renderWorkspaceMenu": [MockFunction],
+      "workspaceEnabled$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": false,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [
+          Subscriber {
+            "_parentOrParents": null,
+            "_subscriptions": Array [
+              SubjectSubscription {
+                "_parentOrParents": [Circular],
+                "_subscriptions": null,
+                "closed": false,
+                "subject": [Circular],
+                "subscriber": [Circular],
+              },
+            ],
+            "closed": false,
+            "destination": SafeSubscriber {
+              "_complete": undefined,
+              "_context": [Circular],
+              "_error": undefined,
+              "_next": [Function],
+              "_parentOrParents": null,
+              "_parentSubscriber": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "destination": Object {
+                "closed": true,
+                "complete": [Function],
+                "error": [Function],
+                "next": [Function],
+              },
+              "isStopped": false,
+              "syncErrorThrowable": false,
+              "syncErrorThrown": false,
+              "syncErrorValue": null,
+            },
+            "isStopped": false,
+            "syncErrorThrowable": true,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          Subscriber {
+            "_parentOrParents": null,
+            "_subscriptions": Array [
+              SubjectSubscription {
+                "_parentOrParents": [Circular],
+                "_subscriptions": null,
+                "closed": false,
+                "subject": [Circular],
+                "subscriber": [Circular],
+              },
+            ],
+            "closed": false,
+            "destination": SafeSubscriber {
+              "_complete": undefined,
+              "_context": [Circular],
+              "_error": undefined,
+              "_next": [Function],
+              "_parentOrParents": null,
+              "_parentSubscriber": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "destination": Object {
+                "closed": true,
+                "complete": [Function],
+                "error": [Function],
+                "next": [Function],
+              },
+              "isStopped": false,
+              "syncErrorThrowable": false,
+              "syncErrorThrown": false,
+              "syncErrorValue": null,
+            },
+            "isStopped": false,
+            "syncErrorThrowable": true,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          Subscriber {
+            "_parentOrParents": null,
+            "_subscriptions": Array [
+              SubjectSubscription {
+                "_parentOrParents": [Circular],
+                "_subscriptions": null,
+                "closed": false,
+                "subject": [Circular],
+                "subscriber": [Circular],
+              },
+            ],
+            "closed": false,
+            "destination": SafeSubscriber {
+              "_complete": undefined,
+              "_context": [Circular],
+              "_error": undefined,
+              "_next": [Function],
+              "_parentOrParents": null,
+              "_parentSubscriber": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "destination": Object {
+                "closed": true,
+                "complete": [Function],
+                "error": [Function],
+                "next": [Function],
+              },
+              "isStopped": false,
+              "syncErrorThrowable": false,
+              "syncErrorThrown": false,
+              "syncErrorValue": null,
+            },
+            "isStopped": false,
+            "syncErrorThrowable": true,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          Subscriber {
+            "_parentOrParents": null,
+            "_subscriptions": Array [
+              SubjectSubscription {
+                "_parentOrParents": [Circular],
+                "_subscriptions": null,
+                "closed": false,
+                "subject": [Circular],
+                "subscriber": [Circular],
+              },
+            ],
+            "closed": false,
+            "destination": SafeSubscriber {
+              "_complete": undefined,
+              "_context": [Circular],
+              "_error": undefined,
+              "_next": [Function],
+              "_parentOrParents": null,
+              "_parentSubscriber": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "destination": Object {
+                "closed": true,
+                "complete": [Function],
+                "error": [Function],
+                "next": [Function],
+              },
+              "isStopped": false,
+              "syncErrorThrowable": false,
+              "syncErrorThrown": false,
+              "syncErrorValue": null,
+            },
+            "isStopped": false,
+            "syncErrorThrowable": true,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+        ],
+        "thrownError": null,
+      },
+      "workspaceList$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": Array [],
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+    }
+  }
 >
   <EuiCollapsibleNav
     aria-label="Primary"
@@ -4973,14 +6690,257 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 3`] = 
           <div
             className="euiFlexItem eui-yScroll"
           >
+            <CollapsibleNavHeader
+              workspaces={
+                Object {
+                  "currentWorkspace$": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": null,
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
+                  "currentWorkspaceId$": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": "",
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
+                  "renderWorkspaceMenu": [MockFunction],
+                  "workspaceEnabled$": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": false,
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [
+                      Subscriber {
+                        "_parentOrParents": null,
+                        "_subscriptions": Array [
+                          SubjectSubscription {
+                            "_parentOrParents": [Circular],
+                            "_subscriptions": null,
+                            "closed": false,
+                            "subject": [Circular],
+                            "subscriber": [Circular],
+                          },
+                        ],
+                        "closed": false,
+                        "destination": SafeSubscriber {
+                          "_complete": undefined,
+                          "_context": [Circular],
+                          "_error": undefined,
+                          "_next": [Function],
+                          "_parentOrParents": null,
+                          "_parentSubscriber": [Circular],
+                          "_subscriptions": null,
+                          "closed": false,
+                          "destination": Object {
+                            "closed": true,
+                            "complete": [Function],
+                            "error": [Function],
+                            "next": [Function],
+                          },
+                          "isStopped": false,
+                          "syncErrorThrowable": false,
+                          "syncErrorThrown": false,
+                          "syncErrorValue": null,
+                        },
+                        "isStopped": false,
+                        "syncErrorThrowable": true,
+                        "syncErrorThrown": false,
+                        "syncErrorValue": null,
+                      },
+                      Subscriber {
+                        "_parentOrParents": null,
+                        "_subscriptions": Array [
+                          SubjectSubscription {
+                            "_parentOrParents": [Circular],
+                            "_subscriptions": null,
+                            "closed": false,
+                            "subject": [Circular],
+                            "subscriber": [Circular],
+                          },
+                        ],
+                        "closed": false,
+                        "destination": SafeSubscriber {
+                          "_complete": undefined,
+                          "_context": [Circular],
+                          "_error": undefined,
+                          "_next": [Function],
+                          "_parentOrParents": null,
+                          "_parentSubscriber": [Circular],
+                          "_subscriptions": null,
+                          "closed": false,
+                          "destination": Object {
+                            "closed": true,
+                            "complete": [Function],
+                            "error": [Function],
+                            "next": [Function],
+                          },
+                          "isStopped": false,
+                          "syncErrorThrowable": false,
+                          "syncErrorThrown": false,
+                          "syncErrorValue": null,
+                        },
+                        "isStopped": false,
+                        "syncErrorThrowable": true,
+                        "syncErrorThrown": false,
+                        "syncErrorValue": null,
+                      },
+                      Subscriber {
+                        "_parentOrParents": null,
+                        "_subscriptions": Array [
+                          SubjectSubscription {
+                            "_parentOrParents": [Circular],
+                            "_subscriptions": null,
+                            "closed": false,
+                            "subject": [Circular],
+                            "subscriber": [Circular],
+                          },
+                        ],
+                        "closed": false,
+                        "destination": SafeSubscriber {
+                          "_complete": undefined,
+                          "_context": [Circular],
+                          "_error": undefined,
+                          "_next": [Function],
+                          "_parentOrParents": null,
+                          "_parentSubscriber": [Circular],
+                          "_subscriptions": null,
+                          "closed": false,
+                          "destination": Object {
+                            "closed": true,
+                            "complete": [Function],
+                            "error": [Function],
+                            "next": [Function],
+                          },
+                          "isStopped": false,
+                          "syncErrorThrowable": false,
+                          "syncErrorThrown": false,
+                          "syncErrorValue": null,
+                        },
+                        "isStopped": false,
+                        "syncErrorThrowable": true,
+                        "syncErrorThrown": false,
+                        "syncErrorValue": null,
+                      },
+                      Subscriber {
+                        "_parentOrParents": null,
+                        "_subscriptions": Array [
+                          SubjectSubscription {
+                            "_parentOrParents": [Circular],
+                            "_subscriptions": null,
+                            "closed": false,
+                            "subject": [Circular],
+                            "subscriber": [Circular],
+                          },
+                        ],
+                        "closed": false,
+                        "destination": SafeSubscriber {
+                          "_complete": undefined,
+                          "_context": [Circular],
+                          "_error": undefined,
+                          "_next": [Function],
+                          "_parentOrParents": null,
+                          "_parentSubscriber": [Circular],
+                          "_subscriptions": null,
+                          "closed": false,
+                          "destination": Object {
+                            "closed": true,
+                            "complete": [Function],
+                            "error": [Function],
+                            "next": [Function],
+                          },
+                          "isStopped": false,
+                          "syncErrorThrowable": false,
+                          "syncErrorThrown": false,
+                          "syncErrorValue": null,
+                        },
+                        "isStopped": false,
+                        "syncErrorThrowable": true,
+                        "syncErrorThrown": false,
+                        "syncErrorValue": null,
+                      },
+                    ],
+                    "thrownError": null,
+                  },
+                  "workspaceList$": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": Array [],
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
+                }
+              }
+            >
+              <EuiCollapsibleNavGroup>
+                <div
+                  className="euiCollapsibleNavGroup"
+                  id="mockId"
+                >
+                  <div
+                    className="euiCollapsibleNavGroup__children"
+                  >
+                    <EuiFlexGroup>
+                      <div
+                        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                      >
+                        <EuiFlexItem>
+                          <div
+                            className="euiFlexItem"
+                          >
+                            <EuiIcon
+                              size="l"
+                              type="logoOpenSearch"
+                            >
+                              <span
+                                data-euiicon-type="logoOpenSearch"
+                                size="l"
+                              />
+                            </EuiIcon>
+                          </div>
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <div
+                            className="euiFlexItem"
+                          >
+                            <EuiText>
+                              <div
+                                className="euiText euiText--medium"
+                              >
+                                <strong>
+                                   
+                                  OpenSearch Analytics
+                                   
+                                </strong>
+                              </div>
+                            </EuiText>
+                          </div>
+                        </EuiFlexItem>
+                      </div>
+                    </EuiFlexGroup>
+                  </div>
+                </div>
+              </EuiCollapsibleNavGroup>
+            </CollapsibleNavHeader>
             <EuiCollapsibleNavGroup
-              background="light"
-              data-test-subj="collapsibleNavGroup-recentlyViewed"
+              data-test-opensearch-logo="clock"
+              data-test-subj="collapsibleNavGroup-recentlyVisited"
+              iconType="clock"
               initialIsOpen={true}
               isCollapsible={true}
-              key="recentlyViewed"
+              key="recentlyVisited"
               onToggle={[Function]}
-              title="Recently viewed"
+              title="Recently Visited"
             >
               <EuiAccordion
                 arrowDisplay="right"
@@ -4991,6 +6951,14 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 3`] = 
                     gutterSize="m"
                     responsive={false}
                   >
+                    <EuiFlexItem
+                      grow={false}
+                    >
+                      <EuiIcon
+                        size="l"
+                        type="clock"
+                      />
+                    </EuiFlexItem>
                     <EuiFlexItem>
                       <EuiTitle
                         size="xxs"
@@ -4999,14 +6967,15 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 3`] = 
                           className="euiCollapsibleNavGroup__title"
                           id="mockId__title"
                         >
-                          Recently viewed
+                          Recently Visited
                         </h3>
                       </EuiTitle>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 }
-                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
-                data-test-subj="collapsibleNavGroup-recentlyViewed"
+                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                data-test-opensearch-logo="clock"
+                data-test-subj="collapsibleNavGroup-recentlyVisited"
                 id="mockId"
                 initialIsOpen={true}
                 isLoading={false}
@@ -5015,8 +6984,9 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 3`] = 
                 paddingSize="none"
               >
                 <div
-                  className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
-                  data-test-subj="collapsibleNavGroup-recentlyViewed"
+                  className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                  data-test-opensearch-logo="clock"
+                  data-test-subj="collapsibleNavGroup-recentlyVisited"
                   onToggle={[Function]}
                 >
                   <div
@@ -5056,6 +7026,23 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 3`] = 
                           <div
                             className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
                           >
+                            <EuiFlexItem
+                              grow={false}
+                            >
+                              <div
+                                className="euiFlexItem euiFlexItem--flexGrowZero"
+                              >
+                                <EuiIcon
+                                  size="l"
+                                  type="clock"
+                                >
+                                  <span
+                                    data-euiicon-type="clock"
+                                    size="l"
+                                  />
+                                </EuiIcon>
+                              </div>
+                            </EuiFlexItem>
                             <EuiFlexItem>
                               <div
                                 className="euiFlexItem"
@@ -5067,7 +7054,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 3`] = 
                                     className="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
                                     id="mockId__title"
                                   >
-                                    Recently viewed
+                                    Recently Visited
                                   </h3>
                                 </EuiTitle>
                               </div>
@@ -5095,19 +7082,18 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 3`] = 
                             className="euiCollapsibleNavGroup__children"
                           >
                             <EuiListGroup
-                              aria-label="Recently viewed links"
-                              className="osdCollapsibleNav__recentsListGroup"
+                              aria-label="Primary navigation links, Recently Visited"
                               color="subdued"
                               gutterSize="none"
                               listItems={
                                 Array [
                                   Object {
-                                    "aria-label": "recent",
-                                    "data-test-subj": "collapsibleNavAppLink--recent",
+                                    "data-test-subj": "collapsibleNavAppLink",
                                     "href": "http://localhost/recent",
+                                    "isActive": false,
+                                    "isDisabled": undefined,
                                     "label": "recent",
                                     "onClick": [Function],
-                                    "title": "recent",
                                   },
                                 ]
                               }
@@ -5115,8 +7101,8 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 3`] = 
                               size="s"
                             >
                               <ul
-                                aria-label="Recently viewed links"
-                                className="euiListGroup osdCollapsibleNav__recentsListGroup"
+                                aria-label="Primary navigation links, Recently Visited"
+                                className="euiListGroup"
                                 style={
                                   Object {
                                     "maxWidth": "none",
@@ -5124,29 +7110,26 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 3`] = 
                                 }
                               >
                                 <EuiListGroupItem
-                                  aria-label="recent"
                                   color="subdued"
-                                  data-test-subj="collapsibleNavAppLink--recent"
+                                  data-test-subj="collapsibleNavAppLink"
                                   href="http://localhost/recent"
+                                  isActive={false}
                                   key="title-0"
                                   label="recent"
                                   onClick={[Function]}
                                   showToolTip={false}
                                   size="s"
-                                  title="recent"
                                   wrapText={false}
                                 >
                                   <li
                                     className="euiListGroupItem euiListGroupItem--small euiListGroupItem--subdued euiListGroupItem-isClickable"
                                   >
                                     <a
-                                      aria-label="recent"
                                       className="euiListGroupItem__button"
-                                      data-test-subj="collapsibleNavAppLink--recent"
+                                      data-test-subj="collapsibleNavAppLink"
                                       href="http://localhost/recent"
                                       onClick={[Function]}
                                       rel="noreferrer"
-                                      title="recent"
                                     >
                                       <span
                                         className="euiListGroupItem__label"
@@ -5175,7 +7158,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 3`] = 
               isCollapsible={true}
               key="opensearchDashboards"
               onToggle={[Function]}
-              title="Library"
+              title="OpenSearch Dashboards"
             >
               <EuiAccordion
                 arrowDisplay="right"
@@ -5202,7 +7185,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 3`] = 
                           className="euiCollapsibleNavGroup__title"
                           id="mockId__title"
                         >
-                          Library
+                          OpenSearch Dashboards
                         </h3>
                       </EuiTitle>
                     </EuiFlexItem>
@@ -5289,7 +7272,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 3`] = 
                                     className="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
                                     id="mockId__title"
                                   >
-                                    Library
+                                    OpenSearch Dashboards
                                   </h3>
                                 </EuiTitle>
                               </div>
@@ -5317,7 +7300,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 3`] = 
                             className="euiCollapsibleNavGroup__children"
                           >
                             <EuiListGroup
-                              aria-label="Primary navigation links, Library"
+                              aria-label="Primary navigation links, OpenSearch Dashboards"
                               color="subdued"
                               gutterSize="none"
                               listItems={
@@ -5336,7 +7319,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 3`] = 
                               size="s"
                             >
                               <ul
-                                aria-label="Primary navigation links, Library"
+                                aria-label="Primary navigation links, OpenSearch Dashboards"
                                 className="euiListGroup"
                                 style={
                                   Object {
@@ -5776,15 +7759,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 1`]
   customNavLink$={
     BehaviorSubject {
       "_isScalar": false,
-      "_value": Object {
-        "baseUrl": "/",
-        "category": undefined,
-        "data-test-subj": "Custom link",
-        "href": "Custom link",
-        "id": "Custom link",
-        "isActive": true,
-        "title": "Custom link",
-      },
+      "_value": undefined,
       "closed": false,
       "hasError": false,
       "isStopped": false,
@@ -5792,6 +7767,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 1`]
       "thrownError": null,
     }
   }
+  getUrlForApp={[MockFunction]}
   homeHref="/"
   id="collapsibe-nav"
   isLocked={false}
@@ -5804,7 +7780,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 1`]
           "baseUrl": "/",
           "category": Object {
             "id": "opensearchDashboards",
-            "label": "Library",
+            "label": "OpenSearch Dashboards",
             "order": 1000,
           },
           "data-test-subj": "discover",
@@ -5939,6 +7915,159 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 1`]
       "values": Array [],
     }
   }
+  workspaces={
+    Object {
+      "currentWorkspace$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": null,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "currentWorkspaceId$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": "",
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "renderWorkspaceMenu": [MockFunction],
+      "workspaceEnabled$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": false,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [
+          Subscriber {
+            "_parentOrParents": null,
+            "_subscriptions": Array [
+              SubjectSubscription {
+                "_parentOrParents": [Circular],
+                "_subscriptions": null,
+                "closed": false,
+                "subject": [Circular],
+                "subscriber": [Circular],
+              },
+            ],
+            "closed": false,
+            "destination": SafeSubscriber {
+              "_complete": undefined,
+              "_context": [Circular],
+              "_error": undefined,
+              "_next": [Function],
+              "_parentOrParents": null,
+              "_parentSubscriber": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "destination": Object {
+                "closed": true,
+                "complete": [Function],
+                "error": [Function],
+                "next": [Function],
+              },
+              "isStopped": false,
+              "syncErrorThrowable": false,
+              "syncErrorThrown": false,
+              "syncErrorValue": null,
+            },
+            "isStopped": false,
+            "syncErrorThrowable": true,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          Subscriber {
+            "_parentOrParents": null,
+            "_subscriptions": Array [
+              SubjectSubscription {
+                "_parentOrParents": [Circular],
+                "_subscriptions": null,
+                "closed": false,
+                "subject": [Circular],
+                "subscriber": [Circular],
+              },
+            ],
+            "closed": false,
+            "destination": SafeSubscriber {
+              "_complete": undefined,
+              "_context": [Circular],
+              "_error": undefined,
+              "_next": [Function],
+              "_parentOrParents": null,
+              "_parentSubscriber": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "destination": Object {
+                "closed": true,
+                "complete": [Function],
+                "error": [Function],
+                "next": [Function],
+              },
+              "isStopped": false,
+              "syncErrorThrowable": false,
+              "syncErrorThrown": false,
+              "syncErrorValue": null,
+            },
+            "isStopped": false,
+            "syncErrorThrowable": true,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          Subscriber {
+            "_parentOrParents": null,
+            "_subscriptions": Array [
+              SubjectSubscription {
+                "_parentOrParents": [Circular],
+                "_subscriptions": null,
+                "closed": false,
+                "subject": [Circular],
+                "subscriber": [Circular],
+              },
+            ],
+            "closed": false,
+            "destination": SafeSubscriber {
+              "_complete": undefined,
+              "_context": [Circular],
+              "_error": undefined,
+              "_next": [Function],
+              "_parentOrParents": null,
+              "_parentSubscriber": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "destination": Object {
+                "closed": true,
+                "complete": [Function],
+                "error": [Function],
+                "next": [Function],
+              },
+              "isStopped": false,
+              "syncErrorThrowable": false,
+              "syncErrorThrown": false,
+              "syncErrorValue": null,
+            },
+            "isStopped": false,
+            "syncErrorThrowable": true,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+        ],
+        "thrownError": null,
+      },
+      "workspaceList$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": Array [],
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+    }
+  }
 >
   <EuiCollapsibleNav
     aria-label="Primary"
@@ -5983,14 +8112,220 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 1`]
           <div
             className="euiFlexItem eui-yScroll"
           >
+            <CollapsibleNavHeader
+              workspaces={
+                Object {
+                  "currentWorkspace$": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": null,
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
+                  "currentWorkspaceId$": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": "",
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
+                  "renderWorkspaceMenu": [MockFunction],
+                  "workspaceEnabled$": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": false,
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [
+                      Subscriber {
+                        "_parentOrParents": null,
+                        "_subscriptions": Array [
+                          SubjectSubscription {
+                            "_parentOrParents": [Circular],
+                            "_subscriptions": null,
+                            "closed": false,
+                            "subject": [Circular],
+                            "subscriber": [Circular],
+                          },
+                        ],
+                        "closed": false,
+                        "destination": SafeSubscriber {
+                          "_complete": undefined,
+                          "_context": [Circular],
+                          "_error": undefined,
+                          "_next": [Function],
+                          "_parentOrParents": null,
+                          "_parentSubscriber": [Circular],
+                          "_subscriptions": null,
+                          "closed": false,
+                          "destination": Object {
+                            "closed": true,
+                            "complete": [Function],
+                            "error": [Function],
+                            "next": [Function],
+                          },
+                          "isStopped": false,
+                          "syncErrorThrowable": false,
+                          "syncErrorThrown": false,
+                          "syncErrorValue": null,
+                        },
+                        "isStopped": false,
+                        "syncErrorThrowable": true,
+                        "syncErrorThrown": false,
+                        "syncErrorValue": null,
+                      },
+                      Subscriber {
+                        "_parentOrParents": null,
+                        "_subscriptions": Array [
+                          SubjectSubscription {
+                            "_parentOrParents": [Circular],
+                            "_subscriptions": null,
+                            "closed": false,
+                            "subject": [Circular],
+                            "subscriber": [Circular],
+                          },
+                        ],
+                        "closed": false,
+                        "destination": SafeSubscriber {
+                          "_complete": undefined,
+                          "_context": [Circular],
+                          "_error": undefined,
+                          "_next": [Function],
+                          "_parentOrParents": null,
+                          "_parentSubscriber": [Circular],
+                          "_subscriptions": null,
+                          "closed": false,
+                          "destination": Object {
+                            "closed": true,
+                            "complete": [Function],
+                            "error": [Function],
+                            "next": [Function],
+                          },
+                          "isStopped": false,
+                          "syncErrorThrowable": false,
+                          "syncErrorThrown": false,
+                          "syncErrorValue": null,
+                        },
+                        "isStopped": false,
+                        "syncErrorThrowable": true,
+                        "syncErrorThrown": false,
+                        "syncErrorValue": null,
+                      },
+                      Subscriber {
+                        "_parentOrParents": null,
+                        "_subscriptions": Array [
+                          SubjectSubscription {
+                            "_parentOrParents": [Circular],
+                            "_subscriptions": null,
+                            "closed": false,
+                            "subject": [Circular],
+                            "subscriber": [Circular],
+                          },
+                        ],
+                        "closed": false,
+                        "destination": SafeSubscriber {
+                          "_complete": undefined,
+                          "_context": [Circular],
+                          "_error": undefined,
+                          "_next": [Function],
+                          "_parentOrParents": null,
+                          "_parentSubscriber": [Circular],
+                          "_subscriptions": null,
+                          "closed": false,
+                          "destination": Object {
+                            "closed": true,
+                            "complete": [Function],
+                            "error": [Function],
+                            "next": [Function],
+                          },
+                          "isStopped": false,
+                          "syncErrorThrowable": false,
+                          "syncErrorThrown": false,
+                          "syncErrorValue": null,
+                        },
+                        "isStopped": false,
+                        "syncErrorThrowable": true,
+                        "syncErrorThrown": false,
+                        "syncErrorValue": null,
+                      },
+                    ],
+                    "thrownError": null,
+                  },
+                  "workspaceList$": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": Array [],
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
+                }
+              }
+            >
+              <EuiCollapsibleNavGroup>
+                <div
+                  className="euiCollapsibleNavGroup"
+                  id="mockId"
+                >
+                  <div
+                    className="euiCollapsibleNavGroup__children"
+                  >
+                    <EuiFlexGroup>
+                      <div
+                        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                      >
+                        <EuiFlexItem>
+                          <div
+                            className="euiFlexItem"
+                          >
+                            <EuiIcon
+                              size="l"
+                              type="logoOpenSearch"
+                            >
+                              <span
+                                data-euiicon-type="logoOpenSearch"
+                                size="l"
+                              />
+                            </EuiIcon>
+                          </div>
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <div
+                            className="euiFlexItem"
+                          >
+                            <EuiText>
+                              <div
+                                className="euiText euiText--medium"
+                              >
+                                <strong>
+                                   
+                                  OpenSearch Analytics
+                                   
+                                </strong>
+                              </div>
+                            </EuiText>
+                          </div>
+                        </EuiFlexItem>
+                      </div>
+                    </EuiFlexGroup>
+                  </div>
+                </div>
+              </EuiCollapsibleNavGroup>
+            </CollapsibleNavHeader>
             <EuiCollapsibleNavGroup
-              background="light"
-              data-test-subj="collapsibleNavGroup-recentlyViewed"
+              data-test-opensearch-logo="clock"
+              data-test-subj="collapsibleNavGroup-recentlyVisited"
+              iconType="clock"
               initialIsOpen={true}
               isCollapsible={true}
-              key="recentlyViewed"
+              key="recentlyVisited"
               onToggle={[Function]}
-              title="Recently viewed"
+              title="Recently Visited"
             >
               <EuiAccordion
                 arrowDisplay="right"
@@ -6001,6 +8336,14 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 1`]
                     gutterSize="m"
                     responsive={false}
                   >
+                    <EuiFlexItem
+                      grow={false}
+                    >
+                      <EuiIcon
+                        size="l"
+                        type="clock"
+                      />
+                    </EuiFlexItem>
                     <EuiFlexItem>
                       <EuiTitle
                         size="xxs"
@@ -6009,14 +8352,15 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 1`]
                           className="euiCollapsibleNavGroup__title"
                           id="mockId__title"
                         >
-                          Recently viewed
+                          Recently Visited
                         </h3>
                       </EuiTitle>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 }
-                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
-                data-test-subj="collapsibleNavGroup-recentlyViewed"
+                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                data-test-opensearch-logo="clock"
+                data-test-subj="collapsibleNavGroup-recentlyVisited"
                 id="mockId"
                 initialIsOpen={true}
                 isLoading={false}
@@ -6025,8 +8369,9 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 1`]
                 paddingSize="none"
               >
                 <div
-                  className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
-                  data-test-subj="collapsibleNavGroup-recentlyViewed"
+                  className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                  data-test-opensearch-logo="clock"
+                  data-test-subj="collapsibleNavGroup-recentlyVisited"
                   onToggle={[Function]}
                 >
                   <div
@@ -6066,6 +8411,23 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 1`]
                           <div
                             className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
                           >
+                            <EuiFlexItem
+                              grow={false}
+                            >
+                              <div
+                                className="euiFlexItem euiFlexItem--flexGrowZero"
+                              >
+                                <EuiIcon
+                                  size="l"
+                                  type="clock"
+                                >
+                                  <span
+                                    data-euiicon-type="clock"
+                                    size="l"
+                                  />
+                                </EuiIcon>
+                              </div>
+                            </EuiFlexItem>
                             <EuiFlexItem>
                               <div
                                 className="euiFlexItem"
@@ -6077,7 +8439,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 1`]
                                     className="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
                                     id="mockId__title"
                                   >
-                                    Recently viewed
+                                    Recently Visited
                                   </h3>
                                 </EuiTitle>
                               </div>
@@ -6105,19 +8467,18 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 1`]
                             className="euiCollapsibleNavGroup__children"
                           >
                             <EuiListGroup
-                              aria-label="Recently viewed links"
-                              className="osdCollapsibleNav__recentsListGroup"
+                              aria-label="Primary navigation links, Recently Visited"
                               color="subdued"
                               gutterSize="none"
                               listItems={
                                 Array [
                                   Object {
-                                    "aria-label": "recent",
-                                    "data-test-subj": "collapsibleNavAppLink--recent",
+                                    "data-test-subj": "collapsibleNavAppLink",
                                     "href": "http://localhost/recent",
+                                    "isActive": false,
+                                    "isDisabled": undefined,
                                     "label": "recent",
                                     "onClick": [Function],
-                                    "title": "recent",
                                   },
                                 ]
                               }
@@ -6125,8 +8486,8 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 1`]
                               size="s"
                             >
                               <ul
-                                aria-label="Recently viewed links"
-                                className="euiListGroup osdCollapsibleNav__recentsListGroup"
+                                aria-label="Primary navigation links, Recently Visited"
+                                className="euiListGroup"
                                 style={
                                   Object {
                                     "maxWidth": "none",
@@ -6134,29 +8495,26 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 1`]
                                 }
                               >
                                 <EuiListGroupItem
-                                  aria-label="recent"
                                   color="subdued"
-                                  data-test-subj="collapsibleNavAppLink--recent"
+                                  data-test-subj="collapsibleNavAppLink"
                                   href="http://localhost/recent"
+                                  isActive={false}
                                   key="title-0"
                                   label="recent"
                                   onClick={[Function]}
                                   showToolTip={false}
                                   size="s"
-                                  title="recent"
                                   wrapText={false}
                                 >
                                   <li
                                     className="euiListGroupItem euiListGroupItem--small euiListGroupItem--subdued euiListGroupItem-isClickable"
                                   >
                                     <a
-                                      aria-label="recent"
                                       className="euiListGroupItem__button"
-                                      data-test-subj="collapsibleNavAppLink--recent"
+                                      data-test-subj="collapsibleNavAppLink"
                                       href="http://localhost/recent"
                                       onClick={[Function]}
                                       rel="noreferrer"
-                                      title="recent"
                                     >
                                       <span
                                         className="euiListGroupItem__label"
@@ -6185,7 +8543,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 1`]
               isCollapsible={true}
               key="opensearchDashboards"
               onToggle={[Function]}
-              title="Library"
+              title="OpenSearch Dashboards"
             >
               <EuiAccordion
                 arrowDisplay="right"
@@ -6212,7 +8570,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 1`]
                           className="euiCollapsibleNavGroup__title"
                           id="mockId__title"
                         >
-                          Library
+                          OpenSearch Dashboards
                         </h3>
                       </EuiTitle>
                     </EuiFlexItem>
@@ -6299,7 +8657,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 1`]
                                     className="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
                                     id="mockId__title"
                                   >
-                                    Library
+                                    OpenSearch Dashboards
                                   </h3>
                                 </EuiTitle>
                               </div>
@@ -6327,7 +8685,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 1`]
                             className="euiCollapsibleNavGroup__children"
                           >
                             <EuiListGroup
-                              aria-label="Primary navigation links, Library"
+                              aria-label="Primary navigation links, OpenSearch Dashboards"
                               color="subdued"
                               gutterSize="none"
                               listItems={
@@ -6346,7 +8704,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 1`]
                               size="s"
                             >
                               <ul
-                                aria-label="Primary navigation links, Library"
+                                aria-label="Primary navigation links, OpenSearch Dashboards"
                                 className="euiListGroup"
                                 style={
                                   Object {
@@ -6783,15 +9141,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 2`]
   customNavLink$={
     BehaviorSubject {
       "_isScalar": false,
-      "_value": Object {
-        "baseUrl": "/",
-        "category": undefined,
-        "data-test-subj": "Custom link",
-        "href": "Custom link",
-        "id": "Custom link",
-        "isActive": true,
-        "title": "Custom link",
-      },
+      "_value": undefined,
       "closed": false,
       "hasError": false,
       "isStopped": false,
@@ -6799,6 +9149,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 2`]
       "thrownError": null,
     }
   }
+  getUrlForApp={[MockFunction]}
   homeHref="/"
   id="collapsibe-nav"
   isLocked={false}
@@ -6811,7 +9162,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 2`]
           "baseUrl": "/",
           "category": Object {
             "id": "opensearchDashboards",
-            "label": "Library",
+            "label": "OpenSearch Dashboards",
             "order": 1000,
           },
           "data-test-subj": "discover",
@@ -6946,6 +9297,159 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 2`]
       "values": Array [],
     }
   }
+  workspaces={
+    Object {
+      "currentWorkspace$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": null,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "currentWorkspaceId$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": "",
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "renderWorkspaceMenu": [MockFunction],
+      "workspaceEnabled$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": false,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [
+          Subscriber {
+            "_parentOrParents": null,
+            "_subscriptions": Array [
+              SubjectSubscription {
+                "_parentOrParents": [Circular],
+                "_subscriptions": null,
+                "closed": false,
+                "subject": [Circular],
+                "subscriber": [Circular],
+              },
+            ],
+            "closed": false,
+            "destination": SafeSubscriber {
+              "_complete": undefined,
+              "_context": [Circular],
+              "_error": undefined,
+              "_next": [Function],
+              "_parentOrParents": null,
+              "_parentSubscriber": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "destination": Object {
+                "closed": true,
+                "complete": [Function],
+                "error": [Function],
+                "next": [Function],
+              },
+              "isStopped": false,
+              "syncErrorThrowable": false,
+              "syncErrorThrown": false,
+              "syncErrorValue": null,
+            },
+            "isStopped": false,
+            "syncErrorThrowable": true,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          Subscriber {
+            "_parentOrParents": null,
+            "_subscriptions": Array [
+              SubjectSubscription {
+                "_parentOrParents": [Circular],
+                "_subscriptions": null,
+                "closed": false,
+                "subject": [Circular],
+                "subscriber": [Circular],
+              },
+            ],
+            "closed": false,
+            "destination": SafeSubscriber {
+              "_complete": undefined,
+              "_context": [Circular],
+              "_error": undefined,
+              "_next": [Function],
+              "_parentOrParents": null,
+              "_parentSubscriber": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "destination": Object {
+                "closed": true,
+                "complete": [Function],
+                "error": [Function],
+                "next": [Function],
+              },
+              "isStopped": false,
+              "syncErrorThrowable": false,
+              "syncErrorThrown": false,
+              "syncErrorValue": null,
+            },
+            "isStopped": false,
+            "syncErrorThrowable": true,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          Subscriber {
+            "_parentOrParents": null,
+            "_subscriptions": Array [
+              SubjectSubscription {
+                "_parentOrParents": [Circular],
+                "_subscriptions": null,
+                "closed": false,
+                "subject": [Circular],
+                "subscriber": [Circular],
+              },
+            ],
+            "closed": false,
+            "destination": SafeSubscriber {
+              "_complete": undefined,
+              "_context": [Circular],
+              "_error": undefined,
+              "_next": [Function],
+              "_parentOrParents": null,
+              "_parentSubscriber": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "destination": Object {
+                "closed": true,
+                "complete": [Function],
+                "error": [Function],
+                "next": [Function],
+              },
+              "isStopped": false,
+              "syncErrorThrowable": false,
+              "syncErrorThrown": false,
+              "syncErrorValue": null,
+            },
+            "isStopped": false,
+            "syncErrorThrowable": true,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+        ],
+        "thrownError": null,
+      },
+      "workspaceList$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": Array [],
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+    }
+  }
 >
   <EuiCollapsibleNav
     aria-label="Primary"
@@ -6990,14 +9494,220 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 2`]
           <div
             className="euiFlexItem eui-yScroll"
           >
+            <CollapsibleNavHeader
+              workspaces={
+                Object {
+                  "currentWorkspace$": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": null,
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
+                  "currentWorkspaceId$": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": "",
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
+                  "renderWorkspaceMenu": [MockFunction],
+                  "workspaceEnabled$": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": false,
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [
+                      Subscriber {
+                        "_parentOrParents": null,
+                        "_subscriptions": Array [
+                          SubjectSubscription {
+                            "_parentOrParents": [Circular],
+                            "_subscriptions": null,
+                            "closed": false,
+                            "subject": [Circular],
+                            "subscriber": [Circular],
+                          },
+                        ],
+                        "closed": false,
+                        "destination": SafeSubscriber {
+                          "_complete": undefined,
+                          "_context": [Circular],
+                          "_error": undefined,
+                          "_next": [Function],
+                          "_parentOrParents": null,
+                          "_parentSubscriber": [Circular],
+                          "_subscriptions": null,
+                          "closed": false,
+                          "destination": Object {
+                            "closed": true,
+                            "complete": [Function],
+                            "error": [Function],
+                            "next": [Function],
+                          },
+                          "isStopped": false,
+                          "syncErrorThrowable": false,
+                          "syncErrorThrown": false,
+                          "syncErrorValue": null,
+                        },
+                        "isStopped": false,
+                        "syncErrorThrowable": true,
+                        "syncErrorThrown": false,
+                        "syncErrorValue": null,
+                      },
+                      Subscriber {
+                        "_parentOrParents": null,
+                        "_subscriptions": Array [
+                          SubjectSubscription {
+                            "_parentOrParents": [Circular],
+                            "_subscriptions": null,
+                            "closed": false,
+                            "subject": [Circular],
+                            "subscriber": [Circular],
+                          },
+                        ],
+                        "closed": false,
+                        "destination": SafeSubscriber {
+                          "_complete": undefined,
+                          "_context": [Circular],
+                          "_error": undefined,
+                          "_next": [Function],
+                          "_parentOrParents": null,
+                          "_parentSubscriber": [Circular],
+                          "_subscriptions": null,
+                          "closed": false,
+                          "destination": Object {
+                            "closed": true,
+                            "complete": [Function],
+                            "error": [Function],
+                            "next": [Function],
+                          },
+                          "isStopped": false,
+                          "syncErrorThrowable": false,
+                          "syncErrorThrown": false,
+                          "syncErrorValue": null,
+                        },
+                        "isStopped": false,
+                        "syncErrorThrowable": true,
+                        "syncErrorThrown": false,
+                        "syncErrorValue": null,
+                      },
+                      Subscriber {
+                        "_parentOrParents": null,
+                        "_subscriptions": Array [
+                          SubjectSubscription {
+                            "_parentOrParents": [Circular],
+                            "_subscriptions": null,
+                            "closed": false,
+                            "subject": [Circular],
+                            "subscriber": [Circular],
+                          },
+                        ],
+                        "closed": false,
+                        "destination": SafeSubscriber {
+                          "_complete": undefined,
+                          "_context": [Circular],
+                          "_error": undefined,
+                          "_next": [Function],
+                          "_parentOrParents": null,
+                          "_parentSubscriber": [Circular],
+                          "_subscriptions": null,
+                          "closed": false,
+                          "destination": Object {
+                            "closed": true,
+                            "complete": [Function],
+                            "error": [Function],
+                            "next": [Function],
+                          },
+                          "isStopped": false,
+                          "syncErrorThrowable": false,
+                          "syncErrorThrown": false,
+                          "syncErrorValue": null,
+                        },
+                        "isStopped": false,
+                        "syncErrorThrowable": true,
+                        "syncErrorThrown": false,
+                        "syncErrorValue": null,
+                      },
+                    ],
+                    "thrownError": null,
+                  },
+                  "workspaceList$": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": Array [],
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
+                }
+              }
+            >
+              <EuiCollapsibleNavGroup>
+                <div
+                  className="euiCollapsibleNavGroup"
+                  id="mockId"
+                >
+                  <div
+                    className="euiCollapsibleNavGroup__children"
+                  >
+                    <EuiFlexGroup>
+                      <div
+                        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                      >
+                        <EuiFlexItem>
+                          <div
+                            className="euiFlexItem"
+                          >
+                            <EuiIcon
+                              size="l"
+                              type="logoOpenSearch"
+                            >
+                              <span
+                                data-euiicon-type="logoOpenSearch"
+                                size="l"
+                              />
+                            </EuiIcon>
+                          </div>
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <div
+                            className="euiFlexItem"
+                          >
+                            <EuiText>
+                              <div
+                                className="euiText euiText--medium"
+                              >
+                                <strong>
+                                   
+                                  OpenSearch Analytics
+                                   
+                                </strong>
+                              </div>
+                            </EuiText>
+                          </div>
+                        </EuiFlexItem>
+                      </div>
+                    </EuiFlexGroup>
+                  </div>
+                </div>
+              </EuiCollapsibleNavGroup>
+            </CollapsibleNavHeader>
             <EuiCollapsibleNavGroup
-              background="light"
-              data-test-subj="collapsibleNavGroup-recentlyViewed"
+              data-test-opensearch-logo="clock"
+              data-test-subj="collapsibleNavGroup-recentlyVisited"
+              iconType="clock"
               initialIsOpen={true}
               isCollapsible={true}
-              key="recentlyViewed"
+              key="recentlyVisited"
               onToggle={[Function]}
-              title="Recently viewed"
+              title="Recently Visited"
             >
               <EuiAccordion
                 arrowDisplay="right"
@@ -7008,6 +9718,14 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 2`]
                     gutterSize="m"
                     responsive={false}
                   >
+                    <EuiFlexItem
+                      grow={false}
+                    >
+                      <EuiIcon
+                        size="l"
+                        type="clock"
+                      />
+                    </EuiFlexItem>
                     <EuiFlexItem>
                       <EuiTitle
                         size="xxs"
@@ -7016,14 +9734,15 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 2`]
                           className="euiCollapsibleNavGroup__title"
                           id="mockId__title"
                         >
-                          Recently viewed
+                          Recently Visited
                         </h3>
                       </EuiTitle>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 }
-                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
-                data-test-subj="collapsibleNavGroup-recentlyViewed"
+                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                data-test-opensearch-logo="clock"
+                data-test-subj="collapsibleNavGroup-recentlyVisited"
                 id="mockId"
                 initialIsOpen={true}
                 isLoading={false}
@@ -7032,8 +9751,9 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 2`]
                 paddingSize="none"
               >
                 <div
-                  className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
-                  data-test-subj="collapsibleNavGroup-recentlyViewed"
+                  className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                  data-test-opensearch-logo="clock"
+                  data-test-subj="collapsibleNavGroup-recentlyVisited"
                   onToggle={[Function]}
                 >
                   <div
@@ -7073,6 +9793,23 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 2`]
                           <div
                             className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
                           >
+                            <EuiFlexItem
+                              grow={false}
+                            >
+                              <div
+                                className="euiFlexItem euiFlexItem--flexGrowZero"
+                              >
+                                <EuiIcon
+                                  size="l"
+                                  type="clock"
+                                >
+                                  <span
+                                    data-euiicon-type="clock"
+                                    size="l"
+                                  />
+                                </EuiIcon>
+                              </div>
+                            </EuiFlexItem>
                             <EuiFlexItem>
                               <div
                                 className="euiFlexItem"
@@ -7084,7 +9821,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 2`]
                                     className="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
                                     id="mockId__title"
                                   >
-                                    Recently viewed
+                                    Recently Visited
                                   </h3>
                                 </EuiTitle>
                               </div>
@@ -7112,19 +9849,18 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 2`]
                             className="euiCollapsibleNavGroup__children"
                           >
                             <EuiListGroup
-                              aria-label="Recently viewed links"
-                              className="osdCollapsibleNav__recentsListGroup"
+                              aria-label="Primary navigation links, Recently Visited"
                               color="subdued"
                               gutterSize="none"
                               listItems={
                                 Array [
                                   Object {
-                                    "aria-label": "recent",
-                                    "data-test-subj": "collapsibleNavAppLink--recent",
+                                    "data-test-subj": "collapsibleNavAppLink",
                                     "href": "http://localhost/recent",
+                                    "isActive": false,
+                                    "isDisabled": undefined,
                                     "label": "recent",
                                     "onClick": [Function],
-                                    "title": "recent",
                                   },
                                 ]
                               }
@@ -7132,8 +9868,8 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 2`]
                               size="s"
                             >
                               <ul
-                                aria-label="Recently viewed links"
-                                className="euiListGroup osdCollapsibleNav__recentsListGroup"
+                                aria-label="Primary navigation links, Recently Visited"
+                                className="euiListGroup"
                                 style={
                                   Object {
                                     "maxWidth": "none",
@@ -7141,29 +9877,26 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 2`]
                                 }
                               >
                                 <EuiListGroupItem
-                                  aria-label="recent"
                                   color="subdued"
-                                  data-test-subj="collapsibleNavAppLink--recent"
+                                  data-test-subj="collapsibleNavAppLink"
                                   href="http://localhost/recent"
+                                  isActive={false}
                                   key="title-0"
                                   label="recent"
                                   onClick={[Function]}
                                   showToolTip={false}
                                   size="s"
-                                  title="recent"
                                   wrapText={false}
                                 >
                                   <li
                                     className="euiListGroupItem euiListGroupItem--small euiListGroupItem--subdued euiListGroupItem-isClickable"
                                   >
                                     <a
-                                      aria-label="recent"
                                       className="euiListGroupItem__button"
-                                      data-test-subj="collapsibleNavAppLink--recent"
+                                      data-test-subj="collapsibleNavAppLink"
                                       href="http://localhost/recent"
                                       onClick={[Function]}
                                       rel="noreferrer"
-                                      title="recent"
                                     >
                                       <span
                                         className="euiListGroupItem__label"
@@ -7192,7 +9925,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 2`]
               isCollapsible={true}
               key="opensearchDashboards"
               onToggle={[Function]}
-              title="Library"
+              title="OpenSearch Dashboards"
             >
               <EuiAccordion
                 arrowDisplay="right"
@@ -7219,7 +9952,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 2`]
                           className="euiCollapsibleNavGroup__title"
                           id="mockId__title"
                         >
-                          Library
+                          OpenSearch Dashboards
                         </h3>
                       </EuiTitle>
                     </EuiFlexItem>
@@ -7306,7 +10039,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 2`]
                                     className="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
                                     id="mockId__title"
                                   >
-                                    Library
+                                    OpenSearch Dashboards
                                   </h3>
                                 </EuiTitle>
                               </div>
@@ -7334,7 +10067,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 2`]
                             className="euiCollapsibleNavGroup__children"
                           >
                             <EuiListGroup
-                              aria-label="Primary navigation links, Library"
+                              aria-label="Primary navigation links, OpenSearch Dashboards"
                               color="subdued"
                               gutterSize="none"
                               listItems={
@@ -7353,7 +10086,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 2`]
                               size="s"
                             >
                               <ul
-                                aria-label="Primary navigation links, Library"
+                                aria-label="Primary navigation links, OpenSearch Dashboards"
                                 className="euiListGroup"
                                 style={
                                   Object {
