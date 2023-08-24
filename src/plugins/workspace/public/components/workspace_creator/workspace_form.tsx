@@ -415,7 +415,7 @@ export const WorkspaceForm = ({
                   disabled={
                     isWorkspaceFeatureGroup(featureOrGroup)
                       ? false
-                      : //If this feature isn't checked, will not disable to allow check to compatible dirty data.
+                      : // If this feature isn't checked, will not disable to allow check to compatible dirty data.
                         isDefaultCheckedFeatureId(featureOrGroup.id) && selectedIds.length > 0
                   }
                   indeterminate={
