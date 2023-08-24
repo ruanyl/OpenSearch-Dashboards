@@ -157,7 +157,7 @@ export function CollapsibleNav({
   const workspaceEnabled = useObservable(workspaces.workspaceEnabled$, false);
   const currentWorkspaceId = useObservable(workspaces.currentWorkspaceId$, '');
   const allNavLinks: CollapsibleNavLink[] = [...navLinks];
-  if (workspaceEnabled && currentWorkspaceId !== MANAGEMENT_WORKSPACE_ID) {
+  if (!workspaceEnabled || currentWorkspaceId !== MANAGEMENT_WORKSPACE_ID) {
     // no recently visited in management workspace
     if (recentlyAccessed.length) {
       allNavLinks.push(
