@@ -35,7 +35,6 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
   private coreStart?: CoreStart;
   private config$: Observable<ConfigSchema>;
   private enabled$: BehaviorSubject<boolean> = new BehaviorSubject(false);
-  private loopRequestTimer?: NodeJS.Timeout;
 
   private get isEnabled() {
     return this.enabled$.getValue();
