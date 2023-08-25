@@ -94,7 +94,7 @@ const isDefaultCheckedFeatureId = (id: string) => {
 
 const appendDefaultFeatureIds = (ids: string[]) => {
   // concat default checked ids and unique the result
-  return Array.from(ids.concat(DEFAULT_CHECKED_FEATURES_IDS));
+  return Array.from(new Set(ids.concat(DEFAULT_CHECKED_FEATURES_IDS)));
 };
 
 const workspaceHtmlIdGenerator = htmlIdGenerator();
