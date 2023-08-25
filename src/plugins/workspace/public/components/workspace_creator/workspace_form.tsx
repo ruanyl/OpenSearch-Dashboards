@@ -92,6 +92,11 @@ const isDefaultCheckedFeatureId = (id: string) => {
   return DEFAULT_CHECKED_FEATURES_IDS.indexOf(id) > -1;
 };
 
+const appendDefaultFeatureIds = (ids: string[]) => {
+  // concat default checked ids and unique the result
+  return Array.from(ids.concat(DEFAULT_CHECKED_FEATURES_IDS));
+};
+
 const workspaceHtmlIdGenerator = htmlIdGenerator();
 
 const defaultVISThemeOptions = [{ label: 'Categorical', value: 'categorical' }];
@@ -118,7 +123,7 @@ export const WorkspaceForm = ({
   const [defaultVISTheme, setDefaultVISTheme] = useState(defaultValues?.defaultVISTheme);
 
   const [selectedFeatureIds, setSelectedFeatureIds] = useState(
-    defaultValues?.features || DEFAULT_CHECKED_FEATURES_IDS
+    appendDefaultFeatureIds(defaultValues?.features || [])
   );
   const [permissionSettings, setPermissionSettings] = useState<
     Array<Partial<WorkspacePermissionSetting>>
@@ -413,10 +418,8 @@ export const WorkspaceForm = ({
                   }`}
                   checked={selectedIds.length > 0}
                   disabled={
-                    isWorkspaceFeatureGroup(featureOrGroup)
-                      ? false
-                      : // If this feature isn't checked, will not disable to allow check to compatible dirty data.
-                        isDefaultCheckedFeatureId(featureOrGroup.id) && selectedIds.length > 0
+                    !isWorkspaceFeatureGroup(featureOrGroup) &&
+                    isDefaultCheckedFeatureId(featureOrGroup.id)
                   }
                   indeterminate={
                     isWorkspaceFeatureGroup(featureOrGroup) &&
@@ -429,6 +432,7 @@ export const WorkspaceForm = ({
                     options={featureOrGroup.features.map((item) => ({
                       id: item.id,
                       label: item.name,
+                      disabled: isDefaultCheckedFeatureId(item.id),
                     }))}
                     idToSelectedMap={selectedIds.reduce(
                       (previousValue, currentValue) => ({
