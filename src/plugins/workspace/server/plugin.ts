@@ -85,6 +85,19 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
       workspaceSavedObjectsClientWrapper.wrapperFactory
     );
 
+    core.savedObjects.setClientFactoryProvider(
+      (repositoryFactory) => ({ request, includedHiddenTypes }) => {
+        const enabled = this.isEnabled;
+        if (enabled) {
+          return new SavedObjectsClient(repositoryFactory.createInternalRepository());
+        }
+
+        return new SavedObjectsClient(
+          repositoryFactory.createScopedRepository(request, includedHiddenTypes)
+        );
+      }
+    );
+
     this.proxyWorkspaceTrafficToRealHandler(core);
 
     registerRoutes({

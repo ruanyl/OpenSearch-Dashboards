@@ -478,7 +478,7 @@ export class WorkspaceSavedObjectsClientWrapper {
 
     const isDashboardAdmin = this.isDashboardAdmin(wrapperOptions.request);
 
-    if (isDashboardAdmin || !this.options.enabled$.getValue()) {
+    if (isDashboardAdmin) {
       return wrapperOptions.client;
     }
 
