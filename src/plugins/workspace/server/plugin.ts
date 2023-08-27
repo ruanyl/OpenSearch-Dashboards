@@ -92,6 +92,7 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
       logger: this.logger,
       client: this.client as IWorkspaceDBImpl,
       enabled$: this.enabled$,
+      config$: this.config$,
     });
 
     core.savedObjects.setClientFactoryProvider((repositoryFactory) => () =>
@@ -219,6 +220,5 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
 
   public stop() {
     this.enabled$.unsubscribe();
-    clearTimeout(this.loopRequestTimer);
   }
 }

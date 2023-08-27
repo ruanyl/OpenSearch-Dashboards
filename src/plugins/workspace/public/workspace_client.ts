@@ -329,8 +329,12 @@ export class WorkspaceClient {
     return result;
   }
 
-  public async getFeatureFlag(): Promise<IResponse<boolean>> {
-    const result = await this.safeFetch(this.getPath(['is_workspace_enabled']), {
+  public async getFeatureFlag(): Promise<
+    IResponse<{
+      enabled: boolean;
+    }>
+  > {
+    const result = await this.safeFetch(this.getPath(['settings']), {
       method: 'get',
     });
 
