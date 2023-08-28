@@ -689,7 +689,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
     return (
       <SavedObjectsCopyModal
-        seletedSavedObjects={this.state.selectedSavedObjects}
+        selectedSavedObjects={this.state.selectedSavedObjects}
         workspaces={this.props.workspaces}
         onCopy={this.onCopy}
         onClose={this.hideCopyModal}
