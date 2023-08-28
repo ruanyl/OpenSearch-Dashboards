@@ -35,6 +35,7 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
   private coreStart?: CoreStart;
   private config$: Observable<ConfigSchema>;
   private enabled$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  private version: string;
 
   private get isEnabled() {
     return this.enabled$.getValue();
@@ -63,6 +64,7 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('plugins', 'workspace');
     this.config$ = initializerContext.config.create<ConfigSchema>();
+    this.version = initializerContext.env.packageInfo.version;
   }
 
   public async setup(core: CoreSetup) {
@@ -188,12 +190,21 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
     ]);
   }
 
+  private getInternalRepository() {
+    if (!this.coreStart) {
+      throw new Error('UI setting client can not be found');
+    }
+    const { savedObjects } = this.coreStart as CoreStart;
+
+    return savedObjects.createInternalRepository();
+  }
+
   private async getUISettingClient() {
     if (!this.coreStart) {
       throw new Error('UI setting client can not be found');
     }
-    const { uiSettings, savedObjects } = this.coreStart as CoreStart;
-    const internalRepository = savedObjects.createInternalRepository();
+    const { uiSettings } = this.coreStart as CoreStart;
+    const internalRepository = this.getInternalRepository();
     const savedObjectClient = new SavedObjectsClient(internalRepository);
     return uiSettings.asScopedToClient(savedObjectClient);
   }
@@ -211,17 +222,53 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
     return workspaceEnabled;
   }
 
-  public start(core: CoreStart) {
+  private async setupUISettinsACL() {
+    const internalRepository = this.getInternalRepository();
+    const CONFIG_TYPE = 'config';
+    try {
+      await internalRepository.get(CONFIG_TYPE, this.version);
+    } catch (e) {
+      try {
+        const uiSettingClient = await this.getUISettingClient();
+        await uiSettingClient.set(FEATURE_FLAG_KEY_IN_UI_SETTING, false);
+      } catch (error: unknown) {
+        if (typeof error === 'string') {
+          this.logger.error(error);
+        } else {
+          this.logger.error(`Something went wrong when setup advanced settings: ${error}`);
+        }
+      }
+    }
+
+    if (this.isEnabled) {
+      const acl = new ACL().addPermission([WorkspacePermissionMode.Read], {
+        users: ['*'],
+      });
+      await internalRepository.update(
+        CONFIG_TYPE,
+        this.version,
+        {},
+        {
+          permissions: acl.getPermissions(),
+        }
+      );
+    } else {
+      await internalRepository.deleteACL(CONFIG_TYPE, this.version);
+    }
+  }
+
+  public async start(core: CoreStart) {
     this.logger.debug('Starting SavedObjects service');
 
     this.coreStart = core;
 
-    this.setupWorkspaceFeatureFlag();
+    await this.setupWorkspaceFeatureFlag();
 
     this.enabled$.subscribe((enabled) => {
       if (enabled) {
         this.setupWorkspaces();
       }
+      this.setupUISettinsACL();
     });
 
     return {

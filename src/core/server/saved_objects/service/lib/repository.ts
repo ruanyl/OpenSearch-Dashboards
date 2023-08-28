@@ -1766,6 +1766,33 @@ export class SavedObjectsRepository {
     };
   }
 
+  async deleteACL<T = unknown>(type: string, id: string): Promise<boolean> {
+    if (!this._allowedTypes.includes(type)) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+    }
+
+    const { statusCode } = await this.client.update<SavedObjectsRawDocSource>(
+      {
+        id: this._serializer.generateRawId(undefined, type, id),
+        index: this.getIndexForType(type),
+
+        body: {
+          script: {
+            source: "ctx._source.remove('permissions')",
+          },
+        },
+      },
+      { ignore: [404] }
+    );
+
+    if (statusCode === 404) {
+      // see "404s from missing index" above
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+    }
+
+    return true;
+  }
+
   /**
    * Returns index specified by the given type or the default index
    *
