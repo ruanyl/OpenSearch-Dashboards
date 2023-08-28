@@ -75,7 +75,6 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
       core.savedObjects.permissionControl,
       {
         config$: this.config$,
-        enabled$: this.enabled$,
       }
     );
 

@@ -5,7 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 import Boom from '@hapi/boom';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 
 import {
@@ -504,7 +504,6 @@ export class WorkspaceSavedObjectsClientWrapper {
     private readonly permissionControl: SavedObjectsPermissionControlContract,
     private readonly options: {
       config$: Observable<ConfigSchema>;
-      enabled$: BehaviorSubject<boolean>;
     }
   ) {
     this.options.config$.subscribe((config) => {
