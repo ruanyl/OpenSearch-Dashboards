@@ -52,7 +52,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
   ) {
     const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
     workspaceClient.init();
-    const featureFlagResp = await workspaceClient.getFeatureFlag();
+    const featureFlagResp = await workspaceClient.getSettings();
     if (featureFlagResp.success) {
       core.workspaces.workspaceEnabled$.next(featureFlagResp.result.enabled);
     } else {

@@ -329,7 +329,7 @@ export class WorkspaceClient {
     return result;
   }
 
-  public async getFeatureFlag(): Promise<
+  public async getSettings(): Promise<
     IResponse<{
       enabled: boolean;
     }>
