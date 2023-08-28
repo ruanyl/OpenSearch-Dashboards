@@ -349,13 +349,14 @@ export class WorkspaceSavedObjectsClientWrapper {
     };
 
     const findWithWorkspacePermissionControl = async <T = unknown>(
-      options: SavedObjectsFindOptions
+      options: SavedObjectsFindOptions,
+      permissionModes?: WorkspacePermissionMode[]
     ) => {
       const principals = this.permissionControl.getPrincipalsFromRequest(wrapperOptions.request);
 
       if (this.isRelatedToWorkspace(options.type)) {
-        const queryDSLForQueryingWorkspaces = ACL.genereateGetPermittedSavedObjectsQueryDSL(
-          [
+        options.queryDSL = ACL.generateGetPermittedSavedObjectsQueryDSL(
+          permissionModes ?? [
             WorkspacePermissionMode.LibraryRead,
             WorkspacePermissionMode.LibraryWrite,
             WorkspacePermissionMode.Management,
@@ -363,7 +364,6 @@ export class WorkspaceSavedObjectsClientWrapper {
           principals,
           WORKSPACE_TYPE
         );
-        options.queryDSL = queryDSLForQueryingWorkspaces;
       } else {
         const permittedWorkspaceIds = await this.permissionControl.getPermittedWorkspaceIds(
           wrapperOptions.request,
@@ -392,7 +392,7 @@ export class WorkspaceSavedObjectsClientWrapper {
            */
           options.workspaces = permittedWorkspaces;
         } else {
-          const queryDSL = ACL.genereateGetPermittedSavedObjectsQueryDSL(
+          const queryDSL = ACL.generateGetPermittedSavedObjectsQueryDSL(
             [WorkspacePermissionMode.Read, WorkspacePermissionMode.Write],
             principals,
             options.type

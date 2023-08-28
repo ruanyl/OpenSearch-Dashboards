@@ -46,11 +46,11 @@ interface Props {
     targetWorkspace: string
   ) => Promise<void>;
   onClose: () => void;
-  seletedSavedObjects: SavedObjectWithMetadata[];
+  selectedSavedObjects: SavedObjectWithMetadata[];
 }
 
 interface State {
-  allSeletedObjects: SavedObjectWithMetadata[];
+  allSelectedObjects: SavedObjectWithMetadata[];
   workspaceOptions: WorkspaceOption[];
   allWorkspaceOptions: WorkspaceOption[];
   targetWorkspaceOption: WorkspaceOption[];
@@ -65,7 +65,7 @@ export class SavedObjectsCopyModal extends React.Component<Props, State> {
     super(props);
 
     this.state = {
-      allSeletedObjects: this.props.seletedSavedObjects,
+      allSelectedObjects: this.props.selectedSavedObjects,
       workspaceOptions: [],
       allWorkspaceOptions: [],
       targetWorkspaceOption: [],
@@ -152,15 +152,15 @@ export class SavedObjectsCopyModal extends React.Component<Props, State> {
       workspaceOptions,
       targetWorkspaceOption,
       isIncludeReferencesDeepChecked,
-      allSeletedObjects,
+      allSelectedObjects,
     } = this.state;
     const targetWorkspaceId = targetWorkspaceOption?.at(0)?.key;
-    const includedSeletedObjects = allSeletedObjects.filter((item) =>
+    const includedSeletedObjects = allSelectedObjects.filter((item) =>
       !!targetWorkspaceId && !!item.workspaces
         ? !item.workspaces.includes(targetWorkspaceId)
         : true && item.type !== SAVED_OBJECT_TYPE_WORKSAPCE
     );
-    const ignoredSeletedObjectsLength = allSeletedObjects.length - includedSeletedObjects.length;
+    const ignoredSeletedObjectsLength = allSelectedObjects.length - includedSeletedObjects.length;
 
     let confirmCopyButtonEnabled = false;
     if (!!targetWorkspaceId && includedSeletedObjects.length > 0) {
