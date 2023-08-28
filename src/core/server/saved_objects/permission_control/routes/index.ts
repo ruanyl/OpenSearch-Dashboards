@@ -6,6 +6,7 @@
 import { InternalHttpServiceSetup } from '../../../http';
 import { SavedObjectsPermissionControlContract } from '../client';
 import { registerListRoute } from './principals';
+import { registerStatusRoute } from './status';
 import { registerValidateRoute } from './validate';
 
 export function registerPermissionCheckRoutes({
@@ -19,4 +20,5 @@ export function registerPermissionCheckRoutes({
 
   registerValidateRoute(router, permissionControl);
   registerListRoute(router, permissionControl);
+  registerStatusRoute(router, http);
 }

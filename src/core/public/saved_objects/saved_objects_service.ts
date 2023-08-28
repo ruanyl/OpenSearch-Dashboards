@@ -31,6 +31,10 @@
 import { CoreService } from 'src/core/types';
 import { CoreStart } from 'src/core/public';
 import { SavedObjectsClient, SavedObjectsClientContract } from './saved_objects_client';
+import {
+  PermissionControlClient,
+  PermissionControlClientContract,
+} from './permission_control_client';
 
 /**
  * @public
@@ -38,12 +42,16 @@ import { SavedObjectsClient, SavedObjectsClientContract } from './saved_objects_
 export interface SavedObjectsStart {
   /** {@link SavedObjectsClient} */
   client: SavedObjectsClientContract;
+  permissionControl: PermissionControlClientContract;
 }
 
 export class SavedObjectsService implements CoreService<void, SavedObjectsStart> {
   public async setup() {}
   public async start({ http }: { http: CoreStart['http'] }): Promise<SavedObjectsStart> {
-    return { client: new SavedObjectsClient(http) };
+    return {
+      client: new SavedObjectsClient(http),
+      permissionControl: new PermissionControlClient(http),
+    };
   }
   public async stop() {}
 }

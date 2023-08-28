@@ -43,6 +43,9 @@ const createStartContractMock = () => {
       update: jest.fn(),
       setCurrentWorkspace: jest.fn(),
     },
+    permissionControl: {
+      status: jest.fn(),
+    },
   };
   return mock;
 };

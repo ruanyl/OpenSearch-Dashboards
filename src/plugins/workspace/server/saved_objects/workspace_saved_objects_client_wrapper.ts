@@ -30,6 +30,7 @@ import {
   WORKSPACE_TYPE,
   ACL,
   WorkspacePermissionMode,
+  AuthStatus,
 } from '../../../../core/server';
 import { ConfigSchema } from '../../config';
 
@@ -478,7 +479,12 @@ export class WorkspaceSavedObjectsClientWrapper {
 
     const isDashboardAdmin = this.isDashboardAdmin(wrapperOptions.request);
 
-    if (isDashboardAdmin) {
+    // if the current request is recognized as dashboard admin it should bypass the permission check
+    // or if there was no auth interceptor registered(auth status is unknown), bypass the permission check
+    if (
+      isDashboardAdmin ||
+      this.options.getAuthStatus(wrapperOptions.request) === AuthStatus.unknown
+    ) {
       return wrapperOptions.client;
     }
 
@@ -504,6 +510,7 @@ export class WorkspaceSavedObjectsClientWrapper {
     private readonly permissionControl: SavedObjectsPermissionControlContract,
     private readonly options: {
       config$: Observable<ConfigSchema>;
+      getAuthStatus: (req: OpenSearchDashboardsRequest) => AuthStatus | undefined;
     }
   ) {
     this.options.config$.subscribe((config) => {

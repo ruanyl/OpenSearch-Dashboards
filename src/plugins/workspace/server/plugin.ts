@@ -21,6 +21,7 @@ import {
   SavedObjectsClient,
   WorkspaceAttribute,
   DEFAULT_APP_CATEGORIES,
+  OpenSearchDashboardsRequest,
 } from '../../../core/server';
 import { IWorkspaceDBImpl } from './types';
 import { WorkspaceClientWithSavedObject } from './workspace_client';
@@ -75,6 +76,8 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
       core.savedObjects.permissionControl,
       {
         config$: this.config$,
+        getAuthStatus: (req: OpenSearchDashboardsRequest) =>
+          this.coreStart?.http.auth.get(req).status,
       }
     );
 
