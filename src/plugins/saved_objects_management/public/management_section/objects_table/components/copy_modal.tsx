@@ -31,10 +31,10 @@ import {
   EuiCallOut,
   EuiText,
 } from '@elastic/eui';
-import { WorkspaceAttribute, WorkspaceStart } from 'opensearch-dashboards/public';
+import { HttpStart, WorkspaceAttribute, WorkspaceStart } from 'opensearch-dashboards/public';
 import { i18n } from '@osd/i18n';
 import { SavedObjectWithMetadata } from '../../../types';
-import { getSavedObjectLabel } from '../../../lib';
+import { getSavedObjectLabel, getWorkspacesWithWritePermission } from '../../../lib';
 import { SAVED_OBJECT_TYPE_WORKSAPCE } from '../../../constants';
 
 type WorkspaceOption = EuiComboBoxOptionOption<WorkspaceAttribute>;
@@ -47,6 +47,7 @@ interface Props {
     targetWorkspace: string
   ) => Promise<void>;
   onClose: () => void;
+  http: HttpStart;
   selectedSavedObjects: SavedObjectWithMetadata[];
 }
 
@@ -80,21 +81,22 @@ export class SavedObjectsCopyModal extends React.Component<Props, State> {
   };
 
   async componentDidMount() {
-    const { workspaces } = this.props;
-    const workspaceList = workspaces.workspaceList$;
+    const { workspaces, http } = this.props;
+    const workspaceList = (await getWorkspacesWithWritePermission(http)).result.workspaces;
+    const workspaceList2 = workspaces.workspaceList$.value;
     const currentWorkspace = workspaces.currentWorkspace$;
 
     if (!!currentWorkspace?.value?.name) {
       const currentWorkspaceName = currentWorkspace.value.name;
-      const filteredWorkspaceOptions = workspaceList.value
+      const filteredWorkspaceOptions = workspaceList
         .map(this.workspaceToOption)
-        .filter((item) => item.label !== currentWorkspaceName);
+        .filter((item: WorkspaceOption) => item.label !== currentWorkspaceName);
       this.setState({
         workspaceOptions: filteredWorkspaceOptions,
         allWorkspaceOptions: filteredWorkspaceOptions,
       });
     } else {
-      const allWorkspaceOptions = workspaceList.value.map(this.workspaceToOption);
+      const allWorkspaceOptions = workspaceList.map(this.workspaceToOption);
       this.setState({
         workspaceOptions: allWorkspaceOptions,
         allWorkspaceOptions,

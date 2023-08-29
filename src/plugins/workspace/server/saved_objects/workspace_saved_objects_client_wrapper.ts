@@ -32,6 +32,7 @@ import {
   WorkspacePermissionMode,
 } from '../../../../core/server';
 import { ConfigSchema } from '../../config';
+import { WorkspaceFindOptions } from '../types';
 
 // Can't throw unauthorized for now, the page will be refreshed if unauthorized
 const generateWorkspacePermissionError = () =>
@@ -349,14 +350,13 @@ export class WorkspaceSavedObjectsClientWrapper {
     };
 
     const findWithWorkspacePermissionControl = async <T = unknown>(
-      options: SavedObjectsFindOptions,
-      permissionModes?: WorkspacePermissionMode[]
+      options: SavedObjectsFindOptions & Pick<WorkspaceFindOptions, 'permissionModes'>
     ) => {
       const principals = this.permissionControl.getPrincipalsFromRequest(wrapperOptions.request);
 
       if (this.isRelatedToWorkspace(options.type)) {
         options.queryDSL = ACL.generateGetPermittedSavedObjectsQueryDSL(
-          permissionModes ?? [
+          options.permissionModes ?? [
             WorkspacePermissionMode.LibraryRead,
             WorkspacePermissionMode.LibraryWrite,
             WorkspacePermissionMode.Management,

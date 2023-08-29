@@ -94,7 +94,7 @@ import {
   SavedObjectsManagementNamespaceServiceStart,
 } from '../../services';
 import { Header, Table, Flyout, Relationships } from './components';
-import { DataPublicPluginStart } from '../../../../../plugins/data/public';
+import { DataPublicPluginStart } from '../../../../data/public';
 import { SavedObjectsCopyModal } from './components/copy_modal';
 import { PUBLIC_WORKSPACE_ID, MANAGEMENT_WORKSPACE_ID } from '../../../../../core/public';
 
@@ -495,7 +495,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     this.refreshObjects();
     notifications.toasts.addSuccess({
       title: i18n.translate('savedObjectsManagement.objectsTable.copy.successNotification', {
-        defaultMessage: 'Copy saved objects successly',
+        defaultMessage: 'Copy saved objects successfully',
       }),
     });
   };
@@ -691,6 +691,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       <SavedObjectsCopyModal
         selectedSavedObjects={this.state.selectedSavedObjects}
         workspaces={this.props.workspaces}
+        http={this.props.http}
         onCopy={this.onCopy}
         onClose={this.hideCopyModal}
       />
