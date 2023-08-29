@@ -31,7 +31,7 @@ import {
   EuiCallOut,
   EuiText,
 } from '@elastic/eui';
-import { HttpStart, WorkspaceAttribute, WorkspaceStart } from 'opensearch-dashboards/public';
+import { WorkspaceAttribute, WorkspaceStart } from 'opensearch-dashboards/public';
 import { i18n } from '@osd/i18n';
 import { SavedObjectWithMetadata } from '../../../types';
 import { getSavedObjectLabel } from '../../../lib';
