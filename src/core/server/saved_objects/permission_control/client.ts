@@ -20,6 +20,7 @@ export type SavedObjectsPermissionModes = string[];
 export interface AuthInfo {
   backend_roles?: string[];
   user_name?: string;
+  is_security_admin?: boolean;
 }
 
 export class SavedObjectsPermissionControl {
@@ -27,9 +28,12 @@ export class SavedObjectsPermissionControl {
   private getInternalRepository() {
     return this.createInternalRepository?.();
   }
-  public getPrincipalsFromRequest(request: OpenSearchDashboardsRequest): Principals {
+  public getAuthInfoFromRequest(request: OpenSearchDashboardsRequest) {
     const rawRequest = ensureRawRequest(request);
-    const authInfo = rawRequest?.auth?.credentials?.authInfo as AuthInfo | null;
+    return rawRequest?.auth?.credentials?.authInfo as AuthInfo | null;
+  }
+  public getPrincipalsFromRequest(request: OpenSearchDashboardsRequest): Principals {
+    const authInfo = this.getAuthInfoFromRequest(request);
     const payload: Principals = {};
     if (!authInfo) {
       /**

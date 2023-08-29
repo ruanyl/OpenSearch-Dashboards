@@ -123,6 +123,11 @@ export class WorkspaceSavedObjectsClientWrapper {
   }
 
   private isDashboardAdmin(request: OpenSearchDashboardsRequest): boolean {
+    const authInfo = this.permissionControl.getAuthInfoFromRequest(request);
+    if (authInfo?.is_security_admin) {
+      return true;
+    }
+
     const config = this.config || ({} as ConfigSchema);
     const principals = this.permissionControl.getPrincipalsFromRequest(request);
     const adminBackendRoles = config?.dashboardAdmin?.backendRoles || [];
