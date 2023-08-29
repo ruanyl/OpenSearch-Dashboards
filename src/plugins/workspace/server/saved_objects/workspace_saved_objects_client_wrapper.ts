@@ -240,7 +240,7 @@ export class WorkspaceSavedObjectsClientWrapper {
         const permitted = await this.validateMultiWorkspacesPermissions(
           options.workspaces,
           wrapperOptions.request,
-          [WorkspacePermissionMode.Write, WorkspacePermissionMode.Management]
+          [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Management]
         );
         if (!permitted) {
           throw generateSavedObjectsPermissionError();
