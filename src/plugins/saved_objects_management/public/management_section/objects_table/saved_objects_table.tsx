@@ -77,6 +77,7 @@ import {
   SavedObjectCountOptions,
   getRelationships,
   getSavedObjectLabel,
+  getWorkspacesWithWritePermission,
   fetchExportObjects,
   fetchExportByTypeAndSearch,
   filterQuery,
@@ -472,6 +473,29 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     });
   };
 
+  getCopyWorkspaces = async (): Promise<WorkspaceAttribute[]> => {
+    const { notifications, http } = this.props;
+    let result;
+    try {
+      result = await getWorkspacesWithWritePermission(http);
+    } catch (error) {
+      notifications?.toasts.addDanger({
+        title: i18n.translate(
+          'savedObjectsManagement.objectsTable.copyWorkspaces.dangerNotification',
+          {
+            defaultMessage: 'Unable to get workspaces with write permission',
+          }
+        ),
+        text: error instanceof Error ? error.message : JSON.stringify(error),
+      });
+    }
+    if (result?.success) {
+      return result.result?.workspaces ?? [];
+    } else {
+      return [];
+    }
+  };
+
   onCopy = async (
     savedObjects: SavedObjectWithMetadata[],
     includeReferencesDeep: boolean,
@@ -691,7 +715,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       <SavedObjectsCopyModal
         selectedSavedObjects={this.state.selectedSavedObjects}
         workspaces={this.props.workspaces}
-        http={this.props.http}
+        getCopyWorkspaces={this.getCopyWorkspaces}
         onCopy={this.onCopy}
         onClose={this.hideCopyModal}
       />
@@ -1045,6 +1069,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             onExport={this.onExport}
             canDelete={applications.capabilities.savedObjectsManagement.delete as boolean}
             onDelete={this.onDelete}
+            onCopy={() => this.setState({ isShowingCopyModal: true })}
             onActionRefresh={this.refreshObject}
             goInspectObject={this.props.goInspectObject}
             pageIndex={page}

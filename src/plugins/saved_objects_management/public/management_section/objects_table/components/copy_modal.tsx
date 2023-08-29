@@ -34,7 +34,7 @@ import {
 import { HttpStart, WorkspaceAttribute, WorkspaceStart } from 'opensearch-dashboards/public';
 import { i18n } from '@osd/i18n';
 import { SavedObjectWithMetadata } from '../../../types';
-import { getSavedObjectLabel, getWorkspacesWithWritePermission } from '../../../lib';
+import { getSavedObjectLabel } from '../../../lib';
 import { SAVED_OBJECT_TYPE_WORKSAPCE } from '../../../constants';
 
 type WorkspaceOption = EuiComboBoxOptionOption<WorkspaceAttribute>;
@@ -47,7 +47,7 @@ interface Props {
     targetWorkspace: string
   ) => Promise<void>;
   onClose: () => void;
-  http: HttpStart;
+  getCopyWorkspaces: () => Promise<WorkspaceAttribute[]>;
   selectedSavedObjects: SavedObjectWithMetadata[];
 }
 
@@ -81,9 +81,8 @@ export class SavedObjectsCopyModal extends React.Component<Props, State> {
   };
 
   async componentDidMount() {
-    const { workspaces, http } = this.props;
-    const workspaceList = (await getWorkspacesWithWritePermission(http)).result.workspaces;
-    const workspaceList2 = workspaces.workspaceList$.value;
+    const { workspaces, getCopyWorkspaces } = this.props;
+    const workspaceList = await getCopyWorkspaces();
     const currentWorkspace = workspaces.currentWorkspace$;
 
     if (!!currentWorkspace?.value?.name) {

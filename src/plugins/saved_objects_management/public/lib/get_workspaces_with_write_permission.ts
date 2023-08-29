@@ -9,7 +9,8 @@
  * GitHub history for details.
  */
 
-import { HttpStart, WorkspacePermissionMode } from 'src/core/public';
+import { HttpStart } from 'src/core/public';
+import { WorkspacePermissionMode } from '../../../../core/public';
 
 export async function getWorkspacesWithWritePermission(http: HttpStart) {
   return await http.post('/api/workspaces/_list', {
