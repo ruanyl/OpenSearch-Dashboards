@@ -66,14 +66,8 @@ export const mountManagementSection = async ({
   const { element, history } = usedMountParams;
   const { chrome } = coreStart;
   const setBreadcrumbs = mountParams?.setBreadcrumbs || chrome.setBreadcrumbs;
-  let finalAllowedObjectTypes = allowedObjectTypes;
-  if (finalAllowedObjectTypes === undefined) {
-    /**
-     * Workspace needs to be filtered out since it is a concept with higher level than normal saved objects.
-     */
-    finalAllowedObjectTypes = (await getAllowedTypes(coreStart.http)).filter(
-      (item) => item !== WORKSPACE_TYPE
-    );
+  if (allowedObjectTypes === undefined) {
+    allowedObjectTypes = await getAllowedTypes(coreStart.http);
   }
 
   coreStart.chrome.docTitle.change(title);

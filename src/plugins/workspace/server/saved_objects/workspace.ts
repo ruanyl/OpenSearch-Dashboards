@@ -38,4 +38,7 @@ export const workspace: SavedObjectsType = {
       },
     },
   },
+  management: {
+    importableAndExportable: false,
+  },
 };
