@@ -259,7 +259,7 @@ export class WorkspaceSavedObjectsClientWrapper {
         workspacePermitted = await this.validateMultiWorkspacesPermissions(
           options.workspaces,
           wrapperOptions.request,
-          WorkspacePermissionMode.Management
+          [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Management]
         );
       } else {
         workspacePermitted = true;
