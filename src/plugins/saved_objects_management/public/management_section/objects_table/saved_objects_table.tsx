@@ -99,6 +99,12 @@ import { DataPublicPluginStart } from '../../../../data/public';
 import { SavedObjectsCopyModal } from './components/copy_modal';
 import { PUBLIC_WORKSPACE_ID, MANAGEMENT_WORKSPACE_ID } from '../../../../../core/public';
 
+export enum CopyState {
+  Single = 'single',
+  Selected = 'selected',
+  All = 'all',
+}
+
 interface ExportAllOption {
   id: string;
   label: string;
@@ -136,6 +142,7 @@ export interface SavedObjectsTableState {
   selectedSavedObjects: SavedObjectWithMetadata[];
   isShowingImportFlyout: boolean;
   isShowingCopyModal: boolean;
+  copyState: CopyState;
   isSearching: boolean;
   filteredItemCount: number;
   isShowingRelationships: boolean;
@@ -175,6 +182,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       selectedSavedObjects: [],
       isShowingImportFlyout: false,
       isShowingCopyModal: false,
+      copyState: CopyState.Selected,
       isSearching: false,
       filteredItemCount: 0,
       isShowingRelationships: false,
@@ -737,6 +745,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         selectedSavedObjects={this.state.selectedSavedObjects}
         workspaces={this.props.workspaces}
         getCopyWorkspaces={this.getCopyWorkspaces}
+        copyState={this.state.copyState}
         onCopy={this.onCopy}
         onClose={this.hideCopyModal}
       />
@@ -1074,13 +1083,17 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         <Header
           onExportAll={() => this.setState({ isShowingExportAllOptionsModal: true })}
           onImport={this.showImportFlyout}
-          onCopy={() => this.setState({ isShowingCopyModal: true })}
+          onCopy={() =>
+            this.setState({
+              isShowingCopyModal: true,
+              copyState: CopyState.All,
+              selectedSavedObjects: savedObjects,
+            })
+          }
           onRefresh={this.refreshObjects}
           filteredCount={filteredItemCount}
           title={this.props.title}
-          selectedCount={selectedSavedObjects.length}
-          hideImport={hideImport}
-          showDuplicateAll={workspaceEnabled}
+          objectCount={savedObjects.length}
         />
         <EuiSpacer size="xs" />
         <RedirectAppLinks application={applications}>
@@ -1097,7 +1110,9 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             onExport={this.onExport}
             canDelete={applications.capabilities.savedObjectsManagement.delete as boolean}
             onDelete={this.onDelete}
-            onCopy={() => this.setState({ isShowingCopyModal: true })}
+            onCopy={() =>
+              this.setState({ isShowingCopyModal: true, copyState: CopyState.Selected })
+            }
             onActionRefresh={this.refreshObject}
             goInspectObject={this.props.goInspectObject}
             pageIndex={page}

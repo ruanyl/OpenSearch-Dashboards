@@ -47,9 +47,7 @@ export const Header = ({
   onRefresh,
   filteredCount,
   title,
-  selectedCount,
-  hideImport = false,
-  showDuplicateAll = false,
+  objectCount,
 }: {
   onExportAll: () => void;
   onImport: () => void;
@@ -57,9 +55,7 @@ export const Header = ({
   onRefresh: () => void;
   filteredCount: number;
   title: string;
-  selectedCount: number;
-  hideImport: boolean;
-  showDuplicateAll: boolean;
+  objectCount: number;
 }) => (
   <Fragment>
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
@@ -71,21 +67,19 @@ export const Header = ({
 
       <EuiFlexItem grow={false}>
         <EuiFlexGroup alignItems="baseline" gutterSize="m" responsive={false}>
-          {showDuplicateAll && (
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="s"
-                data-test-subj="copyObjects"
-                onClick={onCopy}
-                disabled={selectedCount === 0}
-              >
-                <FormattedMessage
-                  id="savedObjectsManagement.objectsTable.header.duplicateAllButtonLabel"
-                  defaultMessage="Duplicate All"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="s"
+              data-test-subj="copyObjects"
+              onClick={onCopy}
+              disabled={objectCount === 0}
+            >
+              <FormattedMessage
+                id="savedObjectsManagement.objectsTable.header.duplicateAllButtonLabel"
+                defaultMessage="Duplicate All"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               size="s"

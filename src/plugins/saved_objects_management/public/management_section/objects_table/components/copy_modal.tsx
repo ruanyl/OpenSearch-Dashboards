@@ -11,7 +11,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
-
+import { groupBy } from 'lodash';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -36,6 +36,7 @@ import { i18n } from '@osd/i18n';
 import { SavedObjectWithMetadata } from '../../../types';
 import { getSavedObjectLabel } from '../../../lib';
 import { SAVED_OBJECT_TYPE_WORKSAPCE } from '../../../constants';
+import { CopyState } from '../';
 
 type WorkspaceOption = EuiComboBoxOptionOption<WorkspaceAttribute>;
 
@@ -47,6 +48,7 @@ interface Props {
     targetWorkspace: string
   ) => Promise<void>;
   onClose: () => void;
+  copyState: CopyState;
   getCopyWorkspaces: () => Promise<WorkspaceAttribute[]>;
   selectedSavedObjects: SavedObjectWithMetadata[];
 }
@@ -58,6 +60,11 @@ interface State {
   targetWorkspaceOption: WorkspaceOption[];
   isLoading: boolean;
   isIncludeReferencesDeepChecked: boolean;
+  savedObjectTypeInfoMap: Map<string, [number, boolean]>;
+}
+
+function capitalizeFirstLetter(str: string): string {
+  return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
 export class SavedObjectsCopyModal extends React.Component<Props, State> {
@@ -73,6 +80,7 @@ export class SavedObjectsCopyModal extends React.Component<Props, State> {
       targetWorkspaceOption: [],
       isLoading: false,
       isIncludeReferencesDeepChecked: true,
+      savedObjectTypeInfoMap: new Map<string, [number, boolean]>(),
     };
   }
 
@@ -100,6 +108,17 @@ export class SavedObjectsCopyModal extends React.Component<Props, State> {
         workspaceOptions: allWorkspaceOptions,
         allWorkspaceOptions,
       });
+    }
+
+    const { copyState } = this.props;
+    if (copyState === CopyState.All) {
+      const { allSelectedObjects } = this.state;
+      const categorizedObjects = groupBy(allSelectedObjects, (object) => object.type);
+      const savedObjectTypeInfoMap = new Map<string, [number, boolean]>();
+      for (const [savedObjectType, savedObjects] of Object.entries(categorizedObjects)) {
+        savedObjectTypeInfoMap.set(savedObjectType, [savedObjects.length, true]);
+      }
+      this.setState({ savedObjectTypeInfoMap });
     }
 
     this.isMounted = true;
@@ -149,6 +168,64 @@ export class SavedObjectsCopyModal extends React.Component<Props, State> {
     }));
   };
 
+  changeIncludeSavedObjectType = (savedObjectType: string) => {
+    const { savedObjectTypeInfoMap } = this.state;
+    const savedObjectTypeInfo = savedObjectTypeInfoMap.get(savedObjectType);
+    if (savedObjectTypeInfo) {
+      const [count, checked] = savedObjectTypeInfo;
+      savedObjectTypeInfoMap.set(savedObjectType, [count, !checked]);
+      this.setState({ savedObjectTypeInfoMap });
+    }
+  };
+
+  renderCopyObjectCategory = (
+    savedObjectType: string,
+    savedObjectTypeCount: number,
+    savedObjectTypeChecked: boolean
+  ) => {
+    return (
+      <EuiCheckbox
+        id={'includeSavedObjectType.' + savedObjectType}
+        key={savedObjectType}
+        label={
+          <FormattedMessage
+            id={'savedObjectsManagement.objectsTable.copyModal.savedObjectType.' + savedObjectType}
+            defaultMessage={
+              capitalizeFirstLetter(savedObjectType) + ' (' + savedObjectTypeCount.toString() + ')'
+            }
+          />
+        }
+        checked={savedObjectTypeChecked}
+        onChange={() => this.changeIncludeSavedObjectType(savedObjectType)}
+      />
+    );
+  };
+
+  renderCopyObjectCategories = () => {
+    if (this.props.copyState !== CopyState.All) {
+      return null;
+    }
+    const { savedObjectTypeInfoMap } = this.state;
+    const checkboxList: JSX.Element[] = [];
+    savedObjectTypeInfoMap.forEach(
+      ([savedObjectTypeCount, savedObjectTypeChecked], savedObjectType) =>
+        checkboxList.push(
+          this.renderCopyObjectCategory(
+            savedObjectType,
+            savedObjectTypeCount,
+            savedObjectTypeChecked
+          )
+        )
+    );
+    return checkboxList;
+  };
+
+  isSavedObjectTypeIncluded = (savedObjectType: string) => {
+    const { savedObjectTypeInfoMap } = this.state;
+    const savedObjectTypeInfo = savedObjectTypeInfoMap.get(savedObjectType);
+    return savedObjectTypeInfo && savedObjectTypeInfo[1];
+  };
+
   render() {
     const {
       workspaceOptions,
@@ -156,19 +233,43 @@ export class SavedObjectsCopyModal extends React.Component<Props, State> {
       isIncludeReferencesDeepChecked,
       allSelectedObjects,
     } = this.state;
+    const { copyState } = this.props;
     const targetWorkspaceId = targetWorkspaceOption?.at(0)?.key;
-    const includedSelectedObjects = allSelectedObjects.filter((item) =>
+    let selectedObjects = allSelectedObjects;
+    if (copyState === CopyState.All) {
+      selectedObjects = selectedObjects.filter((item) => this.isSavedObjectTypeIncluded(item.type));
+    }
+    const includedSelectedObjects = selectedObjects.filter((item) =>
       !!targetWorkspaceId && !!item.workspaces
         ? !item.workspaces.includes(targetWorkspaceId)
         : item.type !== SAVED_OBJECT_TYPE_WORKSAPCE
     );
-    const ignoredSelectedObjectsLength = allSelectedObjects.length - includedSelectedObjects.length;
+
+    const ignoredSelectedObjectsLength = selectedObjects.length - includedSelectedObjects.length;
 
     let confirmCopyButtonEnabled = false;
     if (!!targetWorkspaceId && includedSelectedObjects.length > 0) {
       confirmCopyButtonEnabled = true;
     }
 
+    const titleMessageForOneSelectedObject = 'Duplicate 1 object?';
+    const titleMessageForMultipleSelectedObjects =
+      'Duplicate ' + allSelectedObjects.length.toString() + ' objects?';
+    const titleMessageForAllObjects = 'Duplicate all objects?';
+    const confirmMessageForAllObjects =
+      'Duplicate (' + includedSelectedObjects.length.toString() + ')';
+    const confirmMessageForSingleOrSelectedObjects = 'Duplicate';
+    // Duplicate single object title will be implemented later
+    const titleMessage =
+      copyState === CopyState.All
+        ? titleMessageForAllObjects
+        : allSelectedObjects.length > 1
+        ? titleMessageForMultipleSelectedObjects
+        : titleMessageForOneSelectedObject;
+    const confirmMessage =
+      copyState === CopyState.All
+        ? confirmMessageForAllObjects
+        : confirmMessageForSingleOrSelectedObjects;
     const warningMessageForOnlyOneSavedObject = (
       <p>
         <b style={{ color: '#000' }}>1</b> saved object will <b style={{ color: '#000' }}>not</b> be
@@ -209,11 +310,7 @@ export class SavedObjectsCopyModal extends React.Component<Props, State> {
           <EuiModalHeaderTitle>
             <FormattedMessage
               id="savedObjectsManagement.objectsTable.copyModal.title"
-              defaultMessage={
-                'Duplicate ' +
-                allSelectedObjects.length.toString() +
-                (allSelectedObjects.length > 1 ? ' objects?' : ' object?')
-              }
+              defaultMessage={titleMessage}
             />
           </EuiModalHeaderTitle>
         </EuiModalHeader>
@@ -246,7 +343,7 @@ export class SavedObjectsCopyModal extends React.Component<Props, State> {
           </EuiFormRow>
 
           <EuiSpacer size="m" />
-
+          {this.renderCopyObjectCategories()}
           <EuiFormRow
             fullWidth
             label={
@@ -338,7 +435,7 @@ export class SavedObjectsCopyModal extends React.Component<Props, State> {
           >
             <FormattedMessage
               id="savedObjectsManagement.objectsTable.copyModal.confirmButtonLabel"
-              defaultMessage="Duplicate"
+              defaultMessage={confirmMessage}
             />
           </EuiButton>
         </EuiModalFooter>
