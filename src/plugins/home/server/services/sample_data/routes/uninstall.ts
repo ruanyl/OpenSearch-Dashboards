@@ -47,12 +47,14 @@ export function createUninstallRoute(
         params: schema.object({ id: schema.string() }),
         query: schema.object({
           data_source_id: schema.maybe(schema.string()),
+          workspace_id: schema.maybe(schema.string()),
         }),
       },
     },
     async (context, request, response) => {
       const sampleDataset = sampleDatasets.find(({ id }) => id === request.params.id);
       const dataSourceId = request.query.data_source_id;
+      const workspaceId = request.query.workspace_id;
 
       if (!sampleDataset) {
         return response.notFound();
@@ -78,9 +80,19 @@ export function createUninstallRoute(
         }
       }
 
-      const savedObjectsList = dataSourceId
-        ? sampleDataset.getDataSourceIntegratedSavedObjects(dataSourceId)
-        : sampleDataset.savedObjects;
+      let savedObjectsList = sampleDataset.savedObjects;
+      if (dataSourceId) {
+        savedObjectsList = sampleDataset.getDataSourceIntegratedSavedObjects(
+          savedObjectsList,
+          dataSourceId
+        );
+      }
+      if (workspaceId) {
+        savedObjectsList = sampleDataset.getWorkspaceIntegratedSavedObjects(
+          savedObjectsList,
+          workspaceId
+        );
+      }
 
       const deletePromises = savedObjectsList.map(({ type, id }) =>
         context.core.savedObjects.client.delete(type, id)

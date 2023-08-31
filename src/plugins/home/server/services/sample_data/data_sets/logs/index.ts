@@ -33,7 +33,12 @@ import { i18n } from '@osd/i18n';
 import { getSavedObjects } from './saved_objects';
 import { fieldMappings } from './field_mappings';
 import { SampleDatasetSchema, AppLinkSchema } from '../../lib/sample_dataset_registry_types';
-import { appendDataSourceId, getSavedObjectsWithDataSource } from '../util';
+import {
+  appendDataSourceId,
+  appendWorkspaceAndDataSourceId,
+  getDataSourceIntegratedSavedObjects,
+  getWorkspaceIntegratedSavedObjects,
+} from '../util';
 
 const logsName = i18n.translate('home.sampleData.logsSpecTitle', {
   defaultMessage: 'Sample web logs',
@@ -55,13 +60,13 @@ export const logsSpecProvider = function (): SampleDatasetSchema {
     darkPreviewImagePath: '/plugins/home/assets/sample_data_resources/logs/dashboard_dark.png',
     hasNewThemeImages: true,
     overviewDashboard: DASHBOARD_ID,
-    getDataSourceIntegratedDashboard: appendDataSourceId(DASHBOARD_ID),
+    getWorkspaceAndDataSourceIntegratedDashboard: appendWorkspaceAndDataSourceId(DASHBOARD_ID),
     appLinks: initialAppLinks,
     defaultIndex: DEFAULT_INDEX,
     getDataSourceIntegratedDefaultIndex: appendDataSourceId(DEFAULT_INDEX),
     savedObjects: getSavedObjects(),
-    getDataSourceIntegratedSavedObjects: (dataSourceId?: string, dataSourceTitle?: string) =>
-      getSavedObjectsWithDataSource(getSavedObjects(), dataSourceId, dataSourceTitle),
+    getDataSourceIntegratedSavedObjects,
+    getWorkspaceIntegratedSavedObjects,
     dataIndices: [
       {
         id: 'logs',

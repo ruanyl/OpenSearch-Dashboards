@@ -89,7 +89,9 @@ export interface SampleDatasetSchema<T = unknown> {
 
   // saved object id of main dashboard for sample data set
   overviewDashboard: string;
-  getDataSourceIntegratedDashboard: (dataSourceId?: string) => string;
+  getWorkspaceAndDataSourceIntegratedDashboard: (
+    workspaceId?: string
+  ) => (dataSourceId?: string) => string;
   appLinks: AppLinkSchema[];
 
   // saved object id of default index-pattern for sample data set
@@ -100,8 +102,13 @@ export interface SampleDatasetSchema<T = unknown> {
   // Should provide a nice demo of OpenSearch Dashboards's functionality with the sample data set
   savedObjects: Array<SavedObject<T>>;
   getDataSourceIntegratedSavedObjects: (
+    savedObjects: Array<SavedObject<T>>,
     dataSourceId?: string,
     dataSourceTitle?: string
+  ) => Array<SavedObject<T>>;
+  getWorkspaceIntegratedSavedObjects: (
+    savedObjects: Array<SavedObject<T>>,
+    workspaceId?: string
   ) => Array<SavedObject<T>>;
   dataIndices: DataIndexSchema[];
   status?: string | undefined;
