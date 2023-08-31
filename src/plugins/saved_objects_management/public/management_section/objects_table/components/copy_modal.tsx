@@ -202,14 +202,11 @@ export class SavedObjectsCopyModal extends React.Component<Props, State> {
   };
 
   renderCopyObjectCategories = () => {
-    if (this.props.copyState !== CopyState.All) {
-      return null;
-    }
     const { savedObjectTypeInfoMap } = this.state;
-    const elementList: JSX.Element[] = [];
+    const checkboxList: JSX.Element[] = [];
     savedObjectTypeInfoMap.forEach(
       ([savedObjectTypeCount, savedObjectTypeChecked], savedObjectType) =>
-        elementList.push(
+        checkboxList.push(
           this.renderCopyObjectCategory(
             savedObjectType,
             savedObjectTypeCount,
@@ -217,8 +214,8 @@ export class SavedObjectsCopyModal extends React.Component<Props, State> {
           )
         )
     );
-    elementList.push(<EuiSpacer size="m" />);
-    return elementList;
+    checkboxList.push();
+    return checkboxList;
   };
 
   isSavedObjectTypeIncluded = (savedObjectType: string) => {
@@ -344,7 +341,9 @@ export class SavedObjectsCopyModal extends React.Component<Props, State> {
           </EuiFormRow>
 
           <EuiSpacer size="m" />
-          {this.renderCopyObjectCategories()}
+          {copyState && this.renderCopyObjectCategories()}
+          {copyState && <EuiSpacer size="m" />}
+
           <EuiFormRow
             fullWidth
             label={

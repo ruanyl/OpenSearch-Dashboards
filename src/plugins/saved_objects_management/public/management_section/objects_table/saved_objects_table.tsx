@@ -529,13 +529,28 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   ) => {
     const { notifications, http } = this.props;
     const objectsToCopy = savedObjects.map((obj) => ({ id: obj.id, type: obj.type }));
-
+    let result;
     try {
-      await copySavedObjects(http, objectsToCopy, includeReferencesDeep, targetWorkspace);
+      result = await copySavedObjects(http, objectsToCopy, includeReferencesDeep, targetWorkspace);
+      if (result.success) {
+        notifications.toasts.addSuccess({
+          title: i18n.translate('savedObjectsManagement.objectsTable.copy.successNotification', {
+            defaultMessage:
+              'Copy ' + savedObjects.length.toString() + ' saved objects successfully',
+          }),
+        });
+      } else {
+        const failedCount = savedObjects.length - result.successCount;
+        notifications.toasts.addSuccess({
+          title: i18n.translate('savedObjectsManagement.objectsTable.copy.dangerNotification', {
+            defaultMessage: 'Unable to copy ' + failedCount.toString() + ' saved objects failed',
+          }),
+        });
+      }
     } catch (e) {
       notifications.toasts.addDanger({
         title: i18n.translate('savedObjectsManagement.objectsTable.copy.dangerNotification', {
-          defaultMessage: 'Unable to copy saved objects',
+          defaultMessage: 'Unable to copy all saved objects',
         }),
       });
       throw e;
@@ -543,11 +558,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
     this.hideCopyModal();
     this.refreshObjects();
-    notifications.toasts.addSuccess({
-      title: i18n.translate('savedObjectsManagement.objectsTable.copy.successNotification', {
-        defaultMessage: 'Copy saved objects successfully',
-      }),
-    });
   };
 
   onExport = async (includeReferencesDeep: boolean) => {
