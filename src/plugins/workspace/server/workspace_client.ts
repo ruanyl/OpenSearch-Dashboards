@@ -24,7 +24,7 @@ import { generateRandomId } from './utils';
 const WORKSPACE_ID_SIZE = 6;
 
 const DUPLICATE_WORKSPACE_NAME_ERROR = i18n.translate('workspace.duplicate.name.error', {
-  defaultMessage: 'workspace name is already used, try with a different name',
+  defaultMessage: 'workspace name has already been used, try with a different name',
 });
 
 export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
