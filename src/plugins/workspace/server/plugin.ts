@@ -29,6 +29,8 @@ import { registerRoutes } from './routes';
 import { WORKSPACE_OVERVIEW_APP_ID, WORKSPACE_UPDATE_APP_ID } from '../common/constants';
 import { ConfigSchema, FEATURE_FLAG_KEY_IN_UI_SETTING } from '../config';
 
+const CONFIG_TYPE = 'config';
+
 export class WorkspacePlugin implements Plugin<{}, {}> {
   private readonly logger: Logger;
   private client?: IWorkspaceDBImpl;
@@ -146,7 +148,7 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
 
   private async setupWorkspaces() {
     if (!this.coreStart) {
-      throw new Error('UI setting client can not be found');
+      throw new Error('Repository client can not be found');
     }
     const internalRepository = this.coreStart.savedObjects.createInternalRepository();
     this.client?.setInternalRepository(internalRepository);
@@ -216,28 +218,25 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
   }
 
   private async setupWorkspaceFeatureFlag() {
-    const uiSettingClient = await this.getUISettingClient();
-    const workspaceEnabled = await uiSettingClient.get(FEATURE_FLAG_KEY_IN_UI_SETTING);
-    this.enabled$.next(!!workspaceEnabled);
-    return workspaceEnabled;
+    const internalRepository = this.getInternalRepository();
+    try {
+      /**
+       * We can not use ui settings client here as the client will create a advanced config if there is not when just calling "get"
+       */
+      const config = await internalRepository.get<Record<string, any>>(CONFIG_TYPE, this.version);
+      const workspaceEnabled = !!config.attributes[FEATURE_FLAG_KEY_IN_UI_SETTING];
+      this.enabled$.next(workspaceEnabled);
+    } catch (e) {
+      this.enabled$.next(false);
+    }
   }
 
   private async setupUISettinsACL() {
     const internalRepository = this.getInternalRepository();
-    const CONFIG_TYPE = 'config';
     try {
       await internalRepository.get(CONFIG_TYPE, this.version);
     } catch (e) {
-      try {
-        const uiSettingClient = await this.getUISettingClient();
-        await uiSettingClient.set(FEATURE_FLAG_KEY_IN_UI_SETTING, false);
-      } catch (error: unknown) {
-        if (typeof error === 'string') {
-          this.logger.error(error);
-        } else {
-          this.logger.error(`Something went wrong when setup advanced settings: ${error}`);
-        }
-      }
+      return;
     }
 
     if (this.isEnabled) {
