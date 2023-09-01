@@ -121,6 +121,9 @@ export const WorkspaceForm = ({
   opType,
 }: WorkspaceFormProps) => {
   const workspaceId = defaultValues?.id;
+  const workspaceNameReadOnly =
+    workspaceId === PUBLIC_WORKSPACE_ID || workspaceId === MANAGEMENT_WORKSPACE_ID;
+  const isShowingWorkspaceFeatures = workspaceId !== MANAGEMENT_WORKSPACE_ID;
   const applications = useApplications(application);
 
   const [name, setName] = useState(defaultValues?.name);
@@ -365,9 +368,7 @@ export const WorkspaceForm = ({
           <EuiFieldText
             value={name}
             onChange={handleNameInputChange}
-            readOnly={
-              workspaceId === MANAGEMENT_WORKSPACE_ID || workspaceId === PUBLIC_WORKSPACE_ID
-            }
+            readOnly={workspaceNameReadOnly}
           />
         </EuiFormRow>
         <EuiFormRow
@@ -400,7 +401,7 @@ export const WorkspaceForm = ({
         </EuiFormRow>
       </EuiPanel>
       <EuiSpacer />
-      {defaultValues?.id !== MANAGEMENT_WORKSPACE_ID && (
+      {isShowingWorkspaceFeatures && (
         <EuiPanel>
           <EuiTitle size="s">
             <h2>Workspace features</h2>
