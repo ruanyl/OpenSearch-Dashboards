@@ -318,8 +318,8 @@ export const WorkspaceForm = ({
           permissionErrors[i] = i18n.translate('workspace.form.permission.invalidate.group', {
             defaultMessage: 'Invalid user group',
           });
+          continue; // this line is need for more conditions
         }
-        continue; // this line is need for more conditions
       }
       if (permissionErrors.some((error) => !!error)) {
         setFormErrors({ permissions: permissionErrors });
