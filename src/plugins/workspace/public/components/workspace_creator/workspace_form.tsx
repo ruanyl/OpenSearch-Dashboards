@@ -332,14 +332,9 @@ export const WorkspaceForm = ({
     [onSubmit]
   );
 
-  const handleNameInputChange = useCallback<Required<EuiFieldTextProps>['onChange']>(
-    (e) => {
-      if (workspaceId !== MANAGEMENT_WORKSPACE_ID && workspaceId !== PUBLIC_WORKSPACE_ID) {
-        setName(e.target.value);
-      }
-    },
-    [workspaceId]
-  );
+  const handleNameInputChange = useCallback<Required<EuiFieldTextProps>['onChange']>((e) => {
+    setName(e.target.value);
+  }, []);
 
   const handleDescriptionInputChange = useCallback<Required<EuiFieldTextProps>['onChange']>((e) => {
     setDescription(e.target.value);
@@ -367,7 +362,13 @@ export const WorkspaceForm = ({
         </EuiTitle>
         <EuiSpacer />
         <EuiFormRow label="Name" isInvalid={!!formErrors.name} error={formErrors.name}>
-          <EuiFieldText value={name} onChange={handleNameInputChange} />
+          <EuiFieldText
+            value={name}
+            onChange={handleNameInputChange}
+            readOnly={
+              workspaceId === MANAGEMENT_WORKSPACE_ID || workspaceId === PUBLIC_WORKSPACE_ID
+            }
+          />
         </EuiFormRow>
         <EuiFormRow
           label={
