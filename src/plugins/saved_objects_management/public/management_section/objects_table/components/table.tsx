@@ -282,17 +282,18 @@ export class Table extends PureComponent<TableProps, TableState> {
         actions: [
           {
             name: i18n.translate(
-              'savedObjectsManagement.objectsTable.table.columnActions.copyActionName',
-              { defaultMessage: 'Copy' }
+              'savedObjectsManagement.objectsTable.table.columnActions.duplicateActionName',
+              { defaultMessage: 'Duplicate' }
             ),
             description: i18n.translate(
-              'savedObjectsManagement.objectsTable.table.columnActions.copyActionDescription',
-              { defaultMessage: 'Copy this saved object' }
+              'savedObjectsManagement.objectsTable.table.columnActions.duplicateActionDescription',
+              { defaultMessage: 'Duplicate this saved object' }
             ),
             type: 'icon',
             icon: 'copyClipboard',
+            isPrimary: true,
             onClick: (object) => onCopySingle(object),
-            'data-test-subj': 'savedObjectsTableAction-copy',
+            'data-test-subj': 'savedObjectsTableAction-duplicate',
           },
           {
             name: i18n.translate(
@@ -312,7 +313,7 @@ export class Table extends PureComponent<TableProps, TableState> {
           {
             name: i18n.translate(
               'savedObjectsManagement.objectsTable.table.columnActions.viewRelationshipsActionName',
-              { defaultMessage: 'Relationships' }
+              { defaultMessage: 'View object relationships' }
             ),
             description: i18n.translate(
               'savedObjectsManagement.objectsTable.table.columnActions.viewRelationshipsActionDescription',
