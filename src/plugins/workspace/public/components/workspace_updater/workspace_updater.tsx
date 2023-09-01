@@ -28,7 +28,7 @@ import { formatUrlWithWorkspaceId } from '../../utils';
 import { WorkspaceClient } from '../../workspace_client';
 import { WorkspacePermissionSetting } from '../';
 
-export interface WorkspaceWithPermission extends WorkspaceAttribute {
+interface WorkspaceWithPermission extends WorkspaceAttribute {
   permissions?: WorkspacePermissionSetting[];
 }
 
