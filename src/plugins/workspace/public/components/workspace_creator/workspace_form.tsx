@@ -35,6 +35,7 @@ import {
   ApplicationStart,
   DEFAULT_APP_CATEGORIES,
   MANAGEMENT_WORKSPACE_ID,
+  PUBLIC_WORKSPACE_ID,
 } from '../../../../../core/public';
 import { useApplications } from '../../hooks';
 import {
@@ -119,6 +120,7 @@ export const WorkspaceForm = ({
   defaultValues,
   opType,
 }: WorkspaceFormProps) => {
+  const workspaceId = defaultValues?.id;
   const applications = useApplications(application);
 
   const [name, setName] = useState(defaultValues?.name);
@@ -317,6 +319,7 @@ export const WorkspaceForm = ({
             defaultMessage: 'Invalid user group',
           });
         }
+        continue; // this line is need for more conditions
       }
       if (permissionErrors.some((error) => !!error)) {
         setFormErrors({ permissions: permissionErrors });
@@ -329,9 +332,14 @@ export const WorkspaceForm = ({
     [onSubmit]
   );
 
-  const handleNameInputChange = useCallback<Required<EuiFieldTextProps>['onChange']>((e) => {
-    setName(e.target.value);
-  }, []);
+  const handleNameInputChange = useCallback<Required<EuiFieldTextProps>['onChange']>(
+    (e) => {
+      if (workspaceId !== MANAGEMENT_WORKSPACE_ID && workspaceId !== PUBLIC_WORKSPACE_ID) {
+        setName(e.target.value);
+      }
+    },
+    [workspaceId]
+  );
 
   const handleDescriptionInputChange = useCallback<Required<EuiFieldTextProps>['onChange']>((e) => {
     setDescription(e.target.value);
