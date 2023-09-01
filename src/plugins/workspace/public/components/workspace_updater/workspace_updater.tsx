@@ -26,12 +26,20 @@ import { WORKSPACE_OVERVIEW_APP_ID, WORKSPACE_OP_TYPE_UPDATE } from '../../../co
 import { DeleteWorkspaceModal } from '../delete_workspace_modal';
 import { formatUrlWithWorkspaceId } from '../../utils';
 import { WorkspaceClient } from '../../workspace_client';
+import { WorkspacePermissionSetting } from '../';
+
+export interface WorkspaceWithPermission extends WorkspaceAttribute {
+  permissions?: WorkspacePermissionSetting[];
+}
 
 function getFormDataFromWorkspace(
   currentWorkspace: WorkspaceAttribute | null | undefined
 ): WorkspaceFormData {
-  currentWorkspace = currentWorkspace || ({} as WorkspaceAttribute);
-  return { ...currentWorkspace, permissions: [] };
+  const currentWorkspaceWithPermission = (currentWorkspace || {}) as WorkspaceWithPermission;
+  return {
+    ...currentWorkspaceWithPermission,
+    permissions: currentWorkspaceWithPermission.permissions || [],
+  };
 }
 export const WorkspaceUpdater = () => {
   const {
