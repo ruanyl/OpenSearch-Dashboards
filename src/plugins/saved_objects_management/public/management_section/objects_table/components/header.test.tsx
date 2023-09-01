@@ -38,12 +38,38 @@ describe('Header', () => {
       onExportAll: () => {},
       onImport: () => {},
       onRefresh: () => {},
+      onCopy: () => {},
+      title: 'Saved Objects',
+      selectedCount: 0,
       totalCount: 4,
       filteredCount: 2,
+      workspaceEnabled: false,
+      hideImport: false,
     };
 
     const component = shallow(<Header {...props} />);
 
     expect(component).toMatchSnapshot();
+  });
+});
+
+describe('Header - workspace enabled', () => {
+  it('should render normally when workspace enabled', () => {
+    const props = {
+      onExportAll: () => {},
+      onImport: () => {},
+      onRefresh: () => {},
+      onCopy: () => {},
+      title: 'Saved Objects',
+      selectedCount: 0,
+      totalCount: 4,
+      filteredCount: 2,
+      workspaceEnabled: true,
+      hideImport: false,
+    };
+
+    const component = shallow(<Header {...props} />);
+
+    expect(component.find('EuiButtonEmpty[data-test-subj="copyObjects"]')).not.toBeNull();
   });
 });
