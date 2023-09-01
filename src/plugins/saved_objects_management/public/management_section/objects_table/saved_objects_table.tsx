@@ -1120,8 +1120,15 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             onExport={this.onExport}
             canDelete={applications.capabilities.savedObjectsManagement.delete as boolean}
             onDelete={this.onDelete}
-            onCopy={() =>
+            onCopySelected={() =>
               this.setState({ isShowingCopyModal: true, copyState: CopyState.Selected })
+            }
+            onCopySingle={(object) =>
+              this.setState({
+                selectedSavedObjects: [object],
+                isShowingCopyModal: true,
+                copyState: CopyState.Single,
+              })
             }
             onActionRefresh={this.refreshObject}
             goInspectObject={this.props.goInspectObject}

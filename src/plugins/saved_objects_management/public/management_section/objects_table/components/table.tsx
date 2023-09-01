@@ -70,7 +70,8 @@ export interface TableProps {
   filters: any[];
   canDelete: boolean;
   onDelete: () => void;
-  onCopy: () => void;
+  onCopySelected: () => void;
+  onCopySingle: (object: SavedObjectWithMetadata) => void;
   onActionRefresh: (object: SavedObjectWithMetadata) => void;
   onExport: (includeReferencesDeep: boolean) => void;
   goInspectObject: (obj: SavedObjectWithMetadata) => void;
@@ -79,7 +80,7 @@ export interface TableProps {
   items: SavedObjectWithMetadata[];
   itemId: string | (() => string);
   totalItemCount: number;
-  onQueryChange: (query: any, filterFields: string[]) => void;
+  onQueryChange: (query: any, filterFields?: string[]) => void;
   onTableChange: (table: any) => void;
   isSearching: boolean;
   onShowRelationships: (object: SavedObjectWithMetadata) => void;
@@ -171,7 +172,8 @@ export class Table extends PureComponent<TableProps, TableState> {
       filters,
       selectionConfig: selection,
       onDelete,
-      onCopy,
+      onCopySelected,
+      onCopySingle,
       onActionRefresh,
       selectedSavedObjects,
       onTableChange,
@@ -278,6 +280,20 @@ export class Table extends PureComponent<TableProps, TableState> {
         }),
         width: '80px',
         actions: [
+          {
+            name: i18n.translate(
+              'savedObjectsManagement.objectsTable.table.columnActions.copyActionName',
+              { defaultMessage: 'Copy' }
+            ),
+            description: i18n.translate(
+              'savedObjectsManagement.objectsTable.table.columnActions.copyActionDescription',
+              { defaultMessage: 'Copy this saved object' }
+            ),
+            type: 'icon',
+            icon: 'copyClipboard',
+            onClick: (object) => onCopySingle(object),
+            'data-test-subj': 'savedObjectsTableAction-copy',
+          },
           {
             name: i18n.translate(
               'savedObjectsManagement.objectsTable.table.columnActions.inspectActionName',
@@ -445,7 +461,70 @@ export class Table extends PureComponent<TableProps, TableState> {
           box={{ 'data-test-subj': 'savedObjectSearchBar' }}
           filters={filters as any}
           onChange={this.onChange}
-          toolsRight={tools}
+          toolsRight={[
+            <EuiButton
+              key="deleteSO"
+              iconType="trash"
+              color="danger"
+              onClick={onDelete}
+              isDisabled={selectedSavedObjects.length === 0 || !this.props.canDelete}
+              title={
+                this.props.canDelete
+                  ? undefined
+                  : i18n.translate('savedObjectsManagement.objectsTable.table.deleteButtonTitle', {
+                      defaultMessage: 'Unable to delete saved objects',
+                    })
+              }
+              data-test-subj="savedObjectsManagementDelete"
+            >
+              <FormattedMessage
+                id="savedObjectsManagement.objectsTable.table.deleteButtonLabel"
+                defaultMessage="Delete"
+              />
+            </EuiButton>,
+            <EuiButtonIcon
+              key="copySO"
+              iconType="copyClipboard"
+              onClick={onCopySelected}
+              isDisabled={selectedSavedObjects.length === 0}
+              data-test-subj="savedObjectsManagementCopy"
+            />,
+            <EuiPopover
+              key="exportSOOptions"
+              button={button}
+              isOpen={this.state.isExportPopoverOpen}
+              closePopover={this.closeExportPopover}
+            >
+              <EuiFormRow
+                label={
+                  <FormattedMessage
+                    id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.exportOptionsLabel"
+                    defaultMessage="Options"
+                  />
+                }
+              >
+                <EuiSwitch
+                  name="includeReferencesDeep"
+                  label={
+                    <FormattedMessage
+                      id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
+                      defaultMessage="Include related objects"
+                    />
+                  }
+                  checked={this.state.isIncludeReferencesDeepChecked}
+                  onChange={this.toggleIsIncludeReferencesDeepChecked}
+                />
+              </EuiFormRow>
+              <EuiFormRow>
+                <EuiButton key="exportSO" iconType="exportAction" onClick={this.onExportClick} fill>
+                  <FormattedMessage
+                    id="savedObjectsManagement.objectsTable.table.exportButtonLabel"
+                    defaultMessage="Export"
+                  />
+                </EuiButton>
+              </EuiFormRow>
+            </EuiPopover>,
+          ]}
         />
         {queryParseError}
         <EuiSpacer size="s" />

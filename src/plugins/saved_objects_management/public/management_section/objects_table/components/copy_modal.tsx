@@ -250,12 +250,10 @@ export class SavedObjectsCopyModal extends React.Component<Props, State> {
       confirmCopyButtonEnabled = true;
     }
 
-    const titleMessageForOneSelectedObject = 'Duplicate 1 object?';
-    const titleMessageForMultipleSelectedObjects =
-      'Duplicate ' + allSelectedObjects.length.toString() + ' objects?';
-    const titleMessageForAllObjects = 'Duplicate all objects?';
-    const confirmMessageForAllObjects =
-      'Duplicate (' + includedSelectedObjects.length.toString() + ')';
+    const titleMessageForOneSelectedObject = `Duplicate ${allSelectedObjects[0].meta.title}?`;
+    const titleMessageForMultipleSelectedObjects = `Duplicate ${allSelectedObjects.length} objects?`;
+    const titleMessageForAllObjects = `Duplicate all objects?`;
+    const confirmMessageForAllObjects = `Duplicate (${includedSelectedObjects.length})`;
     const confirmMessageForSingleOrSelectedObjects = 'Duplicate';
     // Duplicate single object title will be implemented later
     const titleMessage =
