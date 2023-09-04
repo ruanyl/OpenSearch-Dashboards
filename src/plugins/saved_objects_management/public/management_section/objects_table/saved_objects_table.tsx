@@ -140,6 +140,7 @@ export interface SavedObjectsTableState {
   savedObjectCounts: Record<string, Record<string, number>>;
   activeQuery: Query;
   selectedSavedObjects: SavedObjectWithMetadata[];
+  copySelectedSavedObjects: SavedObjectWithMetadata[];
   isShowingImportFlyout: boolean;
   isShowingCopyModal: boolean;
   copyState: CopyState;
@@ -180,6 +181,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       savedObjectCounts: { type: typeCounts } as Record<string, Record<string, number>>,
       activeQuery: Query.parse(''),
       selectedSavedObjects: [],
+      copySelectedSavedObjects: [],
       isShowingImportFlyout: false,
       isShowingCopyModal: false,
       copyState: CopyState.Selected,
@@ -745,7 +747,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
   renderCopyModal() {
     const { workspaces } = this.props;
-    const { isShowingCopyModal, selectedSavedObjects, savedObjects, copyState } = this.state;
+    const { isShowingCopyModal, copySelectedSavedObjects, copyState } = this.state;
 
     if (!isShowingCopyModal) {
       return null;
@@ -753,7 +755,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
     return (
       <SavedObjectsCopyModal
-        selectedSavedObjects={copyState === CopyState.All ? savedObjects : selectedSavedObjects}
+        selectedSavedObjects={copySelectedSavedObjects}
         workspaces={workspaces}
         getCopyWorkspaces={this.getCopyWorkspaces}
         copyState={copyState}
@@ -1096,6 +1098,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
           onImport={this.showImportFlyout}
           onCopy={() =>
             this.setState({
+              copySelectedSavedObjects: savedObjects,
               isShowingCopyModal: true,
               copyState: CopyState.All,
             })
@@ -1121,11 +1124,15 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             canDelete={applications.capabilities.savedObjectsManagement.delete as boolean}
             onDelete={this.onDelete}
             onCopySelected={() =>
-              this.setState({ isShowingCopyModal: true, copyState: CopyState.Selected })
+              this.setState({
+                isShowingCopyModal: true,
+                copyState: CopyState.Selected,
+                copySelectedSavedObjects: selectedSavedObjects,
+              })
             }
             onCopySingle={(object) =>
               this.setState({
-                selectedSavedObjects: [object],
+                copySelectedSavedObjects: [object],
                 isShowingCopyModal: true,
                 copyState: CopyState.Single,
               })
