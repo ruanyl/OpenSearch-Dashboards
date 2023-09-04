@@ -191,7 +191,7 @@ export class SavedObjectsCopyModal extends React.Component<Props, State> {
           <FormattedMessage
             id={'savedObjectsManagement.objectsTable.copyModal.savedObjectType.' + savedObjectType}
             defaultMessage={
-              capitalizeFirstLetter(savedObjectType) + ' (' + savedObjectTypeCount.toString() + ')'
+              capitalizeFirstLetter(savedObjectType) + ` (${savedObjectTypeCount.toString()})`
             }
           />
         }
@@ -275,7 +275,7 @@ export class SavedObjectsCopyModal extends React.Component<Props, State> {
       <p>
         <b style={{ color: '#000' }}>{ignoredSelectedObjectsLength}</b> saved objects will{' '}
         <b style={{ color: '#000' }}>not</b> be copied, because they have already existed in the
-        selected workspace or they are worksapces themselves.
+        selected workspace or they are workspaces themselves.
       </p>
     );
 
