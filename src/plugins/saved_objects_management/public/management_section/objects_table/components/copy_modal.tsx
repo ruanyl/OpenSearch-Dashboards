@@ -250,17 +250,8 @@ export class SavedObjectsCopyModal extends React.Component<Props, State> {
       confirmCopyButtonEnabled = true;
     }
 
-    const titleMessageForOneSelectedObject = `Duplicate ${allSelectedObjects[0].meta.title}?`;
-    const titleMessageForMultipleSelectedObjects = `Duplicate ${allSelectedObjects.length} objects?`;
-    const titleMessageForAllObjects = `Duplicate all objects?`;
     const confirmMessageForAllObjects = `Duplicate (${includedSelectedObjects.length})`;
     const confirmMessageForSingleOrSelectedObjects = 'Duplicate';
-    const titleMessage =
-      copyState === CopyState.All
-        ? titleMessageForAllObjects
-        : allSelectedObjects.length > 1
-        ? titleMessageForMultipleSelectedObjects
-        : titleMessageForOneSelectedObject;
     const confirmMessage =
       copyState === CopyState.All
         ? confirmMessageForAllObjects
@@ -305,7 +296,12 @@ export class SavedObjectsCopyModal extends React.Component<Props, State> {
           <EuiModalHeaderTitle>
             <FormattedMessage
               id="savedObjectsManagement.objectsTable.copyModal.title"
-              defaultMessage={titleMessage}
+              defaultMessage="Duplicate {copyState, select, all {all objects} other {{objectCount, plural, =1 {{objectName}} other {# objects}}}}?"
+              values={{
+                copyState,
+                objectName: allSelectedObjects[0].meta.title,
+                objectCount: allSelectedObjects.length,
+              }}
             />
           </EuiModalHeaderTitle>
         </EuiModalHeader>
