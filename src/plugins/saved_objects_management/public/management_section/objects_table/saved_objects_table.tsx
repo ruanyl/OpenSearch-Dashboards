@@ -744,7 +744,8 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   }
 
   renderCopyModal() {
-    const { isShowingCopyModal } = this.state;
+    const { workspaces } = this.props;
+    const { isShowingCopyModal, selectedSavedObjects, savedObjects, copyState } = this.state;
 
     if (!isShowingCopyModal) {
       return null;
@@ -752,10 +753,10 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
     return (
       <SavedObjectsCopyModal
-        selectedSavedObjects={this.state.selectedSavedObjects}
-        workspaces={this.props.workspaces}
+        selectedSavedObjects={copyState === CopyState.All ? savedObjects : selectedSavedObjects}
+        workspaces={workspaces}
         getCopyWorkspaces={this.getCopyWorkspaces}
-        copyState={this.state.copyState}
+        copyState={copyState}
         onCopy={this.onCopy}
         onClose={this.hideCopyModal}
       />
@@ -1097,7 +1098,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             this.setState({
               isShowingCopyModal: true,
               copyState: CopyState.All,
-              selectedSavedObjects: savedObjects,
             })
           }
           onRefresh={this.refreshObjects}
