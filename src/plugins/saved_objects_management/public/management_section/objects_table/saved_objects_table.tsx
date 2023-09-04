@@ -1093,6 +1093,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             onShowRelationships={this.onShowRelationships}
             canGoInApp={this.props.canGoInApp}
             dateFormat={this.props.dateFormat}
+            availableWorkspace={this.state.availableWorkspace}
           />
         </RedirectAppLinks>
       </EuiPageContent>

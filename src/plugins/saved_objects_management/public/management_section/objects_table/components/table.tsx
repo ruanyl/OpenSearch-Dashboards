@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { IBasePath } from 'src/core/public';
+import { IBasePath, WorkspaceAttribute } from 'src/core/public';
 import React, { PureComponent, Fragment } from 'react';
 import moment from 'moment';
 import {
@@ -57,6 +57,7 @@ import {
   SavedObjectsManagementAction,
   SavedObjectsManagementColumnServiceStart,
 } from '../../../services';
+import { WORKSPACE_PATH_PREFIX } from '../../../../../../core/public/utils';
 
 export interface TableProps {
   basePath: IBasePath;
@@ -84,6 +85,7 @@ export interface TableProps {
   onShowRelationships: (object: SavedObjectWithMetadata) => void;
   canGoInApp: (obj: SavedObjectWithMetadata) => boolean;
   dateFormat: string;
+  availableWorkspace?: WorkspaceAttribute[];
 }
 
 interface TableState {
@@ -178,7 +180,10 @@ export class Table extends PureComponent<TableProps, TableState> {
       actionRegistry,
       columnRegistry,
       dateFormat,
+      availableWorkspace,
     } = this.props;
+
+    const visibleWsIds = availableWorkspace?.map((ws) => ws.id) || [];
 
     const pagination = {
       pageIndex,
@@ -227,13 +232,20 @@ export class Table extends PureComponent<TableProps, TableState> {
         sortable: false,
         'data-test-subj': 'savedObjectsTableRowTitle',
         render: (title: string, object: SavedObjectWithMetadata) => {
-          const { path = '' } = object.meta.inAppUrl || {};
+          let { path = '' as string } = object.meta.inAppUrl || {};
           const canGoInApp = this.props.canGoInApp(object);
           if (!canGoInApp) {
             return <EuiText size="s">{title || getDefaultTitle(object)}</EuiText>;
           }
+          if (object.workspaces) {
+            // first workspace login user have permission
+            const [workspaceId] = object.workspaces.filter((wsId) => visibleWsIds.includes(wsId));
+            path = workspaceId ? `${WORKSPACE_PATH_PREFIX}/${workspaceId}${path}` : path;
+          }
           return (
-            <EuiLink href={basePath.prepend(path)}>{title || getDefaultTitle(object)}</EuiLink>
+            <EuiLink href={basePath.prepend(path, { withoutWorkspace: true })}>
+              {title || getDefaultTitle(object)}
+            </EuiLink>
           );
         },
       } as EuiTableFieldDataColumnType<SavedObjectWithMetadata<any>>,
