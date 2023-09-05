@@ -466,6 +466,26 @@ export class SavedObjectsClient {
   };
 
   /**
+   * Different DB may have different query DSL for given params
+   */
+  getPermissionQueryDSL = async (
+    props: Parameters<SavedObjectsRepository['getPermissionQueryDSL']>[0]
+  ) => {
+    return await this._repository.getPermissionQueryDSL(props);
+  };
+
+  /**
+   * Different DB may have different query to find granted objects,
+   * provide a placeholder here for other query implementation
+   */
+  processFindOptions = async (props: {
+    options: SavedObjectsFindOptions;
+    principals: Principals;
+  }): Promise<SavedObjectsFindOptions> => {
+    return await this._repository.processFindOptions(props);
+  };
+
+  /**
    * Bulk Updates multiple SavedObject at once
    *
    * @param objects
@@ -475,25 +495,5 @@ export class SavedObjectsClient {
     options?: SavedObjectsBulkUpdateOptions
   ): Promise<SavedObjectsBulkUpdateResponse<T>> {
     return await this._repository.bulkUpdate(objects, options);
-  }
-
-  /**
-   * Different DB may have different query DSL for given params
-   */
-  async getPermissionQueryDSL(
-    props: Parameters<SavedObjectsRepository['getPermissionQueryDSL']>[0]
-  ) {
-    return await this._repository.getPermissionQueryDSL(props);
-  }
-
-  /**
-   * Different DB may have different query to find granted objects,
-   * provide a placeholder here for other query implementation
-   */
-  async processFindOptions(props: {
-    options: SavedObjectsFindOptions;
-    principals: Principals;
-  }): Promise<SavedObjectsFindOptions> {
-    return await this._repository.processFindOptions(props);
   }
 }

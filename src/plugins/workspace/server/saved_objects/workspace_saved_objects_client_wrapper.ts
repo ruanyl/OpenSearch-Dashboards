@@ -4,7 +4,6 @@
  */
 
 import { i18n } from '@osd/i18n';
-import Boom from '@hapi/boom';
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 
@@ -29,23 +28,29 @@ import {
   SavedObjectsPermissionControlContract,
   WORKSPACE_TYPE,
   WorkspacePermissionMode,
+  SavedObjectsErrorHelpers,
 } from '../../../../core/server';
 import { ConfigSchema } from '../../config';
 import { WorkspaceFindOptions } from '../types';
 
 // Can't throw unauthorized for now, the page will be refreshed if unauthorized
-const generateWorkspacePermissionError = () =>
-  Boom.illegal(
-    i18n.translate('workspace.permission.invalidate', {
-      defaultMessage: 'Invalid workspace permission',
-    })
+const generateWorkspacePermissionError = () => {
+  SavedObjectsErrorHelpers.decorateForbiddenError(
+    new Error(
+      i18n.translate('workspace.permission.invalidate', {
+        defaultMessage: 'Invalid workspace permission',
+      })
+    )
   );
+};
 
 const generateSavedObjectsPermissionError = () =>
-  Boom.illegal(
-    i18n.translate('saved_objects.permission.invalidate', {
-      defaultMessage: 'Invalid saved objects permission',
-    })
+  SavedObjectsErrorHelpers.decorateForbiddenError(
+    new Error(
+      i18n.translate('saved_objects.permission.invalidate', {
+        defaultMessage: 'Invalid saved objects permission',
+      })
+    )
   );
 
 export class WorkspaceSavedObjectsClientWrapper {
@@ -347,8 +352,6 @@ export class WorkspaceSavedObjectsClientWrapper {
         principals,
       });
       return await wrapperOptions.client.find<T>(processedOptions);
-
-      return await wrapperOptions.client.find<T>(options);
     };
 
     const addToWorkspacesWithPermissionControl = async (
