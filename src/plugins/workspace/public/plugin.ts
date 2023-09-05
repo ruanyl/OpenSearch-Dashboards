@@ -46,16 +46,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
   public async setup(core: CoreSetup, { savedObjectsManagement }: WorkspacePluginSetupDeps) {
     const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
     workspaceClient.init();
-    const featureFlagResp = await workspaceClient.getSettings();
-    if (featureFlagResp.success) {
-      core.workspaces.workspaceEnabled$.next(featureFlagResp.result.enabled);
-    } else {
-      core.workspaces.workspaceEnabled$.next(false);
-    }
-
-    if (!core.workspaces.workspaceEnabled$.getValue()) {
-      return {};
-    }
+    core.workspaces.workspaceEnabled$.next(true);
 
     core.workspaces.registerWorkspaceMenuRender(renderWorkspaceMenu);
 
@@ -243,9 +234,6 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
   }
 
   public start(core: CoreStart) {
-    if (!core.workspaces.workspaceEnabled$.getValue()) {
-      return {};
-    }
     this.coreStart = core;
 
     this.currentWorkspaceSubscription = this._changeSavedObjectCurrentWorkspace();
