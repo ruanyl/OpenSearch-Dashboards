@@ -112,8 +112,7 @@ export default function ({ getService, getPageObjects }) {
 
       describe('is false', () => {
         before(async () => {
-          await PageObjects.header.clickStackManagement();
-          await PageObjects.settings.clickOpenSearchDashboardsSettings();
+          await PageObjects.common.navigateToApp('settings');
           await PageObjects.settings.toggleAdvancedSettingCheckbox(VISUALIZE_ENABLE_LABS_SETTING);
         });
 
