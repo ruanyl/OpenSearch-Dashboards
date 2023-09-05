@@ -44,11 +44,11 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     return getWorkspaceIdFromUrl(window.location.href);
   }
   public async setup(core: CoreSetup, { savedObjectsManagement }: WorkspacePluginSetupDeps) {
+    core.workspaces.workspaceEnabled$.next(true);
+    core.workspaces.registerWorkspaceMenuRender(renderWorkspaceMenu);
+    
     const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
     workspaceClient.init();
-    core.workspaces.workspaceEnabled$.next(true);
-
-    core.workspaces.registerWorkspaceMenuRender(renderWorkspaceMenu);
 
     /**
      * Retrieve workspace id from url
