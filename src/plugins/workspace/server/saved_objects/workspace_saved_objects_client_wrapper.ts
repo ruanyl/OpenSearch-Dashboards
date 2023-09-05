@@ -28,7 +28,6 @@ import {
   SavedObjectsBulkUpdateOptions,
   SavedObjectsPermissionControlContract,
   WORKSPACE_TYPE,
-  ACL,
   WorkspacePermissionMode,
 } from '../../../../core/server';
 import { ConfigSchema } from '../../config';
@@ -129,16 +128,6 @@ export class WorkspaceSavedObjectsClientWrapper {
     const adminBackendRoles = config?.dashboardAdmin?.backendRoles || [];
     const matchAny = principals?.groups?.some((item) => adminBackendRoles.includes(item)) || false;
     return matchAny;
-  }
-
-  /**
-   * check if the type include workspace
-   * Workspace permission check is totally different from object permission check.
-   * @param type
-   * @returns
-   */
-  private isRelatedToWorkspace(type: string | string[]): boolean {
-    return type === WORKSPACE_TYPE || (Array.isArray(type) && type.includes(WORKSPACE_TYPE));
   }
 
   public wrapperFactory: SavedObjectsClientWrapperFactory = (wrapperOptions) => {
@@ -353,94 +342,11 @@ export class WorkspaceSavedObjectsClientWrapper {
       options: SavedObjectsFindOptions & Pick<WorkspaceFindOptions, 'permissionModes'>
     ) => {
       const principals = this.permissionControl.getPrincipalsFromRequest(wrapperOptions.request);
-
-      if (this.isRelatedToWorkspace(options.type)) {
-        options.queryDSL = ACL.generateGetPermittedSavedObjectsQueryDSL(
-          options.permissionModes ?? [
-            WorkspacePermissionMode.LibraryRead,
-            WorkspacePermissionMode.LibraryWrite,
-            WorkspacePermissionMode.Management,
-          ],
-          principals,
-          WORKSPACE_TYPE
-        );
-      } else {
-        const permittedWorkspaceIds = await this.permissionControl.getPermittedWorkspaceIds(
-          wrapperOptions.request,
-          [
-            WorkspacePermissionMode.LibraryRead,
-            WorkspacePermissionMode.LibraryWrite,
-            WorkspacePermissionMode.Management,
-          ]
-        );
-        if (options.workspaces) {
-          const permittedWorkspaces = options.workspaces.filter((item) =>
-            (permittedWorkspaceIds || []).includes(item)
-          );
-          if (!permittedWorkspaces.length) {
-            /**
-             * If user does not have any one workspace access
-             * deny the request
-             */
-            throw generateWorkspacePermissionError();
-          }
-
-          /**
-           * Overwrite the options.workspaces when user has the access of partial workspaces.
-           * This mainly solve the problem that public workspace's ACL may be modified by dashboard_admin.
-           * And in custom workspace, we will fetch objects from public workspace and current custom workspace.
-           */
-          options.workspaces = permittedWorkspaces;
-        } else {
-          const queryDSL = ACL.generateGetPermittedSavedObjectsQueryDSL(
-            [WorkspacePermissionMode.Read, WorkspacePermissionMode.Write],
-            principals,
-            options.type
-          );
-          options.workspaces = undefined;
-          /**
-           * Select all the docs that
-           * 1. ACL matches read or write permission OR
-           * 2. workspaces matches library_read or library_write or management OR
-           * 3. Advanced settings
-           */
-          options.queryDSL = {
-            query: {
-              bool: {
-                filter: [
-                  {
-                    bool: {
-                      should: [
-                        {
-                          term: {
-                            type: 'config',
-                          },
-                        },
-                        queryDSL.query,
-                        {
-                          terms: {
-                            workspaces: permittedWorkspaceIds,
-                          },
-                        },
-                        // TODO: remove this child clause when home workspace proposal is finalized.
-                        {
-                          bool: {
-                            must_not: {
-                              exists: {
-                                field: 'workspaces',
-                              },
-                            },
-                          },
-                        },
-                      ],
-                    },
-                  },
-                ],
-              },
-            },
-          };
-        }
-      }
+      const processedOptions = await wrapperOptions.client.processFindOptions({
+        options,
+        principals,
+      });
+      return await wrapperOptions.client.find<T>(processedOptions);
 
       return await wrapperOptions.client.find<T>(options);
     };

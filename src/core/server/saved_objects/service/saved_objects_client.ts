@@ -28,8 +28,8 @@
  * under the License.
  */
 
-import { Permissions } from '../permission_control/acl';
-import { ISavedObjectsRepository } from './lib';
+import { Permissions, Principals } from '../permission_control/acl';
+import { ISavedObjectsRepository, SavedObjectsRepository } from './lib';
 import {
   SavedObject,
   SavedObjectError,
@@ -475,5 +475,25 @@ export class SavedObjectsClient {
     options?: SavedObjectsBulkUpdateOptions
   ): Promise<SavedObjectsBulkUpdateResponse<T>> {
     return await this._repository.bulkUpdate(objects, options);
+  }
+
+  /**
+   * Different DB may have different query DSL for given params
+   */
+  async getPermissionQueryDSL(
+    props: Parameters<SavedObjectsRepository['getPermissionQueryDSL']>[0]
+  ) {
+    return await this._repository.getPermissionQueryDSL(props);
+  }
+
+  /**
+   * Different DB may have different query to find granted objects,
+   * provide a placeholder here for other query implementation
+   */
+  async processFindOptions(props: {
+    options: SavedObjectsFindOptions;
+    principals: Principals;
+  }): Promise<SavedObjectsFindOptions> {
+    return await this._repository.processFindOptions(props);
   }
 }
