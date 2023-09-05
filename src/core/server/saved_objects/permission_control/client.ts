@@ -9,6 +9,7 @@ import { SavedObjectsServiceStart } from '../saved_objects_service';
 import { SavedObjectsBulkGetObject } from '../service';
 import { ACL, Principals, TransformedPermission, PrincipalType } from './acl';
 import { WORKSPACE_TYPE } from '../constants';
+import { Logger } from '../../logging';
 
 export type SavedObjectsPermissionControlContract = Pick<
   SavedObjectsPermissionControl,
@@ -23,10 +24,16 @@ export interface AuthInfo {
 }
 
 export class SavedObjectsPermissionControl {
+  private readonly logger: Logger;
   private createInternalRepository?: SavedObjectsServiceStart['createInternalRepository'];
   private getInternalRepository() {
     return this.createInternalRepository?.();
   }
+
+  constructor(logger: Logger) {
+    this.logger = logger;
+  }
+
   public getPrincipalsFromRequest(request: OpenSearchDashboardsRequest): Principals {
     const rawRequest = ensureRawRequest(request);
     const authInfo = rawRequest?.auth?.credentials?.authInfo as AuthInfo | null;
@@ -86,27 +93,53 @@ export class SavedObjectsPermissionControl {
     permissionModes: SavedObjectsPermissionModes
   ) {
     const savedObjectsGet = await this.bulkGetSavedObjects(request, savedObjects);
-    if (savedObjectsGet) {
-      const principals = this.getPrincipalsFromRequest(request);
-      const hasAllPermission = savedObjectsGet.every((item) => {
-        // for object that doesn't contain ACL like config, return true
-        if (!item.permissions) {
-          return true;
-        }
-        const aclInstance = new ACL(item.permissions);
-        return aclInstance.hasPermission(permissionModes, principals);
-      });
+    if (!savedObjectsGet) {
       return {
-        success: true,
-        result: hasAllPermission,
+        success: false,
+        error: i18n.translate('savedObjects.permission.notFound', {
+          defaultMessage: 'Can not find target saved objects.',
+        }),
       };
     }
 
+    if (savedObjectsGet.length === 1 && !!savedObjectsGet[0].error) {
+      return {
+        success: false,
+        error: savedObjectsGet[0].error,
+      };
+    }
+
+    const principals = this.getPrincipalsFromRequest(request);
+    const hasAllPermission = savedObjectsGet.every((item) => {
+      // for object that doesn't contain ACL like config, return true
+      if (!item.permissions) {
+        return true;
+      }
+      const aclInstance = new ACL(item.permissions);
+      return aclInstance.hasPermission(permissionModes, principals);
+    });
+    if (!hasAllPermission) {
+      const savedObjectsBasicInfo = savedObjectsGet.map((item) => {
+        return {
+          id: item.id,
+          type: item.type,
+          workspaces: item.workspaces,
+          permissions: item.permissions,
+        };
+      });
+      this.logger.debug(
+        'Authorization failed, principals: ' +
+          JSON.stringify(principals) +
+          ' has no [' +
+          permissionModes +
+          '] permissions' +
+          ' on the requested saved object: ' +
+          JSON.stringify(savedObjectsBasicInfo)
+      );
+    }
     return {
-      success: false,
-      error: i18n.translate('savedObjects.permission.notFound', {
-        defaultMessage: 'Can not find target saved objects.',
-      }),
+      success: true,
+      result: hasAllPermission,
     };
   }
 
