@@ -84,31 +84,42 @@ export class SavedObjectsCopyModal extends React.Component<Props, State> {
     };
   }
 
-  workspaceToOption = (workspace: WorkspaceAttribute): WorkspaceOption => {
-    return { label: workspace.name, key: workspace.id, value: workspace };
+  workspaceToOption = (
+    workspace: WorkspaceAttribute,
+    currentWorkspaceName?: string
+  ): WorkspaceOption => {
+    // add (current) after current workspace name
+    let workspaceName = workspace.name;
+    if (workspace.name === currentWorkspaceName) {
+      workspaceName += ' (current)';
+    }
+    return {
+      label: workspaceName,
+      key: workspace.id,
+      value: workspace,
+    };
   };
 
   async componentDidMount() {
     const { workspaces, getCopyWorkspaces } = this.props;
     const workspaceList = await getCopyWorkspaces();
-    const currentWorkspace = workspaces.currentWorkspace$;
+    const currentWorkspace = workspaces.currentWorkspace$.value;
+    const currentWorkspaceName = currentWorkspace?.name;
 
-    if (!!currentWorkspace?.value?.name) {
-      const currentWorkspaceName = currentWorkspace.value.name;
-      const filteredWorkspaceOptions = workspaceList
-        .map(this.workspaceToOption)
-        .filter((item: WorkspaceOption) => item.label !== currentWorkspaceName);
-      this.setState({
-        workspaceOptions: filteredWorkspaceOptions,
-        allWorkspaceOptions: filteredWorkspaceOptions,
-      });
-    } else {
-      const allWorkspaceOptions = workspaceList.map(this.workspaceToOption);
-      this.setState({
-        workspaceOptions: allWorkspaceOptions,
-        allWorkspaceOptions,
-      });
-    }
+    // current workspace is the first option
+    const workspaceOptions = [
+      ...(currentWorkspace ? [this.workspaceToOption(currentWorkspace, currentWorkspaceName)] : []),
+      ...workspaceList
+        .filter((workspace: WorkspaceAttribute) => workspace.name !== currentWorkspaceName)
+        .map((workspace: WorkspaceAttribute) =>
+          this.workspaceToOption(workspace, currentWorkspaceName)
+        ),
+    ];
+
+    this.setState({
+      workspaceOptions,
+      allWorkspaceOptions: workspaceOptions,
+    });
 
     const { copyState } = this.props;
     if (copyState === CopyState.All) {
