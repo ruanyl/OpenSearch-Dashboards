@@ -198,7 +198,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       return undefined;
     } else {
       // application home
-      if (!workspaceId || workspaceId === MANAGEMENT_WORKSPACE_ID) {
+      if (!workspaceId) {
         return availableWorkspace?.map((ws) => ws.id);
       } else {
         return [workspaceId];
