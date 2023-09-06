@@ -178,7 +178,6 @@ export default function ({ getService, getPageObjects }) {
 
       after(async function () {
         await filterBar.removeFilter(termsField);
-        await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickOpenSearchDashboardsIndexPatterns();
         await PageObjects.settings.clickIndexPatternLogstash();
         await PageObjects.settings.filterField(termsField);
