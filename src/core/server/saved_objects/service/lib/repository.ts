@@ -90,7 +90,7 @@ import {
 } from './utils';
 import { PUBLIC_WORKSPACE_ID, WorkspacePermissionMode } from '../../../../utils/constants';
 import { ACL, Principals } from '../../permission_control/acl';
-import { WORKSPACE_TYPE } from '../../constants';
+import { WORKSPACE_TYPE } from '../../../../server';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -1769,7 +1769,7 @@ export class SavedObjectsRepository {
     };
   }
 
-  async getPermissionQueryDSL(props: {
+  async getPermissionQuery(props: {
     permissionTypes: string[];
     principals: Principals;
     savedObjectType?: string[];
@@ -1788,7 +1788,7 @@ export class SavedObjectsRepository {
     const { principals } = props;
     const options = { ...props.options };
     if (this.isRelatedToWorkspace(options.type)) {
-      options.queryDSL = await this.getPermissionQueryDSL({
+      options.queryDSL = await this.getPermissionQuery({
         permissionTypes: options.permissionModes ?? [
           WorkspacePermissionMode.LibraryRead,
           WorkspacePermissionMode.LibraryWrite,
@@ -1798,26 +1798,15 @@ export class SavedObjectsRepository {
         savedObjectType: [WORKSPACE_TYPE],
       });
     } else {
-      const permittedWorkspaceQueryDSL = await this.getPermissionQueryDSL({
-        permissionTypes: [
+      const permittedWorkspaceIds = await SavedObjectsUtils.getPermittedWorkspaceIds({
+        permissionModes: [
           WorkspacePermissionMode.LibraryRead,
           WorkspacePermissionMode.LibraryWrite,
           WorkspacePermissionMode.Management,
         ],
         principals,
-        savedObjectType: [WORKSPACE_TYPE],
+        repository: this,
       });
-      let permittedWorkspaceIds: string[];
-      try {
-        const result = await this.find({
-          type: [WORKSPACE_TYPE],
-          queryDSL: permittedWorkspaceQueryDSL,
-          perPage: 999,
-        });
-        permittedWorkspaceIds = result?.saved_objects.map((item) => item.id) || [];
-      } catch (e) {
-        permittedWorkspaceIds = [];
-      }
 
       if (options.workspaces) {
         const permittedWorkspaces = options.workspaces.filter((item) =>
@@ -1842,7 +1831,7 @@ export class SavedObjectsRepository {
          */
         options.workspaces = permittedWorkspaces;
       } else {
-        const queryDSL = await this.getPermissionQueryDSL({
+        const queryDSL = await this.getPermissionQuery({
           permissionTypes: [WorkspacePermissionMode.Read, WorkspacePermissionMode.Write],
           principals,
           savedObjectType: Array.isArray(options.type) ? options.type : [options.type],

@@ -468,10 +468,10 @@ export class SavedObjectsClient {
   /**
    * Different DB may have different query DSL for given params
    */
-  getPermissionQueryDSL = async (
-    props: Parameters<SavedObjectsRepository['getPermissionQueryDSL']>[0]
+  getPermissionQuery = async (
+    props: Parameters<SavedObjectsRepository['getPermissionQuery']>[0]
   ) => {
-    return await this._repository.getPermissionQueryDSL(props);
+    return await this._repository.getPermissionQuery(props);
   };
 
   /**
