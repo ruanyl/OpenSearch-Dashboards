@@ -128,13 +128,11 @@ export class SavedObjectsPermissionControl {
         };
       });
       this.logger.debug(
-        'Authorization failed, principals: ' +
-          JSON.stringify(principals) +
-          ' has no [' +
-          permissionModes +
-          '] permissions' +
-          ' on the requested saved object: ' +
-          JSON.stringify(savedObjectsBasicInfo)
+        `Authorization failed, principals: ${JSON.stringify(
+          principals
+        )} has no [${permissionModes}] permissions on the requested saved object: ${JSON.stringify(
+          savedObjectsBasicInfo
+        )}`
       );
     }
     return {
