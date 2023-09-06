@@ -25,7 +25,6 @@ import {
   WORKSPACE_NAV_CATEGORY,
   WORKSPACE_FATAL_ERROR_APP_ID,
 } from '../common/constants';
-import { mountDropdownList } from './mount';
 import { SavedObjectsManagementPluginSetup } from '../../saved_objects_management/public';
 import { getWorkspaceColumn } from './components/utils/workspace_column';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
@@ -45,20 +44,11 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     return getWorkspaceIdFromUrl(window.location.href);
   }
   public async setup(core: CoreSetup, { savedObjectsManagement }: WorkspacePluginSetupDeps) {
+    core.workspaces.workspaceEnabled$.next(true);
+    core.workspaces.registerWorkspaceMenuRender(renderWorkspaceMenu);
+
     const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
     workspaceClient.init();
-    const featureFlagResp = await workspaceClient.getSettings();
-    if (featureFlagResp.success) {
-      core.workspaces.workspaceEnabled$.next(featureFlagResp.result.enabled);
-    } else {
-      core.workspaces.workspaceEnabled$.next(false);
-    }
-
-    if (!core.workspaces.workspaceEnabled$.getValue()) {
-      return {};
-    }
-
-    core.workspaces.registerWorkspaceMenuRender(renderWorkspaceMenu);
 
     /**
      * Retrieve workspace id from url
@@ -244,17 +234,8 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
   }
 
   public start(core: CoreStart) {
-    if (!core.workspaces.workspaceEnabled$.getValue()) {
-      return {};
-    }
     this.coreStart = core;
 
-    mountDropdownList({
-      application: core.application,
-      workspaces: core.workspaces,
-      chrome: core.chrome,
-      http: core.http,
-    });
     this.currentWorkspaceSubscription = this._changeSavedObjectCurrentWorkspace();
     if (core) {
       this.filterNavLinks(core);
