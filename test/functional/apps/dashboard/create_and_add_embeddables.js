@@ -126,8 +126,7 @@ export default function ({ getService, getPageObjects }) {
         });
 
         after(async () => {
-          await PageObjects.header.clickStackManagement();
-          await PageObjects.settings.clickOpenSearchDashboardsSettings();
+          await PageObjects.settings.navigateTo();
           await PageObjects.settings.clearAdvancedSettings(VISUALIZE_ENABLE_LABS_SETTING);
           await PageObjects.header.clickDashboard();
         });
