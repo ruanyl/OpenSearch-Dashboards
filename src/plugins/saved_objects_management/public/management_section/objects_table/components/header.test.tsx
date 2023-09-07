@@ -43,7 +43,7 @@ describe('Header', () => {
       selectedCount: 0,
       totalCount: 4,
       filteredCount: 2,
-      workspaceEnabled: false,
+      showDuplicateAll: false,
       hideImport: false,
     };
 
@@ -54,7 +54,7 @@ describe('Header', () => {
 });
 
 describe('Header - workspace enabled', () => {
-  it('should render normally when workspace enabled', () => {
+  it('should render `Duplicate All` button when workspace enabled', () => {
     const props = {
       onExportAll: () => {},
       onImport: () => {},
@@ -64,12 +64,31 @@ describe('Header - workspace enabled', () => {
       selectedCount: 0,
       totalCount: 4,
       filteredCount: 2,
-      workspaceEnabled: true,
+      showDuplicateAll: true,
       hideImport: false,
     };
 
     const component = shallow(<Header {...props} />);
 
-    expect(component.find('EuiButtonEmpty[data-test-subj="copyObjects"]')).not.toBeNull();
+    expect(component.find('EuiButtonEmpty[data-test-subj="copyObjects"]').exists()).toBe(true);
+  });
+
+  it('should hide `Import` button for application home state', () => {
+    const props = {
+      onExportAll: () => {},
+      onImport: () => {},
+      onRefresh: () => {},
+      onCopy: () => {},
+      title: 'Saved Objects',
+      selectedCount: 0,
+      totalCount: 4,
+      filteredCount: 2,
+      showDuplicateAll: true,
+      hideImport: true,
+    };
+
+    const component = shallow(<Header {...props} />);
+
+    expect(component.find('EuiButtonEmpty[data-test-subj="importObjects"]').exists()).toBe(false);
   });
 });

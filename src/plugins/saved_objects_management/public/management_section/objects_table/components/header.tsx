@@ -49,7 +49,7 @@ export const Header = ({
   title,
   selectedCount,
   hideImport = false,
-  workspaceEnabled = false,
+  showDuplicateAll = false,
 }: {
   onExportAll: () => void;
   onImport: () => void;
@@ -59,7 +59,7 @@ export const Header = ({
   title: string;
   selectedCount: number;
   hideImport: boolean;
-  workspaceEnabled: boolean;
+  showDuplicateAll: boolean;
 }) => (
   <Fragment>
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
@@ -71,7 +71,7 @@ export const Header = ({
 
       <EuiFlexItem grow={false}>
         <EuiFlexGroup alignItems="baseline" gutterSize="m" responsive={false}>
-          {workspaceEnabled && (
+          {showDuplicateAll && (
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 size="s"

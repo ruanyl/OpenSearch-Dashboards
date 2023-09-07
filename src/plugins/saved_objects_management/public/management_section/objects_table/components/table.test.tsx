@@ -135,7 +135,7 @@ describe('Table', () => {
     };
     const props = {
       ...defaultProps,
-      availableWorkspace: [{ id: 'ws-1', name: 'My workspace' } as WorkspaceAttribute],
+      availableWorkspaces: [{ id: 'ws-1', name: 'My workspace' } as WorkspaceAttribute],
       items: [item],
     };
     const component = shallowWithI18nProvider(<Table {...props} />);
