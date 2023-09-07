@@ -57,7 +57,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     async clickOpenSearchDashboardsSavedObjects() {
-      await testSubjects.click('objects');
+      await PageObjects.common.navigateToApp('objects');
       await PageObjects.savedObjects.waitTableIsLoaded();
     }
 
