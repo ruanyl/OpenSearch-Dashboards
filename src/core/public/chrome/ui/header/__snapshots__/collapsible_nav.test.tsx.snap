@@ -951,9 +951,9 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                 className="euiText euiText--medium"
                               >
                                 <strong>
-
-                                  OpenSearch Analytics
-
+                                   
+                                  OpenSearch Dashboards
+                                   
                                 </strong>
                               </div>
                             </EuiText>
@@ -3634,9 +3634,9 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                                 className="euiText euiText--medium"
                               >
                                 <strong>
-
-                                  OpenSearch Analytics
-
+                                   
+                                  OpenSearch Dashboards
+                                   
                                 </strong>
                               </div>
                             </EuiText>
@@ -5640,9 +5640,9 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 1`] = 
                                 className="euiText euiText--medium"
                               >
                                 <strong>
-
-                                  OpenSearch Analytics
-
+                                   
+                                  OpenSearch Dashboards
+                                   
                                 </strong>
                               </div>
                             </EuiText>
@@ -8080,9 +8080,9 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 2`] = 
                                 className="euiText euiText--medium"
                               >
                                 <strong>
-
-                                  OpenSearch Analytics
-
+                                   
+                                  OpenSearch Dashboards
+                                   
                                 </strong>
                               </div>
                             </EuiText>
@@ -10518,9 +10518,9 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 3`] = 
                                 className="euiText euiText--medium"
                               >
                                 <strong>
-
-                                  OpenSearch Analytics
-
+                                   
+                                  OpenSearch Dashboards
+                                   
                                 </strong>
                               </div>
                             </EuiText>
@@ -12737,9 +12737,9 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 1`]
                                 className="euiText euiText--medium"
                               >
                                 <strong>
-
-                                  OpenSearch Analytics
-
+                                   
+                                  OpenSearch Dashboards
+                                   
                                 </strong>
                               </div>
                             </EuiText>
@@ -14953,9 +14953,9 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 2`]
                                 className="euiText euiText--medium"
                               >
                                 <strong>
-
-                                  OpenSearch Analytics
-
+                                   
+                                  OpenSearch Dashboards
+                                   
                                 </strong>
                               </div>
                             </EuiText>
