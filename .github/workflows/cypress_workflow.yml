@@ -19,7 +19,7 @@ env:
 
 jobs:
   cypress-tests:
-    runs-on: ip-172-31-48-64
+    runs-on: self-hosted
     container:
       image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
       options: --user 1001

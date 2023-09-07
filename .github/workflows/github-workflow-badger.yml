@@ -7,7 +7,7 @@ on:
 
 jobs:
   call-action:
-    runs-on: ip-172-31-48-64
+    runs-on: self-hosted
     permissions:
       pull-requests: write
     steps:

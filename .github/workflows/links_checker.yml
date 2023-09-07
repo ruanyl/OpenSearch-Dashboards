@@ -12,7 +12,7 @@ on:
 jobs:
   linkchecker:
 
-    runs-on: ip-172-31-48-64
+    runs-on: self-hosted
 
     steps:
     - uses: actions/checkout@v2

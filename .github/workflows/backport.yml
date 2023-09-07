@@ -7,7 +7,7 @@ on:
 
 jobs:
   backport:
-    runs-on: ip-172-31-48-64
+    runs-on: self-hosted
     permissions:
       contents: write
       pull-requests: write
