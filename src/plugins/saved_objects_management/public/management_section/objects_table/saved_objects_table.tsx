@@ -545,7 +545,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         const failedCount = savedObjects.length - result.successCount;
         notifications.toasts.addSuccess({
           title: i18n.translate('savedObjectsManagement.objectsTable.copy.dangerNotification', {
-            defaultMessage: 'Unable to copy ' + failedCount.toString() + ' saved objects failed',
+            defaultMessage: 'Unable to copy ' + failedCount.toString() + ' saved objects',
           }),
         });
       }
