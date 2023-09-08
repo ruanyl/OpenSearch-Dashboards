@@ -1096,6 +1096,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         <Header
           onExportAll={() => this.setState({ isShowingExportAllOptionsModal: true })}
           onImport={this.showImportFlyout}
+          hideImport={hideImport}
           onCopy={() =>
             this.setState({
               copySelectedSavedObjects: savedObjects,

@@ -48,6 +48,7 @@ export const Header = ({
   filteredCount,
   title,
   objectCount,
+  hideImport = false,
 }: {
   onExportAll: () => void;
   onImport: () => void;
@@ -56,6 +57,7 @@ export const Header = ({
   filteredCount: number;
   title: string;
   objectCount: number;
+  hideImport: boolean;
 }) => (
   <Fragment>
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
