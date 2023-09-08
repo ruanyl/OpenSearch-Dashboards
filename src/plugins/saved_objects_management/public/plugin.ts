@@ -29,10 +29,17 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { AppMountParameters, CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import {
+  AppMountParameters,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  ChromeBreadcrumb,
+  ScopedHistory,
+} from 'src/core/public';
 
 import { VisBuilderStart } from '../../vis_builder/public';
-import { ManagementSetup } from '../../management/public';
+import { ManagementSetup, ManagementAppMountParams } from '../../management/public';
 import { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { DashboardStart } from '../../dashboard/public';
@@ -61,9 +68,11 @@ import {
   SAVED_OBJECT_MANAGEMENT_TITLE_WORDINGS,
   ALL_LIBRARY_OBJECTS_TITLE_WORDINGS,
   ALL_LIBRARY_OBJECTS_WORDINGS,
+  SAVED_OBJECT_MANAGEMENT_TITLE_WORDINGS,
   SAVED_QUERIES_WORDINGS,
   SAVED_SEARCHES_WORDINGS,
 } from './constants';
+import { reactRouterNavigate } from '../../opensearch_dashboards_react/public';
 
 export interface SavedObjectsManagementPluginSetup {
   actions: SavedObjectsManagementActionServiceSetup;
@@ -195,19 +204,41 @@ export class SavedObjectsManagementPlugin
       });
     }
 
-    const opensearchDashboardsSection = management.sections.section.opensearchDashboards;
-    opensearchDashboardsSection.registerApp({
+    core.application.register({
       id: 'objects',
       title: i18n.translate('savedObjectsManagement.managementSectionLabel', {
         defaultMessage: 'Saved objects',
       }),
-      order: 1,
-      mount: async (mountParams) => {
+      category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
+      mount: async (params: AppMountParameters) => {
         const { mountManagementSection } = await import('./management_section');
+        const [coreStart] = await core.getStartServices();
+
+        const setBreadcrumbsScope = (
+          crumbs: ChromeBreadcrumb[] = [],
+          appHistory?: ScopedHistory
+        ) => {
+          const wrapBreadcrumb = (item: ChromeBreadcrumb, scopedHistory: ScopedHistory) => ({
+            ...item,
+            ...(item.href ? reactRouterNavigate(scopedHistory, item.href) : {}),
+          });
+
+          coreStart.chrome.setBreadcrumbs([
+            ...crumbs.map((item) => wrapBreadcrumb(item, appHistory || params.history)),
+          ]);
+        };
+
+        const managementParams: ManagementAppMountParams = {
+          element: params.element,
+          history: params.history,
+          setBreadcrumbs: setBreadcrumbsScope,
+          basePath: params.appBasePath,
+        };
+
         return mountManagementSection({
           core,
           serviceRegistry: this.serviceRegistry,
-          mountParams,
+          mountParams: managementParams,
           title: SAVED_OBJECT_MANAGEMENT_TITLE_WORDINGS,
         });
       },
