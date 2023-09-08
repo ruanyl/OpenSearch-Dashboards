@@ -46,7 +46,13 @@ export {
   ISavedObjectsManagementServiceRegistry,
   SavedObjectsManagementServiceRegistryEntry,
 } from './services';
-export { ProcessedImportResponse, processImportResponse, FailedImport } from './lib';
+export {
+  ProcessedImportResponse,
+  processImportResponse,
+  FailedImport,
+  copySavedObjects,
+  getWorkspacesWithWritePermission,
+} from './lib';
 export { SavedObjectRelation, SavedObjectWithMetadata, SavedObjectMetadata } from './types';
 export { SAVED_OBJECT_DELETE_TRIGGER, savedObjectDeleteTrigger } from './triggers';
 export { SavedObjectDeleteContext } from './ui_actions_bootstrap';

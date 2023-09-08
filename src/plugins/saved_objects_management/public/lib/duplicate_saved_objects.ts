@@ -11,7 +11,7 @@
 
 import { HttpStart } from 'src/core/public';
 
-export async function copySavedObjects(
+export async function duplicateSavedObjects(
   http: HttpStart,
   objects: any[],
   includeReferencesDeep: boolean = true,

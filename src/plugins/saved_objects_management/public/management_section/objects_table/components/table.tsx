@@ -70,8 +70,8 @@ export interface TableProps {
   filters: any[];
   canDelete: boolean;
   onDelete: () => void;
-  onCopySelected: () => void;
-  onCopySingle: (object: SavedObjectWithMetadata) => void;
+  onDuplicateSelected: () => void;
+  onDuplicateSingle: (object: SavedObjectWithMetadata) => void;
   onActionRefresh: (object: SavedObjectWithMetadata) => void;
   onExport: (includeReferencesDeep: boolean) => void;
   goInspectObject: (obj: SavedObjectWithMetadata) => void;
@@ -172,8 +172,8 @@ export class Table extends PureComponent<TableProps, TableState> {
       filters,
       selectionConfig: selection,
       onDelete,
-      onCopySelected,
-      onCopySingle,
+      onDuplicateSelected,
+      onDuplicateSingle,
       onActionRefresh,
       selectedSavedObjects,
       onTableChange,
