@@ -218,12 +218,14 @@ export class SavedObjectsManagementPlugin
     // depends on `getStartServices`, should not be awaited
     registerServices(this.serviceRegistry, core.getStartServices);
 
+    this.registerLibrarySubApp(core);
+
     return {
       actions: actionSetup,
       columns: columnSetup,
       namespaces: namespaceSetup,
       serviceRegistry: this.serviceRegistry,
-      registerLibrarySubApp: () => this.registerLibrarySubApp(core),
+      registerLibrarySubApp: () => {},
     };
   }
 
