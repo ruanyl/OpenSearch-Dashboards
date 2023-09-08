@@ -188,7 +188,7 @@ export class SavedObjectsManagementPlugin
             'Import, export, and manage your saved searches, visualizations, and dashboards.',
         }),
         icon: 'savedObjectsApp',
-        path: '/app/management/opensearch-dashboards/objects',
+        path: '/app/objects',
         showOnHomePage: false,
         category: FeatureCatalogueCategory.ADMIN,
       });

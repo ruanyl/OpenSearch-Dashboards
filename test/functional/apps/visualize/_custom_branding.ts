@@ -179,7 +179,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('in dark mode', async () => {
         before(async function () {
-          await PageObjects.common.navigateToApp('management/opensearch-dashboards/settings');
+          await PageObjects.settings.navigateTo();
           await PageObjects.settings.toggleAdvancedSettingCheckbox('theme:darkMode');
           await PageObjects.common.navigateToApp('home');
         });
