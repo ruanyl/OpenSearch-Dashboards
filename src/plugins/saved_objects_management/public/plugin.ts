@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import { i18n } from '@osd/i18n';
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 
 import { VisBuilderStart } from '../../vis_builder/public';
@@ -36,7 +37,7 @@ import { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { DashboardStart } from '../../dashboard/public';
 import { DiscoverStart } from '../../discover/public';
-import { HomePublicPluginSetup } from '../../home/public';
+import { HomePublicPluginSetup, FeatureCatalogueCategory } from '../../home/public';
 import { VisualizationsStart } from '../../visualizations/public';
 import { VisAugmenterStart } from '../../vis_augmenter/public';
 import {
