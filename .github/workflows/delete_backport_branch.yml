@@ -6,7 +6,7 @@ on:
   
 jobs:
   delete-branch:
-    runs-on: arc-runner-set
+    runs-on: arc-runner-set-1
     if: startsWith(github.event.pull_request.head.ref,'backport/')
     steps:
       - name: Delete merged branch
