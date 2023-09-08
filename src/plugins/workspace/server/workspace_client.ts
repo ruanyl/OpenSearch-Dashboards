@@ -3,20 +3,38 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { i18n } from '@osd/i18n';
-import type { SavedObject, SavedObjectsClientContract, CoreSetup } from '../../../core/server';
-import { MANAGEMENT_WORKSPACE, PUBLIC_WORKSPACE, WORKSPACE_TYPE } from '../../../core/server';
+import type {
+  SavedObject,
+  SavedObjectsClientContract,
+  CoreSetup,
+  WorkspaceAttribute,
+  ISavedObjectsRepository,
+} from '../../../core/server';
+import { WORKSPACE_TYPE } from '../../../core/server';
 import {
   IWorkspaceDBImpl,
-  WorkspaceAttribute,
   WorkspaceFindOptions,
   IResponse,
   IRequestDetail,
   WorkspaceAttributeWithPermission,
 } from './types';
 import { workspace } from './saved_objects';
+import { generateRandomId } from './utils';
+
+const WORKSPACE_ID_SIZE = 6;
+
+const DUPLICATE_WORKSPACE_NAME_ERROR = i18n.translate('workspace.duplicate.name.error', {
+  defaultMessage: 'workspace name has already been used, try with a different name',
+});
 
 export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
   private setupDep: CoreSetup;
+
+  private internalSavedObjectsRepository?: ISavedObjectsRepository;
+  setInternalRepository(repository: ISavedObjectsRepository) {
+    this.internalSavedObjectsRepository = repository;
+  }
+
   constructor(core: CoreSetup) {
     this.setupDep = core;
   }
@@ -50,11 +68,24 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
   ): ReturnType<IWorkspaceDBImpl['create']> {
     try {
       const { permissions, ...attributes } = payload;
-      const result = await this.getSavedObjectClientsFromRequestDetail(requestDetail).create<
-        Omit<WorkspaceAttribute, 'id'>
-      >(WORKSPACE_TYPE, attributes, {
-        permissions,
+      const id = generateRandomId(WORKSPACE_ID_SIZE);
+      const client = this.getSavedObjectClientsFromRequestDetail(requestDetail);
+      const existingWorkspaceRes = await this.internalSavedObjectsRepository?.find({
+        type: WORKSPACE_TYPE,
+        search: attributes.name,
+        searchFields: ['name'],
       });
+      if (existingWorkspaceRes && existingWorkspaceRes.total > 0) {
+        throw new Error(DUPLICATE_WORKSPACE_NAME_ERROR);
+      }
+      const result = await client.create<Omit<WorkspaceAttribute, 'id'>>(
+        WORKSPACE_TYPE,
+        attributes,
+        {
+          id,
+          permissions,
+        }
+      );
       return {
         success: true,
         result: {
@@ -122,9 +153,20 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
   ): Promise<IResponse<boolean>> {
     const { permissions, ...attributes } = payload;
     try {
-      await this.getSavedObjectClientsFromRequestDetail(requestDetail).update<
-        Omit<WorkspaceAttribute, 'id'>
-      >(WORKSPACE_TYPE, id, attributes, {
+      const client = this.getSavedObjectClientsFromRequestDetail(requestDetail);
+      const workspaceInDB: SavedObject<WorkspaceAttribute> = await client.get(WORKSPACE_TYPE, id);
+      if (workspaceInDB.attributes.name !== attributes.name) {
+        const existingWorkspaceRes = await this.internalSavedObjectsRepository?.find({
+          type: WORKSPACE_TYPE,
+          search: attributes.name,
+          searchFields: ['name'],
+          fields: ['_id'],
+        });
+        if (existingWorkspaceRes && existingWorkspaceRes.total > 0) {
+          throw new Error(DUPLICATE_WORKSPACE_NAME_ERROR);
+        }
+      }
+      await client.update<Omit<WorkspaceAttribute, 'id'>>(WORKSPACE_TYPE, id, attributes, {
         permissions,
       });
       return {

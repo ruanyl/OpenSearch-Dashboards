@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+export const WORKSPACE_TYPE = 'workspace';
+
 export const WORKSPACE_PATH_PREFIX = '/w';
 
 export enum WorkspacePermissionMode {
@@ -13,6 +15,6 @@ export enum WorkspacePermissionMode {
   LibraryWrite = 'library_write',
 }
 
-export const PUBLIC_WORKSPACE = 'public';
+export const PUBLIC_WORKSPACE_ID = 'public';
 
-export const MANAGEMENT_WORKSPACE = 'management';
+export const MANAGEMENT_WORKSPACE_ID = 'management';

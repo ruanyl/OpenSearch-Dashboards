@@ -36,22 +36,29 @@ import {
   EuiListGroup,
   EuiListGroupItem,
   EuiShowFor,
-  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { groupBy, sortBy } from 'lodash';
 import React, { useRef } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import * as Rx from 'rxjs';
+import { WorkspaceStart } from 'opensearch-dashboards/public';
 import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '../..';
 import { AppCategory } from '../../../../types';
 import { InternalApplicationStart } from '../../../application';
 import { HttpStart } from '../../../http';
 import { OnIsLockedUpdate } from './';
-import { createEuiListItem, isModifiedOrPrevented, createRecentNavLink } from './nav_link';
+import {
+  createEuiListItem,
+  createRecentChromeNavLink,
+  emptyRecentlyVisited,
+  CollapsibleNavLink,
+} from './nav_link';
 import { ChromeBranding } from '../../chrome_service';
+import { CollapsibleNavHeader } from './collapsible_nav_header';
+import { MANAGEMENT_WORKSPACE_ID } from '../../../utils';
 
-function getAllCategories(allCategorizedLinks: Record<string, ChromeNavLink[]>) {
+function getAllCategories(allCategorizedLinks: Record<string, CollapsibleNavLink[]>) {
   const allCategories = {} as Record<string, AppCategory | undefined>;
 
   for (const [key, value] of Object.entries(allCategorizedLinks)) {
@@ -62,7 +69,7 @@ function getAllCategories(allCategorizedLinks: Record<string, ChromeNavLink[]>) 
 }
 
 function getOrderedCategories(
-  mainCategories: Record<string, ChromeNavLink[]>,
+  mainCategories: Record<string, CollapsibleNavLink[]>,
   categoryDictionary: ReturnType<typeof getAllCategories>
 ) {
   return sortBy(
@@ -73,9 +80,9 @@ function getOrderedCategories(
 
 function getMergedNavLinks(
   orderedCategories: string[],
-  uncategorizedLinks: ChromeNavLink[],
+  uncategorizedLinks: CollapsibleNavLink[],
   categoryDictionary: ReturnType<typeof getAllCategories>
-): Array<string | ChromeNavLink> {
+): Array<string | CollapsibleNavLink> {
   const uncategorizedLinksWithOrder = sortBy(
     uncategorizedLinks.filter((link) => link.order !== null),
     'order'
@@ -121,10 +128,12 @@ interface Props {
   storage?: Storage;
   onIsLockedUpdate: OnIsLockedUpdate;
   closeNav: () => void;
+  getUrlForApp: InternalApplicationStart['getUrlForApp'];
   navigateToApp: InternalApplicationStart['navigateToApp'];
   navigateToUrl: InternalApplicationStart['navigateToUrl'];
   customNavLink$: Rx.Observable<ChromeNavLink | undefined>;
   branding: ChromeBranding;
+  workspaces: WorkspaceStart;
 }
 
 export function CollapsibleNav({
@@ -136,16 +145,32 @@ export function CollapsibleNav({
   storage = window.localStorage,
   onIsLockedUpdate,
   closeNav,
+  getUrlForApp,
   navigateToApp,
   navigateToUrl,
   branding,
+  workspaces,
   ...observables
 }: Props) {
   const navLinks = useObservable(observables.navLinks$, []).filter((link) => !link.hidden);
   const recentlyAccessed = useObservable(observables.recentlyAccessed$, []);
+  const workspaceEnabled = useObservable(workspaces.workspaceEnabled$, false);
+  const currentWorkspaceId = useObservable(workspaces.currentWorkspaceId$, '');
+  const allNavLinks: CollapsibleNavLink[] = [...navLinks];
+  if (!workspaceEnabled || currentWorkspaceId !== MANAGEMENT_WORKSPACE_ID) {
+    // no recently visited in management workspace
+    if (recentlyAccessed.length) {
+      allNavLinks.push(
+        ...recentlyAccessed.map((link) => createRecentChromeNavLink(link, navLinks, basePath))
+      );
+    } else {
+      allNavLinks.push(emptyRecentlyVisited);
+    }
+  }
+
   const appId = useObservable(observables.appId$, '');
   const lockRef = useRef<HTMLButtonElement>(null);
-  const groupedNavLinks = groupBy(navLinks, (link) => link?.category?.id);
+  const groupedNavLinks = groupBy(allNavLinks, (link) => link?.category?.id);
   const { undefined: uncategorizedLinks = [], ...allCategorizedLinks } = groupedNavLinks;
   const categoryDictionary = getAllCategories(allCategorizedLinks);
   const orderedCategories = getOrderedCategories(allCategorizedLinks, categoryDictionary);
@@ -155,7 +180,7 @@ export function CollapsibleNav({
     categoryDictionary
   );
 
-  const readyForEUI = (link: ChromeNavLink, needsIcon: boolean = false) => {
+  const readyForEUI = (link: CollapsibleNavLink, needsIcon: boolean = false) => {
     return createEuiListItem({
       link,
       appId,
@@ -215,60 +240,7 @@ export function CollapsibleNav({
       outsideClickCloses={false}
     >
       <EuiFlexItem className="eui-yScroll">
-        {/* Recently viewed */}
-        <EuiCollapsibleNavGroup
-          key="recentlyViewed"
-          background="light"
-          title={i18n.translate('core.ui.recentlyViewed', { defaultMessage: 'Recently viewed' })}
-          isCollapsible={true}
-          initialIsOpen={getIsCategoryOpen('recentlyViewed', storage)}
-          onToggle={(isCategoryOpen) =>
-            setIsCategoryOpen('recentlyViewed', isCategoryOpen, storage)
-          }
-          data-test-subj="collapsibleNavGroup-recentlyViewed"
-        >
-          {recentlyAccessed.length > 0 ? (
-            <EuiListGroup
-              aria-label={i18n.translate('core.ui.recentlyViewedAriaLabel', {
-                defaultMessage: 'Recently viewed links',
-              })}
-              listItems={recentlyAccessed.map((link) => {
-                // TODO #64541
-                // Can remove icon from recent links completely
-                const { iconType, onClick, ...hydratedLink } = createRecentNavLink(
-                  link,
-                  navLinks,
-                  basePath,
-                  navigateToUrl
-                );
-
-                return {
-                  ...hydratedLink,
-                  'data-test-subj': 'collapsibleNavAppLink--recent',
-                  onClick: (event) => {
-                    if (!isModifiedOrPrevented(event)) {
-                      closeNav();
-                      onClick(event);
-                    }
-                  },
-                };
-              })}
-              maxWidth="none"
-              color="subdued"
-              gutterSize="none"
-              size="s"
-              className="osdCollapsibleNav__recentsListGroup"
-            />
-          ) : (
-            <EuiText size="s" color="subdued" style={{ padding: '0 8px 8px' }}>
-              <p>
-                {i18n.translate('core.ui.EmptyRecentlyViewed', {
-                  defaultMessage: 'No recently viewed items',
-                })}
-              </p>
-            </EuiText>
-          )}
-        </EuiCollapsibleNavGroup>
+        <CollapsibleNavHeader workspaces={workspaces} />
 
         {/* merged NavLinks */}
         {mergedNavLinks.map((item, i) => {

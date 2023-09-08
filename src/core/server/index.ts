@@ -218,6 +218,7 @@ export {
   SessionStorageFactory,
   DestructiveRouteMethod,
   SafeRouteMethod,
+  ensureRawRequest,
 } from './http';
 
 export {
@@ -323,7 +324,6 @@ export {
   SavedObjectsAddToWorkspacesOptions,
   SavedObjectsAddToWorkspacesResponse,
   SavedObjectsDeleteByWorkspaceOptions,
-  WORKSPACE_TYPE,
   Permissions,
   ACL,
   SavedObjectsPermissionControlContract,
@@ -353,12 +353,13 @@ export {
   MetricsServiceStart,
 } from './metrics';
 
-export { AppCategory } from '../types';
+export { AppCategory, WorkspaceAttribute } from '../types';
 export {
   DEFAULT_APP_CATEGORIES,
   WorkspacePermissionMode,
-  PUBLIC_WORKSPACE,
-  MANAGEMENT_WORKSPACE,
+  PUBLIC_WORKSPACE_ID,
+  MANAGEMENT_WORKSPACE_ID,
+  WORKSPACE_TYPE,
 } from '../utils';
 
 export {

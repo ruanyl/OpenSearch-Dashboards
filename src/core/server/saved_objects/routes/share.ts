@@ -8,8 +8,7 @@ import { IRouter } from '../../http';
 import { exportSavedObjectsToStream } from '../export';
 import { validateObjects } from './utils';
 import { collectSavedObjects } from '../import/collect_saved_objects';
-import { WORKSPACE_TYPE } from '../constants';
-import { PUBLIC_WORKSPACE } from '../../../utils/constants';
+import { PUBLIC_WORKSPACE_ID, WORKSPACE_TYPE } from '../../../utils';
 
 const SHARE_LIMIT = 10000;
 
@@ -73,7 +72,7 @@ export const registerShareRoute = (router: IRouter) => {
           (obj) =>
             obj.workspaces &&
             obj.workspaces.length > 0 &&
-            !obj.workspaces.includes(PUBLIC_WORKSPACE)
+            !obj.workspaces.includes(PUBLIC_WORKSPACE_ID)
         )
         .map((obj) => ({ id: obj.id, type: obj.type, workspaces: obj.workspaces }));
 

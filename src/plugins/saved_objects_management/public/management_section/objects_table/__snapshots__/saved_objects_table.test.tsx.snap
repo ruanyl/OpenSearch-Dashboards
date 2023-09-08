@@ -209,9 +209,13 @@ exports[`SavedObjectsTable should render normally 1`] = `
 >
   <Header
     filteredCount={4}
+    hideImport={false}
+    onCopy={[Function]}
     onExportAll={[Function]}
     onImport={[Function]}
     onRefresh={[Function]}
+    selectedCount={0}
+    showDuplicateAll={false}
   />
   <EuiSpacer
     size="xs"
@@ -263,6 +267,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
           "has": [MockFunction],
         }
       }
+      availableWorkspaces={Array []}
       basePath={
         BasePath {
           "basePath": "",
@@ -322,10 +327,10 @@ exports[`SavedObjectsTable should render normally 1`] = `
           Object {
             "id": "1",
             "meta": Object {
-              "editUrl": "#/management/opensearch-dashboards/indexPatterns/patterns/1",
+              "editUrl": "#/indexPatterns/patterns/1",
               "icon": "indexPatternApp",
               "inAppUrl": Object {
-                "path": "/management/opensearch-dashboards/indexPatterns/patterns/1",
+                "path": "/indexPatterns/patterns/1",
                 "uiCapabilitiesPath": "management.opensearchDashboards.indexPatterns",
               },
               "title": "MyIndexPattern*",
@@ -374,6 +379,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
         ]
       }
       onActionRefresh={[Function]}
+      onCopy={[Function]}
       onDelete={[Function]}
       onExport={[Function]}
       onQueryChange={[Function]}
@@ -387,6 +393,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
           "onSelectionChange": [Function],
         }
       }
+      showDuplicate={false}
       totalItemCount={4}
     />
   </RedirectAppLinks>

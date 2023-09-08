@@ -37,6 +37,7 @@ import { ChromeNavLink, DEFAULT_APP_CATEGORIES } from '../../..';
 import { httpServiceMock } from '../../../http/http_service.mock';
 import { ChromeRecentlyAccessedHistoryItem } from '../../recently_accessed';
 import { CollapsibleNav } from './collapsible_nav';
+import { workspacesServiceMock } from '../../../workspace/workspaces_service.mock';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => 'mockId',
@@ -79,6 +80,8 @@ function mockProps() {
     closeNav: () => {},
     navigateToApp: () => Promise.resolve(),
     navigateToUrl: () => Promise.resolve(),
+    getUrlForApp: jest.fn(),
+    workspaces: workspacesServiceMock.createStartContract(),
     customNavLink$: new BehaviorSubject(undefined),
     branding: {
       darkMode: false,
@@ -152,10 +155,6 @@ describe('CollapsibleNav', () => {
   });
 
   it('remembers collapsible section state', () => {
-    /**
-     * TODO skip for workspace refractor, will revert once refractor the left menu part
-     */
-    return;
     const navLinks = [
       mockLink({ category: opensearchDashboards }),
       mockLink({ category: observability }),
@@ -169,9 +168,9 @@ describe('CollapsibleNav', () => {
         recentlyAccessed$={new BehaviorSubject(recentNavLinks)}
       />
     );
-    expectShownNavLinksCount(component, 0);
+    expectShownNavLinksCount(component, 3);
     clickGroup(component, 'opensearchDashboards');
-    clickGroup(component, 'recentlyViewed');
+    clickGroup(component, 'recentlyVisited');
     expectShownNavLinksCount(component, 1);
     component.setProps({ isNavOpen: false });
     expectNavIsClosed(component);
@@ -180,10 +179,6 @@ describe('CollapsibleNav', () => {
   });
 
   it('closes the nav after clicking a link', () => {
-    /**
-     * TODO skip for workspace refractor, will revert once refractor the left menu part
-     */
-    return;
     const onClose = sinon.spy();
     const navLinks = [
       mockLink({ category: opensearchDashboards }),
@@ -205,7 +200,7 @@ describe('CollapsibleNav', () => {
       },
     });
 
-    component.find('[data-test-subj="collapsibleNavGroup-recentlyViewed"] a').simulate('click');
+    component.find('[data-test-subj="collapsibleNavGroup-recentlyVisited"] a').simulate('click');
     expect(onClose.callCount).toEqual(1);
     expectNavIsClosed(component);
     component.setProps({ isNavOpen: true });

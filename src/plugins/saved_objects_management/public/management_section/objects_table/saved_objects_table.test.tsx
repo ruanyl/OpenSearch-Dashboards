@@ -176,9 +176,9 @@ describe('SavedObjectsTable', () => {
           meta: {
             title: `MyIndexPattern*`,
             icon: 'indexPatternApp',
-            editUrl: '#/management/opensearch-dashboards/indexPatterns/patterns/1',
+            editUrl: '#/indexPatterns/patterns/1',
             inAppUrl: {
-              path: '/management/opensearch-dashboards/indexPatterns/patterns/1',
+              path: '/indexPatterns/patterns/1',
               uiCapabilitiesPath: 'management.opensearchDashboards.indexPatterns',
             },
           },
@@ -284,7 +284,7 @@ describe('SavedObjectsTable', () => {
       await component.instance().onExport(true);
 
       expect(fetchExportObjectsMock).toHaveBeenCalledWith(http, mockSelectedSavedObjects, true, {
-        workspaces: ['public'],
+        workspaces: undefined,
       });
       expect(notifications.toasts.addSuccess).toHaveBeenCalledWith({
         title: 'Your file is downloading in the background',
@@ -329,7 +329,7 @@ describe('SavedObjectsTable', () => {
       await component.instance().onExport(true);
 
       expect(fetchExportObjectsMock).toHaveBeenCalledWith(http, mockSelectedSavedObjects, true, {
-        workspaces: ['public'],
+        workspaces: undefined,
       });
       expect(notifications.toasts.addWarning).toHaveBeenCalledWith({
         title:
@@ -372,7 +372,7 @@ describe('SavedObjectsTable', () => {
         allowedTypes,
         undefined,
         true,
-        { workspaces: ['public'] }
+        { workspaces: undefined }
       );
       expect(saveAsMock).toHaveBeenCalledWith(blob, 'export.ndjson');
       expect(notifications.toasts.addSuccess).toHaveBeenCalledWith({
@@ -403,7 +403,7 @@ describe('SavedObjectsTable', () => {
         allowedTypes,
         'test*',
         true,
-        { workspaces: ['public'] }
+        { workspaces: undefined }
       );
       expect(saveAsMock).toHaveBeenCalledWith(blob, 'export.ndjson');
       expect(notifications.toasts.addSuccess).toHaveBeenCalledWith({

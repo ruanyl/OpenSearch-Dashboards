@@ -31,6 +31,7 @@
 import { omit, intersection } from 'lodash';
 import type { opensearchtypes } from '@opensearch-project/opensearch';
 import uuid from 'uuid';
+import { i18n } from '@osd/i18n';
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { DeleteDocumentResponse, OpenSearchClient } from '../../../opensearch/';
@@ -90,7 +91,9 @@ import {
   FIND_DEFAULT_PER_PAGE,
   SavedObjectsUtils,
 } from './utils';
-import { PUBLIC_WORKSPACE } from '../../../../utils/constants';
+import { PUBLIC_WORKSPACE_ID, WorkspacePermissionMode } from '../../../../utils/constants';
+import { ACL, Principals } from '../../permission_control/acl';
+import { WORKSPACE_TYPE } from '../../../../server';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -381,15 +384,28 @@ export class SavedObjectsRepository {
 
       const method = object.id && overwrite ? 'index' : 'create';
       const requiresNamespacesCheck = object.id && this._registry.isMultiNamespace(object.type);
+      /**
+       * Only when importing an object to a target workspace should we check if the object is workspace-specific.
+       */
+      const requiresWorkspaceCheck = object.id;
 
       if (object.id == null) object.id = uuid.v1();
+
+      let opensearchRequestIndexPayload = {};
+
+      if (requiresNamespacesCheck || requiresWorkspaceCheck) {
+        opensearchRequestIndexPayload = {
+          opensearchRequestIndex: bulkGetRequestIndexCounter,
+        };
+        bulkGetRequestIndexCounter++;
+      }
 
       return {
         tag: 'Right' as 'Right',
         value: {
           method,
           object,
-          ...(requiresNamespacesCheck && { opensearchRequestIndex: bulkGetRequestIndexCounter++ }),
+          ...opensearchRequestIndexPayload,
         },
       };
     });
@@ -400,7 +416,7 @@ export class SavedObjectsRepository {
       .map(({ value: { object: { type, id } } }) => ({
         _id: this._serializer.generateRawId(namespace, type, id),
         _index: this.getIndexForType(type),
-        _source: ['type', 'namespaces'],
+        _source: ['type', 'namespaces', 'workspaces'],
       }));
     const bulkGetResponse = bulkGetDocs.length
       ? await this.client.mget(
@@ -429,15 +445,8 @@ export class SavedObjectsRepository {
         method,
       } = expectedBulkGetResult.value;
       let savedObjectWorkspaces: string[] | undefined;
-      if (expectedBulkGetResult.value.method === 'create') {
-        if (options.workspaces) {
-          savedObjectWorkspaces = Array.from(new Set([...(options.workspaces || [])]));
-        }
-      } else if (object.workspaces) {
-        savedObjectWorkspaces = Array.from(
-          new Set([...object.workspaces, ...(options.workspaces || [])])
-        );
-      }
+      let finalMethod = method;
+      let finalObjectId = object.id;
       if (opensearchRequestIndex !== undefined) {
         const indexFound = bulkGetResponse?.statusCode !== 404;
         const actualResult = indexFound
@@ -474,12 +483,57 @@ export class SavedObjectsRepository {
         versionProperties = getExpectedVersionProperties(version);
       }
 
+      if (expectedBulkGetResult.value.method === 'create') {
+        savedObjectWorkspaces = options.workspaces;
+      } else {
+        const changeToCreate = () => {
+          finalMethod = 'create';
+          finalObjectId = object.id;
+          savedObjectWorkspaces = options.workspaces;
+          versionProperties = {};
+        };
+        /**
+         * When overwrite, need to check if the object is workspace-specific
+         * if so, copy object to target workspace instead of refering it.
+         */
+        const rawId = this._serializer.generateRawId(namespace, object.type, object.id);
+        const findObject =
+          bulkGetResponse?.statusCode !== 404
+            ? bulkGetResponse?.body.docs?.find((item) => item._id === rawId)
+            : null;
+        if (findObject && findObject.found) {
+          const transformedObject = this._serializer.rawToSavedObject(
+            findObject as SavedObjectsRawDoc
+          ) as SavedObject;
+          const filteredWorkspaces = SavedObjectsUtils.filterWorkspacesAccordingToBaseWorkspaces(
+            options.workspaces,
+            transformedObject.workspaces
+          );
+          /**
+           * We need to create a new object when the object
+           * is about to import into workspaces it is not belong to
+           */
+          if (filteredWorkspaces.length) {
+            /**
+             * Create a new object but only belong to the set of (target workspaces - original workspace)
+             */
+            changeToCreate();
+            finalObjectId = uuid.v1();
+            savedObjectWorkspaces = filteredWorkspaces;
+          } else {
+            savedObjectWorkspaces = transformedObject.workspaces;
+          }
+        } else {
+          savedObjectWorkspaces = options.workspaces;
+        }
+      }
+
       const expectedResult = {
         opensearchRequestIndex: bulkRequestIndexCounter++,
-        requestedId: object.id,
+        requestedId: finalObjectId,
         rawMigratedDoc: this._serializer.savedObjectToRaw(
           this._migrator.migrateDocument({
-            id: object.id,
+            id: finalObjectId,
             type: object.type,
             attributes: object.attributes,
             migrationVersion: object.migrationVersion,
@@ -495,7 +549,7 @@ export class SavedObjectsRepository {
 
       bulkCreateParams.push(
         {
-          [method]: {
+          [finalMethod]: {
             _id: expectedResult.rawMigratedDoc._id,
             _index: this.getIndexForType(object.type),
             ...(overwrite && versionProperties),
@@ -586,7 +640,7 @@ export class SavedObjectsRepository {
     const bulkGetDocs = expectedBulkGetResults.filter(isRight).map(({ value: { type, id } }) => ({
       _id: this._serializer.generateRawId(namespace, type, id),
       _index: this.getIndexForType(type),
-      _source: ['type', 'namespaces'],
+      _source: ['type', 'namespaces', 'workspaces'],
     }));
     const bulkGetResponse = bulkGetDocs.length
       ? await this.client.mget(
@@ -609,17 +663,24 @@ export class SavedObjectsRepository {
       const { type, id, opensearchRequestIndex } = expectedResult.value;
       const doc = bulkGetResponse?.body.docs[opensearchRequestIndex];
       if (doc?.found) {
-        errors.push({
-          id,
-          type,
-          error: {
-            ...errorContent(SavedObjectsErrorHelpers.createConflictError(type, id)),
-            // @ts-expect-error MultiGetHit._source is optional
-            ...(!this.rawDocExistsInNamespace(doc!, namespace) && {
-              metadata: { isNotOverwritable: true },
-            }),
-          },
-        });
+        const transformedObject = this._serializer.rawToSavedObject(doc as SavedObjectsRawDoc);
+        const filteredWorkspaces = SavedObjectsUtils.filterWorkspacesAccordingToBaseWorkspaces(
+          options.workspaces,
+          transformedObject.workspaces
+        );
+        if (!filteredWorkspaces.length) {
+          errors.push({
+            id,
+            type,
+            error: {
+              ...errorContent(SavedObjectsErrorHelpers.createConflictError(type, id)),
+              // @ts-expect-error MultiGetHit._source is optional
+              ...(!this.rawDocExistsInNamespace(doc!, namespace) && {
+                metadata: { isNotOverwritable: true },
+              }),
+            },
+          });
+        }
       }
     });
 
@@ -1359,7 +1420,7 @@ export class SavedObjectsRepository {
         if (
           obj.workspaces &&
           obj.workspaces.length > 0 &&
-          !obj.workspaces.includes(PUBLIC_WORKSPACE)
+          !obj.workspaces.includes(PUBLIC_WORKSPACE_ID)
         ) {
           return intersection(obj.workspaces, options.workspaces).length === 0;
         }
@@ -1412,7 +1473,7 @@ export class SavedObjectsRepository {
             params: {
               time,
               workspaces,
-              globalWorkspaceId: PUBLIC_WORKSPACE,
+              globalWorkspaceId: PUBLIC_WORKSPACE_ID,
             },
           },
         },
@@ -1863,6 +1924,111 @@ export class SavedObjectsRepository {
     };
   }
 
+  async getPermissionQuery(props: {
+    permissionTypes: string[];
+    principals: Principals;
+    savedObjectType?: string[];
+  }) {
+    return ACL.generateGetPermittedSavedObjectsQueryDSL(
+      props.permissionTypes,
+      props.principals,
+      props.savedObjectType
+    );
+  }
+
+  async processFindOptions(props: {
+    options: SavedObjectsFindOptions & { permissionModes?: string[] };
+    principals: Principals;
+  }): Promise<SavedObjectsFindOptions> {
+    const { principals } = props;
+    const options = { ...props.options };
+    if (this.isRelatedToWorkspace(options.type)) {
+      options.queryDSL = await this.getPermissionQuery({
+        permissionTypes: options.permissionModes ?? [
+          WorkspacePermissionMode.LibraryRead,
+          WorkspacePermissionMode.LibraryWrite,
+          WorkspacePermissionMode.Management,
+        ],
+        principals,
+        savedObjectType: [WORKSPACE_TYPE],
+      });
+    } else {
+      const permittedWorkspaceIds = await SavedObjectsUtils.getPermittedWorkspaceIds({
+        permissionModes: [
+          WorkspacePermissionMode.LibraryRead,
+          WorkspacePermissionMode.LibraryWrite,
+          WorkspacePermissionMode.Management,
+        ],
+        principals,
+        repository: this,
+      });
+
+      if (options.workspaces) {
+        const permittedWorkspaces = options.workspaces.filter((item) =>
+          (permittedWorkspaceIds || []).includes(item)
+        );
+        if (!permittedWorkspaces.length) {
+          /**
+           * If user does not have any one workspace access
+           * deny the request
+           */
+          throw SavedObjectsErrorHelpers.decorateNotAuthorizedError(
+            new Error(
+              i18n.translate('workspace.permission.invalidate', {
+                defaultMessage: 'Invalid workspace permission',
+              })
+            )
+          );
+        }
+
+        /**
+         * Overwrite the options.workspaces when user has access on partial workspaces.
+         */
+        options.workspaces = permittedWorkspaces;
+      } else {
+        const queryDSL = await this.getPermissionQuery({
+          permissionTypes: [WorkspacePermissionMode.Read, WorkspacePermissionMode.Write],
+          principals,
+          savedObjectType: Array.isArray(options.type) ? options.type : [options.type],
+        });
+        options.workspaces = undefined;
+        /**
+         * Select all the docs that
+         * 1. ACL matches read or write permission OR
+         * 2. workspaces matches library_read or library_write or management OR
+         * 3. Advanced settings
+         */
+        options.queryDSL = {
+          query: {
+            bool: {
+              filter: [
+                {
+                  bool: {
+                    should: [
+                      {
+                        term: {
+                          type: 'config',
+                        },
+                      },
+                      queryDSL.query,
+                      {
+                        terms: {
+                          workspaces: permittedWorkspaceIds,
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        };
+      }
+    }
+
+    return options;
+  }
+
   /**
    * Returns index specified by the given type or the default index
    *
@@ -1990,6 +2156,16 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
     return body;
+  }
+
+  /**
+   * check if the type include workspace
+   * Workspace permission check is totally different from object permission check.
+   * @param type
+   * @returns
+   */
+  private isRelatedToWorkspace(type: string | string[]): boolean {
+    return type === WORKSPACE_TYPE || (Array.isArray(type) && type.includes(WORKSPACE_TYPE));
   }
 }
 

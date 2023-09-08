@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { i18n } from '@osd/i18n';
+import { Observable } from 'rxjs';
 
 import {
   PluginInitializerContext,
@@ -13,19 +14,25 @@ import {
   ISavedObjectsRepository,
   WORKSPACE_TYPE,
   ACL,
-  PUBLIC_WORKSPACE,
-  MANAGEMENT_WORKSPACE,
+  PUBLIC_WORKSPACE_ID,
+  MANAGEMENT_WORKSPACE_ID,
   Permissions,
   WorkspacePermissionMode,
+  SavedObjectsClient,
+  WorkspaceAttribute,
+  DEFAULT_APP_CATEGORIES,
 } from '../../../core/server';
-import { IWorkspaceDBImpl, WorkspaceAttribute } from './types';
+import { IWorkspaceDBImpl } from './types';
 import { WorkspaceClientWithSavedObject } from './workspace_client';
 import { WorkspaceSavedObjectsClientWrapper } from './saved_objects';
 import { registerRoutes } from './routes';
+import { WORKSPACE_OVERVIEW_APP_ID, WORKSPACE_UPDATE_APP_ID } from '../common/constants';
+import { ConfigSchema } from '../config';
 
 export class WorkspacePlugin implements Plugin<{}, {}> {
   private readonly logger: Logger;
   private client?: IWorkspaceDBImpl;
+  private config$: Observable<ConfigSchema>;
 
   private proxyWorkspaceTrafficToRealHandler(setupDeps: CoreSetup) {
     /**
@@ -46,6 +53,7 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('plugins', 'workspace');
+    this.config$ = initializerContext.config.create<ConfigSchema>();
   }
 
   public async setup(core: CoreSetup) {
@@ -55,7 +63,10 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
 
     await this.client.setup(core);
     const workspaceSavedObjectsClientWrapper = new WorkspaceSavedObjectsClientWrapper(
-      core.savedObjects.permissionControl
+      core.savedObjects.permissionControl,
+      {
+        config$: this.config$,
+      }
     );
 
     core.savedObjects.addClientWrapper(
@@ -71,6 +82,10 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
       logger: this.logger,
       client: this.client as IWorkspaceDBImpl,
     });
+
+    core.savedObjects.setClientFactoryProvider((repositoryFactory) => () =>
+      new SavedObjectsClient(repositoryFactory.createInternalRepository())
+    );
 
     return {
       client: this.client,
@@ -107,6 +122,7 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
 
   private async setupWorkspaces(startDeps: CoreStart) {
     const internalRepository = startDeps.savedObjects.createInternalRepository();
+    this.client?.setInternalRepository(internalRepository);
     const publicWorkspaceACL = new ACL().addPermission(
       [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.LibraryWrite],
       {
@@ -120,21 +136,27 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
     await Promise.all([
       this.checkAndCreateWorkspace(
         internalRepository,
-        PUBLIC_WORKSPACE,
+        PUBLIC_WORKSPACE_ID,
         {
           name: i18n.translate('workspaces.public.workspace.default.name', {
             defaultMessage: 'public',
           }),
+          features: ['*', `!@${DEFAULT_APP_CATEGORIES.management.id}`],
         },
         publicWorkspaceACL.getPermissions()
       ),
       this.checkAndCreateWorkspace(
         internalRepository,
-        MANAGEMENT_WORKSPACE,
+        MANAGEMENT_WORKSPACE_ID,
         {
           name: i18n.translate('workspaces.management.workspace.default.name', {
             defaultMessage: 'Management',
           }),
+          features: [
+            `@${DEFAULT_APP_CATEGORIES.management.id}`,
+            WORKSPACE_OVERVIEW_APP_ID,
+            WORKSPACE_UPDATE_APP_ID,
+          ],
         },
         managementWorkspaceACL.getPermissions()
       ),

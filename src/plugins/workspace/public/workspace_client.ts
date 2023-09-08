@@ -2,23 +2,16 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import { combineLatest } from 'rxjs';
-import { isEqual } from 'lodash';
-
 import {
   HttpFetchError,
   HttpFetchOptions,
   HttpSetup,
   WorkspaceAttribute,
-  WorkspaceStart,
+  WorkspaceSetup,
 } from '../../../core/public';
 import { WorkspacePermissionMode } from '../../../core/public';
 
 const WORKSPACES_API_BASE_URL = '/api/workspaces';
-
-enum WORKSPACE_ERROR_REASON_MAP {
-  WORKSPACE_STALED = 'WORKSPACE_STALED',
-}
 
 const join = (...uriComponents: Array<string | undefined>) =>
   uriComponents
@@ -51,6 +44,7 @@ interface WorkspaceFindOptions {
   searchFields?: string[];
   sortField?: string;
   sortOrder?: string;
+  permissionModes?: WorkspacePermissionMode[];
 }
 
 /**
@@ -61,60 +55,19 @@ interface WorkspaceFindOptions {
  */
 export class WorkspaceClient {
   private http: HttpSetup;
-  private workspaces: WorkspaceStart;
+  private workspaces: WorkspaceSetup;
 
-  constructor(http: HttpSetup, workspaces: WorkspaceStart) {
+  constructor(http: HttpSetup, workspaces: WorkspaceSetup) {
     this.http = http;
     this.workspaces = workspaces;
-
-    combineLatest([workspaces.workspaceList$, workspaces.currentWorkspaceId$]).subscribe(
-      ([workspaceList, currentWorkspaceId]) => {
-        if (workspaceList.length) {
-          const currentWorkspace = this.findWorkspace([workspaceList, currentWorkspaceId]);
-
-          /**
-           * Do a simple idempotent verification here
-           */
-          if (!isEqual(currentWorkspace, workspaces.currentWorkspace$.getValue())) {
-            workspaces.currentWorkspace$.next(currentWorkspace);
-          }
-
-          if (currentWorkspaceId && !currentWorkspace?.id) {
-            /**
-             * Current workspace is staled
-             */
-            workspaces.currentWorkspaceId$.error({
-              reason: WORKSPACE_ERROR_REASON_MAP.WORKSPACE_STALED,
-            });
-            workspaces.currentWorkspace$.error({
-              reason: WORKSPACE_ERROR_REASON_MAP.WORKSPACE_STALED,
-            });
-          }
-        }
-      }
-    );
   }
 
   /**
    * Initialize workspace list
    */
-  public init() {
-    this.updateWorkspaceListAndNotify();
-  }
-
-  private findWorkspace(payload: [WorkspaceAttribute[], string]): WorkspaceAttribute | null {
-    const [workspaceList, currentWorkspaceId] = payload;
-    if (!currentWorkspaceId || !workspaceList || !workspaceList.length) {
-      return null;
-    }
-
-    const findItem = workspaceList.find((item) => item?.id === currentWorkspaceId);
-
-    if (!findItem) {
-      return null;
-    }
-
-    return findItem;
+  public async init() {
+    await this.updateWorkspaceList();
+    this.workspaces.initialized$.next(true);
   }
 
   /**
@@ -152,7 +105,7 @@ export class WorkspaceClient {
     return [WORKSPACES_API_BASE_URL, join(...path)].filter((item) => item).join('/');
   }
 
-  private async updateWorkspaceListAndNotify(): Promise<void> {
+  private async updateWorkspaceList(): Promise<void> {
     const result = await this.list({
       perPage: 999,
     });
@@ -229,7 +182,7 @@ export class WorkspaceClient {
     });
 
     if (result.success) {
-      this.updateWorkspaceListAndNotify();
+      this.updateWorkspaceList();
     }
 
     return result;
@@ -245,7 +198,7 @@ export class WorkspaceClient {
     const result = await this.safeFetch<null>(this.getPath([id]), { method: 'DELETE' });
 
     if (result.success) {
-      this.updateWorkspaceListAndNotify();
+      this.updateWorkspaceList();
     }
 
     return result;
@@ -261,6 +214,7 @@ export class WorkspaceClient {
    * @property {integer} [options.page=1]
    * @property {integer} [options.per_page=20]
    * @property {array} options.fields
+   * @property {string array} permissionModes
    * @returns A find result with workspaces matching the specified search.
    */
   public list = (
@@ -319,7 +273,7 @@ export class WorkspaceClient {
     });
 
     if (result.success) {
-      this.updateWorkspaceListAndNotify();
+      this.updateWorkspaceList();
     }
 
     return result;

@@ -10,17 +10,9 @@ import {
   CoreSetup,
   WorkspacePermissionMode,
   Permissions,
+  WorkspaceAttribute,
+  ISavedObjectsRepository,
 } from '../../../core/server';
-
-export interface WorkspaceAttribute {
-  id: string;
-  name: string;
-  description?: string;
-  features?: string[];
-  color?: string;
-  icon?: string;
-  defaultVISTheme?: string;
-}
 
 export interface WorkspaceAttributeWithPermission extends WorkspaceAttribute {
   permissions: Permissions;
@@ -33,6 +25,7 @@ export interface WorkspaceFindOptions {
   searchFields?: string[];
   sortField?: string;
   sortOrder?: string;
+  permissionModes?: WorkspacePermissionMode[];
 }
 
 export interface IRequestDetail {
@@ -43,6 +36,7 @@ export interface IRequestDetail {
 
 export interface IWorkspaceDBImpl {
   setup(dep: CoreSetup): Promise<IResponse<boolean>>;
+  setInternalRepository(repository: ISavedObjectsRepository): void;
   create(
     requestDetail: IRequestDetail,
     payload: Omit<WorkspaceAttributeWithPermission, 'id'>
