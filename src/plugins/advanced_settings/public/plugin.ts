@@ -30,7 +30,6 @@
 
 import { i18n } from '@osd/i18n';
 import { AppMountParameters, CoreSetup, Plugin } from 'opensearch-dashboards/public';
-import { FeatureCatalogueCategory } from '../../home/public';
 import { ComponentRegistry } from './component_registry';
 import { AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup } from './types';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';

@@ -13,5 +13,5 @@
     "visAugmenter"
   ],
   "extraPublicDirs": ["public/lib"],
-  "requiredBundles": ["opensearchDashboardsReact", "home"]
+  "requiredBundles": ["opensearchDashboardsReact"]
 }

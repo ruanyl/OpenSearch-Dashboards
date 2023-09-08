@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import { i18n } from '@osd/i18n';
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 
 import { VisBuilderStart } from '../../vis_builder/public';
@@ -37,7 +36,7 @@ import { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { DashboardStart } from '../../dashboard/public';
 import { DiscoverStart } from '../../discover/public';
-import { HomePublicPluginSetup, FeatureCatalogueCategory } from '../../home/public';
+import { HomePublicPluginSetup } from '../../home/public';
 import { VisualizationsStart } from '../../visualizations/public';
 import { VisAugmenterStart } from '../../vis_augmenter/public';
 import {
@@ -59,6 +58,8 @@ import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import {
   MANAGE_LIBRARY_TITLE_WORDINGS,
   SAVED_OBJECT_MANAGEMENT_TITLE_WORDINGS,
+  ALL_LIBRARY_OBJECTS_TITLE_WORDINGS,
+  ALL_LIBRARY_OBJECTS_WORDINGS,
   SAVED_QUERIES_WORDINGS,
   SAVED_SEARCHES_WORDINGS,
 } from './constants';
