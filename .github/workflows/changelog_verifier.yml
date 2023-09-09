@@ -7,7 +7,7 @@ on:
 jobs:
   # Enforces the update of a changelog file on every pull request
   verify-changelog:
-    runs-on: arc-runner-set-1
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
         with:

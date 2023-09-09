@@ -6,7 +6,7 @@ on:
 
 jobs:
   apply-label:
-    runs-on: arc-runner-set-1
+    runs-on: self-hosted
     steps:
       - uses: actions/github-script@v6
         with:
