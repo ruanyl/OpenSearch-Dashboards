@@ -90,7 +90,7 @@ import {
 } from './utils';
 import { PUBLIC_WORKSPACE_ID, WorkspacePermissionMode } from '../../../../utils/constants';
 import { ACL, Principals } from '../../permission_control/acl';
-import { WORKSPACE_TYPE } from '../../../../server';
+import { WORKSPACE_TYPE } from '../../../../utils';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
