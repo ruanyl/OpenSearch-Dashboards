@@ -101,9 +101,10 @@ export const registerResolveImportErrorsRoute = (router: IRouter, config: SavedO
         });
       }
 
-      const workspaces = req.query.workspaces
-        ? Array<string>().concat(req.query.workspaces)
-        : undefined;
+      let workspaces = req.query.workspaces;
+      if (typeof workspaces === 'string') {
+        workspaces = [workspaces];
+      }
 
       const result = await resolveSavedObjectsImportErrors({
         typeRegistry: context.core.savedObjects.typeRegistry,
