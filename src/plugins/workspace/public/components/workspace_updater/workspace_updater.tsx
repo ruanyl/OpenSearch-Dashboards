@@ -110,8 +110,8 @@ export const WorkspaceUpdater = () => {
     return null;
   }
   const deleteWorkspace = async () => {
-    let result;
     if (currentWorkspace?.id) {
+      let result;
       try {
         result = await workspaceClient.delete(currentWorkspace?.id);
       } catch (error) {

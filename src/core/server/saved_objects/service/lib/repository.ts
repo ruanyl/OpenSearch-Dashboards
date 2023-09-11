@@ -732,7 +732,7 @@ export class SavedObjectsRepository {
 
     const obj = await this.get(type, id);
     const existingWorkspace = obj.workspaces || [];
-    if (!force && (existingWorkspace.length > 1 || existingWorkspace.includes(PUBLIC_WORKSPACE))) {
+    if (!force && existingWorkspace.length > 1) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
         'Unable to delete saved object that exists in multiple workspaces, use the `force` option to delete it anyway'
       );

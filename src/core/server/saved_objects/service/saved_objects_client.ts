@@ -508,7 +508,7 @@ export class SavedObjectsClient {
   deleteByWorkspace = async (
     workspace: string,
     options: SavedObjectsDeleteByWorkspaceOptions = {}
-  ): Promise<SavedObjectsAddToWorkspacesResponse[]> => {
+  ): Promise<any> => {
     return await this._repository.deleteByWorkspace(workspace, options);
   };
 
