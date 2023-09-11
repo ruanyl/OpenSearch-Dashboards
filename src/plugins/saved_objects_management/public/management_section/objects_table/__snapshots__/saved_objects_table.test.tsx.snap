@@ -215,6 +215,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
     onExportAll={[Function]}
     onImport={[Function]}
     onRefresh={[Function]}
+    showDuplicateAll={false}
   />
   <EuiSpacer
     size="xs"
