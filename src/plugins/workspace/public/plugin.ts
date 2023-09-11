@@ -48,7 +48,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     core.workspaces.registerWorkspaceMenuRender(renderWorkspaceMenu);
 
     const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
-    workspaceClient.init();
+    await workspaceClient.init();
 
     /**
      * Retrieve workspace id from url
