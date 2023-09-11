@@ -12,6 +12,7 @@ export interface WorkspaceAttribute {
   icon?: string;
   defaultVISTheme?: string;
   reserved?: boolean;
+  defaultVISTheme?: string;
 }
 
 export interface WorkspaceObject extends WorkspaceAttribute {
