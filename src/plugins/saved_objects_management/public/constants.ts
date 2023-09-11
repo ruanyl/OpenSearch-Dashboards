@@ -6,7 +6,7 @@
 import { i18n } from '@osd/i18n';
 
 export const MANAGE_LIBRARY_TITLE_WORDINGS = i18n.translate(
-  'savedObjectsManagement.manage library',
+  'savedObjectsManagement.manageLibrary',
   {
     defaultMessage: 'Manage library',
   }
