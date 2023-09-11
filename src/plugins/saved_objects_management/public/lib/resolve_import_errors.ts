@@ -90,7 +90,7 @@ async function callResolveImportErrorsApi(
   file: File,
   retries: any,
   createNewCopies: boolean,
-  workspaces: string[]
+  workspaces?: string[]
 ): Promise<SavedObjectsImportResponse> {
   const formData = new FormData();
   formData.append('file', file);
@@ -182,6 +182,7 @@ export async function resolveImportErrors({
     file?: File;
     importMode: { createNewCopies: boolean; overwrite: boolean };
   };
+  workspaces?: string[];
 }) {
   const retryDecisionCache = new Map<string, RetryDecision>();
   const replaceReferencesCache = new Map<string, Reference[]>();
