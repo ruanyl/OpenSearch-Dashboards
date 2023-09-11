@@ -103,13 +103,6 @@ export default async function ({ readConfigFile }) {
       management: {
         pathname: '/app/management',
       },
-      /** @obsolete "management" should be instead of "settings" **/
-      settings: {
-        pathname: '/app/management',
-      },
-      timeline: {
-        pathname: '/app/timeline',
-      },
       console: {
         pathname: '/app/dev_tools',
         hash: '/console',
