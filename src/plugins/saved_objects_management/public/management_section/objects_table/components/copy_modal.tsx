@@ -225,7 +225,6 @@ export class SavedObjectsCopyModal extends React.Component<Props, State> {
           )
         )
     );
-    checkboxList.push();
     return checkboxList;
   };
 
