@@ -109,23 +109,28 @@ export class SavedObjectsPermissionControl {
     }
 
     const principals = this.getPrincipalsFromRequest(request);
+    let savedObjectsBasicInfo: any[] = [];
     const hasAllPermission = savedObjectsGet.every((item) => {
       // for object that doesn't contain ACL like config, return true
       if (!item.permissions) {
         return true;
       }
       const aclInstance = new ACL(item.permissions);
-      return aclInstance.hasPermission(permissionModes, principals);
+      const hasPermission = aclInstance.hasPermission(permissionModes, principals);
+      if (!hasPermission) {
+        savedObjectsBasicInfo = [
+          ...savedObjectsBasicInfo,
+          {
+            id: item.id,
+            type: item.type,
+            workspaces: item.workspaces,
+            permissions: item.permissions,
+          },
+        ];
+      }
+      return hasPermission;
     });
     if (!hasAllPermission) {
-      const savedObjectsBasicInfo = savedObjectsGet.map((item) => {
-        return {
-          id: item.id,
-          type: item.type,
-          workspaces: item.workspaces,
-          permissions: item.permissions,
-        };
-      });
       this.logger.debug(
         `Authorization failed, principals: ${JSON.stringify(
           principals
