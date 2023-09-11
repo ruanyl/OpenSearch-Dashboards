@@ -282,21 +282,6 @@ export class Table extends PureComponent<TableProps, TableState> {
         actions: [
           {
             name: i18n.translate(
-              'savedObjectsManagement.objectsTable.table.columnActions.duplicateActionName',
-              { defaultMessage: 'Duplicate' }
-            ),
-            description: i18n.translate(
-              'savedObjectsManagement.objectsTable.table.columnActions.duplicateActionDescription',
-              { defaultMessage: 'Duplicate this saved object' }
-            ),
-            type: 'icon',
-            icon: 'copyClipboard',
-            isPrimary: true,
-            onClick: (object) => onCopySingle(object),
-            'data-test-subj': 'savedObjectsTableAction-duplicate',
-          },
-          {
-            name: i18n.translate(
               'savedObjectsManagement.objectsTable.table.columnActions.inspectActionName',
               { defaultMessage: 'Inspect' }
             ),
@@ -327,6 +312,25 @@ export class Table extends PureComponent<TableProps, TableState> {
             onClick: (object) => onShowRelationships(object),
             'data-test-subj': 'savedObjectsTableAction-relationships',
           },
+          ...(showDuplicate
+            ? [
+                {
+                  name: i18n.translate(
+                    'savedObjectsManagement.objectsTable.table.columnActions.duplicateActionName',
+                    { defaultMessage: 'Duplicate' }
+                  ),
+                  description: i18n.translate(
+                    'savedObjectsManagement.objectsTable.table.columnActions.duplicateActionDescription',
+                    { defaultMessage: 'Duplicate this saved object' }
+                  ),
+                  type: 'icon',
+                  icon: 'copyClipboard',
+                  isPrimary: true,
+                  onClick: (object: SavedObjectWithMetadata<unknown>) => onCopySingle(object),
+                  'data-test-subj': 'savedObjectsTableAction-duplicate',
+                },
+              ]
+            : []),
           ...actionRegistry.getAll().map((action) => {
             return {
               ...action.euiAction,

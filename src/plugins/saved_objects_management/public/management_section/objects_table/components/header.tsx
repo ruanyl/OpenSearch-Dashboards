@@ -49,6 +49,7 @@ export const Header = ({
   title,
   objectCount,
   hideImport = false,
+  showDuplicateAll = false,
 }: {
   onExportAll: () => void;
   onImport: () => void;
@@ -58,6 +59,7 @@ export const Header = ({
   title: string;
   objectCount: number;
   hideImport: boolean;
+  showDuplicateAll: boolean;
 }) => (
   <Fragment>
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
@@ -69,19 +71,21 @@ export const Header = ({
 
       <EuiFlexItem grow={false}>
         <EuiFlexGroup alignItems="baseline" gutterSize="m" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="s"
-              data-test-subj="copyObjects"
-              onClick={onCopy}
-              disabled={objectCount === 0}
-            >
-              <FormattedMessage
-                id="savedObjectsManagement.objectsTable.header.duplicateAllButtonLabel"
-                defaultMessage="Duplicate All"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
+          {showDuplicateAll && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="s"
+                data-test-subj="copyObjects"
+                onClick={onCopy}
+                disabled={objectCount === 0}
+              >
+                <FormattedMessage
+                  id="savedObjectsManagement.objectsTable.header.duplicateAllButtonLabel"
+                  defaultMessage="Duplicate All"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               size="s"
