@@ -50,9 +50,10 @@ export {
   ProcessedImportResponse,
   processImportResponse,
   FailedImport,
-  copySavedObjects,
+  duplicateSavedObjects,
   getWorkspacesWithWritePermission,
 } from './lib';
+export { SavedObjectsDuplicateModal } from './management_section';
 export { SavedObjectRelation, SavedObjectWithMetadata, SavedObjectMetadata } from './types';
 export { SAVED_OBJECT_DELETE_TRIGGER, savedObjectDeleteTrigger } from './triggers';
 export { SavedObjectDeleteContext } from './ui_actions_bootstrap';
