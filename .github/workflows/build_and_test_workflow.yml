@@ -48,7 +48,7 @@ jobs:
           git config --global core.autocrlf false
 
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Setup JDK (Windows only)
         if: matrix.os == 'windows-latest'
@@ -147,7 +147,7 @@ jobs:
           git config --global core.autocrlf false
 
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Setup JDK (Windows only)
         if: matrix.os == 'windows-latest'
@@ -244,7 +244,7 @@ jobs:
         working-directory: .
 
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
         with:
           path: ./artifacts
 
@@ -321,7 +321,7 @@ jobs:
         version: [osd-2.0.0, osd-2.1.0, osd-2.2.0, osd-2.3.0, osd-2.4.0, osd-2.5.0, osd-2.6.0, osd-2.7.0]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
         with:
           path: ./artifacts
 
