@@ -32,10 +32,11 @@ import React from 'react';
 import { i18n } from '@osd/i18n';
 
 import { TopNavMenuData } from 'src/plugins/navigation/public';
-import { AppMountParameters } from 'opensearch-dashboards/public';
+import { AppMountParameters, WorkspaceAttribute } from 'opensearch-dashboards/public';
 import { VISUALIZE_EMBEDDABLE_TYPE, VisualizeInput } from '../../../../visualizations/public';
 import {
   showSaveModal,
+  showDuplicateModal,
   SavedObjectSaveModalOrigin,
   SavedObjectSaveOpts,
   OnSaveProps,
@@ -50,6 +51,12 @@ import {
 import { VisualizeConstants } from '../visualize_constants';
 import { getEditBreadcrumbs } from './breadcrumbs';
 import { EmbeddableStateTransfer } from '../../../../embeddable/public';
+import {
+  duplicateSavedObjects,
+  getWorkspacesWithWritePermission,
+  SavedObjectsDuplicateModal,
+  SavedObjectWithMetadata,
+} from '../../../../saved_objects_management/public/';
 
 interface TopNavConfigParams {
   hasUnsavedChanges: boolean;
@@ -91,10 +98,15 @@ export const getTopNavConfig = (
     visualizeCapabilities,
     i18n: { Context: I18nContext },
     dashboard,
+    http,
+    notifications,
+    workspaces,
   }: VisualizeServices
 ) => {
   const { vis, embeddableHandler } = visInstance;
+  const workspaceEnabled = workspaces.workspaceEnabled$.getValue();
   const savedVis = 'savedVis' in visInstance ? visInstance.savedVis : undefined;
+
   /**
    * Called when the user clicks "Save" button.
    */
@@ -245,6 +257,114 @@ export const getTopNavConfig = (
       // disable the Share button if no action specified
       disableButton: !share || !!embeddableId,
     },
+    ...(workspaceEnabled
+      ? [
+          {
+            id: 'duplicate',
+            label: i18n.translate('visualize.topNavMenu.duplicateVisualizationButtonLabel', {
+              defaultMessage: 'duplicate',
+            }),
+            description: i18n.translate(
+              'visualize.topNavMenu.duplicateVisualizationButtonAriaLabel',
+              {
+                defaultMessage: 'Duplicate Visualization',
+              }
+            ),
+            testId: 'visualizeDuplicateButton',
+            disableButton: hasUnappliedChanges,
+            tooltip() {
+              if (hasUnappliedChanges) {
+                return i18n.translate(
+                  'visualize.topNavMenu.duplicateVisualizationDisabledButtonTooltip',
+                  {
+                    defaultMessage: 'Apply or Discard your changes before duplicating',
+                  }
+                );
+              }
+            },
+            run: (anchorElement: HTMLElement) => {
+              const getDuplicateWorkspaces = async (): Promise<WorkspaceAttribute[]> => {
+                let result;
+                try {
+                  result = await getWorkspacesWithWritePermission(http);
+                } catch (error) {
+                  notifications?.toasts.addDanger({
+                    title: i18n.translate(
+                      'savedObjectsManagement.objectsTable.duplicateWorkspaces.dangerNotification',
+                      {
+                        defaultMessage: 'Unable to get workspaces with write permission',
+                      }
+                    ),
+                    text: error instanceof Error ? error.message : JSON.stringify(error),
+                  });
+                }
+                if (result?.success) {
+                  return result.result?.workspaces ?? [];
+                } else {
+                  return [];
+                }
+              };
+
+              const onDuplicate = async (
+                savedObjects: SavedObjectWithMetadata[],
+                includeReferencesDeep: boolean,
+                targetWorkspace: string
+              ) => {
+                const objectsToDuplicate = savedObjects.map((obj) => ({
+                  id: obj.id,
+                  type: 'visualization',
+                }));
+
+                try {
+                  await duplicateSavedObjects(
+                    http,
+                    objectsToDuplicate,
+                    includeReferencesDeep,
+                    targetWorkspace
+                  );
+                } catch (e) {
+                  notifications.toasts.addDanger({
+                    title: i18n.translate('visualize.topNavMenu.duplicate.dangerNotification', {
+                      defaultMessage: 'Unable to duplicate visualization',
+                    }),
+                  });
+                  throw e;
+                }
+                notifications.toasts.addSuccess({
+                  title: i18n.translate('visualize.topNavMenu.duplicate.successNotification', {
+                    defaultMessage: 'Duplicate visualization successfully',
+                  }),
+                });
+              };
+
+              const selectedSavedObjects = [(savedVis || {}) as SavedObjectWithMetadata];
+
+              const duplicateModal = (
+                <SavedObjectsDuplicateModal
+                  selectedSavedObjects={selectedSavedObjects}
+                  workspaces={workspaces}
+                  getDuplicateWorkspaces={getDuplicateWorkspaces}
+                  onDuplicate={onDuplicate}
+                  onClose={() => {}}
+                />
+              );
+              const isSaveAsButton = anchorElement.classList.contains('saveAsButton');
+              onAppLeave((actions) => {
+                return actions.default();
+              });
+              if (
+                originatingApp === 'dashboards' &&
+                dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables &&
+                !isSaveAsButton
+              ) {
+                createVisReference();
+              } else if (savedVis) {
+                showDuplicateModal(duplicateModal, I18nContext);
+              }
+            },
+          },
+        ]
+      : []),
     ...(originatingApp === 'dashboards' || originatingApp === 'canvas'
       ? [
           {

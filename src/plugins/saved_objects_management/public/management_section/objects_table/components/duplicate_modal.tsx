@@ -35,8 +35,8 @@ import { WorkspaceAttribute, WorkspaceStart } from 'opensearch-dashboards/public
 import { i18n } from '@osd/i18n';
 import { SavedObjectWithMetadata } from '../../../types';
 import { getSavedObjectLabel } from '../../../lib';
-import { SAVED_OBJECT_TYPE_WORKSAPCE } from '../../../constants';
 import { DuplicateState } from '../';
+import { SAVED_OBJECT_TYPE_WORKSPACE } from '../../../constants';
 
 type WorkspaceOption = EuiComboBoxOptionOption<WorkspaceAttribute>;
 
@@ -250,7 +250,7 @@ export class SavedObjectsDuplicateModal extends React.Component<Props, State> {
     const includedSelectedObjects = selectedObjects.filter((item) =>
       !!targetWorkspaceId && !!item.workspaces
         ? !item.workspaces.includes(targetWorkspaceId)
-        : item.type !== SAVED_OBJECT_TYPE_WORKSAPCE
+        : item.type !== SAVED_OBJECT_TYPE_WORKSPACE
     );
 
     const ignoredSelectedObjectsLength = selectedObjects.length - includedSelectedObjects.length;
@@ -398,7 +398,7 @@ export class SavedObjectsDuplicateModal extends React.Component<Props, State> {
                 width: '50px',
                 render: (type, object) => (
                   <EuiToolTip position="top" content={getSavedObjectLabel(type)}>
-                    <EuiIcon type={object.meta.icon || 'apps'} />
+                    <EuiIcon type={object.meta?.icon || 'apps'} />
                   </EuiToolTip>
                 ),
               },
