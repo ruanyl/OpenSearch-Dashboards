@@ -730,7 +730,7 @@ export class SavedObjectsRepository {
       }
     }
 
-    const obj = await this.get(type, id);
+    const obj = await this.get(type, id, { namespace });
     const existingWorkspace = obj.workspaces || [];
     if (!force && existingWorkspace.length > 1) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
