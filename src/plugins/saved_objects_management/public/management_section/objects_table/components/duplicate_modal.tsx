@@ -200,7 +200,10 @@ export class SavedObjectsDuplicateModal extends React.Component<Props, State> {
         key={savedObjectType}
         label={
           <FormattedMessage
-            id={'savedObjectsManagement.objectsTable.duplicateModal.savedObjectType.' + savedObjectType}
+            id={
+              'savedObjectsManagement.objectsTable.duplicateModal.savedObjectType.' +
+              savedObjectType
+            }
             defaultMessage={
               capitalizeFirstLetter(savedObjectType) + ` (${savedObjectTypeCount.toString()})`
             }
@@ -263,7 +266,7 @@ export class SavedObjectsDuplicateModal extends React.Component<Props, State> {
     const confirmMessageForAllObjects = `Duplicate (${includedSelectedObjects.length})`;
     const confirmMessageForSingleOrSelectedObjects = 'Duplicate';
     const confirmMessage =
-    duplicateState === DuplicateState.All
+      duplicateState === DuplicateState.All
         ? confirmMessageForAllObjects
         : confirmMessageForSingleOrSelectedObjects;
     const warningMessageForOnlyOneSavedObject = (

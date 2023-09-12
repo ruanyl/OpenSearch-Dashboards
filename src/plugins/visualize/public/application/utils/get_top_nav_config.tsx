@@ -30,23 +30,21 @@
 
 import React from 'react';
 import { i18n } from '@osd/i18n';
-
 import { TopNavMenuData } from 'src/plugins/navigation/public';
 import { AppMountParameters, WorkspaceAttribute } from 'opensearch-dashboards/public';
 import { VISUALIZE_EMBEDDABLE_TYPE, VisualizeInput } from '../../../../visualizations/public';
 import {
-  showSaveModal,
-  showDuplicateModal,
+  OnSaveProps,
   SavedObjectSaveModalOrigin,
   SavedObjectSaveOpts,
-  OnSaveProps,
+  showDuplicateModal,
+  showSaveModal,
 } from '../../../../saved_objects/public';
 import { unhashUrl } from '../../../../opensearch_dashboards_utils/public';
-
 import {
-  VisualizeServices,
   VisualizeAppStateContainer,
   VisualizeEditorVisInstance,
+  VisualizeServices,
 } from '../types';
 import { VisualizeConstants } from '../visualize_constants';
 import { getEditBreadcrumbs } from './breadcrumbs';
@@ -56,6 +54,7 @@ import {
   getWorkspacesWithWritePermission,
   SavedObjectsDuplicateModal,
   SavedObjectWithMetadata,
+  DuplicateState,
 } from '../../../../saved_objects_management/public/';
 
 interface TopNavConfigParams {
@@ -338,11 +337,13 @@ export const getTopNavConfig = (
                 });
               };
 
-              const visualizationSavedObjects = [(savedVis || {}) as SavedObjectWithMetadata];
+              const visualizationSavedObject = (savedVis || {}) as SavedObjectWithMetadata;
+              visualizationSavedObject.meta = { title: savedVis?.title }; // meta is missing in savedVis
 
               const duplicateModal = (
                 <SavedObjectsDuplicateModal
-                  selectedSavedObjects={visualizationSavedObjects}
+                  duplicateState={DuplicateState.Single}
+                  selectedSavedObjects={[visualizationSavedObject]}
                   workspaces={workspaces}
                   getDuplicateWorkspaces={getDuplicateWorkspaces}
                   onDuplicate={onDuplicate}
