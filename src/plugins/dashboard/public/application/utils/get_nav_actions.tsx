@@ -18,6 +18,7 @@ import {
   DashboardSaveModal,
   TopNavIds,
   showCloneModal,
+  showDuplicateModal,
   showOptionsPopover,
   UrlParams,
 } from '../components/dashboard_top_nav';
@@ -33,6 +34,13 @@ import { DashboardContainer } from '../embeddable/dashboard_container';
 import { DashboardConstants, createDashboardEditUrl } from '../../dashboard_constants';
 import { unhashUrl } from '../../../../opensearch_dashboards_utils/public';
 import { Dashboard } from '../../dashboard';
+import { SavedObjectWithMetadata } from '../../../../saved_objects_management/common';
+import {
+  duplicateSavedObjects,
+  getWorkspacesWithWritePermission,
+  SavedObjectsDuplicateModal,
+} from '../../../../saved_objects_management/public';
+import { WorkspaceAttribute } from '../../../../../core/types';
 
 interface UrlParamsSelectedMap {
   [UrlParams.SHOW_TOP_MENU]: boolean;
@@ -65,6 +73,8 @@ export const getNavActions = (
     share,
     dashboardConfig,
     dashboardCapabilities,
+    http,
+    workspaces,
   } = services;
   const navActions: {
     [key: string]: NavAction;
@@ -133,7 +143,7 @@ export const getNavActions = (
         title={currentTitle}
         description={currentDescription}
         timeRestore={currentTimeRestore}
-        showCopyOnSave={savedDashboard.id ? true : false}
+        showCopyOnSave={!!savedDashboard.id}
       />
     );
     showSaveModal(dashboardSaveModal, I18nContext);
@@ -164,6 +174,74 @@ export const getNavActions = (
     };
 
     showCloneModal(onClone, currentTitle);
+  };
+
+  navActions[TopNavIds.DUPLICATE] = () => {
+    const getDuplicateWorkspaces = async (): Promise<WorkspaceAttribute[]> => {
+      let result;
+      try {
+        result = await getWorkspacesWithWritePermission(http);
+      } catch (error) {
+        notifications?.toasts.addDanger({
+          title: i18n.translate('dashboard.duplicateWorkspaces.dangerNotification', {
+            defaultMessage: 'Unable to get workspaces with write permission',
+          }),
+          text: error instanceof Error ? error.message : JSON.stringify(error),
+        });
+      }
+      if (result?.success) {
+        return result.result?.workspaces ?? [];
+      } else {
+        return [];
+      }
+    };
+    const onDuplicate = async (
+      dashboardSavedObjects: SavedObjectWithMetadata[],
+      includeReferencesDeep: boolean,
+      targetWorkspace: string
+    ) => {
+      // object must be dashboard type
+      const objectsToDuplicate = dashboardSavedObjects.map((obj) => ({
+        id: obj.id,
+        type: 'dashboard',
+      }));
+
+      try {
+        await duplicateSavedObjects(
+          http,
+          objectsToDuplicate,
+          includeReferencesDeep,
+          targetWorkspace
+        );
+      } catch (e) {
+        notifications.toasts.addDanger({
+          title: i18n.translate('dashboard.dashboardWasNotDuplicatedDangerMessage', {
+            defaultMessage: 'Unable to duplicate dashboard',
+          }),
+        });
+        throw e;
+      }
+
+      notifications.toasts.addSuccess({
+        title: i18n.translate('dashboard.dashboardWasDuplicatedSuccessMessage', {
+          defaultMessage: 'Duplicate dashboard successfully',
+        }),
+      });
+    };
+
+    const dashboardSavedObjects = [(savedDashboard || {}) as SavedObjectWithMetadata];
+
+    const duplicateModal = (
+      <SavedObjectsDuplicateModal
+        selectedSavedObjects={dashboardSavedObjects}
+        workspaces={workspaces}
+        getDuplicateWorkspaces={getDuplicateWorkspaces}
+        onDuplicate={onDuplicate}
+        onClose={() => {}}
+      />
+    );
+
+    showDuplicateModal(duplicateModal);
   };
 
   navActions[TopNavIds.ADD_EXISTING] = () => {
@@ -203,7 +281,7 @@ export const getNavActions = (
   };
 
   if (share) {
-    // the share button is only availabale if "share" plugin contract enabled
+    // the share button is only available if "share" plugin contract enabled
     navActions[TopNavIds.SHARE] = (anchorElement) => {
       const EmbedUrlParamExtension = ({
         setParamValue,
