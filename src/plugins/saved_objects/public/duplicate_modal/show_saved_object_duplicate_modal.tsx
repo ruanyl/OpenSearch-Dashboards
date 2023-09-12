@@ -11,7 +11,8 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { I18nStart } from '../../../../core/public';
+import { I18nStart, WorkspaceAttribute, WorkspaceStart } from '../../../../core/public';
+import { SavedObjectWithMetadata } from '../../../saved_objects_management/common';
 
 /**
  * Represents the result of trying to duplicate the saved object.
@@ -22,6 +23,9 @@ import { I18nStart } from '../../../../core/public';
  */
 
 interface MinimalDuplicateModalProps {
+  selectedSavedObjects: SavedObjectWithMetadata[];
+  workspaces: WorkspaceStart;
+  getDuplicateWorkspaces: (...args: any[]) => Promise<WorkspaceAttribute[]>;
   onDuplicate: (...args: any[]) => Promise<void>;
   onClose: () => void;
 }

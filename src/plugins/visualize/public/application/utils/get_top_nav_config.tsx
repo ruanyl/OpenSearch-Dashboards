@@ -306,11 +306,12 @@ export const getTopNavConfig = (
               };
 
               const onDuplicate = async (
-                savedObjects: SavedObjectWithMetadata[],
+                visualizationSavedObjects: SavedObjectWithMetadata[],
                 includeReferencesDeep: boolean,
                 targetWorkspace: string
               ) => {
-                const objectsToDuplicate = savedObjects.map((obj) => ({
+                // object must be visualization type
+                const objectsToDuplicate = visualizationSavedObjects.map((obj) => ({
                   id: obj.id,
                   type: 'visualization',
                 }));
@@ -337,11 +338,11 @@ export const getTopNavConfig = (
                 });
               };
 
-              const selectedSavedObjects = [(savedVis || {}) as SavedObjectWithMetadata];
+              const visualizationSavedObjects = [(savedVis || {}) as SavedObjectWithMetadata];
 
               const duplicateModal = (
                 <SavedObjectsDuplicateModal
-                  selectedSavedObjects={selectedSavedObjects}
+                  selectedSavedObjects={visualizationSavedObjects}
                   workspaces={workspaces}
                   getDuplicateWorkspaces={getDuplicateWorkspaces}
                   onDuplicate={onDuplicate}
