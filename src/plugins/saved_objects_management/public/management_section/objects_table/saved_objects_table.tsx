@@ -97,7 +97,7 @@ import {
 import { Header, Table, Flyout, Relationships } from './components';
 import { DataPublicPluginStart } from '../../../../data/public';
 import { SavedObjectsDuplicateModal } from './components';
-import { PUBLIC_WORKSPACE_ID, MANAGEMENT_WORKSPACE_ID } from '../../../../../core/public';
+import { PUBLIC_WORKSPACE_ID } from '../../../../../core/public';
 
 export enum DuplicateState {
   Single = 'single',
@@ -533,20 +533,31 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     const objectsToDuplicate = savedObjects.map((obj) => ({ id: obj.id, type: obj.type }));
     let result;
     try {
-      result = await duplicateSavedObjects(http, objectsToDuplicate, includeReferencesDeep, targetWorkspace);
+      result = await duplicateSavedObjects(
+        http,
+        objectsToDuplicate,
+        includeReferencesDeep,
+        targetWorkspace
+      );
       if (result.success) {
         notifications.toasts.addSuccess({
-          title: i18n.translate('savedObjectsManagement.objectsTable.duplicate.successNotification', {
-            defaultMessage:
-              'Duplicate ' + savedObjects.length.toString() + ' saved objects successfully',
-          }),
+          title: i18n.translate(
+            'savedObjectsManagement.objectsTable.duplicate.successNotification',
+            {
+              defaultMessage:
+                'Duplicate ' + savedObjects.length.toString() + ' saved objects successfully',
+            }
+          ),
         });
       } else {
         const failedCount = savedObjects.length - result.successCount;
         notifications.toasts.addSuccess({
-          title: i18n.translate('savedObjectsManagement.objectsTable.duplicate.dangerNotification', {
-            defaultMessage: 'Unable to duplicate ' + failedCount.toString() + ' saved objects',
-          }),
+          title: i18n.translate(
+            'savedObjectsManagement.objectsTable.duplicate.dangerNotification',
+            {
+              defaultMessage: 'Unable to duplicate ' + failedCount.toString() + ' saved objects',
+            }
+          ),
         });
       }
     } catch (e) {

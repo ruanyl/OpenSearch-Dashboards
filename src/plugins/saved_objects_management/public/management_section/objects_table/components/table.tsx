@@ -326,7 +326,7 @@ export class Table extends PureComponent<TableProps, TableState> {
                   type: 'icon',
                   icon: 'copyClipboard',
                   isPrimary: true,
-                  onClick: (object: SavedObjectWithMetadata<unknown>) => onCopySingle(object),
+                  onClick: (object: SavedObjectWithMetadata<unknown>) => onDuplicateSingle(object),
                   'data-test-subj': 'savedObjectsTableAction-duplicate',
                 },
               ]
@@ -449,7 +449,7 @@ export class Table extends PureComponent<TableProps, TableState> {
       <EuiButtonIcon
         key="copySO"
         iconType="copyClipboard"
-        onClick={onCopySelected}
+        onClick={onDuplicateSelected}
         isDisabled={selectedSavedObjects.length === 0}
         data-test-subj="savedObjectsManagementCopy"
       />

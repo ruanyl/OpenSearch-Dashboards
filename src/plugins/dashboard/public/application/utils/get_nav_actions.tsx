@@ -37,6 +37,7 @@ import { Dashboard } from '../../dashboard';
 import { SavedObjectWithMetadata } from '../../../../saved_objects_management/common';
 import {
   duplicateSavedObjects,
+  DuplicateState,
   getWorkspacesWithWritePermission,
   SavedObjectsDuplicateModal,
 } from '../../../../saved_objects_management/public';
@@ -229,11 +230,13 @@ export const getNavActions = (
       });
     };
 
-    const dashboardSavedObjects = [(savedDashboard || {}) as SavedObjectWithMetadata];
+    const dashboardSavedObject = (savedDashboard || {}) as SavedObjectWithMetadata;
+    dashboardSavedObject.meta = { title: savedDashboard.title };
 
     const duplicateModal = (
       <SavedObjectsDuplicateModal
-        selectedSavedObjects={dashboardSavedObjects}
+        duplicateState={DuplicateState.Single}
+        selectedSavedObjects={[dashboardSavedObject]}
         workspaces={workspaces}
         getDuplicateWorkspaces={getDuplicateWorkspaces}
         onDuplicate={onDuplicate}
