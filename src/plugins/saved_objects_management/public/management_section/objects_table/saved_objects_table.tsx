@@ -550,8 +550,24 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
           ),
         });
       } else {
-        const failedCount = savedObjects.length - result.successCount;
-        notifications.toasts.addSuccess({
+        let failedCount = savedObjects.length;
+        if (result.successCount) {
+          // reduplicate objects which can be successfully duplicated
+          const successObjectIds = result.successResults.map((item: { id: string }) => item.id);
+          const successObjectsToDuplicate = objectsToDuplicate.filter((item) =>
+            successObjectIds.includes(item.id)
+          );
+          result = await duplicateSavedObjects(
+            http,
+            successObjectsToDuplicate,
+            includeReferencesDeep,
+            targetWorkspace
+          );
+          if (result.success) {
+            failedCount -= successObjectsToDuplicate.length;
+          }
+        }
+        notifications.toasts.addDanger({
           title: i18n.translate(
             'savedObjectsManagement.objectsTable.duplicate.dangerNotification',
             {
@@ -563,7 +579,8 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     } catch (e) {
       notifications.toasts.addDanger({
         title: i18n.translate('savedObjectsManagement.objectsTable.duplicate.dangerNotification', {
-          defaultMessage: 'Unable to duplicate all saved objects',
+          defaultMessage:
+            'Unable to duplicate ' + savedObjects.length.toString() + ' saved objects',
         }),
       });
       throw e;
