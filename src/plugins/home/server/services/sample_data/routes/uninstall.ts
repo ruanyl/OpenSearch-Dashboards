@@ -34,6 +34,10 @@ import { IRouter } from 'src/core/server';
 import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 import { createIndexName } from '../lib/create_index_name';
 import { SampleDataUsageTracker } from '../usage/usage';
+import {
+  getDataSourceIntegratedSavedObjects,
+  getWorkspaceIntegratedSavedObjects,
+} from '../data_sets/util';
 
 export function createUninstallRoute(
   router: IRouter,
@@ -81,17 +85,11 @@ export function createUninstallRoute(
       }
 
       let savedObjectsList = sampleDataset.savedObjects;
-      if (dataSourceId) {
-        savedObjectsList = sampleDataset.getDataSourceIntegratedSavedObjects(
-          savedObjectsList,
-          dataSourceId
-        );
-      }
       if (workspaceId) {
-        savedObjectsList = sampleDataset.getWorkspaceIntegratedSavedObjects(
-          savedObjectsList,
-          workspaceId
-        );
+        savedObjectsList = getWorkspaceIntegratedSavedObjects(savedObjectsList, workspaceId);
+      }
+      if (dataSourceId) {
+        savedObjectsList = getDataSourceIntegratedSavedObjects(savedObjectsList, dataSourceId);
       }
 
       const deletePromises = savedObjectsList.map(({ type, id }) =>

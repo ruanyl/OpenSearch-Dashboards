@@ -6,12 +6,16 @@
 import { SavedObject } from 'opensearch-dashboards/server';
 import { cloneDeep } from 'lodash';
 
-const generateIdWithPrefix = (id: string, prefix?: string) => {
-  return [...(prefix ? [prefix] : []), id].join('_');
+const withPrefix = (...args: Array<string | undefined>) => (id: string) => {
+  const prefix = args.filter(Boolean).join('_');
+  if (prefix) {
+    return `${prefix}_${id}`;
+  }
+  return id;
 };
 
-export const appendDataSourceId = (id: string) => {
-  return (dataSourceId?: string) => generateIdWithPrefix(id, dataSourceId);
+export const addPrefixTo = (id: string) => (...args: Array<string | undefined>) => {
+  return withPrefix(...args)(id);
 };
 
 const overrideSavedObjectId = (savedObject: SavedObject, idGenerator: (id: string) => string) => {
@@ -62,9 +66,8 @@ export const getDataSourceIntegratedSavedObjects = (
 ): SavedObject[] => {
   savedObjectList = cloneDeep(savedObjectList);
   if (dataSourceId) {
-    const idGeneratorWithDataSource = (id: string) => generateIdWithPrefix(id, dataSourceId);
     return savedObjectList.map((savedObject) => {
-      overrideSavedObjectId(savedObject, idGeneratorWithDataSource);
+      overrideSavedObjectId(savedObject, withPrefix(dataSourceId));
 
       // update reference
       if (savedObject.type === 'index-pattern') {
@@ -94,22 +97,14 @@ export const getDataSourceIntegratedSavedObjects = (
   return savedObjectList;
 };
 
-export const appendWorkspaceId = (id: string) => (workspaceId?: string) =>
-  generateIdWithPrefix(id, workspaceId);
-
-export const appendWorkspaceAndDataSourceId = (id: string) => (workspaceId?: string) => (
-  dataSourceId?: string
-) => appendDataSourceId(appendWorkspaceId(id)(workspaceId))(dataSourceId);
-
 export const getWorkspaceIntegratedSavedObjects = (
   savedObjectList: SavedObject[],
   workspaceId?: string
 ) => {
   savedObjectList = cloneDeep(savedObjectList);
-  const generateWithWorkspaceId = (id: string) => appendWorkspaceId(id)(workspaceId);
 
   savedObjectList.forEach((savedObject) => {
-    overrideSavedObjectId(savedObject, generateWithWorkspaceId);
+    overrideSavedObjectId(savedObject, withPrefix(workspaceId));
   });
   return savedObjectList;
 };

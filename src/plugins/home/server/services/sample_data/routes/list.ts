@@ -60,9 +60,7 @@ export const createListRoute = (router: IRouter, sampleDatasets: SampleDatasetSc
           previewImagePath: sampleDataset.previewImagePath,
           darkPreviewImagePath: sampleDataset.darkPreviewImagePath,
           hasNewThemeImages: sampleDataset.hasNewThemeImages,
-          overviewDashboard: sampleDataset.getWorkspaceAndDataSourceIntegratedDashboard(
-            workspaceId
-          )(dataSourceId),
+          overviewDashboard: sampleDataset.getDashboardWithPrefix(dataSourceId, workspaceId),
           appLinks: sampleDataset.appLinks,
           defaultIndex: sampleDataset.getDataSourceIntegratedDefaultIndex(dataSourceId),
           dataIndices: sampleDataset.dataIndices.map(({ id }) => ({ id })),

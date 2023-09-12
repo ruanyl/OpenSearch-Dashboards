@@ -39,6 +39,10 @@ import {
 } from '../lib/translate_timestamp';
 import { loadData } from '../lib/load_data';
 import { SampleDataUsageTracker } from '../usage/usage';
+import {
+  getDataSourceIntegratedSavedObjects,
+  getWorkspaceIntegratedSavedObjects,
+} from '../data_sets/util';
 
 const insertDataIntoIndex = (
   dataIndexConfig: any,
@@ -201,17 +205,14 @@ export function createInstallRoute(
 
       let createResults;
       let savedObjectsList = sampleDataset.savedObjects;
+      if (workspaceId) {
+        savedObjectsList = getWorkspaceIntegratedSavedObjects(savedObjectsList, workspaceId);
+      }
       if (dataSourceId) {
-        savedObjectsList = sampleDataset.getDataSourceIntegratedSavedObjects(
+        savedObjectsList = getDataSourceIntegratedSavedObjects(
           savedObjectsList,
           dataSourceId,
           dataSourceTitle
-        );
-      }
-      if (workspaceId) {
-        savedObjectsList = sampleDataset.getWorkspaceIntegratedSavedObjects(
-          savedObjectsList,
-          workspaceId
         );
       }
 
