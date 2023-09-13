@@ -169,7 +169,7 @@ export class SavedObjectsPermissionControl {
       const result = await repository?.find({
         type: [WORKSPACE_TYPE],
         ACLSearchParams: {
-          workspacePermissionModes: permissionModes,
+          permissionModes,
           principals,
         },
         perPage: 999,

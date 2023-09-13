@@ -286,9 +286,9 @@ export function getQueryParams({
 
   if (ACLSearchParams) {
     const shouldClause: any = [];
-    if (ACLSearchParams.workspacePermissionModes && ACLSearchParams.principals) {
+    if (ACLSearchParams.permissionModes && ACLSearchParams.principals) {
       const workspacePermissionDSL = ACL.generateGetPermittedSavedObjectsQueryDSL(
-        ACLSearchParams.workspacePermissionModes,
+        ACLSearchParams.permissionModes,
         ACLSearchParams.principals
       );
       shouldClause.push(workspacePermissionDSL.query);
@@ -300,14 +300,6 @@ export function getQueryParams({
           workspaces: ACLSearchParams.workspaces,
         },
       });
-    }
-
-    if (ACLSearchParams.objectPermissionModes && ACLSearchParams.principals) {
-      const objectPermissionDSL = ACL.generateGetPermittedSavedObjectsQueryDSL(
-        ACLSearchParams.objectPermissionModes,
-        ACLSearchParams.principals
-      );
-      shouldClause.push(objectPermissionDSL.query);
     }
 
     if (shouldClause.length) {

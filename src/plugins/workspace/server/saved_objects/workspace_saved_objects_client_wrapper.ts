@@ -362,7 +362,7 @@ export class WorkspaceSavedObjectsClientWrapper {
         options.ACLSearchParams = {};
       }
       if (this.isRelatedToWorkspace(options.type)) {
-        options.ACLSearchParams.workspacePermissionModes = [
+        options.ACLSearchParams.permissionModes = [
           WorkspacePermissionMode.LibraryRead,
           WorkspacePermissionMode.LibraryWrite,
           WorkspacePermissionMode.Management,
@@ -409,7 +409,7 @@ export class WorkspaceSavedObjectsClientWrapper {
            */
           options.workspaces = undefined;
           options.ACLSearchParams.workspaces = permittedWorkspaceIds;
-          options.ACLSearchParams.objectPermissionModes = [
+          options.ACLSearchParams.permissionModes = [
             WorkspacePermissionMode.Read,
             WorkspacePermissionMode.Write,
           ];

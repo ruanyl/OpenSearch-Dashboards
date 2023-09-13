@@ -118,8 +118,7 @@ export interface SavedObjectsFindOptions {
   ACLSearchParams?: {
     workspaces?: string[];
     principals?: Principals;
-    workspacePermissionModes?: string[];
-    objectPermissionModes?: string[];
+    permissionModes?: string[];
   };
 }
 
