@@ -42,11 +42,15 @@ export const createListRoute = (router: IRouter, sampleDatasets: SampleDatasetSc
     {
       path: '/api/sample_data',
       validate: {
-        query: schema.object({ data_source_id: schema.maybe(schema.string()) }),
+        query: schema.object({
+          data_source_id: schema.maybe(schema.string()),
+          workspace_id: schema.maybe(schema.string()),
+        }),
       },
     },
     async (context, req, res) => {
       const dataSourceId = req.query.data_source_id;
+      const workspaceId = req.query.workspace_id;
 
       const registeredSampleDatasets = sampleDatasets.map((sampleDataset) => {
         return {
@@ -55,7 +59,7 @@ export const createListRoute = (router: IRouter, sampleDatasets: SampleDatasetSc
           description: sampleDataset.description,
           previewImagePath: sampleDataset.previewImagePath,
           darkPreviewImagePath: sampleDataset.darkPreviewImagePath,
-          overviewDashboard: sampleDataset.getDataSourceIntegratedDashboard(dataSourceId),
+          overviewDashboard: sampleDataset.getDashboardWithPrefix(dataSourceId, workspaceId),
           appLinks: sampleDataset.appLinks,
           defaultIndex: sampleDataset.getDataSourceIntegratedDefaultIndex(dataSourceId),
           dataIndices: sampleDataset.dataIndices.map(({ id }) => ({ id })),
