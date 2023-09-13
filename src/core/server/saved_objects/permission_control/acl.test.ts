@@ -6,8 +6,6 @@
 import { Principals, Permissions, ACL } from './acl';
 
 describe('SavedObjectTypeRegistry', () => {
-  let acl: ACL;
-
   it('test has permission', () => {
     const principals: Principals = {
       users: ['user1'],
@@ -16,7 +14,7 @@ describe('SavedObjectTypeRegistry', () => {
     const permissions: Permissions = {
       read: principals,
     };
-    acl = new ACL(permissions);
+    const acl = new ACL(permissions);
     expect(
       acl.hasPermission(['read'], {
         users: ['user1'],
@@ -32,7 +30,7 @@ describe('SavedObjectTypeRegistry', () => {
   });
 
   it('test add permission', () => {
-    acl = new ACL();
+    const acl = new ACL();
     const result1 = acl
       .addPermission(['read'], {
         users: ['user1'],
@@ -61,8 +59,8 @@ describe('SavedObjectTypeRegistry', () => {
       read: principals1,
       write: principals1,
     };
-    acl = new ACL(permissions1);
-    const result1 = acl
+    const acl1 = new ACL(permissions1);
+    const result1 = acl1
       .removePermission(['read'], {
         users: ['user1'],
         groups: [],
@@ -85,8 +83,8 @@ describe('SavedObjectTypeRegistry', () => {
       write: principals2,
     };
 
-    acl = new ACL(permissions2);
-    const result2 = acl
+    const acl2 = new ACL(permissions2);
+    const result2 = acl2
       .removePermission(['read', 'write'], {
         users: ['user1'],
         groups: ['group1'],
@@ -105,7 +103,7 @@ describe('SavedObjectTypeRegistry', () => {
       read: principals,
       write: principals,
     };
-    acl = new ACL(permissions);
+    const acl = new ACL(permissions);
     const result = acl.toFlatList();
     expect(result).toHaveLength(3);
     expect(result).toEqual(
