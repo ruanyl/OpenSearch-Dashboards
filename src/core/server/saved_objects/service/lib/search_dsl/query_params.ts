@@ -287,11 +287,11 @@ export function getQueryParams({
   if (ACLSearchParams) {
     const shouldClause: any = [];
     if (ACLSearchParams.permissionModes && ACLSearchParams.principals) {
-      const workspacePermissionDSL = ACL.generateGetPermittedSavedObjectsQueryDSL(
+      const permissionDSL = ACL.generateGetPermittedSavedObjectsQueryDSL(
         ACLSearchParams.permissionModes,
         ACLSearchParams.principals
       );
-      shouldClause.push(workspacePermissionDSL.query);
+      shouldClause.push(permissionDSL.query);
     }
 
     if (ACLSearchParams.workspaces) {
