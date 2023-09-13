@@ -132,6 +132,7 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
     const managementWorkspaceACL = new ACL().addPermission([WorkspacePermissionMode.LibraryRead], {
       users: ['*'],
     });
+    const DSM_APP_ID = 'dataSources';
 
     await Promise.all([
       this.checkAndCreateWorkspace(
@@ -155,7 +156,7 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
           features: [
             `@${DEFAULT_APP_CATEGORIES.management.id}`,
             WORKSPACE_OVERVIEW_APP_ID,
-            WORKSPACE_UPDATE_APP_ID,
+            DSM_APP_ID,
           ],
         },
         managementWorkspaceACL.getPermissions()
