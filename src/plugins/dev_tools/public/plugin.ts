@@ -85,7 +85,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup> {
       icon: '/plugins/home/public/assets/logos/opensearch_mark_default.svg',
       /* the order of dev tools, it shows as last item of management section */
       order: 9070,
-      category: DEFAULT_APP_CATEGORIES.management,
+      category: DEFAULT_APP_CATEGORIES.openSearchFeatures,
       mount: async (params: AppMountParameters) => {
         const { element, history } = params;
         element.classList.add('devAppWrapper');

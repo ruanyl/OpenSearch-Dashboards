@@ -4,7 +4,6 @@
  */
 import { i18n } from '@osd/i18n';
 import { Observable } from 'rxjs';
-
 import {
   PluginInitializerContext,
   CoreSetup,
@@ -26,7 +25,7 @@ import { IWorkspaceDBImpl } from './types';
 import { WorkspaceClientWithSavedObject } from './workspace_client';
 import { WorkspaceSavedObjectsClientWrapper } from './saved_objects';
 import { registerRoutes } from './routes';
-import { WORKSPACE_OVERVIEW_APP_ID, WORKSPACE_UPDATE_APP_ID } from '../common/constants';
+import { WORKSPACE_OVERVIEW_APP_ID } from '../common/constants';
 import { ConfigSchema } from '../config';
 
 export class WorkspacePlugin implements Plugin<{}, {}> {
@@ -133,6 +132,7 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
       users: ['*'],
     });
     const DSM_APP_ID = 'dataSources';
+    const DEV_TOOLS_APP_ID = 'dev_tools';
 
     await Promise.all([
       this.checkAndCreateWorkspace(
@@ -157,6 +157,7 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
             `@${DEFAULT_APP_CATEGORIES.management.id}`,
             WORKSPACE_OVERVIEW_APP_ID,
             DSM_APP_ID,
+            DEV_TOOLS_APP_ID,
           ],
         },
         managementWorkspaceACL.getPermissions()
