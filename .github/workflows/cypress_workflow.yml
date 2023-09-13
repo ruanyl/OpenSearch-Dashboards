@@ -19,7 +19,7 @@ env:
 
 jobs:
   cypress-tests:
-    runs-on: arc-runner-set
+    runs-on: ubuntu-latest
     container:
       image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
       options: --user 1001
@@ -78,9 +78,9 @@ jobs:
         uses: cypress-io/github-action@v2
         with:
           working-directory: ${{ env.FTR_PATH }}
-          start: sudo ${{ env.OPENSEARCH_SNAPSHOT_CMD }}, ${{ env.START_CMD }}
+          start: ${{ env.OPENSEARCH_SNAPSHOT_CMD }}, ${{ env.START_CMD }}
           wait-on: 'http://localhost:9200, http://localhost:5601'
-          command: sudo yarn cypress:run-without-security --browser ${{ env.CYPRESS_BROWSER }} --spec ${{ env.SPEC }}
+          command: yarn cypress:run-without-security --browser ${{ env.CYPRESS_BROWSER }} --spec ${{ env.SPEC }}
 
       # Screenshots are only captured on failure, will change this once we do visual regression tests
       - uses: actions/upload-artifact@v3
