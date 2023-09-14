@@ -11,8 +11,8 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { I18nStart, WorkspaceAttribute, WorkspaceStart } from '../../../../../../core/public';
-import { SavedObjectWithMetadata } from '../../../../common';
+import { SavedObjectsDuplicateModalProps } from './duplicate_modal';
+import { I18nStart } from '../../../../../../core/public';
 
 /**
  * Represents the result of trying to duplicate the saved object.
@@ -22,16 +22,8 @@ import { SavedObjectWithMetadata } from '../../../../common';
  * modal can still recover (e.g. the name of the saved object was already taken).
  */
 
-interface MinimalDuplicateModalProps {
-  selectedSavedObjects: SavedObjectWithMetadata[];
-  workspaces: WorkspaceStart;
-  getDuplicateWorkspaces: (...args: any[]) => Promise<WorkspaceAttribute[]>;
-  onDuplicate: (...args: any[]) => Promise<void>;
-  onClose: () => void;
-}
-
 export function showDuplicateModal(
-  duplicateModal: React.ReactElement<MinimalDuplicateModalProps>,
+  duplicateModal: React.ReactElement<SavedObjectsDuplicateModalProps>,
   I18nContext: I18nStart['Context']
 ) {
   const container = document.createElement('div');
@@ -42,7 +34,7 @@ export function showDuplicateModal(
 
   const onDuplicate = duplicateModal.props.onDuplicate;
 
-  const onDuplicateConfirmed: MinimalDuplicateModalProps['onDuplicate'] = async (...args) => {
+  const onDuplicateConfirmed: SavedObjectsDuplicateModalProps['onDuplicate'] = async (...args) => {
     await onDuplicate(...args);
     closeModal();
   };

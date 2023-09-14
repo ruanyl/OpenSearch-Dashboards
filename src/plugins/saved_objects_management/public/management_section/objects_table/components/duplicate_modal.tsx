@@ -42,7 +42,7 @@ export enum DuplicateMode {
   Selected = 'selected',
   All = 'all',
 }
-interface Props {
+export interface SavedObjectsDuplicateModalProps {
   onDuplicate: (
     savedObjects: SavedObjectWithMetadata[],
     includeReferencesDeep: boolean,
@@ -69,10 +69,13 @@ function capitalizeFirstLetter(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-export class SavedObjectsDuplicateModal extends React.Component<Props, State> {
+export class SavedObjectsDuplicateModal extends React.Component<
+  SavedObjectsDuplicateModalProps,
+  State
+> {
   private isMounted = false;
 
-  constructor(props: Props) {
+  constructor(props: SavedObjectsDuplicateModalProps) {
     super(props);
 
     this.state = {
