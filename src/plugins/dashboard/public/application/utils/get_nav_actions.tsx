@@ -17,7 +17,6 @@ import { DashboardAppStateContainer, DashboardServices, NavAction } from '../../
 import {
   DashboardSaveModal,
   TopNavIds,
-  showCloneModal,
   showDuplicateModal,
   showOptionsPopover,
   UrlParams,
@@ -148,33 +147,6 @@ export const getNavActions = (
       />
     );
     showSaveModal(dashboardSaveModal, I18nContext);
-  };
-
-  navActions[TopNavIds.CLONE] = () => {
-    const currentTitle = appState.title;
-    const onClone = (
-      newTitle: string,
-      isTitleDuplicateConfirmed: boolean,
-      onTitleDuplicate: () => void
-    ) => {
-      savedDashboard.copyOnSave = true;
-      stateContainer.transitions.set('title', newTitle);
-      const saveOptions = {
-        confirmOverwrite: false,
-        isTitleDuplicateConfirmed,
-        onTitleDuplicate,
-      };
-      return save(saveOptions).then((response: { id?: string } | { error: Error }) => {
-        // If the save wasn't successful, put the original title back.
-        if ((response as { error: Error }).error) {
-          stateContainer.transitions.set('title', currentTitle);
-        }
-        // updateNavBar();
-        return response;
-      });
-    };
-
-    showCloneModal(onClone, currentTitle);
   };
 
   navActions[TopNavIds.DUPLICATE] = () => {
