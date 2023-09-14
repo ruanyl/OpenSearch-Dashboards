@@ -97,7 +97,7 @@ import {
 import { Header, Table, Flyout, Relationships } from './components';
 import { DataPublicPluginStart } from '../../../../data/public';
 import { PUBLIC_WORKSPACE_ID } from '../../../../../core/public';
-import { SavedObjectsDuplicateModal, DuplicateMode } from '../../../../saved_objects/public';
+import { SavedObjectsDuplicateModal, DuplicateMode } from './';
 
 interface ExportAllOption {
   id: string;

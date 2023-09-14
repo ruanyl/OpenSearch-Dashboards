@@ -58,7 +58,11 @@ export { SavedObjectRelation, SavedObjectWithMetadata, SavedObjectMetadata } fro
 export { SAVED_OBJECT_DELETE_TRIGGER, savedObjectDeleteTrigger } from './triggers';
 export { SavedObjectDeleteContext } from './ui_actions_bootstrap';
 export { SAVED_OBJECT_TYPE_WORKSPACE } from './constants';
-
+export {
+  showDuplicateModal,
+  SavedObjectsDuplicateModal,
+  DuplicateMode,
+} from './management_section';
 export function plugin(initializerContext: PluginInitializerContext) {
   return new SavedObjectsManagementPlugin();
 }
