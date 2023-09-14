@@ -319,19 +319,18 @@ export const getTopNavConfig = (
                     includeReferencesDeep,
                     targetWorkspace
                   );
+                  notifications.toasts.addSuccess({
+                    title: i18n.translate('visualize.topNavMenu.duplicate.successNotification', {
+                      defaultMessage: 'Duplicate visualization successfully',
+                    }),
+                  });
                 } catch (e) {
                   notifications.toasts.addDanger({
                     title: i18n.translate('visualize.topNavMenu.duplicate.dangerNotification', {
                       defaultMessage: 'Unable to duplicate visualization',
                     }),
                   });
-                  throw e;
                 }
-                notifications.toasts.addSuccess({
-                  title: i18n.translate('visualize.topNavMenu.duplicate.successNotification', {
-                    defaultMessage: 'Duplicate visualization successfully',
-                  }),
-                });
               };
 
               const currentWorkspace = workspaces.currentWorkspace$.value;
