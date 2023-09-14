@@ -337,6 +337,7 @@ export const getTopNavConfig = (
                 });
               };
 
+              const currentWorkspace = workspaces.currentWorkspace$.value;
               const visualizationSavedObject = (savedVis || {}) as SavedObjectWithMetadata;
               visualizationSavedObject.meta = { title: savedVis?.title }; // meta is missing in savedVis
 
@@ -344,7 +345,7 @@ export const getTopNavConfig = (
                 <SavedObjectsDuplicateModal
                   duplicateMode={DuplicateMode.Selected}
                   selectedSavedObjects={[visualizationSavedObject]}
-                  workspaces={workspaces}
+                  currentWorkspace={currentWorkspace}
                   getDuplicateWorkspaces={getDuplicateWorkspaces}
                   onDuplicate={onDuplicate}
                   onClose={() => {}}

@@ -202,6 +202,7 @@ export const getNavActions = (
       });
     };
 
+    const currentWorkspace = workspaces.currentWorkspace$.value;
     const dashboardSavedObject = (savedDashboard || {}) as SavedObjectWithMetadata;
     dashboardSavedObject.meta = { title: savedDashboard.title };
 
@@ -209,7 +210,7 @@ export const getNavActions = (
       <SavedObjectsDuplicateModal
         duplicateMode={DuplicateMode.Selected}
         selectedSavedObjects={[dashboardSavedObject]}
-        workspaces={workspaces}
+        currentWorkspace={currentWorkspace}
         getDuplicateWorkspaces={getDuplicateWorkspaces}
         onDuplicate={onDuplicate}
         onClose={() => {}}

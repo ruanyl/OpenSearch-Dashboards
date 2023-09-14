@@ -31,7 +31,7 @@ import {
   EuiCallOut,
   EuiText,
 } from '@elastic/eui';
-import { WorkspaceAttribute, WorkspaceStart } from 'opensearch-dashboards/public';
+import { WorkspaceAttribute } from 'opensearch-dashboards/public';
 import { i18n } from '@osd/i18n';
 import { SavedObjectWithMetadata } from '../../../types';
 import { getSavedObjectLabel } from '../../../lib';
@@ -41,7 +41,6 @@ import { SAVED_OBJECT_TYPE_WORKSPACE } from '../../../constants';
 type WorkspaceOption = EuiComboBoxOptionOption<WorkspaceAttribute>;
 
 interface Props {
-  workspaces: WorkspaceStart;
   onDuplicate: (
     savedObjects: SavedObjectWithMetadata[],
     includeReferencesDeep: boolean,
@@ -49,8 +48,9 @@ interface Props {
   ) => Promise<void>;
   onClose: () => void;
   duplicateMode: DuplicateMode;
-  getDuplicateWorkspaces: () => Promise<WorkspaceAttribute[]>;
+  currentWorkspace: WorkspaceAttribute | null;
   selectedSavedObjects: SavedObjectWithMetadata[];
+  getDuplicateWorkspaces: () => Promise<WorkspaceAttribute[]>;
 }
 
 interface State {
@@ -101,9 +101,8 @@ export class SavedObjectsDuplicateModal extends React.Component<Props, State> {
   };
 
   async componentDidMount() {
-    const { workspaces, getDuplicateWorkspaces } = this.props;
+    const { currentWorkspace, getDuplicateWorkspaces } = this.props;
     const workspaceList = await getDuplicateWorkspaces();
-    const currentWorkspace = workspaces.currentWorkspace$.value;
     const currentWorkspaceName = currentWorkspace?.name;
 
     // current workspace is the first option
