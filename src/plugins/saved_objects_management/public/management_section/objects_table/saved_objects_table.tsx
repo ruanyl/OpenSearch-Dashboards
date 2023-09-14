@@ -1130,7 +1130,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             this.setState({
               duplicateSelectedSavedObjects: savedObjects,
               isShowingDuplicateModal: true,
-              duplicateMode: duplicateMode.All,
+              duplicateMode: DuplicateMode.All,
             })
           }
           onRefresh={this.refreshObjects}
