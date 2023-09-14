@@ -35,10 +35,10 @@ import { Dashboard } from '../../dashboard';
 import { WorkspaceAttribute } from '../../../../../core/types';
 import { SavedObjectWithMetadata } from '../../../../saved_objects_management/common';
 import {
-  duplicateSavedObjects,
-  getWorkspacesWithWritePermission,
   DuplicateMode,
   showDuplicateModal,
+  duplicateSavedObjects,
+  getWorkspacesWithWritePermission,
 } from '../../../../saved_objects_management/public';
 
 interface UrlParamsSelectedMap {
@@ -184,20 +184,19 @@ export const getNavActions = (
           includeReferencesDeep,
           targetWorkspace
         );
+
+        notifications.toasts.addSuccess({
+          title: i18n.translate('dashboard.dashboardWasDuplicatedSuccessMessage', {
+            defaultMessage: 'Duplicate dashboard successfully',
+          }),
+        });
       } catch (e) {
         notifications.toasts.addDanger({
           title: i18n.translate('dashboard.dashboardWasNotDuplicatedDangerMessage', {
             defaultMessage: 'Unable to duplicate dashboard',
           }),
         });
-        throw e;
       }
-
-      notifications.toasts.addSuccess({
-        title: i18n.translate('dashboard.dashboardWasDuplicatedSuccessMessage', {
-          defaultMessage: 'Duplicate dashboard successfully',
-        }),
-      });
     };
 
     const currentWorkspace = workspaces.currentWorkspace$.value;
