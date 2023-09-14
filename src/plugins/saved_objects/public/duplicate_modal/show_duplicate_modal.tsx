@@ -32,7 +32,7 @@ interface MinimalDuplicateModalProps {
 
 export function showDuplicateModal(
   duplicateModal: React.ReactElement<MinimalDuplicateModalProps>,
-  I18nContext: I18nStart['Context']
+  I18nContext?: I18nStart['Context']
 ) {
   const container = document.createElement('div');
   const closeModal = () => {
@@ -53,5 +53,9 @@ export function showDuplicateModal(
     onClose: closeModal,
   });
 
-  ReactDOM.render(<I18nContext>{element}</I18nContext>, container);
+  if (I18nContext) {
+    ReactDOM.render(<I18nContext>{element}</I18nContext>, container);
+  } else {
+    ReactDOM.render(element, container);
+  }
 }

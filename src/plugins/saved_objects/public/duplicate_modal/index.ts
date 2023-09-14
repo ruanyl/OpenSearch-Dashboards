@@ -9,4 +9,5 @@
  * GitHub history for details.
  */
 
-export { showDuplicateModal } from './show_saved_object_duplicate_modal';
+export { showDuplicateModal } from './show_duplicate_modal';
+export { SavedObjectsDuplicateModal, DuplicateMode } from './duplicate_modal';

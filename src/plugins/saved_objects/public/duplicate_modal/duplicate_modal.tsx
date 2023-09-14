@@ -33,12 +33,18 @@ import {
 } from '@elastic/eui';
 import { WorkspaceAttribute } from 'opensearch-dashboards/public';
 import { i18n } from '@osd/i18n';
-import { SavedObjectWithMetadata } from '../../../types';
-import { getSavedObjectLabel } from '../../../lib';
-import { DuplicateMode } from '../';
-import { SAVED_OBJECT_TYPE_WORKSPACE } from '../../../constants';
+import { SavedObjectWithMetadata } from '../../../saved_objects_management/common';
+import {
+  getSavedObjectLabel,
+  SAVED_OBJECT_TYPE_WORKSPACE,
+} from '../../../saved_objects_management/public';
 
 type WorkspaceOption = EuiComboBoxOptionOption<WorkspaceAttribute>;
+
+export enum DuplicateMode {
+  Selected = 'selected',
+  All = 'all',
+}
 
 interface Props {
   onDuplicate: (

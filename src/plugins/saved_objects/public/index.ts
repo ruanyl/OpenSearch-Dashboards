@@ -38,7 +38,7 @@ export {
   SaveResult,
   showSaveModal,
 } from './save_modal';
-export { showDuplicateModal } from './duplicate_modal';
+export { showDuplicateModal, SavedObjectsDuplicateModal, DuplicateMode } from './duplicate_modal';
 export { getSavedObjectFinder, SavedObjectFinderUi, SavedObjectMetaData } from './finder';
 export {
   SavedObjectLoader,

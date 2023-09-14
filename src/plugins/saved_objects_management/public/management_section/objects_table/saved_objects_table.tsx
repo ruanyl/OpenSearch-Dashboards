@@ -96,19 +96,13 @@ import {
 } from '../../services';
 import { Header, Table, Flyout, Relationships } from './components';
 import { DataPublicPluginStart } from '../../../../data/public';
-import { SavedObjectsDuplicateModal } from './components';
 import { PUBLIC_WORKSPACE_ID } from '../../../../../core/public';
-
-export enum DuplicateMode {
-  Selected = 'selected',
-  All = 'all',
-}
+import { SavedObjectsDuplicateModal, DuplicateMode } from '../../../../saved_objects/public';
 
 interface ExportAllOption {
   id: string;
   label: string;
 }
-
 export interface SavedObjectsTableProps {
   allowedTypes: string[];
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
