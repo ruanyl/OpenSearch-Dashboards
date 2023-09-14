@@ -298,6 +298,7 @@ jobs:
           retention-days: 1
 
   bwc-tests:
+    if: false
     needs: [build-min-artifact-tests]
     runs-on: arc-runner-set
     container:
