@@ -35,7 +35,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
         include:
-          - os: ubuntu-latest
+          - os: arc-runner-set
             name: Linux
           - os: windows-latest
             name: Windows
@@ -126,10 +126,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [arc-runner-set, windows-latest]
         group: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
         include:
-          - os: ubuntu-latest
+          - os: arc-runner-set
             name: Linux
           - os: windows-latest
             name: Windows
@@ -234,12 +234,12 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: ubuntu-latest
+          - os: arc-runner-set
             name: Linux x64
             ext: tar.gz
             suffix: linux-x64
             script: build-platform --linux --skip-os-packages
-          - os: ubuntu-latest
+          - os: arc-runner-set
             name: Linux ARM64
             ext: tar.gz
             suffix: linux-arm64
@@ -330,7 +330,7 @@ jobs:
 
   bwc-tests:
     needs: [build-min-artifact-tests]
-    runs-on: ubuntu-latest
+    runs-on: arc-runner-set
     container:
       image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
       options: --user 1001
