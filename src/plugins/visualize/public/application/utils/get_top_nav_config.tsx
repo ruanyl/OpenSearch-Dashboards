@@ -54,7 +54,7 @@ import {
   getWorkspacesWithWritePermission,
   SavedObjectsDuplicateModal,
   SavedObjectWithMetadata,
-  DuplicateState,
+  DuplicateMode,
 } from '../../../../saved_objects_management/public/';
 
 interface TopNavConfigParams {
@@ -342,7 +342,7 @@ export const getTopNavConfig = (
 
               const duplicateModal = (
                 <SavedObjectsDuplicateModal
-                  duplicateState={DuplicateState.Single}
+                  duplicateMode={DuplicateMode.Selected}
                   selectedSavedObjects={[visualizationSavedObject]}
                   workspaces={workspaces}
                   getDuplicateWorkspaces={getDuplicateWorkspaces}

@@ -99,8 +99,7 @@ import { DataPublicPluginStart } from '../../../../data/public';
 import { SavedObjectsDuplicateModal } from './components';
 import { PUBLIC_WORKSPACE_ID } from '../../../../../core/public';
 
-export enum DuplicateState {
-  Single = 'single',
+export enum DuplicateMode {
   Selected = 'selected',
   All = 'all',
 }
@@ -142,7 +141,7 @@ export interface SavedObjectsTableState {
   selectedSavedObjects: SavedObjectWithMetadata[];
   duplicateSelectedSavedObjects: SavedObjectWithMetadata[];
   isShowingImportFlyout: boolean;
-  duplicateState: DuplicateState;
+  duplicateMode: DuplicateMode;
   isShowingDuplicateModal: boolean;
   isSearching: boolean;
   filteredItemCount: number;
@@ -183,7 +182,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       selectedSavedObjects: [],
       duplicateSelectedSavedObjects: [],
       isShowingImportFlyout: false,
-      duplicateState: DuplicateState.Selected,
+      duplicateMode: DuplicateMode.Selected,
       isShowingDuplicateModal: false,
       isSearching: false,
       filteredItemCount: 0,
@@ -775,7 +774,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
   renderDuplicateModal() {
     const { workspaces } = this.props;
-    const { isShowingDuplicateModal, duplicateSelectedSavedObjects, duplicateState } = this.state;
+    const { isShowingDuplicateModal, duplicateSelectedSavedObjects, duplicateMode } = this.state;
 
     if (!isShowingDuplicateModal) {
       return null;
@@ -786,7 +785,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         selectedSavedObjects={duplicateSelectedSavedObjects}
         workspaces={workspaces}
         getDuplicateWorkspaces={this.getDuplicateWorkspaces}
-        duplicateState={duplicateState}
+        duplicateMode={duplicateMode}
         onDuplicate={this.onDuplicate}
         onClose={this.hideDuplicateModal}
       />
@@ -1130,7 +1129,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             this.setState({
               duplicateSelectedSavedObjects: savedObjects,
               isShowingDuplicateModal: true,
-              duplicateState: DuplicateState.All,
+              duplicateMode: duplicateMode.All,
             })
           }
           onRefresh={this.refreshObjects}
@@ -1156,7 +1155,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             onDuplicateSelected={() =>
               this.setState({
                 isShowingDuplicateModal: true,
-                duplicateState: DuplicateState.Selected,
+                duplicateMode: DuplicateMode.Selected,
                 duplicateSelectedSavedObjects: selectedSavedObjects,
               })
             }
@@ -1164,7 +1163,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
               this.setState({
                 duplicateSelectedSavedObjects: [object],
                 isShowingDuplicateModal: true,
-                duplicateState: DuplicateState.Single,
+                duplicateMode: DuplicateMode.Selected,
               })
             }
             onActionRefresh={this.refreshObject}

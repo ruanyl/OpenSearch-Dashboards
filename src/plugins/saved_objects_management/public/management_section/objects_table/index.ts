@@ -28,5 +28,5 @@
  * under the License.
  */
 
-export { SavedObjectsTable, DuplicateState } from './saved_objects_table';
+export { SavedObjectsTable, DuplicateMode } from './saved_objects_table';
 export { SavedObjectsDuplicateModal } from './components';

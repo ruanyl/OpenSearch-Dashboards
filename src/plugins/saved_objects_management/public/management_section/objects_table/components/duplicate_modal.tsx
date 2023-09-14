@@ -35,7 +35,7 @@ import { WorkspaceAttribute, WorkspaceStart } from 'opensearch-dashboards/public
 import { i18n } from '@osd/i18n';
 import { SavedObjectWithMetadata } from '../../../types';
 import { getSavedObjectLabel } from '../../../lib';
-import { DuplicateState } from '../';
+import { DuplicateMode } from '../';
 import { SAVED_OBJECT_TYPE_WORKSPACE } from '../../../constants';
 
 type WorkspaceOption = EuiComboBoxOptionOption<WorkspaceAttribute>;
@@ -48,7 +48,7 @@ interface Props {
     targetWorkspace: string
   ) => Promise<void>;
   onClose: () => void;
-  duplicateState: DuplicateState;
+  duplicateMode: DuplicateMode;
   getDuplicateWorkspaces: () => Promise<WorkspaceAttribute[]>;
   selectedSavedObjects: SavedObjectWithMetadata[];
 }
@@ -121,8 +121,8 @@ export class SavedObjectsDuplicateModal extends React.Component<Props, State> {
       allWorkspaceOptions: workspaceOptions,
     });
 
-    const { duplicateState } = this.props;
-    if (duplicateState === DuplicateState.All) {
+    const { duplicateMode } = this.props;
+    if (duplicateMode === DuplicateMode.All) {
       const { allSelectedObjects } = this.state;
       const categorizedObjects = groupBy(allSelectedObjects, (object) => object.type);
       const savedObjectTypeInfoMap = new Map<string, [number, boolean]>();
@@ -244,10 +244,10 @@ export class SavedObjectsDuplicateModal extends React.Component<Props, State> {
       isIncludeReferencesDeepChecked,
       allSelectedObjects,
     } = this.state;
-    const { duplicateState } = this.props;
+    const { duplicateMode } = this.props;
     const targetWorkspaceId = targetWorkspaceOption?.at(0)?.key;
     let selectedObjects = allSelectedObjects;
-    if (duplicateState === DuplicateState.All) {
+    if (duplicateMode === DuplicateMode.All) {
       selectedObjects = selectedObjects.filter((item) => this.isSavedObjectTypeIncluded(item.type));
     }
     const includedSelectedObjects = selectedObjects.filter((item) =>
@@ -266,7 +266,7 @@ export class SavedObjectsDuplicateModal extends React.Component<Props, State> {
     const confirmMessageForAllObjects = `Duplicate (${includedSelectedObjects.length})`;
     const confirmMessageForSingleOrSelectedObjects = 'Duplicate';
     const confirmMessage =
-      duplicateState === DuplicateState.All
+      duplicateMode === DuplicateMode.All
         ? confirmMessageForAllObjects
         : confirmMessageForSingleOrSelectedObjects;
     const warningMessageForOnlyOneSavedObject = (
@@ -309,9 +309,9 @@ export class SavedObjectsDuplicateModal extends React.Component<Props, State> {
           <EuiModalHeaderTitle>
             <FormattedMessage
               id="savedObjectsManagement.objectsTable.duplicateModal.title"
-              defaultMessage="Duplicate {duplicateState, select, all {all objects} other {{objectCount, plural, =1 {{objectName}} other {# objects}}}}?"
+              defaultMessage="Duplicate {duplicateMode, select, all {all objects} other {{objectCount, plural, =1 {{objectName}} other {# objects}}}}?"
               values={{
-                duplicateState,
+                duplicateMode,
                 objectName: allSelectedObjects[0].meta.title,
                 objectCount: allSelectedObjects.length,
               }}
@@ -347,8 +347,8 @@ export class SavedObjectsDuplicateModal extends React.Component<Props, State> {
           </EuiFormRow>
 
           <EuiSpacer size="m" />
-          {duplicateState && this.renderDuplicateObjectCategories()}
-          {duplicateState && <EuiSpacer size="m" />}
+          {duplicateMode === DuplicateMode.All && this.renderDuplicateObjectCategories()}
+          {duplicateMode === DuplicateMode.All && <EuiSpacer size="m" />}
 
           <EuiFormRow
             fullWidth

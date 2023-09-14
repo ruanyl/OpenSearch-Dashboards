@@ -8,35 +8,35 @@ import { i18n } from '@osd/i18n';
 import { EUI_MODAL_CANCEL_BUTTON, EuiCheckboxGroup } from '@elastic/eui';
 import { EuiCheckboxGroupIdToSelectedMap } from '@elastic/eui/src/components/form/checkbox/checkbox_group';
 import {
-  SaveResult,
-  SavedObjectSaveOpts,
   getSavedObjectFinder,
+  SavedObjectSaveOpts,
+  SaveResult,
   showSaveModal,
 } from '../../../../saved_objects/public';
 import { DashboardAppStateContainer, DashboardServices, NavAction } from '../../types';
 import {
   DashboardSaveModal,
-  TopNavIds,
   showDuplicateModal,
   showOptionsPopover,
+  TopNavIds,
   UrlParams,
 } from '../components/dashboard_top_nav';
 import {
   EmbeddableFactoryNotFoundError,
   EmbeddableInput,
-  ViewMode,
   isErrorEmbeddable,
   openAddPanelFlyout,
+  ViewMode,
 } from '../../../../embeddable/public';
 import { saveDashboard } from '../utils';
 import { DashboardContainer } from '../embeddable/dashboard_container';
-import { DashboardConstants, createDashboardEditUrl } from '../../dashboard_constants';
+import { createDashboardEditUrl, DashboardConstants } from '../../dashboard_constants';
 import { unhashUrl } from '../../../../opensearch_dashboards_utils/public';
 import { Dashboard } from '../../dashboard';
 import { SavedObjectWithMetadata } from '../../../../saved_objects_management/common';
 import {
+  DuplicateMode,
   duplicateSavedObjects,
-  DuplicateState,
   getWorkspacesWithWritePermission,
   SavedObjectsDuplicateModal,
 } from '../../../../saved_objects_management/public';
@@ -207,7 +207,7 @@ export const getNavActions = (
 
     const duplicateModal = (
       <SavedObjectsDuplicateModal
-        duplicateState={DuplicateState.Single}
+        duplicateMode={DuplicateMode.Selected}
         selectedSavedObjects={[dashboardSavedObject]}
         workspaces={workspaces}
         getDuplicateWorkspaces={getDuplicateWorkspaces}
