@@ -52,10 +52,9 @@ import { EmbeddableStateTransfer } from '../../../../embeddable/public';
 import {
   duplicateSavedObjects,
   getWorkspacesWithWritePermission,
-  SavedObjectsDuplicateModal,
   SavedObjectWithMetadata,
-  DuplicateMode,
 } from '../../../../saved_objects_management/public/';
+import { SavedObjectsDuplicateModal, DuplicateMode } from '../../../../saved_objects/public';
 
 interface TopNavConfigParams {
   hasUnsavedChanges: boolean;

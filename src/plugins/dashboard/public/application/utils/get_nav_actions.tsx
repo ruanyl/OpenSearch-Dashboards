@@ -16,11 +16,11 @@ import {
 import { DashboardAppStateContainer, DashboardServices, NavAction } from '../../types';
 import {
   DashboardSaveModal,
-  showDuplicateModal,
   showOptionsPopover,
   TopNavIds,
   UrlParams,
 } from '../components/dashboard_top_nav';
+import { showDuplicateModal } from '../../../../saved_objects/public';
 import {
   EmbeddableFactoryNotFoundError,
   EmbeddableInput,
@@ -33,14 +33,13 @@ import { DashboardContainer } from '../embeddable/dashboard_container';
 import { createDashboardEditUrl, DashboardConstants } from '../../dashboard_constants';
 import { unhashUrl } from '../../../../opensearch_dashboards_utils/public';
 import { Dashboard } from '../../dashboard';
+import { WorkspaceAttribute } from '../../../../../core/types';
 import { SavedObjectWithMetadata } from '../../../../saved_objects_management/common';
 import {
-  DuplicateMode,
   duplicateSavedObjects,
   getWorkspacesWithWritePermission,
-  SavedObjectsDuplicateModal,
 } from '../../../../saved_objects_management/public';
-import { WorkspaceAttribute } from '../../../../../core/types';
+import { SavedObjectsDuplicateModal, DuplicateMode } from '../../../../saved_objects/public/';
 
 interface UrlParamsSelectedMap {
   [UrlParams.SHOW_TOP_MENU]: boolean;
