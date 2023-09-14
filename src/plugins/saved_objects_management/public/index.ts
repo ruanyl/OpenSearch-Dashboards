@@ -53,7 +53,7 @@ export {
   duplicateSavedObjects,
   getWorkspacesWithWritePermission,
 } from './lib';
-export { SavedObjectsDuplicateModal, DuplicateState } from './management_section';
+export { SavedObjectsDuplicateModal, DuplicateMode } from './management_section';
 export { SavedObjectRelation, SavedObjectWithMetadata, SavedObjectMetadata } from './types';
 export { SAVED_OBJECT_DELETE_TRIGGER, savedObjectDeleteTrigger } from './triggers';
 export { SavedObjectDeleteContext } from './ui_actions_bootstrap';
