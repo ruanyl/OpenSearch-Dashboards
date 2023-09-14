@@ -171,6 +171,16 @@ function findChangedProp(actual: any, expected: any) {
  * @returns {IndexMapping}
  */
 function defaultMapping(): IndexMapping {
+  const principals: SavedObjectsFieldMapping = {
+    properties: {
+      users: {
+        type: 'keyword',
+      },
+      groups: {
+        type: 'keyword',
+      },
+    },
+  };
   return {
     dynamic: 'strict',
     properties: {
@@ -207,6 +217,15 @@ function defaultMapping(): IndexMapping {
           id: {
             type: 'keyword',
           },
+        },
+      },
+      permissions: {
+        properties: {
+          read: principals,
+          write: principals,
+          management: principals,
+          library_read: principals,
+          library_write: principals,
         },
       },
     },
