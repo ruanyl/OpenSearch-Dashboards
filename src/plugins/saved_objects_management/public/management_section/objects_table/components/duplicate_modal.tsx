@@ -42,17 +42,20 @@ export enum DuplicateMode {
   Selected = 'selected',
   All = 'all',
 }
-export interface SavedObjectsDuplicateModalProps {
+export interface ShowDuplicateModalProps {
   onDuplicate: (
     savedObjects: SavedObjectWithMetadata[],
     includeReferencesDeep: boolean,
     targetWorkspace: string
   ) => Promise<void>;
-  onClose: () => void;
   duplicateMode: DuplicateMode;
   currentWorkspace: WorkspaceAttribute | null;
   selectedSavedObjects: SavedObjectWithMetadata[];
   getDuplicateWorkspaces: () => Promise<WorkspaceAttribute[]>;
+}
+
+interface Props extends ShowDuplicateModalProps {
+  onClose: () => void;
 }
 
 interface State {
@@ -69,13 +72,10 @@ function capitalizeFirstLetter(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-export class SavedObjectsDuplicateModal extends React.Component<
-  SavedObjectsDuplicateModalProps,
-  State
-> {
+export class SavedObjectsDuplicateModal extends React.Component<Props, State> {
   private isMounted = false;
 
-  constructor(props: SavedObjectsDuplicateModalProps) {
+  constructor(props: Props) {
     super(props);
 
     this.state = {
@@ -248,7 +248,7 @@ export class SavedObjectsDuplicateModal extends React.Component<
       isIncludeReferencesDeepChecked,
       allSelectedObjects,
     } = this.state;
-    const { duplicateMode } = this.props;
+    const { duplicateMode, onClose } = this.props;
     const targetWorkspaceId = targetWorkspaceOption?.at(0)?.key;
     let selectedObjects = allSelectedObjects;
     if (duplicateMode === DuplicateMode.All) {
@@ -301,7 +301,7 @@ export class SavedObjectsDuplicateModal extends React.Component<
       <EuiModal
         data-test-subj="savedObjectsDuplicateModal"
         className="savedObjectsModal"
-        onClose={this.props.onClose}
+        onClose={onClose}
       >
         <EuiModalHeader>
           <EuiModalHeaderTitle>

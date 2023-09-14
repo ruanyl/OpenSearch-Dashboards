@@ -11,8 +11,8 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { SavedObjectsDuplicateModalProps } from './duplicate_modal';
-import { I18nStart } from '../../../../../../core/public';
+import { I18nStart } from 'opensearch-dashboards/public';
+import { SavedObjectsDuplicateModal, ShowDuplicateModalProps } from './duplicate_modal';
 
 /**
  * Represents the result of trying to duplicate the saved object.
@@ -23,7 +23,7 @@ import { I18nStart } from '../../../../../../core/public';
  */
 
 export function showDuplicateModal(
-  duplicateModal: React.ReactElement<SavedObjectsDuplicateModalProps>,
+  showDuplicateModalProps: ShowDuplicateModalProps,
   I18nContext: I18nStart['Context']
 ) {
   const container = document.createElement('div');
@@ -32,18 +32,31 @@ export function showDuplicateModal(
     document.body.removeChild(container);
   };
 
-  const onDuplicate = duplicateModal.props.onDuplicate;
+  const {
+    onDuplicate,
+    duplicateMode,
+    selectedSavedObjects,
+    currentWorkspace,
+    getDuplicateWorkspaces,
+  } = showDuplicateModalProps;
 
-  const onDuplicateConfirmed: SavedObjectsDuplicateModalProps['onDuplicate'] = async (...args) => {
+  const onDuplicateConfirmed: ShowDuplicateModalProps['onDuplicate'] = async (...args) => {
     await onDuplicate(...args);
     closeModal();
   };
 
-  document.body.appendChild(container);
-  const element = React.cloneElement(duplicateModal, {
-    onDuplicate: onDuplicateConfirmed,
-    onClose: closeModal,
-  });
+  const duplicateModal = (
+    <SavedObjectsDuplicateModal
+      onClose={closeModal}
+      duplicateMode={duplicateMode}
+      onDuplicate={onDuplicateConfirmed}
+      currentWorkspace={currentWorkspace}
+      selectedSavedObjects={selectedSavedObjects}
+      getDuplicateWorkspaces={getDuplicateWorkspaces}
+    />
+  );
 
-  ReactDOM.render(<I18nContext>{element}</I18nContext>, container);
+  document.body.appendChild(container);
+
+  ReactDOM.render(<I18nContext>{duplicateModal}</I18nContext>, container);
 }

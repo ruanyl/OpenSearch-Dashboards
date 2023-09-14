@@ -37,7 +37,6 @@ import { SavedObjectWithMetadata } from '../../../../saved_objects_management/co
 import {
   duplicateSavedObjects,
   getWorkspacesWithWritePermission,
-  SavedObjectsDuplicateModal,
   DuplicateMode,
   showDuplicateModal,
 } from '../../../../saved_objects_management/public';
@@ -203,21 +202,18 @@ export const getNavActions = (
     };
 
     const currentWorkspace = workspaces.currentWorkspace$.value;
-    const dashboardSavedObject = (savedDashboard || {}) as SavedObjectWithMetadata;
+    const dashboardSavedObject = (savedDashboard as unknown) as SavedObjectWithMetadata;
     dashboardSavedObject.meta = { title: savedDashboard.title };
 
-    const duplicateModal = (
-      <SavedObjectsDuplicateModal
-        duplicateMode={DuplicateMode.Selected}
-        selectedSavedObjects={[dashboardSavedObject]}
-        currentWorkspace={currentWorkspace}
-        getDuplicateWorkspaces={getDuplicateWorkspaces}
-        onDuplicate={onDuplicate}
-        onClose={() => {}}
-      />
-    );
+    const showDuplicateModalProps = {
+      onDuplicate,
+      currentWorkspace,
+      getDuplicateWorkspaces,
+      duplicateMode: DuplicateMode.Selected,
+      selectedSavedObjects: [dashboardSavedObject],
+    };
 
-    showDuplicateModal(duplicateModal, I18nContext);
+    showDuplicateModal(showDuplicateModalProps, I18nContext);
   };
 
   navActions[TopNavIds.ADD_EXISTING] = () => {
