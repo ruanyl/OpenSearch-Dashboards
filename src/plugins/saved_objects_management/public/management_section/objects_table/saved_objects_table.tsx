@@ -777,12 +777,12 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
     return (
       <SavedObjectsDuplicateModal
-        selectedSavedObjects={duplicateSelectedSavedObjects}
-        currentWorkspace={currentWorkspace}
-        getDuplicateWorkspaces={this.getDuplicateWorkspaces}
         duplicateMode={duplicateMode}
         onDuplicate={this.onDuplicate}
         onClose={this.hideDuplicateModal}
+        currentWorkspace={currentWorkspace}
+        selectedSavedObjects={duplicateSelectedSavedObjects}
+        getDuplicateWorkspaces={this.getDuplicateWorkspaces}
       />
     );
   }

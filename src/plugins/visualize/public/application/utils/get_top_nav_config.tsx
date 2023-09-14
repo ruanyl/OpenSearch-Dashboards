@@ -53,11 +53,7 @@ import {
   getWorkspacesWithWritePermission,
   SavedObjectWithMetadata,
 } from '../../../../saved_objects_management/public/';
-import {
-  SavedObjectsDuplicateModal,
-  DuplicateMode,
-  showDuplicateModal,
-} from '../../../../saved_objects_management/public';
+import { DuplicateMode, showDuplicateModal } from '../../../../saved_objects_management/public';
 
 interface TopNavConfigParams {
   hasUnsavedChanges: boolean;
@@ -105,7 +101,6 @@ export const getTopNavConfig = (
   }: VisualizeServices
 ) => {
   const { vis, embeddableHandler } = visInstance;
-  const workspaceEnabled = workspaces.workspaceEnabled$.getValue();
   const savedVis = 'savedVis' in visInstance ? visInstance.savedVis : undefined;
 
   /**
@@ -258,7 +253,7 @@ export const getTopNavConfig = (
       // disable the Share button if no action specified
       disableButton: !share || !!embeddableId,
     },
-    ...(workspaceEnabled
+    ...(savedVis?.id
       ? [
           {
             id: 'duplicate',
@@ -340,19 +335,17 @@ export const getTopNavConfig = (
               };
 
               const currentWorkspace = workspaces.currentWorkspace$.value;
-              const visualizationSavedObject = (savedVis || {}) as SavedObjectWithMetadata;
-              visualizationSavedObject.meta = { title: savedVis?.title }; // meta is missing in savedVis
+              const visualizationSavedObject = (savedVis as unknown) as SavedObjectWithMetadata;
+              visualizationSavedObject.meta = { title: savedVis.title }; // meta is missing in savedVis
 
-              const duplicateModal = (
-                <SavedObjectsDuplicateModal
-                  duplicateMode={DuplicateMode.Selected}
-                  selectedSavedObjects={[visualizationSavedObject]}
-                  currentWorkspace={currentWorkspace}
-                  getDuplicateWorkspaces={getDuplicateWorkspaces}
-                  onDuplicate={onDuplicate}
-                  onClose={() => {}}
-                />
-              );
+              const showDuplicateModalProps = {
+                onDuplicate,
+                currentWorkspace,
+                getDuplicateWorkspaces,
+                duplicateMode: DuplicateMode.Selected,
+                selectedSavedObjects: [visualizationSavedObject],
+              };
+
               const isSaveAsButton = anchorElement.classList.contains('saveAsButton');
               onAppLeave((actions) => {
                 return actions.default();
@@ -364,7 +357,7 @@ export const getTopNavConfig = (
               ) {
                 createVisReference();
               } else if (savedVis) {
-                showDuplicateModal(duplicateModal, I18nContext);
+                showDuplicateModal(showDuplicateModalProps, I18nContext);
               }
             },
           },
