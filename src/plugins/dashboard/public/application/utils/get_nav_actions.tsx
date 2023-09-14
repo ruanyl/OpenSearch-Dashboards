@@ -152,7 +152,10 @@ export const getNavActions = (
     const getDuplicateWorkspaces = async (): Promise<WorkspaceAttribute[]> => {
       let result;
       try {
-        result = await getWorkspacesWithWritePermission(http);
+        const response = await getWorkspacesWithWritePermission(http);
+        if (response?.success) {
+          return response.result?.workspaces ?? [];
+        } 
       } catch (error) {
         notifications?.toasts.addDanger({
           title: i18n.translate('dashboard.duplicateWorkspaces.dangerNotification', {
@@ -161,11 +164,7 @@ export const getNavActions = (
           text: error instanceof Error ? error.message : JSON.stringify(error),
         });
       }
-      if (result?.success) {
-        return result.result?.workspaces ?? [];
-      } else {
-        return [];
-      }
+      return [];
     };
     const onDuplicate = async (
       dashboardSavedObjects: SavedObjectWithMetadata[],
