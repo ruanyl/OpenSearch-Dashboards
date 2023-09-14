@@ -262,12 +262,6 @@ export class SavedObjectsDuplicateModal extends React.Component<Props, State> {
       confirmDuplicateButtonEnabled = true;
     }
 
-    const confirmMessageForAllObjects = `Duplicate (${includedSelectedObjects.length})`;
-    const confirmMessageForSingleOrSelectedObjects = 'Duplicate';
-    const confirmMessage =
-      duplicateMode === DuplicateMode.All
-        ? confirmMessageForAllObjects
-        : confirmMessageForSingleOrSelectedObjects;
     const warningMessageForOnlyOneSavedObject = (
       <p>
         <b style={{ color: '#000' }}>1</b> saved object will <b style={{ color: '#000' }}>not</b> be
@@ -443,7 +437,11 @@ export class SavedObjectsDuplicateModal extends React.Component<Props, State> {
           >
             <FormattedMessage
               id="savedObjectsManagement.objectsTable.duplicateModal.confirmButtonLabel"
-              defaultMessage={confirmMessage}
+              defaultMessage="Duplicate{duplicateMode, select, all {({objectCount})} other {}}"
+              values={{
+                duplicateMode,
+                objectCount: includedSelectedObjects.length,
+              }}
             />
           </EuiButton>
         </EuiModalFooter>
