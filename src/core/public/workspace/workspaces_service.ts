@@ -35,15 +35,15 @@ enum WORKSPACE_ERROR {
 /**
  * @public
  */
-export interface WorkspaceSetup extends WorkspaceObservables {
+export interface WorkspacesSetup extends WorkspaceObservables {
   registerWorkspaceMenuRender: (render: WorkspaceMenuRenderFn) => void;
 }
 
-export interface WorkspaceStart extends WorkspaceObservables {
+export interface WorkspacesStart extends WorkspaceObservables {
   renderWorkspaceMenu: () => JSX.Element | null;
 }
 
-export class WorkspaceService implements CoreService<WorkspaceSetup, WorkspaceStart> {
+export class WorkspacesService implements CoreService<WorkspacesSetup, WorkspacesStart> {
   private currentWorkspaceId$ = new BehaviorSubject<string>('');
   private workspaceList$ = new BehaviorSubject<WorkspaceAttribute[]>([]);
   private currentWorkspace$ = new BehaviorSubject<WorkspaceAttribute | null>(null);
@@ -80,7 +80,7 @@ export class WorkspaceService implements CoreService<WorkspaceSetup, WorkspaceSt
     );
   }
 
-  public setup(): WorkspaceSetup {
+  public setup(): WorkspacesSetup {
     return {
       currentWorkspaceId$: this.currentWorkspaceId$,
       currentWorkspace$: this.currentWorkspace$,
@@ -98,7 +98,7 @@ export class WorkspaceService implements CoreService<WorkspaceSetup, WorkspaceSt
   }: {
     application: InternalApplicationStart;
     http: HttpSetup;
-  }): WorkspaceStart {
+  }): WorkspacesStart {
     const observables = {
       currentWorkspaceId$: this.currentWorkspaceId$,
       currentWorkspace$: this.currentWorkspace$,
