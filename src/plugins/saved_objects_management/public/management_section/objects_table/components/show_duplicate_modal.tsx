@@ -11,8 +11,8 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { I18nStart, WorkspaceAttribute, WorkspaceStart } from '../../../../core/public';
-import { SavedObjectWithMetadata } from '../../../saved_objects_management/common';
+import { I18nStart, WorkspaceAttribute, WorkspaceStart } from '../../../../../../core/public';
+import { SavedObjectWithMetadata } from '../../../../common';
 
 /**
  * Represents the result of trying to duplicate the saved object.
@@ -32,7 +32,7 @@ interface MinimalDuplicateModalProps {
 
 export function showDuplicateModal(
   duplicateModal: React.ReactElement<MinimalDuplicateModalProps>,
-  I18nContext?: I18nStart['Context']
+  I18nContext: I18nStart['Context']
 ) {
   const container = document.createElement('div');
   const closeModal = () => {
@@ -53,9 +53,5 @@ export function showDuplicateModal(
     onClose: closeModal,
   });
 
-  if (I18nContext) {
-    ReactDOM.render(<I18nContext>{element}</I18nContext>, container);
-  } else {
-    ReactDOM.render(element, container);
-  }
+  ReactDOM.render(<I18nContext>{element}</I18nContext>, container);
 }

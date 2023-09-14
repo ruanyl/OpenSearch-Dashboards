@@ -37,7 +37,6 @@ import {
   OnSaveProps,
   SavedObjectSaveModalOrigin,
   SavedObjectSaveOpts,
-  showDuplicateModal,
   showSaveModal,
 } from '../../../../saved_objects/public';
 import { unhashUrl } from '../../../../opensearch_dashboards_utils/public';
@@ -54,7 +53,11 @@ import {
   getWorkspacesWithWritePermission,
   SavedObjectWithMetadata,
 } from '../../../../saved_objects_management/public/';
-import { SavedObjectsDuplicateModal, DuplicateMode } from '../../../../saved_objects/public';
+import {
+  SavedObjectsDuplicateModal,
+  DuplicateMode,
+  showDuplicateModal,
+} from '../../../../saved_objects_management/public';
 
 interface TopNavConfigParams {
   hasUnsavedChanges: boolean;

@@ -20,7 +20,6 @@ import {
   TopNavIds,
   UrlParams,
 } from '../components/dashboard_top_nav';
-import { showDuplicateModal } from '../../../../saved_objects/public';
 import {
   EmbeddableFactoryNotFoundError,
   EmbeddableInput,
@@ -38,8 +37,10 @@ import { SavedObjectWithMetadata } from '../../../../saved_objects_management/co
 import {
   duplicateSavedObjects,
   getWorkspacesWithWritePermission,
+  SavedObjectsDuplicateModal,
+  DuplicateMode,
+  showDuplicateModal,
 } from '../../../../saved_objects_management/public';
-import { SavedObjectsDuplicateModal, DuplicateMode } from '../../../../saved_objects/public/';
 
 interface UrlParamsSelectedMap {
   [UrlParams.SHOW_TOP_MENU]: boolean;
@@ -216,7 +217,7 @@ export const getNavActions = (
       />
     );
 
-    showDuplicateModal(duplicateModal);
+    showDuplicateModal(duplicateModal, I18nContext);
   };
 
   navActions[TopNavIds.ADD_EXISTING] = () => {
