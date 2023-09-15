@@ -31,7 +31,7 @@
 import React from 'react';
 import { i18n } from '@osd/i18n';
 import { TopNavMenuData } from 'src/plugins/navigation/public';
-import { AppMountParameters, WorkspaceAttribute } from 'opensearch-dashboards/public';
+import { AppMountParameters } from 'opensearch-dashboards/public';
 import { VISUALIZE_EMBEDDABLE_TYPE, VisualizeInput } from '../../../../visualizations/public';
 import {
   OnSaveProps,
@@ -50,7 +50,6 @@ import { getEditBreadcrumbs } from './breadcrumbs';
 import { EmbeddableStateTransfer } from '../../../../embeddable/public';
 import {
   duplicateSavedObjects,
-  getWorkspacesWithWritePermission,
   SavedObjectWithMetadata,
 } from '../../../../saved_objects_management/public/';
 import { DuplicateMode, showDuplicateModal } from '../../../../saved_objects_management/public';
@@ -279,28 +278,6 @@ export const getTopNavConfig = (
               }
             },
             run: (anchorElement: HTMLElement) => {
-              const getDuplicateWorkspaces = async (): Promise<WorkspaceAttribute[]> => {
-                let result;
-                try {
-                  result = await getWorkspacesWithWritePermission(http);
-                } catch (error) {
-                  notifications?.toasts.addDanger({
-                    title: i18n.translate(
-                      'savedObjectsManagement.objectsTable.duplicateWorkspaces.dangerNotification',
-                      {
-                        defaultMessage: 'Unable to get workspaces with write permission',
-                      }
-                    ),
-                    text: error instanceof Error ? error.message : JSON.stringify(error),
-                  });
-                }
-                if (result?.success) {
-                  return result.result?.workspaces ?? [];
-                } else {
-                  return [];
-                }
-              };
-
               const onDuplicate = async (
                 visualizationSavedObjects: SavedObjectWithMetadata[],
                 includeReferencesDeep: boolean,
@@ -338,9 +315,10 @@ export const getTopNavConfig = (
               visualizationSavedObject.meta = { title: savedVis.title }; // meta is missing in savedVis
 
               const showDuplicateModalProps = {
+                http,
                 onDuplicate,
+                notifications,
                 currentWorkspace,
-                getDuplicateWorkspaces,
                 duplicateMode: DuplicateMode.Selected,
                 selectedSavedObjects: [visualizationSavedObject],
               };

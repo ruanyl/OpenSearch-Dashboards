@@ -24,7 +24,7 @@ import { SavedObjectsDuplicateModal, ShowDuplicateModalProps } from './duplicate
 
 export function showDuplicateModal(
   showDuplicateModalProps: ShowDuplicateModalProps,
-  I18nContext: I18nStart['Context']
+  I18nContext?: I18nStart['Context']
 ) {
   const container = document.createElement('div');
   const closeModal = () => {
@@ -33,11 +33,12 @@ export function showDuplicateModal(
   };
 
   const {
+    http,
     onDuplicate,
     duplicateMode,
+    notifications,
     selectedSavedObjects,
     currentWorkspace,
-    getDuplicateWorkspaces,
   } = showDuplicateModalProps;
 
   const onDuplicateConfirmed: ShowDuplicateModalProps['onDuplicate'] = async (...args) => {
@@ -47,16 +48,21 @@ export function showDuplicateModal(
 
   const duplicateModal = (
     <SavedObjectsDuplicateModal
+      http={http}
       onClose={closeModal}
+      notifications={notifications}
       duplicateMode={duplicateMode}
       onDuplicate={onDuplicateConfirmed}
       currentWorkspace={currentWorkspace}
       selectedSavedObjects={selectedSavedObjects}
-      getDuplicateWorkspaces={getDuplicateWorkspaces}
     />
   );
 
   document.body.appendChild(container);
 
-  ReactDOM.render(<I18nContext>{duplicateModal}</I18nContext>, container);
+  if (I18nContext) {
+    ReactDOM.render(<I18nContext>{duplicateModal}</I18nContext>, container);
+  } else {
+    ReactDOM.render(duplicateModal, container);
+  }
 }

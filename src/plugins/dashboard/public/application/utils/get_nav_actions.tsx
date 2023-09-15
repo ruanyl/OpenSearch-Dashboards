@@ -32,13 +32,11 @@ import { DashboardContainer } from '../embeddable/dashboard_container';
 import { createDashboardEditUrl, DashboardConstants } from '../../dashboard_constants';
 import { unhashUrl } from '../../../../opensearch_dashboards_utils/public';
 import { Dashboard } from '../../dashboard';
-import { WorkspaceAttribute } from '../../../../../core/types';
 import { SavedObjectWithMetadata } from '../../../../saved_objects_management/common';
 import {
   DuplicateMode,
   showDuplicateModal,
   duplicateSavedObjects,
-  getWorkspacesWithWritePermission,
 } from '../../../../saved_objects_management/public';
 
 interface UrlParamsSelectedMap {
@@ -149,23 +147,6 @@ export const getNavActions = (
   };
 
   navActions[TopNavIds.DUPLICATE] = () => {
-    const getDuplicateWorkspaces = async (): Promise<WorkspaceAttribute[]> => {
-      let result;
-      try {
-        const response = await getWorkspacesWithWritePermission(http);
-        if (response?.success) {
-          return response.result?.workspaces ?? [];
-        } 
-      } catch (error) {
-        notifications?.toasts.addDanger({
-          title: i18n.translate('dashboard.duplicateWorkspaces.dangerNotification', {
-            defaultMessage: 'Unable to get workspaces with write permission',
-          }),
-          text: error instanceof Error ? error.message : JSON.stringify(error),
-        });
-      }
-      return [];
-    };
     const onDuplicate = async (
       dashboardSavedObjects: SavedObjectWithMetadata[],
       includeReferencesDeep: boolean,
@@ -204,9 +185,10 @@ export const getNavActions = (
     dashboardSavedObject.meta = { title: savedDashboard.title };
 
     const showDuplicateModalProps = {
+      http,
       onDuplicate,
+      notifications,
       currentWorkspace,
-      getDuplicateWorkspaces,
       duplicateMode: DuplicateMode.Selected,
       selectedSavedObjects: [dashboardSavedObject],
     };
