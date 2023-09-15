@@ -3711,9 +3711,18 @@ exports[`Header handles visibility and lock changes 1`] = `
                       data-test-subj="breadcrumb first last"
                       title="test"
                     >
-                      test
-                    </span>
-                  </EuiInnerText>
+                      <EuiInnerText>
+                        <span
+                          aria-current="page"
+                          className="euiBreadcrumb euiBreadcrumb--last"
+                          data-test-subj="breadcrumb first last"
+                          title="test"
+                        >
+                          test
+                        </span>
+                      </EuiInnerText>
+                    </div>
+                  </div>
                 </nav>
               </EuiBreadcrumbs>
             </EuiHeaderBreadcrumbs>
@@ -9106,9 +9115,18 @@ exports[`Header renders condensed header 1`] = `
                       data-test-subj="breadcrumb first"
                       title="test"
                     >
-                      test
-                    </span>
-                  </EuiInnerText>
+                      <EuiInnerText>
+                        <span
+                          aria-current="page"
+                          className="euiBreadcrumb euiBreadcrumb--last"
+                          data-test-subj="breadcrumb first"
+                          title="test"
+                        >
+                          test
+                        </span>
+                      </EuiInnerText>
+                    </div>
+                  </div>
                 </nav>
               </EuiBreadcrumbs>
             </EuiHeaderBreadcrumbs>
