@@ -326,6 +326,9 @@ export {
   SavedObjectsDeleteByWorkspaceOptions,
   Permissions,
   ACL,
+  Principals,
+  TransformedPermission,
+  PrincipalType,
 } from './saved_objects';
 
 export {

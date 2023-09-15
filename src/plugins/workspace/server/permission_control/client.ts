@@ -11,9 +11,9 @@ import {
   PrincipalType,
   SavedObjectsBulkGetObject,
   SavedObjectsServiceStart,
-} from '../../../../core/server/saved_objects';
-import { Logger } from '../../../../core/server';
-import { WORKSPACE_TYPE } from '../../../../core/utils';
+  Logger,
+  WORKSPACE_TYPE,
+} from '../../../../core/server';
 import { WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID } from '../../common/constants';
 
 export type SavedObjectsPermissionControlContract = Pick<
