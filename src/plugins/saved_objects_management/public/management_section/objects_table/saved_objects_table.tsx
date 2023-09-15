@@ -77,7 +77,6 @@ import {
   SavedObjectCountOptions,
   getRelationships,
   getSavedObjectLabel,
-  getWorkspacesWithWritePermission,
   fetchExportObjects,
   fetchExportByTypeAndSearch,
   filterQuery,
@@ -94,10 +93,10 @@ import {
   SavedObjectsManagementColumnServiceStart,
   SavedObjectsManagementNamespaceServiceStart,
 } from '../../services';
-import { Header, Table, Flyout, Relationships } from './components';
+import { Header, Table, Flyout, Relationships, showDuplicateModal } from './components';
 import { DataPublicPluginStart } from '../../../../data/public';
 import { PUBLIC_WORKSPACE_ID } from '../../../../../core/public';
-import { SavedObjectsDuplicateModal, DuplicateMode } from './';
+import { DuplicateMode } from './';
 
 interface ExportAllOption {
   id: string;
@@ -494,95 +493,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     });
   };
 
-  getDuplicateWorkspaces = async (): Promise<WorkspaceAttribute[]> => {
-    const { notifications, http } = this.props;
-    let result;
-    try {
-      result = await getWorkspacesWithWritePermission(http);
-    } catch (error) {
-      notifications?.toasts.addDanger({
-        title: i18n.translate(
-          'savedObjectsManagement.objectsTable.duplicateWorkspaces.dangerNotification',
-          {
-            defaultMessage: 'Unable to get workspaces with write permission',
-          }
-        ),
-        text: error instanceof Error ? error.message : JSON.stringify(error),
-      });
-    }
-    if (result?.success) {
-      return result.result?.workspaces ?? [];
-    } else {
-      return [];
-    }
-  };
-
-  onDuplicate = async (
-    savedObjects: SavedObjectWithMetadata[],
-    includeReferencesDeep: boolean,
-    targetWorkspace: string
-  ) => {
-    const { notifications, http } = this.props;
-    const objectsToDuplicate = savedObjects.map((obj) => ({ id: obj.id, type: obj.type }));
-    let result;
-    try {
-      result = await duplicateSavedObjects(
-        http,
-        objectsToDuplicate,
-        includeReferencesDeep,
-        targetWorkspace
-      );
-      if (result.success) {
-        notifications.toasts.addSuccess({
-          title: i18n.translate(
-            'savedObjectsManagement.objectsTable.duplicate.successNotification',
-            {
-              defaultMessage:
-                'Duplicate ' + savedObjects.length.toString() + ' saved objects successfully',
-            }
-          ),
-        });
-      } else {
-        let failedCount = savedObjects.length;
-        if (result.successCount) {
-          // reduplicate objects which can be successfully duplicated
-          const successObjectIds = result.successResults.map((item: { id: string }) => item.id);
-          const successObjectsToDuplicate = objectsToDuplicate.filter((item) =>
-            successObjectIds.includes(item.id)
-          );
-          result = await duplicateSavedObjects(
-            http,
-            successObjectsToDuplicate,
-            includeReferencesDeep,
-            targetWorkspace
-          );
-          if (result.success) {
-            failedCount -= successObjectsToDuplicate.length;
-          }
-        }
-        notifications.toasts.addDanger({
-          title: i18n.translate(
-            'savedObjectsManagement.objectsTable.duplicate.dangerNotification',
-            {
-              defaultMessage: 'Unable to duplicate ' + failedCount.toString() + ' saved objects',
-            }
-          ),
-        });
-      }
-    } catch (e) {
-      notifications.toasts.addDanger({
-        title: i18n.translate('savedObjectsManagement.objectsTable.duplicate.dangerNotification', {
-          defaultMessage:
-            'Unable to duplicate ' + savedObjects.length.toString() + ' saved objects',
-        }),
-      });
-      throw e;
-    }
-
-    this.hideDuplicateModal();
-    this.refreshObjects();
-  };
-
   onExport = async (includeReferencesDeep: boolean) => {
     const { selectedSavedObjects } = this.state;
     const { notifications, http } = this.props;
@@ -767,7 +677,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   }
 
   renderDuplicateModal() {
-    const { workspaces } = this.props;
+    const { workspaces, http, notifications } = this.props;
     const currentWorkspace = workspaces.currentWorkspace$.value;
     const { isShowingDuplicateModal, duplicateSelectedSavedObjects, duplicateMode } = this.state;
 
@@ -775,16 +685,84 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       return null;
     }
 
-    return (
-      <SavedObjectsDuplicateModal
-        duplicateMode={duplicateMode}
-        onDuplicate={this.onDuplicate}
-        onClose={this.hideDuplicateModal}
-        currentWorkspace={currentWorkspace}
-        selectedSavedObjects={duplicateSelectedSavedObjects}
-        getDuplicateWorkspaces={this.getDuplicateWorkspaces}
-      />
-    );
+    const onDuplicate = async (
+      savedObjects: SavedObjectWithMetadata[],
+      includeReferencesDeep: boolean,
+      targetWorkspace: string
+    ) => {
+      const objectsToDuplicate = savedObjects.map((obj) => ({ id: obj.id, type: obj.type }));
+      let result;
+      try {
+        result = await duplicateSavedObjects(
+          http,
+          objectsToDuplicate,
+          includeReferencesDeep,
+          targetWorkspace
+        );
+        if (result.success) {
+          notifications.toasts.addSuccess({
+            title: i18n.translate(
+              'savedObjectsManagement.objectsTable.duplicate.successNotification',
+              {
+                defaultMessage:
+                  'Duplicate ' + savedObjects.length.toString() + ' saved objects successfully',
+              }
+            ),
+          });
+        } else {
+          let failedCount = savedObjects.length;
+          if (result.successCount) {
+            // reduplicate objects which can be successfully duplicated
+            const successObjectIds = result.successResults.map((item: { id: string }) => item.id);
+            const successObjectsToDuplicate = objectsToDuplicate.filter((item) =>
+              successObjectIds.includes(item.id)
+            );
+            result = await duplicateSavedObjects(
+              http,
+              successObjectsToDuplicate,
+              includeReferencesDeep,
+              targetWorkspace
+            );
+            if (result.success) {
+              failedCount -= successObjectsToDuplicate.length;
+            }
+          }
+          notifications.toasts.addDanger({
+            title: i18n.translate(
+              'savedObjectsManagement.objectsTable.duplicate.dangerNotification',
+              {
+                defaultMessage: 'Unable to duplicate ' + failedCount.toString() + ' saved objects',
+              }
+            ),
+          });
+        }
+      } catch (e) {
+        notifications.toasts.addDanger({
+          title: i18n.translate(
+            'savedObjectsManagement.objectsTable.duplicate.dangerNotification',
+            {
+              defaultMessage:
+                'Unable to duplicate ' + savedObjects.length.toString() + ' saved objects',
+            }
+          ),
+        });
+        throw e;
+      }
+
+      this.hideDuplicateModal();
+      this.refreshObjects();
+    };
+
+    const showDuplicateModalProps = {
+      http,
+      onDuplicate,
+      notifications,
+      duplicateMode,
+      currentWorkspace,
+      selectedSavedObjects: duplicateSelectedSavedObjects,
+    };
+
+    showDuplicateModal(showDuplicateModalProps);
   }
 
   renderRelationships() {

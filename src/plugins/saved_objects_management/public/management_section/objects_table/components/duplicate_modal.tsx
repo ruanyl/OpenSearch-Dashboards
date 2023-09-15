@@ -31,10 +31,14 @@ import {
   EuiCallOut,
   EuiText,
 } from '@elastic/eui';
-import { WorkspaceAttribute } from 'opensearch-dashboards/public';
+import { HttpSetup, NotificationsStart, WorkspaceAttribute } from 'opensearch-dashboards/public';
 import { i18n } from '@osd/i18n';
 import { SavedObjectWithMetadata } from '../../../../common';
-import { getSavedObjectLabel, SAVED_OBJECT_TYPE_WORKSPACE } from '../../../../public';
+import {
+  getSavedObjectLabel,
+  getWorkspacesWithWritePermission,
+  SAVED_OBJECT_TYPE_WORKSPACE,
+} from '../../../../public';
 
 type WorkspaceOption = EuiComboBoxOptionOption<WorkspaceAttribute>;
 
@@ -48,10 +52,11 @@ export interface ShowDuplicateModalProps {
     includeReferencesDeep: boolean,
     targetWorkspace: string
   ) => Promise<void>;
+  http: HttpSetup;
   duplicateMode: DuplicateMode;
+  notifications: NotificationsStart;
   currentWorkspace: WorkspaceAttribute | null;
   selectedSavedObjects: SavedObjectWithMetadata[];
-  getDuplicateWorkspaces: () => Promise<WorkspaceAttribute[]>;
 }
 
 interface Props extends ShowDuplicateModalProps {
@@ -106,8 +111,8 @@ export class SavedObjectsDuplicateModal extends React.Component<Props, State> {
   };
 
   async componentDidMount() {
-    const { currentWorkspace, getDuplicateWorkspaces } = this.props;
-    const workspaceList = await getDuplicateWorkspaces();
+    const { currentWorkspace } = this.props;
+    const workspaceList = await this.getDuplicateWorkspaces();
     const currentWorkspaceName = currentWorkspace?.name;
 
     // current workspace is the first option
@@ -142,6 +147,27 @@ export class SavedObjectsDuplicateModal extends React.Component<Props, State> {
   componentWillUnmount() {
     this.isMounted = false;
   }
+
+  getDuplicateWorkspaces = async (): Promise<WorkspaceAttribute[]> => {
+    const { http, notifications } = this.props;
+    try {
+      const result = await getWorkspacesWithWritePermission(http);
+      if (result?.success) {
+        return result.result?.workspaces ?? [];
+      }
+    } catch (error) {
+      notifications?.toasts.addDanger({
+        title: i18n.translate(
+          'savedObjectsManagement.objectsTable.duplicateWorkspaces.dangerNotification',
+          {
+            defaultMessage: 'Unable to get workspaces with write permission',
+          }
+        ),
+        text: error instanceof Error ? error.message : JSON.stringify(error),
+      });
+    }
+    return [];
+  };
 
   duplicateSavedObjects = async (savedObjects: SavedObjectWithMetadata[]) => {
     this.setState({
