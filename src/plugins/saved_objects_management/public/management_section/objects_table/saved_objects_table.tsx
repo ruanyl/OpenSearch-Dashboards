@@ -67,6 +67,7 @@ import {
   NotificationsStart,
   ApplicationStart,
   WorkspaceAttribute,
+  I18nStart,
 } from 'src/core/public';
 import { Subscription } from 'rxjs';
 import { RedirectAppLinks } from '../../../../opensearch_dashboards_react/public';
@@ -111,6 +112,7 @@ export interface SavedObjectsTableProps {
   savedObjectsClient: SavedObjectsClientContract;
   indexPatterns: IndexPatternsContract;
   http: HttpStart;
+  i18n: I18nStart;
   workspaces: WorkspaceStart;
   search: DataPublicPluginStart['search'];
   overlays: OverlayStart;
@@ -599,14 +601,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     this.setState({ isShowingImportFlyout: false });
   };
 
-  showDuplicateModal = () => {
-    this.setState({ isShowingDuplicateModal: true });
-  };
-
-  hideDuplicateModal = () => {
-    this.setState({ isShowingDuplicateModal: false });
-  };
-
   onDelete = () => {
     this.setState({ isShowingDeleteConfirmModal: true });
   };
@@ -677,7 +671,12 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   }
 
   renderDuplicateModal() {
-    const { workspaces, http, notifications } = this.props;
+    const {
+      workspaces,
+      http,
+      notifications,
+      i18n: { Context: I18nContext },
+    } = this.props;
     const currentWorkspace = workspaces.currentWorkspace$.value;
     const { isShowingDuplicateModal, duplicateSelectedSavedObjects, duplicateMode } = this.state;
 
@@ -748,9 +747,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         });
         throw e;
       }
-
-      this.hideDuplicateModal();
-      this.refreshObjects();
+      await this.refreshObjects();
     };
 
     const showDuplicateModalProps = {
@@ -762,7 +759,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       selectedSavedObjects: duplicateSelectedSavedObjects,
     };
 
-    showDuplicateModal(showDuplicateModalProps);
+    showDuplicateModal(showDuplicateModalProps, I18nContext);
   }
 
   renderRelationships() {
