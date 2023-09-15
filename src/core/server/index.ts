@@ -326,7 +326,6 @@ export {
   SavedObjectsDeleteByWorkspaceOptions,
   Permissions,
   ACL,
-  SavedObjectsPermissionControlContract,
 } from './saved_objects';
 
 export {
