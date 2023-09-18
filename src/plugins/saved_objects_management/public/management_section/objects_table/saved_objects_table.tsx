@@ -112,7 +112,6 @@ export interface SavedObjectsTableProps {
   savedObjectsClient: SavedObjectsClientContract;
   indexPatterns: IndexPatternsContract;
   http: HttpStart;
-  i18n: I18nStart;
   workspaces: WorkspaceStart;
   search: DataPublicPluginStart['search'];
   overlays: OverlayStart;
