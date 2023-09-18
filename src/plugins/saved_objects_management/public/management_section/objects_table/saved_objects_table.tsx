@@ -678,7 +678,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
   renderDuplicateModal() {
     const { workspaces, http, notifications } = this.props;
-    const currentWorkspace = workspaces.currentWorkspace$.value;
     const { isShowingDuplicateModal, duplicateSelectedSavedObjects, duplicateMode } = this.state;
 
     if (!isShowingDuplicateModal) {
@@ -752,11 +751,11 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     return (
       <SavedObjectsDuplicateModal
         http={http}
+        workspaces={workspaces}
         onDuplicate={onDuplicate}
         notifications={notifications}
         duplicateMode={duplicateMode}
         onClose={this.hideDuplicateModal}
-        currentWorkspace={currentWorkspace}
         selectedSavedObjects={duplicateSelectedSavedObjects}
       />
     );

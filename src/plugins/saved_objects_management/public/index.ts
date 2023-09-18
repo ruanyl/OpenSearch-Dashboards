@@ -52,7 +52,6 @@ export {
   FailedImport,
   duplicateSavedObjects,
   getSavedObjectLabel,
-  getWorkspacesWithWritePermission,
 } from './lib';
 export { SavedObjectRelation, SavedObjectWithMetadata, SavedObjectMetadata } from './types';
 export { SAVED_OBJECT_DELETE_TRIGGER, savedObjectDeleteTrigger } from './triggers';
