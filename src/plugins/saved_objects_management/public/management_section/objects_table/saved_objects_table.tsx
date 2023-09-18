@@ -67,7 +67,6 @@ import {
   NotificationsStart,
   ApplicationStart,
   WorkspaceAttribute,
-  I18nStart,
 } from 'src/core/public';
 import { Subscription } from 'rxjs';
 import { RedirectAppLinks } from '../../../../opensearch_dashboards_react/public';

@@ -54,6 +54,7 @@ export function getTopNavConfig(
         : [
             getFullScreenConfig(actions[TopNavIds.FULL_SCREEN]),
             getShareConfig(actions[TopNavIds.SHARE]),
+            getCloneConfig(actions[TopNavIds.CLONE]),
             getDuplicateConfig(actions[TopNavIds.DUPLICATE]),
             getEditConfig(actions[TopNavIds.ENTER_EDIT_MODE]),
           ];
@@ -137,6 +138,23 @@ function getViewConfig(action: NavAction) {
       defaultMessage: 'Cancel editing and switch to view-only mode',
     }),
     testId: 'dashboardViewOnlyMode',
+    run: action,
+  };
+}
+
+/**
+ * @returns {osdTopNavConfig}
+ */
+function getCloneConfig(action: NavAction) {
+  return {
+    id: 'clone',
+    label: i18n.translate('dashboard.topNave.cloneButtonAriaLabel', {
+      defaultMessage: 'clone',
+    }),
+    description: i18n.translate('dashboard.topNave.cloneConfigDescription', {
+      defaultMessage: 'Create a copy of your dashboard',
+    }),
+    testId: 'dashboardClone',
     run: action,
   };
 }
