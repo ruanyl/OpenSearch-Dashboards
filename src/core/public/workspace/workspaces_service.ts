@@ -20,10 +20,12 @@ type WorkspaceMenuRenderFn = ({
   observables: WorkspaceObservables;
 }) => JSX.Element | null;
 
+type WorkspaceObject = WorkspaceAttribute & { readonly?: boolean };
+
 export interface WorkspaceObservables {
   currentWorkspaceId$: BehaviorSubject<string>;
-  currentWorkspace$: BehaviorSubject<WorkspaceAttribute | null>;
-  workspaceList$: BehaviorSubject<WorkspaceAttribute[]>;
+  currentWorkspace$: BehaviorSubject<WorkspaceObject | null>;
+  workspaceList$: BehaviorSubject<WorkspaceObject[]>;
   workspaceEnabled$: BehaviorSubject<boolean>;
   initialized$: BehaviorSubject<boolean>;
 }
@@ -45,8 +47,8 @@ export interface WorkspacesStart extends WorkspaceObservables {
 
 export class WorkspacesService implements CoreService<WorkspacesSetup, WorkspacesStart> {
   private currentWorkspaceId$ = new BehaviorSubject<string>('');
-  private workspaceList$ = new BehaviorSubject<WorkspaceAttribute[]>([]);
-  private currentWorkspace$ = new BehaviorSubject<WorkspaceAttribute | null>(null);
+  private workspaceList$ = new BehaviorSubject<WorkspaceObject[]>([]);
+  private currentWorkspace$ = new BehaviorSubject<WorkspaceObject | null>(null);
   private initialized$ = new BehaviorSubject<boolean>(false);
   private workspaceEnabled$ = new BehaviorSubject<boolean>(false);
   private _renderWorkspaceMenu: WorkspaceMenuRenderFn | null = null;
