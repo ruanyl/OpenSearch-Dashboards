@@ -37,7 +37,7 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
     this.savedObjects = savedObjects;
   }
 
-  private getScopeClientWithoutPermission(
+  private getScopedClientWithoutPermission(
     requestDetail: IRequestDetail
   ): SavedObjectsClientContract | undefined {
     return this.savedObjects?.getScopedClient(requestDetail.request, {
@@ -80,11 +80,13 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
       const { permissions, ...attributes } = payload;
       const id = generateRandomId(WORKSPACE_ID_SIZE);
       const client = this.getSavedObjectClientsFromRequestDetail(requestDetail);
-      const existingWorkspaceRes = await this.getScopeClientWithoutPermission(requestDetail)?.find({
-        type: WORKSPACE_TYPE,
-        search: attributes.name,
-        searchFields: ['name'],
-      });
+      const existingWorkspaceRes = await this.getScopedClientWithoutPermission(requestDetail)?.find(
+        {
+          type: WORKSPACE_TYPE,
+          search: attributes.name,
+          searchFields: ['name'],
+        }
+      );
       if (existingWorkspaceRes && existingWorkspaceRes.total > 0) {
         throw new Error(DUPLICATE_WORKSPACE_NAME_ERROR);
       }
@@ -166,7 +168,7 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
       const client = this.getSavedObjectClientsFromRequestDetail(requestDetail);
       const workspaceInDB: SavedObject<WorkspaceAttribute> = await client.get(WORKSPACE_TYPE, id);
       if (workspaceInDB.attributes.name !== attributes.name) {
-        const existingWorkspaceRes = await this.getScopeClientWithoutPermission(
+        const existingWorkspaceRes = await this.getScopedClientWithoutPermission(
           requestDetail
         )?.find({
           type: WORKSPACE_TYPE,
