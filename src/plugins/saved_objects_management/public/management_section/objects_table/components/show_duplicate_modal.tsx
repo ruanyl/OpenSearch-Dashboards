@@ -24,7 +24,7 @@ import { SavedObjectsDuplicateModal, ShowDuplicateModalProps } from './duplicate
 
 export function showDuplicateModal(
   showDuplicateModalProps: ShowDuplicateModalProps,
-  I18nContext?: I18nStart['Context']
+  I18nContext: I18nStart['Context']
 ) {
   const container = document.createElement('div');
   const closeModal = () => {
@@ -60,9 +60,5 @@ export function showDuplicateModal(
 
   document.body.appendChild(container);
 
-  if (I18nContext) {
-    ReactDOM.render(<I18nContext>{duplicateModal}</I18nContext>, container);
-  } else {
-    ReactDOM.render(duplicateModal, container);
-  }
+  ReactDOM.render(<I18nContext>{duplicateModal}</I18nContext>, container);
 }

@@ -94,7 +94,7 @@ import {
   SavedObjectsManagementColumnServiceStart,
   SavedObjectsManagementNamespaceServiceStart,
 } from '../../services';
-import { Header, Table, Flyout, Relationships, showDuplicateModal } from './components';
+import { Header, Table, Flyout, Relationships, SavedObjectsDuplicateModal } from './components';
 import { DataPublicPluginStart } from '../../../../data/public';
 import { PUBLIC_WORKSPACE_ID } from '../../../../../core/public';
 import { DuplicateMode } from './';
@@ -670,13 +670,16 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     );
   }
 
+  showDuplicateModal = () => {
+    this.setState({ isShowingDuplicateModal: true });
+  };
+
+  hideDuplicateModal = () => {
+    this.setState({ isShowingDuplicateModal: false });
+  };
+
   renderDuplicateModal() {
-    const {
-      workspaces,
-      http,
-      notifications,
-      i18n: { Context: I18nContext },
-    } = this.props;
+    const { workspaces, http, notifications } = this.props;
     const currentWorkspace = workspaces.currentWorkspace$.value;
     const { isShowingDuplicateModal, duplicateSelectedSavedObjects, duplicateMode } = this.state;
 
@@ -747,19 +750,21 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         });
         throw e;
       }
+      this.hideDuplicateModal();
       await this.refreshObjects();
     };
 
-    const showDuplicateModalProps = {
-      http,
-      onDuplicate,
-      notifications,
-      duplicateMode,
-      currentWorkspace,
-      selectedSavedObjects: duplicateSelectedSavedObjects,
-    };
-
-    showDuplicateModal(showDuplicateModalProps, I18nContext);
+    return (
+      <SavedObjectsDuplicateModal
+        http={http}
+        onDuplicate={onDuplicate}
+        notifications={notifications}
+        duplicateMode={duplicateMode}
+        onClose={this.hideDuplicateModal}
+        currentWorkspace={currentWorkspace}
+        selectedSavedObjects={duplicateSelectedSavedObjects}
+      />
+    );
   }
 
   renderRelationships() {
