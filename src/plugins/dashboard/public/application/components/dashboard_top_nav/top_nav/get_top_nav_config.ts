@@ -42,7 +42,8 @@ import { NavAction } from '../../../../types';
 export function getTopNavConfig(
   dashboardMode: ViewMode,
   actions: { [key: string]: NavAction },
-  hideWriteControls: boolean
+  hideWriteControls: boolean,
+  workspaceEnabled?: boolean
 ) {
   switch (dashboardMode) {
     case ViewMode.VIEW:
@@ -54,8 +55,9 @@ export function getTopNavConfig(
         : [
             getFullScreenConfig(actions[TopNavIds.FULL_SCREEN]),
             getShareConfig(actions[TopNavIds.SHARE]),
-            getCloneConfig(actions[TopNavIds.CLONE]),
-            getDuplicateConfig(actions[TopNavIds.DUPLICATE]),
+            ...(workspaceEnabled
+              ? [getDuplicateConfig(actions[TopNavIds.DUPLICATE])]
+              : [getCloneConfig(actions[TopNavIds.CLONE])]),
             getEditConfig(actions[TopNavIds.ENTER_EDIT_MODE]),
           ];
     case ViewMode.EDIT:

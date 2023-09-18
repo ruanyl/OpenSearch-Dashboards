@@ -99,6 +99,7 @@ export const getTopNavConfig = (
     workspaces,
   }: VisualizeServices
 ) => {
+  const workspaceEnabled = workspaces.workspaceEnabled$.value;
   const { vis, embeddableHandler } = visInstance;
   const savedVis = 'savedVis' in visInstance ? visInstance.savedVis : undefined;
 
@@ -252,7 +253,7 @@ export const getTopNavConfig = (
       // disable the Share button if no action specified
       disableButton: !share || !!embeddableId,
     },
-    ...(savedVis?.id
+    ...(savedVis?.id && workspaceEnabled
       ? [
           {
             id: 'duplicate',
