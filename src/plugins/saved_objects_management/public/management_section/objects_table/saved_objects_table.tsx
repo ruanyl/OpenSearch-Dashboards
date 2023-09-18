@@ -711,29 +711,27 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
               }
             ),
           });
-        } else {
-          let failedCount = savedObjects.length;
-          if (result.successCount) {
-            // reduplicate objects which can be successfully duplicated
-            const successObjectIds = result.successResults.map((item: { id: string }) => item.id);
-            const successObjectsToDuplicate = objectsToDuplicate.filter((item) =>
-              successObjectIds.includes(item.id)
-            );
-            result = await duplicateSavedObjects(
-              http,
-              successObjectsToDuplicate,
-              includeReferencesDeep,
-              targetWorkspace
-            );
-            if (result.success) {
-              failedCount -= successObjectsToDuplicate.length;
-            }
-          }
+        } else if (result.errors) {
+          const errorsIds = result.errors.map((item: { id: string }) => item.id);
           notifications.toasts.addDanger({
             title: i18n.translate(
               'savedObjectsManagement.objectsTable.duplicate.dangerNotification',
               {
-                defaultMessage: 'Unable to duplicate ' + failedCount.toString() + ' saved objects',
+                defaultMessage:
+                  'Unable to duplicate ' +
+                  savedObjects.length.toString() +
+                  ' saved objects. These objects cannot be duplicated:' +
+                  errorsIds.join(','),
+              }
+            ),
+          });
+        } else {
+          notifications.toasts.addDanger({
+            title: i18n.translate(
+              'savedObjectsManagement.objectsTable.duplicate.dangerNotification',
+              {
+                defaultMessage:
+                  'Unable to duplicate ' + savedObjects.length.toString() + ' saved objects',
               }
             ),
           });
@@ -748,7 +746,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             }
           ),
         });
-        throw e;
       }
       this.hideDuplicateModal();
       await this.refreshObjects();
