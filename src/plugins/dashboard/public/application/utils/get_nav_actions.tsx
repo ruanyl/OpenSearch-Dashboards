@@ -77,6 +77,7 @@ export const getNavActions = (
   const navActions: {
     [key: string]: NavAction;
   } = {};
+  const workspaceEnabled = workspaces.workspaceEnabled$.value;
 
   if (!stateContainer) {
     return navActions;
@@ -174,57 +175,59 @@ export const getNavActions = (
     showCloneModal(onClone, currentTitle);
   };
 
-  navActions[TopNavIds.DUPLICATE] = () => {
-    const onDuplicate = async (
-      dashboardSavedObjects: SavedObjectWithMetadata[],
-      includeReferencesDeep: boolean,
-      targetWorkspace: string
-    ) => {
-      const objectsToDuplicate = dashboardSavedObjects.map((obj) => ({
-        id: obj.id,
-        type: obj.type,
-      }));
+  if (workspaceEnabled) {
+    navActions[TopNavIds.DUPLICATE] = () => {
+      const onDuplicate = async (
+        dashboardSavedObjects: SavedObjectWithMetadata[],
+        includeReferencesDeep: boolean,
+        targetWorkspace: string
+      ) => {
+        const objectsToDuplicate = dashboardSavedObjects.map((obj) => ({
+          id: obj.id,
+          type: obj.type,
+        }));
 
-      try {
-        await duplicateSavedObjects(
-          http,
-          objectsToDuplicate,
-          includeReferencesDeep,
-          targetWorkspace
-        );
+        try {
+          await duplicateSavedObjects(
+            http,
+            objectsToDuplicate,
+            includeReferencesDeep,
+            targetWorkspace
+          );
 
-        notifications.toasts.addSuccess({
-          title: i18n.translate('dashboard.dashboardWasDuplicatedSuccessMessage', {
-            defaultMessage: 'Duplicate dashboard successfully',
-          }),
-        });
-      } catch (e) {
-        notifications.toasts.addDanger({
-          title: i18n.translate('dashboard.dashboardWasNotDuplicatedDangerMessage', {
-            defaultMessage: 'Unable to duplicate dashboard',
-          }),
-        });
-      }
+          notifications.toasts.addSuccess({
+            title: i18n.translate('dashboard.dashboardWasDuplicatedSuccessMessage', {
+              defaultMessage: 'Duplicate dashboard successfully',
+            }),
+          });
+        } catch (e) {
+          notifications.toasts.addDanger({
+            title: i18n.translate('dashboard.dashboardWasNotDuplicatedDangerMessage', {
+              defaultMessage: 'Unable to duplicate dashboard',
+            }),
+          });
+        }
+      };
+
+      const currentWorkspace = workspaces.currentWorkspace$.value;
+      const dashboardSavedObject = ({
+        ...currentContainer,
+        ...savedDashboard,
+      } as unknown) as SavedObjectWithMetadata;
+      dashboardSavedObject.meta = { title: savedDashboard.title };
+
+      const showDuplicateModalProps = {
+        http,
+        onDuplicate,
+        notifications,
+        currentWorkspace,
+        duplicateMode: DuplicateMode.Selected,
+        selectedSavedObjects: [dashboardSavedObject],
+      };
+
+      showDuplicateModal(showDuplicateModalProps, I18nContext);
     };
-
-    const currentWorkspace = workspaces.currentWorkspace$.value;
-    const dashboardSavedObject = ({
-      ...currentContainer,
-      ...savedDashboard,
-    } as unknown) as SavedObjectWithMetadata;
-    dashboardSavedObject.meta = { title: savedDashboard.title };
-
-    const showDuplicateModalProps = {
-      http,
-      onDuplicate,
-      notifications,
-      currentWorkspace,
-      duplicateMode: DuplicateMode.Selected,
-      selectedSavedObjects: [dashboardSavedObject],
-    };
-
-    showDuplicateModal(showDuplicateModalProps, I18nContext);
-  };
+  }
 
   navActions[TopNavIds.ADD_EXISTING] = () => {
     if (currentContainer && !isErrorEmbeddable(currentContainer)) {
