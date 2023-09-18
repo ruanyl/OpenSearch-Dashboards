@@ -28,9 +28,8 @@ import {
   SavedObjectsDeleteByWorkspaceOptions,
   SavedObjectsErrorHelpers,
 } from '../../../../core/server';
-import { SavedObjectsPermissionControlContract } from '../permission_control/client';
-import { WorkspaceFindOptions } from '../types';
 import { SavedObjectsPermissionControl, SavedObjectsPermissionControlContract } from '../permission_control/client';
+import { WorkspaceFindOptions } from '../types';
 
 // Can't throw unauthorized for now, the page will be refreshed if unauthorized
 const generateWorkspacePermissionError = () => {
