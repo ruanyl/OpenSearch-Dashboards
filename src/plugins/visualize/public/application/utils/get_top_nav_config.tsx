@@ -325,17 +325,11 @@ export const getTopNavConfig = (
                 selectedSavedObjects: [visualizationSavedObject],
               };
 
-              const isSaveAsButton = anchorElement.classList.contains('saveAsButton');
               onAppLeave((actions) => {
                 return actions.default();
               });
-              if (
-                originatingApp === 'dashboards' &&
-                dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables &&
-                !isSaveAsButton
-              ) {
-                createVisReference();
-              } else if (savedVis) {
+
+              if (savedVis) {
                 showDuplicateModal(showDuplicateModalProps, I18nContext);
               }
             },
