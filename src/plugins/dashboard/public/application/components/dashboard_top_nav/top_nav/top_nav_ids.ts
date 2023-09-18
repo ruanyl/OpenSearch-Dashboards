@@ -34,6 +34,7 @@ export const TopNavIds = {
   SAVE: 'save',
   EXIT_EDIT_MODE: 'exitEditMode',
   ENTER_EDIT_MODE: 'enterEditMode',
+  CLONE: 'clone',
   DUPLICATE: 'duplicate',
   FULL_SCREEN: 'fullScreenMode',
   VISUALIZE: 'visualize',
