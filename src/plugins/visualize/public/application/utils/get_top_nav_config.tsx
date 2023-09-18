@@ -283,10 +283,9 @@ export const getTopNavConfig = (
                 includeReferencesDeep: boolean,
                 targetWorkspace: string
               ) => {
-                // object must be visualization type
                 const objectsToDuplicate = visualizationSavedObjects.map((obj) => ({
                   id: obj.id,
-                  type: 'visualization',
+                  type: obj.type,
                 }));
 
                 try {
@@ -311,7 +310,10 @@ export const getTopNavConfig = (
               };
 
               const currentWorkspace = workspaces.currentWorkspace$.value;
-              const visualizationSavedObject = (savedVis as unknown) as SavedObjectWithMetadata;
+              const visualizationSavedObject = ({
+                ...embeddableHandler,
+                ...savedVis,
+              } as unknown) as SavedObjectWithMetadata;
               visualizationSavedObject.meta = { title: savedVis.title }; // meta is missing in savedVis
 
               const showDuplicateModalProps = {

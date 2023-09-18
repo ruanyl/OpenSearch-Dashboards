@@ -152,10 +152,9 @@ export const getNavActions = (
       includeReferencesDeep: boolean,
       targetWorkspace: string
     ) => {
-      // object must be dashboard type
       const objectsToDuplicate = dashboardSavedObjects.map((obj) => ({
         id: obj.id,
-        type: 'dashboard',
+        type: obj.type,
       }));
 
       try {
@@ -181,7 +180,10 @@ export const getNavActions = (
     };
 
     const currentWorkspace = workspaces.currentWorkspace$.value;
-    const dashboardSavedObject = (savedDashboard as unknown) as SavedObjectWithMetadata;
+    const dashboardSavedObject = ({
+      ...currentContainer,
+      ...savedDashboard,
+    } as unknown) as SavedObjectWithMetadata;
     dashboardSavedObject.meta = { title: savedDashboard.title };
 
     const showDuplicateModalProps = {
