@@ -92,7 +92,6 @@ const SavedObjectsTablePage = ({
       http={coreStart.http}
       workspaces={coreStart.workspaces}
       overlays={coreStart.overlays}
-      i18n={coreStart.i18n}
       notifications={coreStart.notifications}
       applications={coreStart.application}
       perPageConfig={itemsPerPage}

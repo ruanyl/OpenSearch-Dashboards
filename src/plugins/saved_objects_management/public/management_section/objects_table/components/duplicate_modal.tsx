@@ -151,9 +151,9 @@ export class SavedObjectsDuplicateModal extends React.Component<Props, State> {
   getDuplicateWorkspaces = async (): Promise<WorkspaceAttribute[]> => {
     const { http, notifications } = this.props;
     try {
-      const result = await getWorkspacesWithWritePermission(http);
-      if (result?.success) {
-        return result.result?.workspaces ?? [];
+      const response = await getWorkspacesWithWritePermission(http);
+      if (response?.success) {
+        return response.result?.workspaces ?? [];
       }
     } catch (error) {
       notifications?.toasts.addDanger({
