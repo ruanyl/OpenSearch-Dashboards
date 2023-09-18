@@ -111,7 +111,21 @@ export class WorkspaceClient {
     });
 
     if (result?.success) {
-      this.workspaces.workspaceList$.next(result.result.workspaces);
+      const resultWithWritePermission = await this.list({
+        perPage: 999,
+        permissionModes: [WorkspacePermissionMode.Management, WorkspacePermissionMode.LibraryWrite],
+      });
+      if (resultWithWritePermission?.success) {
+        const workspaceIdsWithWritePermission = resultWithWritePermission.result.workspaces.map(
+          (workspace: WorkspaceAttribute) => workspace.id
+        );
+        let workspaces = result.result.workspaces;
+        workspaces = result.result.workspaces.map((workspace: WorkspaceAttribute) => ({
+          ...workspace,
+          readonly: !workspaceIdsWithWritePermission.includes(workspace.id),
+        }));
+        this.workspaces.workspaceList$.next(workspaces);
+      }
     }
   }
 
@@ -182,7 +196,7 @@ export class WorkspaceClient {
     });
 
     if (result.success) {
-      this.updateWorkspaceList();
+      await this.updateWorkspaceList();
     }
 
     return result;
@@ -198,7 +212,7 @@ export class WorkspaceClient {
     const result = await this.safeFetch<null>(this.getPath([id]), { method: 'DELETE' });
 
     if (result.success) {
-      this.updateWorkspaceList();
+      await this.updateWorkspaceList();
     }
 
     return result;
@@ -273,7 +287,7 @@ export class WorkspaceClient {
     });
 
     if (result.success) {
-      this.updateWorkspaceList();
+      await this.updateWorkspaceList();
     }
 
     return result;

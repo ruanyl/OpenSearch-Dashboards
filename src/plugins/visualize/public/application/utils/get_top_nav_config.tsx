@@ -310,7 +310,6 @@ export const getTopNavConfig = (
                 }
               };
 
-              const currentWorkspace = workspaces.currentWorkspace$.value;
               const visualizationSavedObject = ({
                 ...embeddableHandler,
                 ...savedVis,
@@ -319,9 +318,9 @@ export const getTopNavConfig = (
 
               const showDuplicateModalProps = {
                 http,
+                workspaces,
                 onDuplicate,
                 notifications,
-                currentWorkspace,
                 duplicateMode: DuplicateMode.Selected,
                 selectedSavedObjects: [visualizationSavedObject],
               };

@@ -209,7 +209,6 @@ export const getNavActions = (
         }
       };
 
-      const currentWorkspace = workspaces.currentWorkspace$.value;
       const dashboardSavedObject = ({
         ...currentContainer,
         ...savedDashboard,
@@ -218,9 +217,9 @@ export const getNavActions = (
 
       const showDuplicateModalProps = {
         http,
+        workspaces,
         onDuplicate,
         notifications,
-        currentWorkspace,
         duplicateMode: DuplicateMode.Selected,
         selectedSavedObjects: [dashboardSavedObject],
       };

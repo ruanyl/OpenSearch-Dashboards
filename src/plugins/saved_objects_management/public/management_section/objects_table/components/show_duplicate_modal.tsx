@@ -34,11 +34,11 @@ export function showDuplicateModal(
 
   const {
     http,
+    workspaces,
     onDuplicate,
     duplicateMode,
     notifications,
     selectedSavedObjects,
-    currentWorkspace,
   } = showDuplicateModalProps;
 
   const onDuplicateConfirmed: ShowDuplicateModalProps['onDuplicate'] = async (...args) => {
@@ -50,10 +50,10 @@ export function showDuplicateModal(
     <SavedObjectsDuplicateModal
       http={http}
       onClose={closeModal}
+      workspaces={workspaces}
       notifications={notifications}
       duplicateMode={duplicateMode}
       onDuplicate={onDuplicateConfirmed}
-      currentWorkspace={currentWorkspace}
       selectedSavedObjects={selectedSavedObjects}
     />
   );
