@@ -29,19 +29,7 @@ export interface AuthInfo {
 }
 
 export class SavedObjectsPermissionControl {
-  private readonly logger: Logger;
-  private _getScopedClient?: SavedObjectsServiceStart['getScopedClient'];
-  private getScopedClient(request: OpenSearchDashboardsRequest) {
-    return this._getScopedClient?.(request, {
-      excludedWrappers: [WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID],
-    });
-  }
-
-  constructor(logger: Logger) {
-    this.logger = logger;
-  }
-
-  public getPrincipalsFromRequest(request: OpenSearchDashboardsRequest): Principals {
+  static getPrincipalsFromRequest(request: OpenSearchDashboardsRequest): Principals {
     const rawRequest = ensureRawRequest(request);
     const authInfo = rawRequest?.auth?.credentials?.authInfo as AuthInfo | null;
     const payload: Principals = {};
@@ -68,6 +56,19 @@ export class SavedObjectsPermissionControl {
     }
     return payload;
   }
+
+  private readonly logger: Logger;
+  private _getScopedClient?: SavedObjectsServiceStart['getScopedClient'];
+  private getScopedClient(request: OpenSearchDashboardsRequest) {
+    return this._getScopedClient?.(request, {
+      excludedWrappers: [WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID],
+    });
+  }
+
+  constructor(logger: Logger) {
+    this.logger = logger;
+  }
+
   private async bulkGetSavedObjects(
     request: OpenSearchDashboardsRequest,
     savedObjects: SavedObjectsBulkGetObject[]
@@ -114,7 +115,7 @@ export class SavedObjectsPermissionControl {
       };
     }
 
-    const principals = this.getPrincipalsFromRequest(request);
+    const principals = SavedObjectsPermissionControl.getPrincipalsFromRequest(request);
     let savedObjectsBasicInfo: any[] = [];
     const hasAllPermission = savedObjectsGet.every((item) => {
       // for object that doesn't contain ACL like config, return true
@@ -168,7 +169,7 @@ export class SavedObjectsPermissionControl {
     request: OpenSearchDashboardsRequest,
     permissionModes: SavedObjectsPermissionModes
   ) {
-    const principals = this.getPrincipalsFromRequest(request);
+    const principals = SavedObjectsPermissionControl.getPrincipalsFromRequest(request);
     const savedObjectClient = this.getScopedClient?.(request);
     try {
       const result = await savedObjectClient?.find({
