@@ -113,7 +113,7 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
       PUBLIC_WORKSPACE_ID,
       {
         name: i18n.translate('workspaces.public.workspace.default.name', {
-          defaultMessage: 'public',
+          defaultMessage: 'Global workspace',
         }),
         features: ['*', `!@${DEFAULT_APP_CATEGORIES.management.id}`],
         reserved: true,
@@ -235,7 +235,7 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
       /**
        * Setup public workspace if public workspace can not be found
        */
-      const hasPublicWorkspace = savedObjects.find((item) => item.id === PUBLIC_WORKSPACE_ID);
+      const hasPublicWorkspace = savedObjects.some((item) => item.id === PUBLIC_WORKSPACE_ID);
 
       if (!hasPublicWorkspace) {
         tasks.push(this.setupPublicWorkspace(scopedClientWithoutPermissionCheck));
@@ -244,7 +244,7 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
       /**
        * Setup management workspace if management workspace can not be found
        */
-      const hasManagementWorkspace = savedObjects.find(
+      const hasManagementWorkspace = savedObjects.some(
         (item) => item.id === MANAGEMENT_WORKSPACE_ID
       );
       if (!hasManagementWorkspace) {
@@ -256,7 +256,8 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
        */
       const principals = getPrincipalsFromRequest(requestDetail.request);
       /**
-       * Only when authentication is enabled will personal workspace be created
+       * Only when authentication is enabled will personal workspace be created.
+       * and the personal workspace id will be like "personal-{userId}"
        */
       if (principals.users && principals.users?.[0]) {
         const hasPersonalWorkspace = savedObjects.find(
