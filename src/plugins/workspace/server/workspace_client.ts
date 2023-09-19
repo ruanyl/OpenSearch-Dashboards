@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { i18n } from '@osd/i18n';
+import { omit } from 'lodash';
 import type {
   SavedObject,
   SavedObjectsClientContract,
@@ -12,7 +13,6 @@ import type {
   Logger,
   Permissions,
   OpenSearchDashboardsRequest,
-  SavedObjectsFindResult,
 } from '../../../core/server';
 import {
   ACL,
@@ -31,13 +31,12 @@ import {
   WorkspaceAttributeWithPermission,
 } from './types';
 import { workspace } from './saved_objects';
-import { generateRandomId } from './utils';
+import { generateRandomId, getPrincipalsFromRequest } from './utils';
 import {
   WORKSPACE_OVERVIEW_APP_ID,
   WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
   WORKSPACE_UPDATE_APP_ID,
 } from '../common/constants';
-import { SavedObjectsPermissionControl } from './permission_control/client';
 
 const WORKSPACE_ID_SIZE = 6;
 
@@ -152,7 +151,7 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
     request: OpenSearchDashboardsRequest,
     savedObjectClient?: SavedObjectsClientContract
   ) {
-    const principals = SavedObjectsPermissionControl.getPrincipalsFromRequest(request);
+    const principals = getPrincipalsFromRequest(request);
     const personalWorkspaceACL = new ACL().addPermission([WorkspacePermissionMode.Management], {
       users: principals.users,
     });
@@ -220,14 +219,14 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
     options: WorkspaceFindOptions
   ): ReturnType<IWorkspaceDBImpl['list']> {
     try {
-      let savedObjects: Array<SavedObjectsFindResult<WorkspaceAttribute>> = [];
-      const { saved_objects, ...others } = await this.getSavedObjectClientsFromRequestDetail(
-        requestDetail
-      ).find<WorkspaceAttribute>({
+      const resultResp = await this.getSavedObjectClientsFromRequestDetail(requestDetail).find<
+        WorkspaceAttribute
+      >({
         ...options,
         type: WORKSPACE_TYPE,
       });
-      savedObjects = saved_objects;
+      const others = omit(resultResp, 'saved_objects');
+      let savedObjects = resultResp.saved_objects;
       const scopedClientWithoutPermissionCheck = this.getScopedClientWithoutPermission(
         requestDetail
       );
@@ -255,9 +254,7 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
       /**
        * Setup personal workspace
        */
-      const principals = SavedObjectsPermissionControl.getPrincipalsFromRequest(
-        requestDetail.request
-      );
+      const principals = getPrincipalsFromRequest(requestDetail.request);
       /**
        * Only when authentication is enabled will personal workspace be created
        */
