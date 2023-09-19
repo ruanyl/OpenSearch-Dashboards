@@ -12,6 +12,7 @@ import type {
   Logger,
   Permissions,
   OpenSearchDashboardsRequest,
+  SavedObjectsFindResult,
 } from '../../../core/server';
 import {
   ACL,
@@ -20,6 +21,7 @@ import {
   PUBLIC_WORKSPACE_ID,
   WORKSPACE_TYPE,
   WorkspacePermissionMode,
+  PERSONAL_WORKSPACE_ID_PREFIX,
 } from '../../../core/server';
 import {
   IWorkspaceDBImpl,
@@ -156,7 +158,7 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
     });
     return this.checkAndCreateWorkspace(
       savedObjectClient,
-      MANAGEMENT_WORKSPACE_ID,
+      `${PERSONAL_WORKSPACE_ID_PREFIX}-${principals.users?.[0] || ''}`,
       {
         name: i18n.translate('workspaces.personal.workspace.default.name', {
           defaultMessage: 'Personal workspace',
@@ -218,16 +220,17 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
     options: WorkspaceFindOptions
   ): ReturnType<IWorkspaceDBImpl['list']> {
     try {
-      const {
-        saved_objects: savedObjects,
-        ...others
-      } = await this.getSavedObjectClientsFromRequestDetail(requestDetail).find<WorkspaceAttribute>(
-        {
-          ...options,
-          type: WORKSPACE_TYPE,
-        }
+      let savedObjects: Array<SavedObjectsFindResult<WorkspaceAttribute>> = [];
+      const { saved_objects, ...others } = await this.getSavedObjectClientsFromRequestDetail(
+        requestDetail
+      ).find<WorkspaceAttribute>({
+        ...options,
+        type: WORKSPACE_TYPE,
+      });
+      savedObjects = saved_objects;
+      const scopedClientWithoutPermissionCheck = this.getScopedClientWithoutPermission(
+        requestDetail
       );
-      const scopedClientWithoutPermissionCheck = this.getScopedClientWithoutPermission(requestDetail);
       const tasks: Array<Promise<unknown>> = [];
 
       /**
@@ -258,9 +261,9 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
       /**
        * Only when authentication is enabled will personal workspace be created
        */
-      if (principals.users) {
-        const hasPersonalWorkspace = savedObjects.find((item) =>
-          principals.users?.includes(item.id)
+      if (principals.users && principals.users?.[0]) {
+        const hasPersonalWorkspace = savedObjects.find(
+          (item) => `${PERSONAL_WORKSPACE_ID_PREFIX}-${principals.users?.[0] || ''}` === item.id
         );
         if (!hasPersonalWorkspace) {
           tasks.push(
@@ -270,6 +273,15 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
       }
       try {
         await Promise.all(tasks);
+        if (tasks.length) {
+          const retryFindResp = await this.getSavedObjectClientsFromRequestDetail(
+            requestDetail
+          ).find<WorkspaceAttribute>({
+            ...options,
+            type: WORKSPACE_TYPE,
+          });
+          savedObjects = retryFindResp.saved_objects;
+        }
       } catch (e) {
         this.logger.error(`Some error happened when initializing reserved workspace: ${e}`);
       }
