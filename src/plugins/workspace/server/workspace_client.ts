@@ -104,12 +104,9 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
     }
   }
   private async setupPublicWorkspace(savedObjectClient?: SavedObjectsClientContract) {
-    const publicWorkspaceACL = new ACL().addPermission(
-      [WorkspacePermissionMode.Management],
-      {
-        users: ['*'],
-      }
-    );
+    const publicWorkspaceACL = new ACL().addPermission([WorkspacePermissionMode.Management], {
+      users: ['*'],
+    });
     return this.checkAndCreateWorkspace(
       savedObjectClient,
       PUBLIC_WORKSPACE_ID,
@@ -231,7 +228,7 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
         }
       );
       const scopedClientWithoutPermissionCheck = this.getScopeClientWithoutPermisson(requestDetail);
-      const tasks: Promise<unknown>[] = [];
+      const tasks: Array<Promise<unknown>> = [];
 
       /**
        * Setup public workspace if public workspace can not be found
