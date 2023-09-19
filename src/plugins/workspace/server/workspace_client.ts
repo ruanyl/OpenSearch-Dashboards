@@ -227,7 +227,7 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
           type: WORKSPACE_TYPE,
         }
       );
-      const scopedClientWithoutPermissionCheck = this.getScopeClientWithoutPermisson(requestDetail);
+      const scopedClientWithoutPermissionCheck = this.getScopedClientWithoutPermission(requestDetail);
       const tasks: Array<Promise<unknown>> = [];
 
       /**
