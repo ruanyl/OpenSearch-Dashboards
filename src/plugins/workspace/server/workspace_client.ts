@@ -105,9 +105,12 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
     }
   }
   private async setupPublicWorkspace(savedObjectClient?: SavedObjectsClientContract) {
-    const publicWorkspaceACL = new ACL().addPermission([WorkspacePermissionMode.Management], {
-      users: ['*'],
-    });
+    const publicWorkspaceACL = new ACL().addPermission(
+      [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
+      {
+        users: ['*'],
+      }
+    );
     return this.checkAndCreateWorkspace(
       savedObjectClient,
       PUBLIC_WORKSPACE_ID,
@@ -122,9 +125,12 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
     );
   }
   private async setupManagementWorkspace(savedObjectClient?: SavedObjectsClientContract) {
-    const managementWorkspaceACL = new ACL().addPermission([WorkspacePermissionMode.Management], {
-      users: ['*'],
-    });
+    const managementWorkspaceACL = new ACL().addPermission(
+      [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
+      {
+        users: ['*'],
+      }
+    );
     const DSM_APP_ID = 'dataSources';
     const DEV_TOOLS_APP_ID = 'dev_tools';
 
@@ -152,9 +158,12 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
     savedObjectClient?: SavedObjectsClientContract
   ) {
     const principals = getPrincipalsFromRequest(request);
-    const personalWorkspaceACL = new ACL().addPermission([WorkspacePermissionMode.Management], {
-      users: principals.users,
-    });
+    const personalWorkspaceACL = new ACL().addPermission(
+      [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
+      {
+        users: principals.users,
+      }
+    );
     return this.checkAndCreateWorkspace(
       savedObjectClient,
       `${PERSONAL_WORKSPACE_ID_PREFIX}-${principals.users?.[0] || ''}`,
