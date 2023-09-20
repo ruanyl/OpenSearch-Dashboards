@@ -113,7 +113,7 @@ export class WorkspaceClient {
     if (result?.success) {
       const resultWithWritePermission = await this.list({
         perPage: 999,
-        permissionModes: [WorkspacePermissionMode.Management, WorkspacePermissionMode.LibraryWrite],
+        permissionModes: [WorkspacePermissionMode.LibraryWrite],
       });
       if (resultWithWritePermission?.success) {
         const workspaceIdsWithWritePermission = resultWithWritePermission.result.workspaces.map(
@@ -122,7 +122,7 @@ export class WorkspaceClient {
         let workspaces = result.result.workspaces;
         workspaces = result.result.workspaces.map((workspace: WorkspaceAttribute) => ({
           ...workspace,
-          readonly: !workspaceIdsWithWritePermission.includes(workspace.id),
+          libraryReadonly: !workspaceIdsWithWritePermission.includes(workspace.id),
         }));
         this.workspaces.workspaceList$.next(workspaces);
       }

@@ -153,7 +153,7 @@ export class SavedObjectsDuplicateModal extends React.Component<Props, State> {
   getTargetWorkspaces = () => {
     const { workspaces } = this.props;
     const workspaceList = workspaces.workspaceList$.value;
-    return workspaceList.filter((workspace) => !workspace.readonly);
+    return workspaceList.filter((workspace) => !workspace.libraryReadonly);
   };
 
   duplicateSavedObjects = async (savedObjects: SavedObjectWithMetadata[]) => {

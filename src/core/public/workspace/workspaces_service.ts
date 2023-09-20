@@ -20,7 +20,7 @@ type WorkspaceMenuRenderFn = ({
   observables: WorkspaceObservables;
 }) => JSX.Element | null;
 
-type WorkspaceObject = WorkspaceAttribute & { readonly?: boolean };
+type WorkspaceObject = WorkspaceAttribute & { libraryReadonly?: boolean };
 export interface WorkspaceObservables {
   currentWorkspaceId$: BehaviorSubject<string>;
   currentWorkspace$: BehaviorSubject<WorkspaceObject | null>;
