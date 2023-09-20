@@ -115,12 +115,12 @@ export class SavedObjectsDuplicateModal extends React.Component<Props, State> {
     const { workspaces } = this.props;
     const currentWorkspace = workspaces.currentWorkspace$.value;
     const currentWorkspaceName = currentWorkspace?.name;
-    const duplicateWorkspaceList = this.getDuplicateWorkspaces();
+    const targetWorkspaces = this.getTargetWorkspaces();
 
     // current workspace is the first option
     const workspaceOptions = [
       ...(currentWorkspace ? [this.workspaceToOption(currentWorkspace, currentWorkspaceName)] : []),
-      ...duplicateWorkspaceList
+      ...targetWorkspaces
         .filter((workspace: WorkspaceAttribute) => workspace.name !== currentWorkspaceName)
         .map((workspace: WorkspaceAttribute) =>
           this.workspaceToOption(workspace, currentWorkspaceName)
@@ -150,10 +150,10 @@ export class SavedObjectsDuplicateModal extends React.Component<Props, State> {
     this.isMounted = false;
   }
 
-  getDuplicateWorkspaces = (): WorkspaceAttribute[] => {
+  getTargetWorkspaces = () => {
     const { workspaces } = this.props;
     const workspaceList = workspaces.workspaceList$.value;
-    return workspaceList.filter((workspace: WorkspaceAttribute) => !workspace.readonly);
+    return workspaceList.filter((workspace) => !workspace.readonly);
   };
 
   duplicateSavedObjects = async (savedObjects: SavedObjectWithMetadata[]) => {
