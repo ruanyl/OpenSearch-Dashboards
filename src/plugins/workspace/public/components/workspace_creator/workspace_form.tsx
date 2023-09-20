@@ -363,7 +363,7 @@ export const WorkspaceForm = ({
       setFormErrors({});
       onSubmit?.({ ...formData, name: formData.name, permissions });
     },
-    [onSubmit, defaultFeatures, defaultValues]
+    [onSubmit, defaultFeatures, defaultValues?.features]
   );
 
   const handleNameInputChange = useCallback<Required<EuiFieldTextProps>['onChange']>((e) => {
