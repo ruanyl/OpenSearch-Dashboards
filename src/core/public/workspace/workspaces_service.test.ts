@@ -77,4 +77,13 @@ describe('WorkspacesService', () => {
     workspacesStart.currentWorkspaceId$.next('workspace-3');
     expect(workspacesStart.currentWorkspace$.hasError).toBe(true);
   });
+
+  it('should stop all observables when workspace service stopped', () => {
+    workspaces.stop();
+    expect(workspacesStart.currentWorkspaceId$.isStopped).toBe(true);
+    expect(workspacesStart.currentWorkspace$.isStopped).toBe(true);
+    expect(workspacesStart.workspaceList$.isStopped).toBe(true);
+    expect(workspacesStart.workspaceEnabled$.isStopped).toBe(true);
+    expect(workspacesStart.initialized$.isStopped).toBe(true);
+  });
 });
