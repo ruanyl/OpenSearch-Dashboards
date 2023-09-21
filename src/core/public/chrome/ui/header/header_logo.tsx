@@ -35,21 +35,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import { ChromeNavLink } from '../..';
 import { ChromeBranding } from '../../chrome_service';
-
-function findClosestAnchor(element: HTMLElement): HTMLAnchorElement | void {
-  let current = element;
-  while (current) {
-    if (current.tagName === 'A') {
-      return current as HTMLAnchorElement;
-    }
-
-    if (!current.parentElement || current.parentElement === document.body) {
-      return undefined;
-    }
-
-    current = current.parentElement;
-  }
-}
+import type { Logos } from '../../../../common/types';
 
 function onClick(
   event: React.MouseEvent<HTMLAnchorElement>,
@@ -57,7 +43,7 @@ function onClick(
   navLinks: ChromeNavLink[],
   navigateToApp: (appId: string) => void
 ) {
-  const anchor = findClosestAnchor((event as any).nativeEvent.target);
+  const anchor = (event.nativeEvent.target as HTMLAnchorElement)?.closest('a');
   if (!anchor) {
     return;
   }
@@ -96,32 +82,37 @@ function onClick(
   }
 }
 
-export const DEFAULT_DARK_LOGO = 'opensearch_logo_dark_mode.svg';
-export const DEFAULT_LOGO = 'opensearch_logo_default_mode.svg';
 interface Props {
   href: string;
   navLinks$: Observable<ChromeNavLink[]>;
   forceNavigation$: Observable<boolean>;
   navigateToApp: (appId: string) => void;
   branding: ChromeBranding;
+  logos: Logos;
+  /* indicates the background color-scheme this element will appear over
+   * `'normal'` and `'light'` are synonyms of being `undefined`, to mean not `'dark'`
+   */
+  backgroundColorScheme?: 'normal' | 'light' | 'dark';
 }
 
-export function HeaderLogo({ href, navigateToApp, branding, ...observables }: Props) {
+export function HeaderLogo({
+  href,
+  navigateToApp,
+  branding,
+  logos,
+  backgroundColorScheme,
+  ...observables
+}: Props) {
   const forceNavigation = useObservable(observables.forceNavigation$, false);
   const navLinks = useObservable(observables.navLinks$, []);
+  const { applicationTitle = 'opensearch dashboards' } = branding;
+
   const {
-    darkMode,
-    assetFolderUrl = '',
-    logo = {},
-    applicationTitle = 'opensearch dashboards',
-  } = branding;
-  const { defaultUrl: logoUrl, darkModeUrl: darkLogoUrl } = logo;
+    [backgroundColorScheme === 'dark' ? 'dark' : 'light']: { url: logoURL },
+    type: logoType,
+  } = logos.Application;
+  const testSubj = `${logoType}Logo`;
 
-  const customLogo = darkMode ? darkLogoUrl ?? logoUrl : logoUrl;
-  const defaultLogo = darkMode ? DEFAULT_DARK_LOGO : DEFAULT_LOGO;
-
-  const logoSrc = customLogo ? customLogo : `${assetFolderUrl}/${defaultLogo}`;
-  const testSubj = customLogo ? 'customLogo' : 'defaultLogo';
   const alt = `${applicationTitle} logo`;
 
   return (
@@ -136,8 +127,8 @@ export function HeaderLogo({ href, navigateToApp, branding, ...observables }: Pr
     >
       <img
         data-test-subj={testSubj}
-        data-test-image-url={logoSrc}
-        src={logoSrc}
+        data-test-image-url={logoURL}
+        src={logoURL}
         alt={alt}
         loading="lazy"
         className="logoImage"

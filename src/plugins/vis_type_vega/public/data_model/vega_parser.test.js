@@ -33,6 +33,7 @@ import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 import { euiPaletteColorBlind } from '@elastic/eui';
 import { VegaParser } from './vega_parser';
 import { bypassExternalUrlCheck } from '../vega_view/vega_base_view';
+import { VisLayerTypes } from '../../../vis_augmenter/public';
 
 jest.mock('../services');
 
@@ -105,6 +106,9 @@ describe(`VegaParser._setDefaultColors`, () => {
             fill: euiThemeVars.euiColorDarkestShade,
           },
         },
+        text: {
+          fill: euiThemeVars.euiTextColor,
+        },
         title: {
           color: euiThemeVars.euiColorDarkestShade,
         },
@@ -131,6 +135,7 @@ describe(`VegaParser._setDefaultColors`, () => {
         rule: { stroke: '#54B399' },
         shape: { stroke: '#54B399' },
         symbol: { fill: '#54B399' },
+        text: { fill: euiThemeVars.euiTextColor },
         trail: { fill: '#54B399' },
         style: {
           'group-title': {
@@ -388,6 +393,25 @@ describe('VegaParser._parseConfig', () => {
     check({ config: { kibana: { a: 1 } } }, { a: 1 }, { config: {} })
   );
   test('_hostConfig', check({ _hostConfig: { a: 1 } }, { a: 1 }, {}, 1));
+  test(
+    'visibleVisLayers conversion to map',
+    check(
+      {
+        config: {
+          kibana: {
+            hideWarnings: true,
+            visibleVisLayers: [[VisLayerTypes.PointInTimeEvents, true]],
+          },
+        },
+      },
+      {
+        hideWarnings: true,
+        visibleVisLayers: new Map([[VisLayerTypes.PointInTimeEvents, true]]),
+      },
+      { config: {} },
+      0
+    )
+  );
 });
 
 describe('VegaParser._compileWithAutosize', () => {

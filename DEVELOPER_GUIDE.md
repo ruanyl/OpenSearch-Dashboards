@@ -13,6 +13,7 @@ This guide applies to all development within the OpenSearch Dashboards project a
   - [Next Steps](#next-steps)
 - [Alternative development installations](#alternative-development-installations)
   - [Optional - Run OpenSearch with plugins](#optional---run-opensearch-with-plugins)
+  - [Plugin development](#plugin-development)
   - [Alternative - Run OpenSearch from tarball](#alternative---run-opensearch-from-tarball)
   - [Configure OpenSearch Dashboards for security](#configure-opensearch-dashboards-for-security)
 - [Building artifacts](#building-artifacts)
@@ -63,12 +64,10 @@ If it's the only version of node installed, it will automatically be set to the 
 
 #### Install `yarn`
 
-Take a look at the [latest Yarn release](https://github.com/yarnpkg/berry/releases/latest), note the version number, and run:
+To install yarn run:
 
 ```bash
-$ npm i -g corepack
-
-$ corepack prepare yarn@<version> --activate
+$ npm i -g yarn
 ```
 
 (See the [Yarn installation documentation](https://yarnpkg.com/getting-started/install) for more information.)
@@ -230,6 +229,9 @@ $ yarn opensearch snapshot --P https://repo1.maven.org/maven2/org/opensearch/plu
 ```
 
 Note - if you add the [`security` plugin](https://github.com/opensearch-project/security), you'll also need to [configure OpenSearch Dashboards for security](#configure-opensearch-dashboards-for-security).
+
+### Plugin development
+The osd-plugin-generator tool makes it easier to create a plugin for OpenSearch Dashboards. It sets up the basic structure of the project and provides scripts to build it. Refer to [osd-plugin-generator](https://github.com/opensearch-project/OpenSearch-Dashboards/tree/main/packages/osd-plugin-generator) for more details.
 
 #### Other snapshot configuration options
 
