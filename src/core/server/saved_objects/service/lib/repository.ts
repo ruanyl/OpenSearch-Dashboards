@@ -440,8 +440,6 @@ export class SavedObjectsRepository {
         method,
       } = expectedBulkGetResult.value;
       let savedObjectWorkspaces: string[] | undefined;
-      let finalMethod = method;
-      let finalObjectId = object.id;
       if (opensearchRequestIndex !== undefined) {
         const indexFound = bulkGetResponse?.statusCode !== 404;
         const actualResult = indexFound
@@ -488,19 +486,9 @@ export class SavedObjectsRepository {
         versionProperties = getExpectedVersionProperties(version);
       }
 
-      if (expectedBulkGetResult.value.method === 'create') {
-        savedObjectWorkspaces = options.workspaces;
-      } else {
-        const changeToCreate = () => {
-          finalMethod = 'create';
-          finalObjectId = object.id;
-          savedObjectWorkspaces = options.workspaces;
-          versionProperties = {};
-        };
-        /**
-         * When overwrite, need to check if the object is workspace-specific
-         * if so, copy object to target workspace instead of refering it.
-         */
+      savedObjectWorkspaces = options.workspaces;
+
+      if (expectedBulkGetResult.value.method !== 'create') {
         const rawId = this._serializer.generateRawId(namespace, object.type, object.id);
         const findObject =
           bulkGetResponse?.statusCode !== 404
@@ -514,31 +502,31 @@ export class SavedObjectsRepository {
             options.workspaces,
             transformedObject.workspaces
           );
-          /**
-           * We need to create a new object when the object
-           * is about to import into workspaces it is not belong to
-           */
           if (filteredWorkspaces.length) {
-            /**
-             * Create a new object but only belong to the set of (target workspaces - original workspace)
-             */
-            changeToCreate();
-            finalObjectId = uuid.v1();
-            savedObjectWorkspaces = filteredWorkspaces;
+            const { id, type } = object;
+            return {
+              tag: 'Left' as 'Left',
+              error: {
+                id,
+                type,
+                error: {
+                  ...errorContent(SavedObjectsErrorHelpers.createConflictError(type, id)),
+                  metadata: { isNotOverwritable: true },
+                },
+              },
+            };
           } else {
             savedObjectWorkspaces = transformedObject.workspaces;
           }
-        } else {
-          savedObjectWorkspaces = options.workspaces;
         }
       }
 
       const expectedResult = {
         opensearchRequestIndex: bulkRequestIndexCounter++,
-        requestedId: finalObjectId,
+        requestedId: object.id,
         rawMigratedDoc: this._serializer.savedObjectToRaw(
           this._migrator.migrateDocument({
-            id: finalObjectId,
+            id: object.id,
             type: object.type,
             attributes: object.attributes,
             migrationVersion: object.migrationVersion,
@@ -554,7 +542,7 @@ export class SavedObjectsRepository {
 
       bulkCreateParams.push(
         {
-          [finalMethod]: {
+          [method]: {
             _id: expectedResult.rawMigratedDoc._id,
             _index: this.getIndexForType(object.type),
             ...(overwrite && versionProperties),
@@ -673,19 +661,14 @@ export class SavedObjectsRepository {
           options.workspaces,
           transformedObject.workspaces
         );
-        if (!filteredWorkspaces.length) {
-          errors.push({
-            id,
-            type,
-            error: {
-              ...errorContent(SavedObjectsErrorHelpers.createConflictError(type, id)),
-              // @ts-expect-error MultiGetHit._source is optional
-              ...(!this.rawDocExistsInNamespace(doc!, namespace) && {
-                metadata: { isNotOverwritable: true },
-              }),
-            },
-          });
-        }
+        errors.push({
+          id,
+          type,
+          error: {
+            ...errorContent(SavedObjectsErrorHelpers.createConflictError(type, id)),
+            metadata: { isNotOverwritable: !!filteredWorkspaces.length },
+          },
+        });
       }
     });
 
