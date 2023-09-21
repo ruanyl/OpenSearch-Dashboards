@@ -289,11 +289,17 @@ export class SavedObjectsRepository {
 
     let savedObjectWorkspaces = workspaces;
 
-    if (id && overwrite) {
+    if (id && overwrite && workspaces) {
       try {
         const currentItem = await this.get(type, id);
-        if (currentItem && currentItem.workspaces) {
-          // do not overwrite workspaces
+        if (
+          SavedObjectsUtils.filterWorkspacesAccordingToBaseWorkspaces(
+            workspaces,
+            currentItem.workspaces
+          ).length
+        ) {
+          throw SavedObjectsErrorHelpers.createConflictError(type, id);
+        } else {
           savedObjectWorkspaces = currentItem.workspaces;
         }
       } catch (e) {
@@ -663,7 +669,7 @@ export class SavedObjectsRepository {
             options.workspaces,
             transformedObject.workspaces
           );
-          if (filteredWorkspaces.length) {
+          if (!filteredWorkspaces.length) {
             workspaceConflict = true;
           }
         }
