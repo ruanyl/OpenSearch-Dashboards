@@ -149,8 +149,9 @@ export class WorkspaceSavedObjectsClientWrapper {
     }
 
     let hasPermission = false;
-    // Check permission based on object's workspaces
-    if (savedObject.workspaces) {
+    // Check permission based on object's workspaces.
+    // If workspacePermissionModes is passed with an empty array, we need to skip this validation and continue to validate object ACL.
+    if (savedObject.workspaces && workspacePermissionModes.length > 0) {
       const workspacePermissionValidator = validateAllWorkspaces
         ? this.validateMultiWorkspacesPermissions
         : this.validateAtLeastOnePermittedWorkspaces;
@@ -243,16 +244,40 @@ export class WorkspaceSavedObjectsClientWrapper {
       objects: Array<SavedObjectsBulkCreateObject<T>>,
       options: SavedObjectsCreateOptions = {}
     ): Promise<SavedObjectsBulkResponse<T>> => {
-      if (options?.workspaces && options.workspaces.length > 0) {
-        const permitted = await this.validateMultiWorkspacesPermissions(
-          options.workspaces,
+      const isPassedWorkspaces = options?.workspaces && options.workspaces.length > 0;
+
+      if (
+        isPassedWorkspaces &&
+        !(await this.validateMultiWorkspacesPermissions(
+          options.workspaces!,
           wrapperOptions.request,
           [WorkspacePermissionMode.LibraryWrite]
-        );
-        if (!permitted) {
-          throw generateSavedObjectsPermissionError();
+        ))
+      ) {
+        throw generateSavedObjectsPermissionError();
+      }
+
+      if (options.overwrite) {
+        for (const object of objects) {
+          const { type, id } = object;
+          if (
+            id &&
+            !(await this.validateWorkspacesAndSavedObjectsPermissions(
+              await wrapperOptions.client.get(type, id),
+              wrapperOptions.request,
+              !isPassedWorkspaces
+                ? // If no workspaces are passed, we need to check the workspace permission of object when overwrite.
+                  [WorkspacePermissionMode.LibraryWrite]
+                : [],
+              [WorkspacePermissionMode.Write],
+              false
+            ))
+          ) {
+            throw generateWorkspacePermissionError();
+          }
         }
       }
+
       return await wrapperOptions.client.bulkCreate(objects, options);
     };
 
@@ -261,11 +286,12 @@ export class WorkspaceSavedObjectsClientWrapper {
       attributes: T,
       options?: SavedObjectsCreateOptions
     ) => {
+      const isPassedWorkspaces = options?.workspaces && options.workspaces.length > 0;
+
       if (
-        options?.workspaces &&
-        options.workspaces.length > 0 &&
+        isPassedWorkspaces &&
         !(await this.validateMultiWorkspacesPermissions(
-          options.workspaces,
+          options.workspaces!,
           wrapperOptions.request,
           [WorkspacePermissionMode.LibraryWrite]
         ))
@@ -279,7 +305,10 @@ export class WorkspaceSavedObjectsClientWrapper {
         !(await this.validateWorkspacesAndSavedObjectsPermissions(
           await wrapperOptions.client.get(type, options.id),
           wrapperOptions.request,
-          [WorkspacePermissionMode.LibraryWrite],
+          !isPassedWorkspaces
+            ? // If no workspaces are passed, we need to check the workspace permission of object when overwrite.
+              [WorkspacePermissionMode.LibraryWrite]
+            : [],
           [WorkspacePermissionMode.Write],
           false
         ))
