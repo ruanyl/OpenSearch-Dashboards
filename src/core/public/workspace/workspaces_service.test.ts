@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { httpServiceMock } from '../http/http_service.mock';
 import { applicationServiceMock } from '../application/application_service.mock';
 import { WorkspacesService, WorkspacesSetup, WorkspacesStart } from './workspaces_service';
