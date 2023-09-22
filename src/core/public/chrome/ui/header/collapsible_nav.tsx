@@ -223,85 +223,89 @@ export function CollapsibleNav({
         </Fragment>
       )}
 
-      {mergedNavLinks.map((item, i) => {
-        if (typeof item === 'string') {
-          const category = categoryDictionary[item]!;
-          const opensearchLinkLogo =
-            category.id === 'opensearchDashboards' ? logos.Mark.url : category.euiIconType;
+      <EuiFlexItem className="eui-yScroll">
+        {mergedNavLinks.map((item, i) => {
+          if (typeof item === 'string') {
+            const category = categoryDictionary[item]!;
+            const opensearchLinkLogo =
+              category.id === 'opensearchDashboards' ? logos.Mark.url : category.euiIconType;
 
-          return (
-            <EuiCollapsibleNavGroup
-              key={category.id}
-              iconType={opensearchLinkLogo}
-              title={category.label}
-              isCollapsible={true}
-              initialIsOpen={getIsCategoryOpen(category.id, storage)}
-              onToggle={(isCategoryOpen) => setIsCategoryOpen(category.id, isCategoryOpen, storage)}
-              data-test-subj={`collapsibleNavGroup-${category.id}`}
-              data-test-opensearch-logo={opensearchLinkLogo}
-            >
-              <EuiListGroup
-                aria-label={i18n.translate('core.ui.primaryNavSection.screenReaderLabel', {
-                  defaultMessage: 'Primary navigation links, {category}',
-                  values: { category: category.label },
-                })}
-                listItems={allCategorizedLinks[item].map((link) => readyForEUI(link))}
-                maxWidth="none"
-                color="subdued"
-                gutterSize="none"
-                size="s"
-              />
-            </EuiCollapsibleNavGroup>
-          );
-        } else {
-          return (
-            <EuiCollapsibleNavGroup data-test-subj={`collapsibleNavGroup-noCategory`} key={i}>
-              <EuiListGroup flush>
-                <EuiListGroupItem color="text" size="s" {...readyForEUI(item, true)} />
-              </EuiListGroup>
-            </EuiCollapsibleNavGroup>
-          );
-        }
-      })}
-
-      {/* Docking button only for larger screens that can support it*/}
-      <EuiShowFor sizes={['l', 'xl']}>
-        <EuiCollapsibleNavGroup>
-          <EuiListGroup flush>
-            <EuiListGroupItem
-              data-test-subj="collapsible-nav-lock"
-              buttonRef={lockRef}
-              size="xs"
-              color="subdued"
-              label={
-                isLocked
-                  ? i18n.translate('core.ui.primaryNavSection.undockLabel', {
-                      defaultMessage: 'Undock navigation',
-                    })
-                  : i18n.translate('core.ui.primaryNavSection.dockLabel', {
-                      defaultMessage: 'Dock navigation',
-                    })
-              }
-              aria-label={
-                isLocked
-                  ? i18n.translate('core.ui.primaryNavSection.undockAriaLabel', {
-                      defaultMessage: 'Undock primary navigation',
-                    })
-                  : i18n.translate('core.ui.primaryNavSection.dockAriaLabel', {
-                      defaultMessage: 'Dock primary navigation',
-                    })
-              }
-              onClick={() => {
-                onIsLockedUpdate(!isLocked);
-                if (lockRef.current) {
-                  lockRef.current.focus();
+            return (
+              <EuiCollapsibleNavGroup
+                key={category.id}
+                iconType={opensearchLinkLogo}
+                title={category.label}
+                isCollapsible={true}
+                initialIsOpen={getIsCategoryOpen(category.id, storage)}
+                onToggle={(isCategoryOpen) =>
+                  setIsCategoryOpen(category.id, isCategoryOpen, storage)
                 }
-              }}
-              iconType={isLocked ? 'lock' : 'lockOpen'}
-            />
-          </EuiListGroup>
-        </EuiCollapsibleNavGroup>
-      </EuiShowFor>
+                data-test-subj={`collapsibleNavGroup-${category.id}`}
+                data-test-opensearch-logo={opensearchLinkLogo}
+              >
+                <EuiListGroup
+                  aria-label={i18n.translate('core.ui.primaryNavSection.screenReaderLabel', {
+                    defaultMessage: 'Primary navigation links, {category}',
+                    values: { category: category.label },
+                  })}
+                  listItems={allCategorizedLinks[item].map((link) => readyForEUI(link))}
+                  maxWidth="none"
+                  color="subdued"
+                  gutterSize="none"
+                  size="s"
+                />
+              </EuiCollapsibleNavGroup>
+            );
+          } else {
+            return (
+              <EuiCollapsibleNavGroup data-test-subj={`collapsibleNavGroup-noCategory`} key={i}>
+                <EuiListGroup flush>
+                  <EuiListGroupItem color="text" size="s" {...readyForEUI(item, true)} />
+                </EuiListGroup>
+              </EuiCollapsibleNavGroup>
+            );
+          }
+        })}
+
+        {/* Docking button only for larger screens that can support it*/}
+        <EuiShowFor sizes={['l', 'xl']}>
+          <EuiCollapsibleNavGroup>
+            <EuiListGroup flush>
+              <EuiListGroupItem
+                data-test-subj="collapsible-nav-lock"
+                buttonRef={lockRef}
+                size="xs"
+                color="subdued"
+                label={
+                  isLocked
+                    ? i18n.translate('core.ui.primaryNavSection.undockLabel', {
+                        defaultMessage: 'Undock navigation',
+                      })
+                    : i18n.translate('core.ui.primaryNavSection.dockLabel', {
+                        defaultMessage: 'Dock navigation',
+                      })
+                }
+                aria-label={
+                  isLocked
+                    ? i18n.translate('core.ui.primaryNavSection.undockAriaLabel', {
+                        defaultMessage: 'Undock primary navigation',
+                      })
+                    : i18n.translate('core.ui.primaryNavSection.dockAriaLabel', {
+                        defaultMessage: 'Dock primary navigation',
+                      })
+                }
+                onClick={() => {
+                  onIsLockedUpdate(!isLocked);
+                  if (lockRef.current) {
+                    lockRef.current.focus();
+                  }
+                }}
+                iconType={isLocked ? 'lock' : 'lockOpen'}
+              />
+            </EuiListGroup>
+          </EuiCollapsibleNavGroup>
+        </EuiShowFor>
+      </EuiFlexItem>
     </EuiCollapsibleNav>
   );
 }
