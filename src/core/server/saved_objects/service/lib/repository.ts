@@ -669,7 +669,7 @@ export class SavedObjectsRepository {
             options.workspaces,
             transformedObject.workspaces
           );
-          if (!filteredWorkspaces.length) {
+          if (filteredWorkspaces.length) {
             workspaceConflict = true;
           }
         }
