@@ -5,10 +5,19 @@
 
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { isEqual } from 'lodash';
+import { CoreService, WorkspaceObject } from '../../types';
+import { InternalApplicationStart } from '../application';
+import { HttpStart } from '../http';
 
-import { CoreService, WorkspaceAttribute } from '../../types';
-
-type WorkspaceObject = WorkspaceAttribute & { readonly?: boolean };
+type WorkspaceMenuRenderFn = ({
+  basePath,
+  getUrlForApp,
+  observables,
+}: {
+  getUrlForApp: InternalApplicationStart['getUrlForApp'];
+  basePath: HttpStart['basePath'];
+  observables: WorkspaceObservables;
+}) => JSX.Element | null;
 
 interface WorkspaceObservables {
   /**
