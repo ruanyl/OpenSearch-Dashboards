@@ -6,11 +6,20 @@
 import { WorkspaceAttribute } from 'src/core/types';
 import { omit } from 'lodash';
 import * as osdTestServer from '../../../../core/test_helpers/osd_server';
+import { WorkspaceRoutePermissionItem } from '../types';
+import { WorkspacePermissionMode } from '../../../../core/server';
 
-const testWorkspace: WorkspaceAttribute = {
+const testWorkspace: WorkspaceAttribute & {
+  permissions: WorkspaceRoutePermissionItem;
+} = {
   id: 'fake_id',
   name: 'test_workspace',
   description: 'test_workspace_description',
+  permissions: {
+    modes: [WorkspacePermissionMode.Management],
+    type: 'user',
+    userId: '*',
+  },
 };
 
 describe('workspace service', () => {
@@ -140,7 +149,7 @@ describe('workspace service', () => {
           page: 1,
         })
         .expect(200);
-      expect(listResult.body.result.total).toEqual(1);
+      expect(listResult.body.result.total).toEqual(4);
     });
   });
 });
