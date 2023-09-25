@@ -244,12 +244,12 @@ export class WorkspaceSavedObjectsClientWrapper {
       objects: Array<SavedObjectsBulkCreateObject<T>>,
       options: SavedObjectsCreateOptions = {}
     ): Promise<SavedObjectsBulkResponse<T>> => {
-      const isPassedWorkspaces = options?.workspaces && options.workspaces.length > 0;
+      const hasTargetWorkspaces = options?.workspaces && options.workspaces.length > 0;
 
       if (
-        isPassedWorkspaces &&
+        hasTargetWorkspaces &&
         !(await this.validateMultiWorkspacesPermissions(
-          options.workspaces!,
+          options.workspaces ?? [],
           wrapperOptions.request,
           [WorkspacePermissionMode.LibraryWrite]
         ))
@@ -265,7 +265,7 @@ export class WorkspaceSavedObjectsClientWrapper {
             !(await this.validateWorkspacesAndSavedObjectsPermissions(
               await wrapperOptions.client.get(type, id),
               wrapperOptions.request,
-              !isPassedWorkspaces
+              !hasTargetWorkspaces
                 ? // If no workspaces are passed, we need to check the workspace permission of object when overwrite.
                   [WorkspacePermissionMode.LibraryWrite]
                 : [],
@@ -286,12 +286,12 @@ export class WorkspaceSavedObjectsClientWrapper {
       attributes: T,
       options?: SavedObjectsCreateOptions
     ) => {
-      const isPassedWorkspaces = options?.workspaces && options.workspaces.length > 0;
+      const hasTargetWorkspaces = options?.workspaces && options.workspaces.length > 0;
 
       if (
-        isPassedWorkspaces &&
+        hasTargetWorkspaces &&
         !(await this.validateMultiWorkspacesPermissions(
-          options.workspaces!,
+          options.workspaces ?? [],
           wrapperOptions.request,
           [WorkspacePermissionMode.LibraryWrite]
         ))
@@ -305,7 +305,7 @@ export class WorkspaceSavedObjectsClientWrapper {
         !(await this.validateWorkspacesAndSavedObjectsPermissions(
           await wrapperOptions.client.get(type, options.id),
           wrapperOptions.request,
-          !isPassedWorkspaces
+          !hasTargetWorkspaces
             ? // If no workspaces are passed, we need to check the workspace permission of object when overwrite.
               [WorkspacePermissionMode.LibraryWrite]
             : [],
