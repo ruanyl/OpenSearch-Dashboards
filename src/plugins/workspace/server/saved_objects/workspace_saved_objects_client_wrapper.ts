@@ -32,12 +32,6 @@ import {
 import { SavedObjectsPermissionControlContract } from '../permission_control/client';
 import { getPrincipalsFromRequest } from '../utils';
 
-const ALL_WORKSPACE_INNER_DATA_PERMISSION_MODES: string[] = [
-  WorkspacePermissionMode.LibraryRead,
-  WorkspacePermissionMode.LibraryWrite,
-  WorkspacePermissionMode.Management,
-];
-
 // Can't throw unauthorized for now, the page will be refreshed if unauthorized
 const generateWorkspacePermissionError = () => {
   SavedObjectsErrorHelpers.decorateForbiddenError(
@@ -194,8 +188,8 @@ export class WorkspaceSavedObjectsClientWrapper {
         !(await this.validateWorkspacesAndSavedObjectsPermissions(
           objectToDeleted,
           wrapperOptions.request,
-          [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Management],
-          [WorkspacePermissionMode.Management, WorkspacePermissionMode.Write]
+          [WorkspacePermissionMode.LibraryWrite],
+          [WorkspacePermissionMode.Write]
         ))
       ) {
         throw generateSavedObjectsPermissionError();
@@ -210,8 +204,8 @@ export class WorkspaceSavedObjectsClientWrapper {
       return await this.validateWorkspacesAndSavedObjectsPermissions(
         objectToUpdate,
         wrapperOptions.request,
-        [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Management],
-        [WorkspacePermissionMode.Management, WorkspacePermissionMode.Write],
+        [WorkspacePermissionMode.LibraryWrite],
+        [WorkspacePermissionMode.Write],
         false
       );
     };
@@ -254,7 +248,7 @@ export class WorkspaceSavedObjectsClientWrapper {
         const permitted = await this.validateMultiWorkspacesPermissions(
           options.workspaces,
           wrapperOptions.request,
-          [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Management]
+          [WorkspacePermissionMode.LibraryWrite]
         );
         if (!permitted) {
           throw generateSavedObjectsPermissionError();
@@ -274,7 +268,7 @@ export class WorkspaceSavedObjectsClientWrapper {
         !(await this.validateMultiWorkspacesPermissions(
           options.workspaces,
           wrapperOptions.request,
-          [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Management]
+          [WorkspacePermissionMode.LibraryWrite]
         ))
       ) {
         throw generateWorkspacePermissionError();
@@ -286,8 +280,8 @@ export class WorkspaceSavedObjectsClientWrapper {
         !(await this.validateWorkspacesAndSavedObjectsPermissions(
           await wrapperOptions.client.get(type, options.id),
           wrapperOptions.request,
-          [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Management],
-          [WorkspacePermissionMode.Write, WorkspacePermissionMode.Management],
+          [WorkspacePermissionMode.LibraryWrite],
+          [WorkspacePermissionMode.Write],
           false
         ))
       ) {
@@ -308,17 +302,8 @@ export class WorkspaceSavedObjectsClientWrapper {
         !(await this.validateWorkspacesAndSavedObjectsPermissions(
           objectToGet,
           wrapperOptions.request,
-          [
-            WorkspacePermissionMode.LibraryRead,
-            WorkspacePermissionMode.LibraryWrite,
-            WorkspacePermissionMode.Management,
-          ],
-          [
-            WorkspacePermissionMode.LibraryRead,
-            WorkspacePermissionMode.Management,
-            WorkspacePermissionMode.Read,
-            WorkspacePermissionMode.Write,
-          ],
+          [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.LibraryWrite],
+          [WorkspacePermissionMode.Read, WorkspacePermissionMode.Write],
           false
         ))
       ) {
@@ -338,17 +323,8 @@ export class WorkspaceSavedObjectsClientWrapper {
           !(await this.validateWorkspacesAndSavedObjectsPermissions(
             object,
             wrapperOptions.request,
-            [
-              WorkspacePermissionMode.LibraryRead,
-              WorkspacePermissionMode.LibraryWrite,
-              WorkspacePermissionMode.Management,
-            ],
-            [
-              WorkspacePermissionMode.LibraryRead,
-              WorkspacePermissionMode.Management,
-              WorkspacePermissionMode.Write,
-              WorkspacePermissionMode.Read,
-            ],
+            [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.LibraryWrite],
+            [WorkspacePermissionMode.Write, WorkspacePermissionMode.Read],
             false
           ))
         ) {
@@ -366,15 +342,13 @@ export class WorkspaceSavedObjectsClientWrapper {
       if (!options.ACLSearchParams) {
         options.ACLSearchParams = {};
       }
-      const workspaceInnerPermissionModes = options.ACLSearchParams.permissionModes
-        ? intersection(
-            options.ACLSearchParams.permissionModes,
-            ALL_WORKSPACE_INNER_DATA_PERMISSION_MODES
-          )
-        : ALL_WORKSPACE_INNER_DATA_PERMISSION_MODES;
 
       if (this.isRelatedToWorkspace(options.type)) {
-        options.ACLSearchParams.permissionModes = workspaceInnerPermissionModes;
+        // Find all "read" saved objects by object's ACL for default
+        options.ACLSearchParams.permissionModes = options.ACLSearchParams.permissionModes ?? [
+          WorkspacePermissionMode.Read,
+          WorkspacePermissionMode.Write,
+        ];
         options.ACLSearchParams.principals = principals;
       } else {
         const permittedWorkspaceIds = (
@@ -383,7 +357,19 @@ export class WorkspaceSavedObjectsClientWrapper {
             perPage: 999,
             ACLSearchParams: {
               principals,
-              permissionModes: workspaceInnerPermissionModes,
+              /**
+               * The permitted workspace ids will be passed to the options.workspaces
+               * or options.ACLSearchParams.workspaces. These two were indicated the saved
+               * objects data inner specific workspaces. We use Library related permission here.
+               * For outside passed permission modes, it may contains other permissions. Add a intersection
+               * here to make sure only Library related permission modes will be used.
+               */
+              permissionModes: options.ACLSearchParams.permissionModes
+                ? intersection(options.ACLSearchParams.permissionModes, [
+                    WorkspacePermissionMode.LibraryRead,
+                    WorkspacePermissionMode.LibraryWrite,
+                  ])
+                : [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.LibraryWrite],
             },
           })
         ).saved_objects.map((item) => item.id);
@@ -413,18 +399,16 @@ export class WorkspaceSavedObjectsClientWrapper {
         } else {
           /**
            * Select all the docs that
-           * 1. ACL matches read or write permission OR
-           * 2. workspaces matches library_read or library_write or management OR
+           * 1. ACL matches read / write / user passed permission OR
+           * 2. workspaces matches library_read or library_write OR
            * 3. Advanced settings
            */
           options.workspaces = undefined;
           options.ACLSearchParams.workspaces = permittedWorkspaceIds;
-          options.ACLSearchParams.permissionModes = options.ACLSearchParams.permissionModes
-            ? intersection(options.ACLSearchParams.permissionModes, [
-                WorkspacePermissionMode.Read,
-                WorkspacePermissionMode.Write,
-              ])
-            : [WorkspacePermissionMode.Read, WorkspacePermissionMode.Write];
+          options.ACLSearchParams.permissionModes = options.ACLSearchParams.permissionModes ?? [
+            WorkspacePermissionMode.Read,
+            WorkspacePermissionMode.Write,
+          ];
           options.ACLSearchParams.principals = principals;
         }
       }
@@ -441,7 +425,7 @@ export class WorkspaceSavedObjectsClientWrapper {
       const workspacePermitted = await this.validateMultiWorkspacesPermissions(
         targetWorkspaces,
         wrapperOptions.request,
-        [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Management]
+        [WorkspacePermissionMode.LibraryWrite]
       );
       if (!workspacePermitted) {
         throw generateWorkspacePermissionError();
@@ -468,8 +452,7 @@ export class WorkspaceSavedObjectsClientWrapper {
       options: SavedObjectsDeleteByWorkspaceOptions = {}
     ) => {
       await this.validateMultiWorkspacesPermissions([workspace], wrapperOptions.request, [
-        WorkspacePermissionMode.LibraryWrite,
-        WorkspacePermissionMode.Management,
+        WorkspacePermissionMode.Write,
       ]);
 
       return await wrapperOptions.client.deleteByWorkspace(workspace, options);

@@ -19,7 +19,8 @@ export const WORKSPACES_API_BASE_URL = '/api/workspaces';
 const workspacePermissionMode = schema.oneOf([
   schema.literal(WorkspacePermissionMode.LibraryRead),
   schema.literal(WorkspacePermissionMode.LibraryWrite),
-  schema.literal(WorkspacePermissionMode.Management),
+  schema.literal(WorkspacePermissionMode.Read),
+  schema.literal(WorkspacePermissionMode.Write),
 ]);
 
 const workspacePermission = schema.oneOf([
@@ -184,7 +185,12 @@ export function registerRoutes({
         permissions.push({
           type: 'user',
           userId: authInfo.user_name,
-          modes: [WorkspacePermissionMode.Management],
+          modes: [WorkspacePermissionMode.LibraryWrite],
+        });
+        permissions.push({
+          type: 'user',
+          userId: authInfo.user_name,
+          modes: [WorkspacePermissionMode.Write],
         });
       }
 
