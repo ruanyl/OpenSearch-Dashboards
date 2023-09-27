@@ -44,7 +44,6 @@ import classnames from 'classnames';
 import React, { createRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
-import { WorkspacesStart } from 'opensearch-dashboards/public';
 import { LoadingIndicator } from '../';
 import {
   ChromeBadge,
@@ -95,7 +94,6 @@ export interface HeaderProps {
   branding: ChromeBranding;
   logos: Logos;
   survey: string | undefined;
-  workspaces: WorkspacesStart;
 }
 
 export function Header({
@@ -108,7 +106,6 @@ export function Header({
   branding,
   survey,
   logos,
-  workspaces,
   collapsibleNavHeaderRender,
   ...observables
 }: HeaderProps) {
@@ -271,7 +268,6 @@ export function Header({
           }}
           customNavLink$={observables.customNavLink$}
           logos={logos}
-          workspaces={workspaces}
         />
       </header>
     </>
