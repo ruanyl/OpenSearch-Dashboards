@@ -33,6 +33,12 @@ import type { PublicMethodsOf } from '@osd/utility-types';
 import { ChromeBadge, ChromeBreadcrumb, ChromeService, InternalChromeStart } from './';
 import { getLogosMock } from '../../common/mocks';
 
+const createSetupContractMock = () => {
+  return {
+    registerCollapsibleNavHeader: jest.fn(),
+  };
+};
+
 const createStartContractMock = () => {
   const startContract: DeeplyMockedKeys<InternalChromeStart> = {
     getHeaderComponent: jest.fn(),
@@ -108,4 +114,5 @@ const createMock = () => {
 export const chromeServiceMock = {
   create: createMock,
   createStartContract: createStartContractMock,
+  createSetupContract: createSetupContractMock,
 };
