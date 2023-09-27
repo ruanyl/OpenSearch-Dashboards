@@ -45,7 +45,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
   }
   public async setup(core: CoreSetup, { savedObjectsManagement }: WorkspacePluginSetupDeps) {
     core.workspaces.workspaceEnabled$.next(true);
-    core.workspaces.registerWorkspaceMenuRender(renderWorkspaceMenu);
+    core.chrome.registerCollapsibleNavHeader(renderWorkspaceMenu);
 
     const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
     await workspaceClient.init();
@@ -232,6 +232,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
 
   public start(core: CoreStart) {
     this.coreStart = core;
+    core.application.capabilities.catalogue;
 
     this.currentWorkspaceSubscription = this._changeSavedObjectCurrentWorkspace();
     if (core) {

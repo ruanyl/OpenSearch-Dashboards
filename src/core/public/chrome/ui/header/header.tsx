@@ -73,6 +73,7 @@ export interface HeaderProps {
   appTitle$: Observable<string>;
   badge$: Observable<ChromeBadge | undefined>;
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
+  collapsibleNavHeaderRender?: () => JSX.Element | null;
   customNavLink$: Observable<ChromeNavLink | undefined>;
   homeHref: string;
   isVisible$: Observable<boolean>;
@@ -108,6 +109,7 @@ export function Header({
   survey,
   logos,
   workspaces,
+  collapsibleNavHeaderRender,
   ...observables
 }: HeaderProps) {
   const isVisible = useObservable(observables.isVisible$, false);
@@ -249,6 +251,7 @@ export function Header({
 
         <CollapsibleNav
           appId$={application.currentAppId$}
+          collapsibleNavHeaderRender={collapsibleNavHeaderRender}
           id={navId}
           isLocked={isLocked}
           navLinks$={observables.navLinks$}

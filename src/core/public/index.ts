@@ -64,6 +64,7 @@ import {
   ChromeNavLinkUpdateableFields,
   ChromeDocTitle,
   ChromeStart,
+  ChromeSetup,
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
   NavType,
@@ -221,6 +222,7 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
    * @deprecated
    */
   context: ContextSetup;
+  chrome: ChromeSetup;
   /** {@link FatalErrorsSetup} */
   fatalErrors: FatalErrorsSetup;
   /** {@link HttpSetup} */

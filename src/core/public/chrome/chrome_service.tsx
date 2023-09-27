@@ -99,6 +99,8 @@ interface StartDeps {
   workspaces: WorkspacesStart;
 }
 
+type CollapsibleNavHeaderRender = () => JSX.Element | null;
+
 /** @internal */
 export class ChromeService {
   private isVisible$!: Observable<boolean>;
@@ -108,6 +110,7 @@ export class ChromeService {
   private readonly navLinks = new NavLinksService();
   private readonly recentlyAccessed = new RecentlyAccessedService();
   private readonly docTitle = new DocTitleService();
+  private collapsibleNavHeaderRender?: CollapsibleNavHeaderRender;
 
   constructor(private readonly params: ConstructorParams) {}
 
@@ -141,6 +144,14 @@ export class ChromeService {
       map(([appHidden, forceHidden]) => !appHidden && !forceHidden),
       takeUntil(this.stop$)
     );
+  }
+
+  public setup() {
+    return {
+      registerCollapsibleNavHeader: (render: CollapsibleNavHeaderRender) => {
+        this.collapsibleNavHeaderRender = render;
+      },
+    };
   }
 
   public async start({
@@ -265,6 +276,7 @@ export class ChromeService {
           logos={logos}
           survey={injectedMetadata.getSurvey()}
           workspaces={workspaces}
+          collapsibleNavHeaderRender={this.collapsibleNavHeaderRender}
         />
       ),
 
@@ -326,6 +338,20 @@ export class ChromeService {
     this.navLinks.stop();
     this.stop$.next();
   }
+}
+
+/**
+ * ChromeSetup allows plugins to customize the global chrome header UI rendering
+ * before the header UI is mounted.
+ *
+ * @example
+ * Customize the Collapsible Nav's (left nav menu) header section:
+ * ```ts
+ * core.chrome.registerCollapsibleNavHeader(() => <CustomNavHeader />)
+ * ```
+ */
+export interface ChromeSetup {
+  registerCollapsibleNavHeader: (render: CollapsibleNavHeaderRender) => void;
 }
 
 /**

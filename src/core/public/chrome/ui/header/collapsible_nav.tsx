@@ -118,6 +118,7 @@ function setIsCategoryOpen(id: string, isOpen: boolean, storage: Storage) {
 interface Props {
   appId$: InternalApplicationStart['currentAppId$'];
   basePath: HttpStart['basePath'];
+  collapsibleNavHeaderRender?: () => JSX.Element | null;
   id: string;
   isLocked: boolean;
   isNavOpen: boolean;
@@ -137,6 +138,7 @@ interface Props {
 
 export function CollapsibleNav({
   basePath,
+  collapsibleNavHeaderRender,
   id,
   isLocked,
   isNavOpen,
@@ -197,7 +199,7 @@ export function CollapsibleNav({
       outsideClickCloses={false}
     >
       <EuiFlexItem className="eui-yScroll">
-        <CollapsibleNavHeader workspaces={workspaces} />
+        {collapsibleNavHeaderRender ? collapsibleNavHeaderRender() : <CollapsibleNavHeader />}
 
         {/* merged NavLinks */}
         {mergedNavLinks.map((item, i) => {
