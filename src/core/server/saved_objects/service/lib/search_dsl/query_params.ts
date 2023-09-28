@@ -127,6 +127,20 @@ function getClauseForType(
     },
   };
 }
+/**
+ *  Gets the clause that will filter for the workspace.
+ */
+function getClauseForWorkspace(workspace: string) {
+  if (!workspace) {
+    return {};
+  }
+
+  return {
+    bool: {
+      must: [{ term: { workspaces: workspace } }],
+    },
+  };
+}
 
 /**
  *  Gets the clause that will filter for the workspace.

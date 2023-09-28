@@ -135,6 +135,7 @@ export const registerResolveImportErrorsRoute = (router: IRouter, config: SavedO
         workspaces,
         dataSourceId,
         dataSourceTitle,
+        workspaces,
       });
 
       return res.ok({ body: result });
