@@ -16,14 +16,25 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { CoreStart, MANAGEMENT_WORKSPACE_ID, WorkspaceAttribute } from '../../../../../core/public';
+import {
+  ApplicationStart,
+  HttpSetup,
+  MANAGEMENT_WORKSPACE_ID,
+  WorkspaceAttribute,
+  WorkspaceObservables,
+} from '../../../../../core/public';
 import {
   WORKSPACE_CREATE_APP_ID,
   WORKSPACE_LIST_APP_ID,
   WORKSPACE_OVERVIEW_APP_ID,
 } from '../../../common/constants';
 import { formatUrlWithWorkspaceId } from '../../utils';
-import { useOpenSearchDashboards } from 'src/plugins/opensearch_dashboards_react/public';
+
+interface Props {
+  getUrlForApp: ApplicationStart['getUrlForApp'];
+  basePath: HttpSetup['basePath'];
+  workspaces: WorkspaceObservables;
+}
 
 function getFilteredWorkspaceList(
   workspaceList: WorkspaceAttribute[],
@@ -39,10 +50,7 @@ function getFilteredWorkspaceList(
   ].slice(0, 5);
 }
 
-export const WorkspaceMenu = () => {
-  const {
-    services: { http, application, workspaces },
-  } = useOpenSearchDashboards<CoreStart>();
+export const WorkspaceMenu = ({ basePath, getUrlForApp, workspaces }: Props) => {
   const [isPopoverOpen, setPopover] = useState(false);
   const currentWorkspace = useObservable(workspaces.currentWorkspace$, null);
   const workspaceList = useObservable(workspaces.workspaceList$, []);
@@ -72,11 +80,11 @@ export const WorkspaceMenu = () => {
 
   const workspaceToItem = (workspace: WorkspaceAttribute, index: number) => {
     const href = formatUrlWithWorkspaceId(
-      application.getUrlForApp(WORKSPACE_OVERVIEW_APP_ID, {
+      getUrlForApp(WORKSPACE_OVERVIEW_APP_ID, {
         absolute: false,
       }),
       workspace.id,
-      http.basePath
+      basePath
     );
     const name =
       currentWorkspace !== null && index === 0 ? (
@@ -106,11 +114,11 @@ export const WorkspaceMenu = () => {
       }),
       key: length.toString(),
       href: formatUrlWithWorkspaceId(
-        application.getUrlForApp(WORKSPACE_CREATE_APP_ID, {
+        getUrlForApp(WORKSPACE_CREATE_APP_ID, {
           absolute: false,
         }),
         currentWorkspace?.id ?? '',
-        http.basePath
+        basePath
       ),
     });
     workspaceListItems.push({
@@ -120,11 +128,11 @@ export const WorkspaceMenu = () => {
       }),
       key: (length + 1).toString(),
       href: formatUrlWithWorkspaceId(
-        application.getUrlForApp(WORKSPACE_LIST_APP_ID, {
+        getUrlForApp(WORKSPACE_LIST_APP_ID, {
           absolute: false,
         }),
         currentWorkspace?.id ?? '',
-        http.basePath
+        basePath
       ),
     });
     return workspaceListItems;
@@ -186,11 +194,11 @@ export const WorkspaceMenu = () => {
           name: managementWorkspaceName,
           icon: 'managementApp',
           href: formatUrlWithWorkspaceId(
-            application.getUrlForApp(WORKSPACE_OVERVIEW_APP_ID, {
+            getUrlForApp(WORKSPACE_OVERVIEW_APP_ID, {
               absolute: false,
             }),
             MANAGEMENT_WORKSPACE_ID,
-            http.basePath
+            basePath
           ),
         },
       ],
