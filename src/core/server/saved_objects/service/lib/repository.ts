@@ -365,15 +365,28 @@ export class SavedObjectsRepository {
 
       const method = object.id && overwrite ? 'index' : 'create';
       const requiresNamespacesCheck = object.id && this._registry.isMultiNamespace(object.type);
+      /**
+       * It requires a check when overwriting objects to target workspaces
+       */
+      const requiresWorkspaceCheck = !!(object.id && options.workspaces);
 
       if (object.id == null) object.id = uuid.v1();
+
+      let opensearchRequestIndexPayload = {};
+
+      if (requiresNamespacesCheck || requiresWorkspaceCheck) {
+        opensearchRequestIndexPayload = {
+          opensearchRequestIndex: bulkGetRequestIndexCounter,
+        };
+        bulkGetRequestIndexCounter++;
+      }
 
       return {
         tag: 'Right' as 'Right',
         value: {
           method,
           object,
-          ...(requiresNamespacesCheck && { opensearchRequestIndex: bulkGetRequestIndexCounter++ }),
+          ...opensearchRequestIndexPayload,
         },
       };
     });
@@ -384,7 +397,7 @@ export class SavedObjectsRepository {
       .map(({ value: { object: { type, id } } }) => ({
         _id: this._serializer.generateRawId(namespace, type, id),
         _index: this.getIndexForType(type),
-        _source: ['type', 'namespaces'],
+        _source: ['type', 'namespaces', 'workspaces'],
       }));
     const bulkGetResponse = bulkGetDocs.length
       ? await this.client.mget(
@@ -577,7 +590,7 @@ export class SavedObjectsRepository {
     const bulkGetDocs = expectedBulkGetResults.filter(isRight).map(({ value: { type, id } }) => ({
       _id: this._serializer.generateRawId(namespace, type, id),
       _index: this.getIndexForType(type),
-      _source: ['type', 'namespaces'],
+      _source: ['type', 'namespaces', 'workspaces'],
     }));
     const bulkGetResponse = bulkGetDocs.length
       ? await this.client.mget(
@@ -600,13 +613,24 @@ export class SavedObjectsRepository {
       const { type, id, opensearchRequestIndex } = expectedResult.value;
       const doc = bulkGetResponse?.body.docs[opensearchRequestIndex];
       if (doc?.found) {
+        let workspaceConflict = false;
+        if (options.workspaces) {
+          const transformedObject = this._serializer.rawToSavedObject(doc as SavedObjectsRawDoc);
+          const filteredWorkspaces = SavedObjectsUtils.filterWorkspacesAccordingToBaseWorkspaces(
+            options.workspaces,
+            transformedObject.workspaces
+          );
+          if (filteredWorkspaces.length) {
+            workspaceConflict = true;
+          }
+        }
         errors.push({
           id,
           type,
           error: {
             ...errorContent(SavedObjectsErrorHelpers.createConflictError(type, id)),
             // @ts-expect-error MultiGetHit._source is optional
-            ...(!this.rawDocExistsInNamespace(doc!, namespace) && {
+            ...((!this.rawDocExistsInNamespace(doc!, namespace) || workspaceConflict) && {
               metadata: { isNotOverwritable: true },
             }),
           },
