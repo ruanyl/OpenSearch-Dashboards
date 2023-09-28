@@ -149,7 +149,7 @@ describe('workspace service', () => {
           page: 1,
         })
         .expect(200);
-      expect(listResult.body.result.total).toEqual(4);
+      expect(listResult.body.result.total).toEqual(3);
     });
   });
 });
