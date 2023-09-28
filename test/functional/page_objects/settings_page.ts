@@ -63,7 +63,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async clickOpenSearchDashboardsIndexPatterns() {
       log.debug('clickOpenSearchDashboardsIndexPatterns link');
-      await testSubjects.click('indexPatterns');
+      await PageObjects.common.navigateToApp('indexPatterns');
 
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
