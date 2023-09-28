@@ -111,8 +111,7 @@ export default function ({ getService }: FtrProviderContext) {
             meta: {
               title: 'VisualizationFromSavedSearch',
               icon: 'visualizeApp',
-              editUrl:
-                '/management/opensearch-dashboards/objects/savedVisualizations/a42c0580-3224-11e8-a572-ffca06da1357',
+              editUrl: '/objects/savedVisualizations/a42c0580-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path: '/app/visualize#/edit/a42c0580-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'visualize.show',
@@ -154,8 +153,7 @@ export default function ({ getService }: FtrProviderContext) {
             meta: {
               icon: 'visualizeApp',
               title: 'VisualizationFromSavedSearch',
-              editUrl:
-                '/management/opensearch-dashboards/objects/savedVisualizations/a42c0580-3224-11e8-a572-ffca06da1357',
+              editUrl: '/objects/savedVisualizations/a42c0580-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path: '/app/visualize#/edit/a42c0580-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'visualize.show',
@@ -199,8 +197,7 @@ export default function ({ getService }: FtrProviderContext) {
             meta: {
               icon: 'visualizeApp',
               title: 'Visualization',
-              editUrl:
-                '/management/opensearch-dashboards/objects/savedVisualizations/add810b0-3224-11e8-a572-ffca06da1357',
+              editUrl: '/objects/savedVisualizations/add810b0-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path: '/app/visualize#/edit/add810b0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'visualize.show',
@@ -215,8 +212,7 @@ export default function ({ getService }: FtrProviderContext) {
             meta: {
               icon: 'visualizeApp',
               title: 'VisualizationFromSavedSearch',
-              editUrl:
-                '/management/opensearch-dashboards/objects/savedVisualizations/a42c0580-3224-11e8-a572-ffca06da1357',
+              editUrl: '/objects/savedVisualizations/a42c0580-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path: '/app/visualize#/edit/a42c0580-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'visualize.show',
@@ -239,8 +235,7 @@ export default function ({ getService }: FtrProviderContext) {
             meta: {
               icon: 'visualizeApp',
               title: 'Visualization',
-              editUrl:
-                '/management/opensearch-dashboards/objects/savedVisualizations/add810b0-3224-11e8-a572-ffca06da1357',
+              editUrl: '/objects/savedVisualizations/add810b0-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path: '/app/visualize#/edit/add810b0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'visualize.show',
@@ -255,8 +250,7 @@ export default function ({ getService }: FtrProviderContext) {
             meta: {
               icon: 'visualizeApp',
               title: 'VisualizationFromSavedSearch',
-              editUrl:
-                '/management/opensearch-dashboards/objects/savedVisualizations/a42c0580-3224-11e8-a572-ffca06da1357',
+              editUrl: '/objects/savedVisualizations/a42c0580-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path: '/app/visualize#/edit/a42c0580-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'visualize.show',
@@ -300,8 +294,7 @@ export default function ({ getService }: FtrProviderContext) {
             meta: {
               icon: 'discoverApp',
               title: 'OneRecord',
-              editUrl:
-                '/management/opensearch-dashboards/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
+              editUrl: '/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path: '/app/discover#/view/960372e0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'discover.show',
@@ -316,8 +309,7 @@ export default function ({ getService }: FtrProviderContext) {
             meta: {
               icon: 'dashboardApp',
               title: 'Dashboard',
-              editUrl:
-                '/management/opensearch-dashboards/objects/savedDashboards/b70c7ae0-3224-11e8-a572-ffca06da1357',
+              editUrl: '/objects/savedDashboards/b70c7ae0-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path: '/app/dashboards#/view/b70c7ae0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'dashboard.show',
@@ -342,8 +334,7 @@ export default function ({ getService }: FtrProviderContext) {
             meta: {
               icon: 'discoverApp',
               title: 'OneRecord',
-              editUrl:
-                '/management/opensearch-dashboards/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
+              editUrl: '/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path: '/app/discover#/view/960372e0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'discover.show',
@@ -386,8 +377,7 @@ export default function ({ getService }: FtrProviderContext) {
             meta: {
               icon: 'discoverApp',
               title: 'OneRecord',
-              editUrl:
-                '/management/opensearch-dashboards/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
+              editUrl: '/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path: '/app/discover#/view/960372e0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'discover.show',
@@ -402,8 +392,7 @@ export default function ({ getService }: FtrProviderContext) {
             meta: {
               icon: 'visualizeApp',
               title: 'Visualization',
-              editUrl:
-                '/management/opensearch-dashboards/objects/savedVisualizations/add810b0-3224-11e8-a572-ffca06da1357',
+              editUrl: '/objects/savedVisualizations/add810b0-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path: '/app/visualize#/edit/add810b0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'visualize.show',
@@ -428,8 +417,7 @@ export default function ({ getService }: FtrProviderContext) {
             meta: {
               icon: 'discoverApp',
               title: 'OneRecord',
-              editUrl:
-                '/management/opensearch-dashboards/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
+              editUrl: '/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path: '/app/discover#/view/960372e0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'discover.show',
