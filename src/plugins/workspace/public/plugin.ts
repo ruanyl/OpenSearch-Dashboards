@@ -232,7 +232,6 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
 
   public start(core: CoreStart) {
     this.coreStart = core;
-    core.application.capabilities.catalogue;
 
     this.currentWorkspaceSubscription = this._changeSavedObjectCurrentWorkspace();
     if (core) {
