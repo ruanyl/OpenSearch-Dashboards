@@ -114,6 +114,8 @@ export interface SavedObjectsTableProps {
   goInspectObject: (obj: SavedObjectWithMetadata) => void;
   canGoInApp: (obj: SavedObjectWithMetadata) => boolean;
   dateFormat: string;
+  title: string;
+  fullWidth: boolean;
 }
 
 export interface SavedObjectsTableState {
@@ -543,9 +545,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       return null;
     }
     const { applications } = this.props;
-    const newIndexPatternUrl = applications.getUrlForApp('management', {
-      path: 'opensearch-dashboards/indexPatterns',
-    });
+    const newIndexPatternUrl = applications.getUrlForApp('indexPatterns');
 
     return (
       <Flyout
@@ -847,7 +847,10 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     }
 
     return (
-      <EuiPageContent horizontalPosition="center">
+      <EuiPageContent
+        horizontalPosition="center"
+        style={this.props.fullWidth ? {} : { maxWidth: '75%', marginTop: '40px' }}
+      >
         {this.renderFlyout()}
         {this.renderRelationships()}
         {this.renderDeleteConfirmModal()}
@@ -857,6 +860,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
           onImport={this.showImportFlyout}
           onRefresh={this.refreshObjects}
           filteredCount={filteredItemCount}
+          title={this.props.title}
         />
         <EuiSpacer size="xs" />
         <RedirectAppLinks application={applications}>
