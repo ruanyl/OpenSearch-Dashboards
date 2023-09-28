@@ -123,23 +123,6 @@ export class SavedObjectsManagementPlugin
       });
     }
 
-    const opensearchDashboardsSection = management.sections.section.opensearchDashboards;
-    opensearchDashboardsSection.registerApp({
-      id: 'objects',
-      title: i18n.translate('savedObjectsManagement.managementSectionLabel', {
-        defaultMessage: 'Saved objects',
-      }),
-      order: 1,
-      mount: async (mountParams) => {
-        const { mountManagementSection } = await import('./management_section');
-        return mountManagementSection({
-          core,
-          serviceRegistry: this.serviceRegistry,
-          mountParams,
-        });
-      },
-    });
-
     // sets up the context mappings and registers any triggers/actions for the plugin
     bootstrap(uiActions);
 
