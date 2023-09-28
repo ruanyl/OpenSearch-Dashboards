@@ -51,13 +51,13 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       await find.clickByDisplayedLinkText(text);
     }
     async clickOpenSearchDashboardsSettings() {
-      await testSubjects.click('settings');
+      await PageObjects.common.navigateToApp('settings');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('managementSettingsTitle');
     }
 
     async clickOpenSearchDashboardsSavedObjects() {
-      await testSubjects.click('objects');
+      await PageObjects.common.navigateToApp('objects');
       await PageObjects.savedObjects.waitTableIsLoaded();
     }
 
