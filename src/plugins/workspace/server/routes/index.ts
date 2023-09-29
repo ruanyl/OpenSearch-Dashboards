@@ -46,7 +46,9 @@ const workspaceAttributesSchema = schema.object({
   icon: schema.maybe(schema.string()),
   reserved: schema.maybe(schema.boolean()),
   defaultVISTheme: schema.maybe(schema.string()),
-  permissions: schema.oneOf([workspacePermission, schema.arrayOf(workspacePermission)]),
+  permissions: schema.maybe(
+    schema.oneOf([workspacePermission, schema.arrayOf(workspacePermission)])
+  ),
 });
 
 const convertToACL = (

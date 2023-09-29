@@ -15,11 +15,6 @@ const testWorkspace: WorkspaceAttribute & {
   id: 'fake_id',
   name: 'test_workspace',
   description: 'test_workspace_description',
-  permissions: {
-    modes: [WorkspacePermissionMode.Write, WorkspacePermissionMode.LibraryWrite],
-    type: 'user',
-    userId: '*',
-  },
 };
 
 describe('workspace service', () => {
