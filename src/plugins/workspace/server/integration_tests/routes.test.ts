@@ -16,7 +16,7 @@ const testWorkspace: WorkspaceAttribute & {
   name: 'test_workspace',
   description: 'test_workspace_description',
   permissions: {
-    modes: [WorkspacePermissionMode.Management],
+    modes: [WorkspacePermissionMode.Write, WorkspacePermissionMode.LibraryWrite],
     type: 'user',
     userId: '*',
   },
