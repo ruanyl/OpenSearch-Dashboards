@@ -50,7 +50,6 @@ const SavedObjectsTablePage = ({
   namespaceRegistry,
   setBreadcrumbs,
   title,
-  fullWidth,
 }: {
   coreStart: CoreStart;
   dataStart: DataPublicPluginStart;
@@ -61,7 +60,6 @@ const SavedObjectsTablePage = ({
   namespaceRegistry: SavedObjectsManagementNamespaceServiceStart;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   title: string;
-  fullWidth: boolean;
 }) => {
   const capabilities = coreStart.application.capabilities;
   const itemsPerPage = coreStart.uiSettings.get<number>('savedObjects:perPage', 50);
@@ -105,7 +103,6 @@ const SavedObjectsTablePage = ({
         return inAppUrl ? Boolean(get(capabilities, inAppUrl.uiCapabilitiesPath)) : false;
       }}
       title={title}
-      fullWidth={fullWidth}
     />
   );
 };
