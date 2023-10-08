@@ -54,14 +54,14 @@ export interface ChromeNavLinks {
   getNavLinks$(): Observable<Array<Readonly<ChromeNavLink>>>;
 
   /**
-   * Set an observable for a sorted list of filtered navlinks.
+   * Get an observable for a sorted list of all navlinks.
    */
-  getFilteredNavLinks$(): Observable<Array<Readonly<ChromeNavLink>>>;
+  getAllNavLinks$(): Observable<Array<Readonly<ChromeNavLink>>>;
 
   /**
    * Set filtered navlinks.
    */
-  setFilteredNavLinks(filteredNavLinks: ReadonlyMap<string, ChromeNavLink>): void;
+  setNavLinks(navLinks: ReadonlyMap<string, ChromeNavLink>): void;
 
   /**
    * Get the state of a navlink at this point in time.
@@ -126,7 +126,7 @@ type LinksUpdater = (navLinks: Map<string, NavLinkWrapper>) => Map<string, NavLi
 
 export class NavLinksService {
   private readonly stop$ = new ReplaySubject(1);
-  private filteredNavLinks$ = new BehaviorSubject<ReadonlyMap<string, ChromeNavLink> | undefined>(
+  private navLinks$ = new BehaviorSubject<ReadonlyMap<string, ChromeNavLink> | undefined>(
     undefined
   );
 
@@ -145,7 +145,7 @@ export class NavLinksService {
     // manual link modifications to be able to re-apply then after every
     // availableApps$ changes.
     const linkUpdaters$ = new BehaviorSubject<LinksUpdater[]>([]);
-    const navLinks$ = new BehaviorSubject<ReadonlyMap<string, NavLinkWrapper>>(new Map());
+    const allNavLinks$ = new BehaviorSubject<ReadonlyMap<string, NavLinkWrapper>>(new Map());
 
     combineLatest([appLinks$, linkUpdaters$])
       .pipe(
@@ -154,42 +154,40 @@ export class NavLinksService {
         })
       )
       .subscribe((navLinks) => {
-        navLinks$.next(navLinks);
+        allNavLinks$.next(navLinks);
       });
 
     const forceAppSwitcherNavigation$ = new BehaviorSubject(false);
 
     return {
       getNavLinks$: () => {
-        return navLinks$.pipe(map(sortNavLinks), takeUntil(this.stop$));
-      },
-
-      setFilteredNavLinks: (filteredNavLinks: ReadonlyMap<string, ChromeNavLink>) => {
-        this.filteredNavLinks$.next(filteredNavLinks);
-      },
-
-      getFilteredNavLinks$: () => {
-        return combineLatest([navLinks$, this.filteredNavLinks$]).pipe(
-          map(([navLinks, filteredNavLinks]) =>
-            filteredNavLinks === undefined
-              ? sortNavLinks(navLinks)
-              : sortChromeNavLinks(filteredNavLinks)
+        return combineLatest([allNavLinks$, this.navLinks$]).pipe(
+          map(([allNavLinks, navLinks]) =>
+            navLinks === undefined ? sortNavLinks(allNavLinks) : sortChromeNavLinks(navLinks)
           ),
           takeUntil(this.stop$)
         );
       },
 
+      setNavLinks: (filteredNavLinks: ReadonlyMap<string, ChromeNavLink>) => {
+        this.navLinks$.next(filteredNavLinks);
+      },
+
+      getAllNavLinks$: () => {
+        return allNavLinks$.pipe(map(sortNavLinks), takeUntil(this.stop$));
+      },
+
       get(id: string) {
-        const link = navLinks$.value.get(id);
+        const link = allNavLinks$.value.get(id);
         return link && link.properties;
       },
 
       getAll() {
-        return sortNavLinks(navLinks$.value);
+        return sortNavLinks(allNavLinks$.value);
       },
 
       has(id: string) {
-        return navLinks$.value.has(id);
+        return allNavLinks$.value.has(id);
       },
 
       showOnly(id: string) {

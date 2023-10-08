@@ -43,6 +43,7 @@ import { groupBy, sortBy } from 'lodash';
 import React, { Fragment, useRef } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import * as Rx from 'rxjs';
+import { DEFAULT_APP_CATEGORIES } from 'src/core/utils';
 import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '../..';
 import { AppCategory } from '../../../../types';
 import { InternalApplicationStart } from '../../../application';
@@ -228,7 +229,9 @@ export function CollapsibleNav({
           if (typeof item === 'string') {
             const category = categoryDictionary[item]!;
             const opensearchLinkLogo =
-              category.id === 'opensearchDashboards' ? logos.Mark.url : category.euiIconType;
+              category.id === DEFAULT_APP_CATEGORIES.opensearchDashboards.id
+                ? logos.Mark.url
+                : category.euiIconType;
 
             return (
               <EuiCollapsibleNavGroup
