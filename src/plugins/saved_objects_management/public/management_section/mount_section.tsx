@@ -43,7 +43,6 @@ import { getAllowedTypes } from './../lib';
 interface MountParams {
   core: CoreSetup<StartDependencies, SavedObjectsManagementPluginStart>;
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
-  mountParams?: ManagementAppMountParams;
   appMountParams?: AppMountParameters;
   title: string;
   allowedObjectTypes?: string[];
@@ -53,17 +52,16 @@ const SavedObjectsEditionPage = lazy(() => import('./saved_objects_edition_page'
 const SavedObjectsTablePage = lazy(() => import('./saved_objects_table_page'));
 export const mountManagementSection = async ({
   core,
-  mountParams,
   appMountParams,
   serviceRegistry,
   title,
   allowedObjectTypes,
 }: MountParams) => {
   const [coreStart, { data, uiActions }, pluginStart] = await core.getStartServices();
-  const usedMountParams = mountParams || appMountParams || ({} as ManagementAppMountParams);
+  const usedMountParams = appMountParams || ({} as ManagementAppMountParams);
   const { element, history } = usedMountParams;
   const { chrome } = coreStart;
-  const setBreadcrumbs = mountParams?.setBreadcrumbs || chrome.setBreadcrumbs;
+  const setBreadcrumbs = chrome.setBreadcrumbs;
   if (allowedObjectTypes === undefined) {
     allowedObjectTypes = await getAllowedTypes(coreStart.http);
   }
