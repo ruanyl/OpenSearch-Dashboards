@@ -215,7 +215,7 @@ export function registerRoutes({
         },
         {
           ...others,
-          ...(permissionsInAttributes ? { permissions: convertToACL(permissions) } : {}),
+          ...(permissions.length ? { permissions: convertToACL(permissions) } : {}),
         }
       );
       return res.ok({ body: result });
@@ -237,6 +237,10 @@ export function registerRoutes({
       const { id } = req.params;
       const { attributes } = req.body;
       const { permissions, ...others } = attributes;
+      let finalPermissions: WorkspaceRoutePermissionItem[] = [];
+      if (permissions) {
+        finalPermissions = Array.isArray(permissions) ? permissions : [permissions];
+      }
 
       const result = await client.update(
         {
@@ -247,7 +251,7 @@ export function registerRoutes({
         id,
         {
           ...others,
-          ...(permissions ? { permissions: convertToACL(permissions) } : {}),
+          ...(finalPermissions.length ? { permissions: convertToACL(finalPermissions) } : {}),
         }
       );
       return res.ok({ body: result });
