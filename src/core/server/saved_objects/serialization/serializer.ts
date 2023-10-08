@@ -114,6 +114,7 @@ export class SavedObjectsSerializer {
       version,
       references,
       workspaces,
+      permissions,
     } = savedObj;
     const source = {
       [type]: attributes,
@@ -125,6 +126,7 @@ export class SavedObjectsSerializer {
       ...(migrationVersion && { migrationVersion }),
       ...(updated_at && { updated_at }),
       ...(workspaces && { workspaces }),
+      ...(permissions && { permissions }),
     };
 
     return {
