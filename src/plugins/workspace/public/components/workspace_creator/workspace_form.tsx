@@ -6,17 +6,19 @@
 import React, { useCallback, useState, FormEventHandler, useRef, useMemo, useEffect } from 'react';
 import { groupBy } from 'lodash';
 import {
+  EuiBottomBar,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
   EuiForm,
   EuiFormRow,
   EuiFieldText,
+  EuiSelect,
   EuiText,
   EuiButton,
+  EuiButtonEmpty,
   EuiFlexItem,
   htmlIdGenerator,
-  EuiFlexGrid,
   EuiCheckbox,
   EuiCheckboxGroup,
   EuiCheckboxGroupProps,
@@ -24,8 +26,9 @@ import {
   EuiFieldTextProps,
   EuiColorPicker,
   EuiColorPickerProps,
-  EuiComboBox,
-  EuiComboBoxProps,
+  EuiHorizontalRule,
+  EuiFlexGroup,
+  EuiPageHeader,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import {
@@ -105,7 +108,7 @@ const appendDefaultFeatureIds = (ids: string[]) => {
 
 const workspaceHtmlIdGenerator = htmlIdGenerator();
 
-const defaultVISThemeOptions = [{ label: 'Categorical', value: 'categorical' }];
+const defaultVISThemeOptions = [{ value: 'categorical', text: 'Categorical' }];
 
 interface WorkspaceFormProps {
   application: ApplicationStart;
@@ -131,8 +134,8 @@ export const WorkspaceForm = ({
   const [color, setColor] = useState(defaultValues?.color);
   const [icon, setIcon] = useState(defaultValues?.icon);
   const [defaultVISTheme, setDefaultVISTheme] = useState(defaultValues?.defaultVISTheme);
-
   const isEditingManagementWorkspace = defaultValues?.id === MANAGEMENT_WORKSPACE_ID;
+  const [tabFeatureSelected, setTabFeatureSelected] = useState(!isEditingManagementWorkspace);
 
   // The matched feature id list based on original feature config,
   // the feature category will be expanded to list of feature ids
@@ -176,7 +179,21 @@ export const WorkspaceForm = ({
   getFormDataRef.current = getFormData;
 
   const featureOrGroups = useMemo(() => {
-    const category2Applications = groupBy(applications, 'category.label');
+    const transformedApplications = applications.map((app) => {
+      if (app.category?.id === DEFAULT_APP_CATEGORIES.opensearchDashboards.id) {
+        return {
+          ...app,
+          category: {
+            ...app.category,
+            label: i18n.translate('core.ui.libraryNavList.label', {
+              defaultMessage: 'Library',
+            }),
+          },
+        };
+      }
+      return app;
+    });
+    const category2Applications = groupBy(transformedApplications, 'category.label');
     return Object.keys(category2Applications).reduce<
       Array<WorkspaceFeature | WorkspaceFeatureGroup>
     >((previousValue, currentKey) => {
@@ -196,7 +213,7 @@ export const WorkspaceForm = ({
       if (features.length === 0) {
         return previousValue;
       }
-      if (features.length === 1 || currentKey === 'undefined') {
+      if (currentKey === 'undefined') {
         return [...previousValue, ...features];
       }
       return [
@@ -208,11 +225,6 @@ export const WorkspaceForm = ({
       ];
     }, []);
   }, [applications]);
-
-  const selectedDefaultVISThemeOptions = useMemo(
-    () => defaultVISThemeOptions.filter((item) => item.value === defaultVISTheme),
-    [defaultVISTheme]
-  );
 
   const allFeatures = useMemo(
     () =>
@@ -384,20 +396,75 @@ export const WorkspaceForm = ({
     setIcon(newIcon);
   }, []);
 
-  const handleDefaultVISThemeInputChange = useCallback<
-    Required<EuiComboBoxProps<string>>['onChange']
-  >((options) => {
-    setDefaultVISTheme(options[0]?.value);
+  const handleTabFeatureClick = useCallback(() => {
+    setTabFeatureSelected(true);
   }, []);
+
+  const handleTabPermissionClick = useCallback(() => {
+    setTabFeatureSelected(false);
+  }, []);
+
+  const onDefaultVISThemeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setDefaultVISTheme(e.target.value);
+  };
+
+  const categoryToDescription: { [key: string]: string } = {
+    Library: 'Workspace-owned library items',
+  };
+
+  // Number of saved changes and cancel button will be implemented in my next PR
+  const bottomBar = (
+    <div>
+      <EuiSpacer size="xl" />
+      <EuiSpacer size="xl" />
+      <EuiBottomBar>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="s">
+              {opType === WORKSPACE_OP_TYPE_UPDATE && (
+                <EuiText textAlign="left">{'1 Unsaved change(s)'}</EuiText>
+              )}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="m">
+              <EuiText textAlign="right">
+                <EuiButtonEmpty color="ghost">Cancel</EuiButtonEmpty>
+              </EuiText>
+              <EuiSpacer />
+              <EuiText textAlign="right">
+                {opType === WORKSPACE_OP_TYPE_CREATE && (
+                  <EuiButton form={formIdRef.current} type="submit" fill color="primary">
+                    Create workspace
+                  </EuiButton>
+                )}
+                {opType === WORKSPACE_OP_TYPE_UPDATE && (
+                  <EuiButton form={formIdRef.current} type="submit" fill color="primary">
+                    Save changes
+                  </EuiButton>
+                )}
+              </EuiText>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiBottomBar>
+    </div>
+  );
 
   return (
     <EuiForm id={formIdRef.current} onSubmit={handleFormSubmit} component="form">
       <EuiPanel>
         <EuiTitle size="s">
-          <h2>Workspace details</h2>
+          <h2>Workspace Details</h2>
         </EuiTitle>
-        <EuiSpacer />
-        <EuiFormRow label="Name" isInvalid={!!formErrors.name} error={formErrors.name}>
+        <EuiHorizontalRule margin="xs" />
+        <EuiSpacer size="s" />
+        <EuiFormRow
+          label="Name"
+          helpText="Valid characters are a-z, A-Z, 0-9, (), [], _ (underscore), - (hyphen) and (space)."
+          isInvalid={!!formErrors.name}
+          error={formErrors.name}
+        >
           <EuiFieldText
             value={name}
             onChange={handleNameInputChange}
@@ -405,6 +472,7 @@ export const WorkspaceForm = ({
           />
         </EuiFormRow>
         <EuiFormRow
+          helpText="Valid characters are a-z, A-Z, 0-9, (), [], _ (underscore), - (hyphen) and (space)."
           label={
             <>
               Description - <i>optional</i>
@@ -414,44 +482,78 @@ export const WorkspaceForm = ({
           <EuiFieldText value={description} onChange={handleDescriptionInputChange} />
         </EuiFormRow>
         <EuiFormRow label="Color" isInvalid={!!formErrors.color} error={formErrors.color}>
-          <EuiColorPicker color={color} onChange={handleColorChange} />
+          <div>
+            <EuiText size="xs" color="subdued">
+              {'Accent color for your workspace'}
+            </EuiText>
+            <EuiSpacer size={'s'} />
+            <EuiColorPicker color={color} onChange={handleColorChange} />
+          </div>
         </EuiFormRow>
         <EuiFormRow label="Icon" isInvalid={!!formErrors.icon} error={formErrors.icon}>
           <WorkspaceIconSelector value={icon} onChange={handleIconChange} color={color} />
         </EuiFormRow>
         <EuiFormRow
-          label="Default VIS Theme"
+          label="Default visualization theme"
           isInvalid={!!formErrors.defaultVISTheme}
           error={formErrors.defaultVISTheme}
         >
-          <EuiComboBox
+          <EuiSelect
+            hasNoInitialSelection
+            value={defaultVISTheme}
             options={defaultVISThemeOptions}
-            singleSelection
-            onChange={handleDefaultVISThemeInputChange}
-            selectedOptions={selectedDefaultVISThemeOptions}
-            isClearable={false}
+            onChange={onDefaultVISThemeChange}
           />
         </EuiFormRow>
       </EuiPanel>
       <EuiSpacer />
-      {!isEditingManagementWorkspace && (
+      <EuiPageHeader
+        tabs={[
+          ...(isEditingManagementWorkspace
+            ? []
+            : [
+                {
+                  label: 'Feature Visibility',
+                  isSelected: tabFeatureSelected,
+                  onClick: handleTabFeatureClick,
+                },
+              ]),
+          {
+            label: 'Users & Permissions',
+            isSelected: !tabFeatureSelected,
+            onClick: handleTabPermissionClick,
+          },
+        ]}
+      />
+
+      {tabFeatureSelected && (
         <EuiPanel>
           <EuiTitle size="s">
-            <h2>Workspace features</h2>
+            <h2>Feature Visibility</h2>
           </EuiTitle>
-          <EuiFlexGrid style={{ paddingLeft: 20, paddingTop: 20 }} columns={2}>
-            {featureOrGroups.map((featureOrGroup) => {
-              const features = isWorkspaceFeatureGroup(featureOrGroup)
+          <EuiHorizontalRule margin="xs" />
+          <EuiSpacer size="s" />
+          {featureOrGroups.map((featureOrGroup) => {
+            const features = isWorkspaceFeatureGroup(featureOrGroup) ? featureOrGroup.features : [];
+            const selectedIds = selectedFeatureIds.filter((id) =>
+              (isWorkspaceFeatureGroup(featureOrGroup)
                 ? featureOrGroup.features
-                : [];
-              const selectedIds = selectedFeatureIds.filter((id) =>
-                (isWorkspaceFeatureGroup(featureOrGroup)
-                  ? featureOrGroup.features
-                  : [featureOrGroup]
-                ).find((item) => item.id === id)
-              );
-              return (
-                <EuiFlexItem key={featureOrGroup.name}>
+                : [featureOrGroup]
+              ).find((item) => item.id === id)
+            );
+            return (
+              <EuiFlexGroup key={featureOrGroup.name}>
+                <EuiFlexItem key={featureOrGroup.name + '-1'}>
+                  <div>
+                    <EuiText>
+                      <strong>{featureOrGroup.name}</strong>
+                    </EuiText>
+                    {isWorkspaceFeatureGroup(featureOrGroup) && (
+                      <EuiText>{categoryToDescription[featureOrGroup.name] ?? ''}</EuiText>
+                    )}
+                  </div>
+                </EuiFlexItem>
+                <EuiFlexItem key={featureOrGroup.name + '-2'}>
                   <EuiCheckbox
                     id={
                       isWorkspaceFeatureGroup(featureOrGroup)
@@ -496,9 +598,24 @@ export const WorkspaceForm = ({
                     />
                   )}
                 </EuiFlexItem>
-              );
-            })}
-          </EuiFlexGrid>
+              </EuiFlexGroup>
+            );
+          })}
+        </EuiPanel>
+      )}
+
+      {!tabFeatureSelected && (
+        <EuiPanel>
+          <EuiTitle size="s">
+            <h2>Users & Permissions</h2>
+          </EuiTitle>
+          <EuiHorizontalRule margin="xs" />
+          <WorkspacePermissionSettingPanel
+            errors={formErrors.permissions}
+            value={permissionSettings}
+            onChange={setPermissionSettings}
+            firstRowDeletable={permissionFirstRowDeletable}
+          />
         </EuiPanel>
       )}
       <EuiSpacer />
@@ -515,19 +632,7 @@ export const WorkspaceForm = ({
           />
         </EuiPanel>
       )}
-      <EuiSpacer />
-      <EuiText textAlign="right">
-        {opType === WORKSPACE_OP_TYPE_CREATE && (
-          <EuiButton form={formIdRef.current} type="submit" fill>
-            Create workspace
-          </EuiButton>
-        )}
-        {opType === WORKSPACE_OP_TYPE_UPDATE && (
-          <EuiButton form={formIdRef.current} type="submit" fill>
-            Update workspace
-          </EuiButton>
-        )}
-      </EuiText>
+      {bottomBar}
     </EuiForm>
   );
 };
