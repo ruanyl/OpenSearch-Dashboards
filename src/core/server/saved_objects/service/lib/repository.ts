@@ -1431,9 +1431,10 @@ export class SavedObjectsRepository {
     const { refresh = DEFAULT_REFRESH_SETTING } = options;
     const savedObjectsBulkResponse = await this.bulkGet(savedObjects);
 
-    const errorObject = savedObjectsBulkResponse.saved_objects.find((obj) => !!obj.error);
-    if (errorObject) {
-      throw SavedObjectsErrorHelpers.decorateBadRequestError(new Error(errorObject.error?.message));
+    const errorObjects = savedObjectsBulkResponse.saved_objects.filter((obj) => !!obj.error);
+    if (errorObjects && errorObjects.length) {
+      const errors = errorObjects.map((errorObject) => errorObject.error?.message).join(',');
+      throw SavedObjectsErrorHelpers.decorateBadRequestError(new Error(errors));
     }
 
     // saved objects must exist in specified workspace
