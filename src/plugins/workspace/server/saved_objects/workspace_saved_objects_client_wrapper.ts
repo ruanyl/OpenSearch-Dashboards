@@ -269,7 +269,7 @@ export class WorkspaceSavedObjectsClientWrapper {
               if (SavedObjectsErrorHelpers.isNotFoundError(error as Error)) {
                 continue;
               } else {
-                throw generateWorkspacePermissionError();
+                throw error;
               }
             }
             if (
