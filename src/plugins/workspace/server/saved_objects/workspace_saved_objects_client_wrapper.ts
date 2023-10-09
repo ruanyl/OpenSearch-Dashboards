@@ -260,20 +260,32 @@ export class WorkspaceSavedObjectsClientWrapper {
       if (options.overwrite) {
         for (const object of objects) {
           const { type, id } = object;
-          if (
-            id &&
-            !(await this.validateWorkspacesAndSavedObjectsPermissions(
-              await wrapperOptions.client.get(type, id),
-              wrapperOptions.request,
-              !hasTargetWorkspaces
-                ? // If no workspaces are passed, we need to check the workspace permission of object when overwrite.
-                  [WorkspacePermissionMode.LibraryWrite]
-                : [],
-              [WorkspacePermissionMode.Write],
-              false
-            ))
-          ) {
-            throw generateWorkspacePermissionError();
+          if (id) {
+            let rawObject;
+            try {
+              rawObject = await wrapperOptions.client.get(type, id);
+            } catch (error) {
+              // If object is not found, we will skip the validation of this object.
+              if (SavedObjectsErrorHelpers.isNotFoundError(error as Error)) {
+                continue;
+              } else {
+                throw generateWorkspacePermissionError();
+              }
+            }
+            if (
+              !(await this.validateWorkspacesAndSavedObjectsPermissions(
+                rawObject,
+                wrapperOptions.request,
+                !hasTargetWorkspaces
+                  ? // If no workspaces are passed, we need to check the workspace permission of object when overwrite.
+                    [WorkspacePermissionMode.LibraryWrite]
+                  : [],
+                [WorkspacePermissionMode.Write],
+                false
+              ))
+            ) {
+              throw generateWorkspacePermissionError();
+            }
           }
         }
       }
