@@ -59,7 +59,7 @@ export interface ChromeNavLinks {
   getAllNavLinks$(): Observable<Array<Readonly<ChromeNavLink>>>;
 
   /**
-   * Set filtered navlinks.
+   * Set navlinks.
    */
   setNavLinks(navLinks: ReadonlyMap<string, ChromeNavLink>): void;
 
