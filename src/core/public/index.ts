@@ -354,3 +354,7 @@ export {
   WorkspacesService,
   WorkspaceObservables,
 } from './workspace';
+
+export { WORKSPACE_TYPE } from '../utils';
+
+export { getWorkspaceIdFromUrl } from './utils';

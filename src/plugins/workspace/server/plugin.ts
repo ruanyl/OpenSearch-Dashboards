@@ -17,6 +17,23 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
   private readonly logger: Logger;
   private client?: IWorkspaceDBImpl;
 
+  private proxyWorkspaceTrafficToRealHandler(setupDeps: CoreSetup) {
+    /**
+     * Proxy all {basePath}/w/{workspaceId}{osdPath*} paths to {basePath}{osdPath*}
+     */
+    setupDeps.http.registerOnPreRouting(async (request, response, toolkit) => {
+      const regexp = /\/w\/([^\/]*)/;
+      const matchedResult = request.url.pathname.match(regexp);
+
+      if (matchedResult) {
+        const requestUrl = new URL(request.url.toString());
+        requestUrl.pathname = requestUrl.pathname.replace(regexp, '');
+        return toolkit.rewriteUrl(requestUrl.toString());
+      }
+      return toolkit.next();
+    });
+  }
+
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('plugins', 'workspace');
   }
@@ -27,6 +44,8 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
     this.client = new WorkspaceClientWithSavedObject(core);
 
     await this.client.setup(core);
+
+    this.proxyWorkspaceTrafficToRealHandler(core);
 
     registerRoutes({
       http: core.http,
