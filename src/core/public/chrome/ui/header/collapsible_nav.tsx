@@ -43,7 +43,7 @@ import { groupBy, sortBy } from 'lodash';
 import React, { Fragment, useRef } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import * as Rx from 'rxjs';
-import { DEFAULT_APP_CATEGORIES } from 'src/core/utils';
+import { DEFAULT_APP_CATEGORIES } from '../../../../utils';
 import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '../..';
 import { AppCategory } from '../../../../types';
 import { InternalApplicationStart } from '../../../application';
