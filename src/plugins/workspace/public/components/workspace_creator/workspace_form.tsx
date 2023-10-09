@@ -29,6 +29,7 @@ import {
   EuiHorizontalRule,
   EuiFlexGroup,
   EuiPageHeader,
+  EuiConfirmModal,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import {
@@ -42,7 +43,7 @@ import { useApplications } from '../../hooks';
 import {
   WORKSPACE_OP_TYPE_CREATE,
   WORKSPACE_OP_TYPE_UPDATE,
-  DEFAULT_CHECKED_FEATURES_IDS,
+  DEFAULT_CHECKED_FEATURES_IDS, WORKSPACE_LIST_APP_ID,
 } from '../../../common/constants';
 import {
   isFeatureDependBySelectedFeatures,
@@ -136,6 +137,7 @@ export const WorkspaceForm = ({
   const [defaultVISTheme, setDefaultVISTheme] = useState(defaultValues?.defaultVISTheme);
   const isEditingManagementWorkspace = defaultValues?.id === MANAGEMENT_WORKSPACE_ID;
   const [tabFeatureSelected, setTabFeatureSelected] = useState(!isEditingManagementWorkspace);
+  const [isCancelModalVisible, setIsCancelModalVisible] = useState(false);
 
   // The matched feature id list based on original feature config,
   // the feature category will be expanded to list of feature ids
@@ -408,11 +410,32 @@ export const WorkspaceForm = ({
     setDefaultVISTheme(e.target.value);
   };
 
-  const categoryToDescription: { [key: string]: string } = {
-    Library: 'Workspace-owned library items',
-  };
+  const closeCancelModal = () => setIsCancelModalVisible(false);
+  const showCancelModal = () => setIsCancelModalVisible(true);
 
-  // Number of saved changes and cancel button will be implemented in my next PR
+  const cancelModal = (
+    <EuiConfirmModal
+      title={i18n.translate('workspace.form.cancelModal.title', {
+        defaultMessage: 'Discard changes?',
+      })}
+      onCancel={closeCancelModal}
+      onConfirm={() => application?.navigateToApp(WORKSPACE_LIST_APP_ID)}
+      cancelButtonText={i18n.translate('workspace.form.cancelButtonText.', {
+        defaultMessage: 'Continue editing',
+      })}
+      confirmButtonText={i18n.translate('workspace.form.confirmButtonText.', {
+        defaultMessage: 'Discard changes',
+      })}
+      buttonColor="danger"
+      defaultFocusedButton="confirm"
+    >
+      {i18n.translate('workspace.form.cancelModal.body', {
+        defaultMessage: 'This will discard all changes. Are you sure?',
+      })}
+    </EuiConfirmModal>
+  );
+
+  // Number of saved changes will be implemented in workspace update page PR
   const bottomBar = (
     <div>
       <EuiSpacer size="xl" />
@@ -422,25 +445,37 @@ export const WorkspaceForm = ({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s">
               {opType === WORKSPACE_OP_TYPE_UPDATE && (
-                <EuiText textAlign="left">{'1 Unsaved change(s)'}</EuiText>
+                <EuiText textAlign="left">
+                  {i18n.translate('workspace.form.bottomBar.unsavedChanges', {
+                    defaultMessage: '1 Unsaved change(s)',
+                  })}
+                </EuiText>
               )}
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="m">
               <EuiText textAlign="right">
-                <EuiButtonEmpty color="ghost">Cancel</EuiButtonEmpty>
+                <EuiButtonEmpty color="ghost" onClick={showCancelModal}>
+                  {i18n.translate('workspace.form.bottomBar.cancel', {
+                    defaultMessage: 'Cancel',
+                  })}
+                </EuiButtonEmpty>
               </EuiText>
               <EuiSpacer />
               <EuiText textAlign="right">
                 {opType === WORKSPACE_OP_TYPE_CREATE && (
                   <EuiButton form={formIdRef.current} type="submit" fill color="primary">
-                    Create workspace
+                    {i18n.translate('workspace.form.bottomBar.createWorkspace', {
+                      defaultMessage: 'Create workspace',
+                    })}
                   </EuiButton>
                 )}
                 {opType === WORKSPACE_OP_TYPE_UPDATE && (
                   <EuiButton form={formIdRef.current} type="submit" fill color="primary">
-                    Save changes
+                    {i18n.translate('workspace.form.bottomBar.saveChanges', {
+                      defaultMessage: 'Save changes',
+                    })}
                   </EuiButton>
                 )}
               </EuiText>
@@ -451,17 +486,43 @@ export const WorkspaceForm = ({
     </div>
   );
 
+  const workspaceDetailsTitle = i18n.translate('workspace.form.workspaceDetails.title', {
+    defaultMessage: 'Workspace Details',
+  });
+  const featureVisibilityTitle = i18n.translate('workspace.form.featureVisibility.title', {
+    defaultMessage: 'Feature Visibility',
+  });
+  const usersAndPermissionsTitle = i18n.translate('workspace.form.usersAndPermissions.title', {
+    defaultMessage: 'Users & Permissions',
+  });
+  const libraryCategoryId = i18n.translate('core.ui.libraryNavList.label', {
+    defaultMessage: 'Library',
+  });
+  const categoryToDescription: { [key: string]: string } = {
+    [libraryCategoryId]: i18n.translate(
+      'workspace.form.featureVisibility.libraryCategory.Description',
+      {
+        defaultMessage: 'Workspace-owned library items',
+      }
+    ),
+  };
+
   return (
     <EuiForm id={formIdRef.current} onSubmit={handleFormSubmit} component="form">
       <EuiPanel>
         <EuiTitle size="s">
-          <h2>Workspace Details</h2>
+          <h2>{workspaceDetailsTitle}</h2>
         </EuiTitle>
         <EuiHorizontalRule margin="xs" />
         <EuiSpacer size="s" />
         <EuiFormRow
-          label="Name"
-          helpText="Valid characters are a-z, A-Z, 0-9, (), [], _ (underscore), - (hyphen) and (space)."
+          label={i18n.translate('workspace.form.workspaceDetails.name.label', {
+            defaultMessage: 'Name',
+          })}
+          helpText={i18n.translate('workspace.form.workspaceDetails.name.helpText', {
+            defaultMessage:
+              'Valid characters are a-z, A-Z, 0-9, (), [], _ (underscore), - (hyphen) and (space).',
+          })}
           isInvalid={!!formErrors.name}
           error={formErrors.name}
         >
@@ -472,29 +533,48 @@ export const WorkspaceForm = ({
           />
         </EuiFormRow>
         <EuiFormRow
-          helpText="Valid characters are a-z, A-Z, 0-9, (), [], _ (underscore), - (hyphen) and (space)."
           label={
             <>
               Description - <i>optional</i>
             </>
           }
+          helpText={i18n.translate('workspace.form.workspaceDetails.description.helpText', {
+            defaultMessage:
+              'Valid characters are a-z, A-Z, 0-9, (), [], _ (underscore), - (hyphen) and (space).',
+          })}
         >
           <EuiFieldText value={description} onChange={handleDescriptionInputChange} />
         </EuiFormRow>
-        <EuiFormRow label="Color" isInvalid={!!formErrors.color} error={formErrors.color}>
+        <EuiFormRow
+          label={i18n.translate('workspace.form.workspaceDetails.color.label', {
+            defaultMessage: 'Color',
+          })}
+          isInvalid={!!formErrors.color}
+          error={formErrors.color}
+        >
           <div>
             <EuiText size="xs" color="subdued">
-              {'Accent color for your workspace'}
+              {i18n.translate('workspace.form.workspaceDetails.color.helpText', {
+                defaultMessage: 'Accent color for your workspace',
+              })}
             </EuiText>
             <EuiSpacer size={'s'} />
             <EuiColorPicker color={color} onChange={handleColorChange} />
           </div>
         </EuiFormRow>
-        <EuiFormRow label="Icon" isInvalid={!!formErrors.icon} error={formErrors.icon}>
+        <EuiFormRow
+          label={i18n.translate('workspace.form.workspaceDetails.icon.label', {
+            defaultMessage: 'Icon',
+          })}
+          isInvalid={!!formErrors.icon}
+          error={formErrors.icon}
+        >
           <WorkspaceIconSelector value={icon} onChange={handleIconChange} color={color} />
         </EuiFormRow>
         <EuiFormRow
-          label="Default visualization theme"
+          label={i18n.translate('workspace.form.workspaceDetails.defaultVisualizationTheme.label', {
+            defaultMessage: 'Default visualization theme',
+          })}
           isInvalid={!!formErrors.defaultVISTheme}
           error={formErrors.defaultVISTheme}
         >
@@ -513,13 +593,13 @@ export const WorkspaceForm = ({
             ? []
             : [
                 {
-                  label: 'Feature Visibility',
+                  label: featureVisibilityTitle,
                   isSelected: tabFeatureSelected,
                   onClick: handleTabFeatureClick,
                 },
               ]),
           {
-            label: 'Users & Permissions',
+            label: usersAndPermissionsTitle,
             isSelected: !tabFeatureSelected,
             onClick: handleTabPermissionClick,
           },
@@ -529,7 +609,7 @@ export const WorkspaceForm = ({
       {tabFeatureSelected && (
         <EuiPanel>
           <EuiTitle size="s">
-            <h2>Feature Visibility</h2>
+            <h2>{featureVisibilityTitle}</h2>
           </EuiTitle>
           <EuiHorizontalRule margin="xs" />
           <EuiSpacer size="s" />
@@ -607,7 +687,7 @@ export const WorkspaceForm = ({
       {!tabFeatureSelected && (
         <EuiPanel>
           <EuiTitle size="s">
-            <h2>Users & Permissions</h2>
+            <h2>{usersAndPermissionsTitle}</h2>
           </EuiTitle>
           <EuiHorizontalRule margin="xs" />
           <WorkspacePermissionSettingPanel
@@ -633,6 +713,7 @@ export const WorkspaceForm = ({
         </EuiPanel>
       )}
       {bottomBar}
+      {isCancelModalVisible && cancelModal}
     </EuiForm>
   );
 };
