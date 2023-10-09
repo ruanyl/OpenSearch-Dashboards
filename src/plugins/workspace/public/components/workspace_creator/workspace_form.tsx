@@ -43,7 +43,8 @@ import { useApplications } from '../../hooks';
 import {
   WORKSPACE_OP_TYPE_CREATE,
   WORKSPACE_OP_TYPE_UPDATE,
-  DEFAULT_CHECKED_FEATURES_IDS, WORKSPACE_LIST_APP_ID,
+  DEFAULT_CHECKED_FEATURES_IDS,
+  WORKSPACE_LIST_APP_ID,
 } from '../../../common/constants';
 import {
   isFeatureDependBySelectedFeatures,
