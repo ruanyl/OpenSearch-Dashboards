@@ -14,7 +14,7 @@ import {
 import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { formatUrlWithWorkspaceId } from '../../utils';
+import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 
 export function WorkspaceFatalError(props: { error?: string }) {
   const {
