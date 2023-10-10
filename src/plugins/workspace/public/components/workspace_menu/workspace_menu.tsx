@@ -21,7 +21,7 @@ import {
   HttpSetup,
   MANAGEMENT_WORKSPACE_ID,
   WorkspaceAttribute,
-  WorkspaceObservables,
+  WorkspacesStart,
 } from '../../../../../core/public';
 import {
   WORKSPACE_CREATE_APP_ID,
@@ -33,7 +33,7 @@ import { formatUrlWithWorkspaceId } from '../../utils';
 interface Props {
   getUrlForApp: ApplicationStart['getUrlForApp'];
   basePath: HttpSetup['basePath'];
-  workspaces: WorkspaceObservables;
+  workspaces: WorkspacesStart;
 }
 
 function getFilteredWorkspaceList(

@@ -9,7 +9,7 @@ import { isEqual } from 'lodash';
 import { CoreService, WorkspaceAttribute } from '../../types';
 
 type WorkspaceObject = WorkspaceAttribute & { libraryReadonly?: boolean };
-export interface WorkspaceObservables {
+interface WorkspaceObservables {
   currentWorkspaceId$: BehaviorSubject<string>;
   currentWorkspace$: BehaviorSubject<WorkspaceObject | null>;
   workspaceList$: BehaviorSubject<WorkspaceObject[]>;
