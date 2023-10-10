@@ -57,7 +57,6 @@ exports[`<WorkspaceFatalError /> render error with callout 1`] = `
             >
               <button
                 class="euiButton euiButton--primary euiButton--fill"
-                data-test-subj="asd"
                 type="button"
               >
                 <span
@@ -157,7 +156,6 @@ exports[`<WorkspaceFatalError /> render normally 1`] = `
             >
               <button
                 class="euiButton euiButton--primary euiButton--fill"
-                data-test-subj="asd"
                 type="button"
               >
                 <span
