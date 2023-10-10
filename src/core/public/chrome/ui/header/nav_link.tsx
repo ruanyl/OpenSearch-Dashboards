@@ -60,10 +60,8 @@ export function createEuiListItem({
   onClick = () => {},
   navigateToApp,
   dataTestSubj,
-  externalLink,
 }: Props) {
-  const { href, id, title, disabled, euiIconType, icon, tooltip } = link;
-  externalLink = externalLink || link.externalLink;
+  const { href, id, title, disabled, euiIconType, icon, tooltip, externalLink } = link;
 
   return {
     label: tooltip ?? title,

@@ -148,8 +148,11 @@ export function CollapsibleNav({
   ...observables
 }: Props) {
   const navLinks = useObservable(observables.navLinks$, []).filter((link) => !link.hidden);
+  let customNavLink = useObservable(observables.customNavLink$, undefined);
+  if (customNavLink) {
+    customNavLink = { ...customNavLink, externalLink: true };
+  }
   const recentlyAccessed = useObservable(observables.recentlyAccessed$, []);
-  const customNavLink = useObservable(observables.customNavLink$, undefined);
   const allNavLinks: CollapsibleNavLink[] = [...navLinks];
   if (recentlyAccessed.length) {
     allNavLinks.push(
@@ -209,7 +212,6 @@ export function CollapsibleNav({
                     navigateToApp,
                     dataTestSubj: 'collapsibleNavCustomNavLink',
                     onClick: closeNav,
-                    externalLink: true,
                   }),
                 ]}
                 maxWidth="none"
