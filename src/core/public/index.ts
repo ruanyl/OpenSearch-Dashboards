@@ -359,4 +359,4 @@ export {
   WORKSPACE_TYPE,
 } from '../utils';
 
-export { getWorkspaceIdFromUrl } from './utils';
+export { getWorkspaceIdFromUrl, formatUrlWithWorkspaceId } from './utils';
