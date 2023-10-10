@@ -288,7 +288,9 @@ export class ChromeService {
           branding={injectedMetadata.getBranding()}
           logos={logos}
           survey={injectedMetadata.getSurvey()}
-          collapsibleNavHeaderRender={collapsibleNavHeaderRender}
+          collapsibleNavHeaderRender={
+            this.collapsibleNavHeaderRender ? collapsibleNavHeaderRender : undefined
+          }
         />
       ),
 
