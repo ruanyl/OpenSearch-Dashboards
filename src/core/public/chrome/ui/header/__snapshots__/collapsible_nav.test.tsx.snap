@@ -378,55 +378,6 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
       "values": Array [],
     }
   }
-  workspaces={
-    Object {
-      "currentWorkspace$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": null,
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "currentWorkspaceId$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": "",
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "initialized$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": false,
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "workspaceEnabled$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": false,
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "workspaceList$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": Array [],
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-    }
-  }
 >
   <EuiCollapsibleNav
     aria-label="Primary"
@@ -2169,55 +2120,6 @@ exports[`CollapsibleNav renders the default nav 1`] = `
       "values": Array [],
     }
   }
-  workspaces={
-    Object {
-      "currentWorkspace$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": null,
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "currentWorkspaceId$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": "",
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "initialized$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": false,
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "workspaceEnabled$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": false,
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "workspaceList$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": Array [],
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-    }
-  }
 >
   <EuiCollapsibleNav
     aria-label="Primary"
@@ -2486,55 +2388,6 @@ exports[`CollapsibleNav renders the default nav 2`] = `
       "values": Array [],
     }
   }
-  workspaces={
-    Object {
-      "currentWorkspace$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": null,
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "currentWorkspaceId$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": "",
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "initialized$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": false,
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "workspaceEnabled$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": false,
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "workspaceList$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": Array [],
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-    }
-  }
 >
   <EuiCollapsibleNav
     aria-label="Primary"
@@ -2801,55 +2654,6 @@ exports[`CollapsibleNav renders the default nav 3`] = `
       "size": 0,
       "sizeLimit": 5000000,
       "values": Array [],
-    }
-  }
-  workspaces={
-    Object {
-      "currentWorkspace$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": null,
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "currentWorkspaceId$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": "",
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "initialized$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": false,
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "workspaceEnabled$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": false,
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "workspaceList$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": Array [],
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
     }
   }
 >
@@ -3555,55 +3359,6 @@ exports[`CollapsibleNav with custom branding renders the nav bar in dark mode 1`
       "size": 0,
       "sizeLimit": 5000000,
       "values": Array [],
-    }
-  }
-  workspaces={
-    Object {
-      "currentWorkspace$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": null,
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "currentWorkspaceId$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": "",
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "initialized$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": false,
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "workspaceEnabled$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": false,
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "workspaceList$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": Array [],
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
     }
   }
 >
@@ -4750,55 +4505,6 @@ exports[`CollapsibleNav with custom branding renders the nav bar in default mode
       "values": Array [],
     }
   }
-  workspaces={
-    Object {
-      "currentWorkspace$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": null,
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "currentWorkspaceId$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": "",
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "initialized$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": false,
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "workspaceEnabled$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": false,
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "workspaceList$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": Array [],
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-    }
-  }
 >
   <EuiCollapsibleNav
     aria-label="Primary"
@@ -5936,55 +5642,6 @@ exports[`CollapsibleNav without custom branding renders the nav bar in dark mode
       "values": Array [],
     }
   }
-  workspaces={
-    Object {
-      "currentWorkspace$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": null,
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "currentWorkspaceId$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": "",
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "initialized$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": false,
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "workspaceEnabled$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": false,
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "workspaceList$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": Array [],
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-    }
-  }
 >
   <EuiCollapsibleNav
     aria-label="Primary"
@@ -7116,55 +6773,6 @@ exports[`CollapsibleNav without custom branding renders the nav bar in default m
       "size": 0,
       "sizeLimit": 5000000,
       "values": Array [],
-    }
-  }
-  workspaces={
-    Object {
-      "currentWorkspace$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": null,
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "currentWorkspaceId$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": "",
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "initialized$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": false,
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "workspaceEnabled$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": false,
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "workspaceList$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": Array [],
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
     }
   }
 >

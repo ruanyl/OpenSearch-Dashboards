@@ -1891,55 +1891,6 @@ exports[`Header handles visibility and lock changes 1`] = `
     }
   }
   survey="/"
-  workspaces={
-    Object {
-      "currentWorkspace$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": null,
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "currentWorkspaceId$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": "",
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "initialized$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": false,
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "workspaceEnabled$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": false,
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "workspaceList$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": Array [],
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-    }
-  }
 >
   <header
     className="hide-for-sharing headerGlobalNav"
@@ -8349,55 +8300,6 @@ exports[`Header renders condensed header 1`] = `
     }
   }
   survey="/"
-  workspaces={
-    Object {
-      "currentWorkspace$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": null,
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "currentWorkspaceId$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": "",
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "initialized$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": false,
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "workspaceEnabled$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": false,
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "workspaceList$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": Array [],
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-    }
-  }
 >
   <header
     className="hide-for-sharing headerGlobalNav"
