@@ -108,30 +108,7 @@ export class IndexPatternManagementPlugin
       mount: async (params: AppMountParameters) => {
         const { mountManagementSection } = await import('./management_app');
 
-        const [coreStart] = await core.getStartServices();
-
-        const setBreadcrumbsScope = (
-          crumbs: ChromeBreadcrumb[] = [],
-          appHistory?: ScopedHistory
-        ) => {
-          const wrapBreadcrumb = (item: ChromeBreadcrumb, scopedHistory: ScopedHistory) => ({
-            ...item,
-            ...(item.href ? reactRouterNavigate(scopedHistory, item.href) : {}),
-          });
-
-          coreStart.chrome.setBreadcrumbs([
-            ...crumbs.map((item) => wrapBreadcrumb(item, appHistory || params.history)),
-          ]);
-        };
-
-        const managementParams: ManagementAppMountParams = {
-          element: params.element,
-          history: params.history,
-          setBreadcrumbs: setBreadcrumbsScope,
-          basePath: params.appBasePath,
-        };
-
-        return mountManagementSection(core.getStartServices, managementParams, () =>
+        return mountManagementSection(core.getStartServices, params, () =>
           this.indexPatternManagementService.environmentService.getEnvironment().ml()
         );
       },
