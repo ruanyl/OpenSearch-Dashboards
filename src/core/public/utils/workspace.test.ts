@@ -7,10 +7,10 @@ import { getWorkspaceIdFromUrl } from './workspace';
 
 describe('#getWorkspaceIdFromUrl', () => {
   it('return workspace when there is a match', () => {
-    expect(getWorkspaceIdFromUrl('/w/foo')).toEqual('foo');
+    expect(getWorkspaceIdFromUrl('http://localhost/w/foo')).toEqual('foo');
   });
 
   it('return empty when there is not a match', () => {
-    expect(getWorkspaceIdFromUrl('/w2/foo')).toEqual('');
+    expect(getWorkspaceIdFromUrl('http://localhost/w2/foo')).toEqual('');
   });
 });
