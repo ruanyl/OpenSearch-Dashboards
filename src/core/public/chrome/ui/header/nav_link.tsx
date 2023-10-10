@@ -40,7 +40,7 @@ export const isModifiedOrPrevented = (event: React.MouseEvent<HTMLButtonElement,
 
 export type CollapsibleNavLink = ChromeNavLink | RecentNavLink;
 interface Props {
-  link: ChromeNavLink | RecentNavLink;
+  link: CollapsibleNavLink;
   appId?: string;
   basePath?: HttpStart['basePath'];
   dataTestSubj: string;
