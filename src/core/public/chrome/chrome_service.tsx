@@ -196,16 +196,14 @@ export class ChromeService {
       localStorage.setItem(IS_LOCKED_KEY, `${isLocked}`);
     };
 
-    const collapsibleNavHeaderRender = this.collapsibleNavHeaderRender
-      ? () =>
-          this.collapsibleNavHeaderRender
-            ? this.collapsibleNavHeaderRender({
-                basePath: http.basePath,
-                workspaces,
-                getUrlForApp: application.getUrlForApp,
-              })
-            : null
-      : undefined;
+    const collapsibleNavHeaderRender = () =>
+      this.collapsibleNavHeaderRender
+        ? this.collapsibleNavHeaderRender({
+            basePath: http.basePath,
+            workspaces,
+            getUrlForApp: application.getUrlForApp,
+          })
+        : null;
 
     const getIsNavDrawerLocked$ = isNavDrawerLocked$.pipe(takeUntil(this.stop$));
 
