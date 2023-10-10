@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { featureMatchesConfig } from './utils';
+import { featureMatchesConfig, formatUrlWithWorkspaceId } from './utils';
+import { httpServiceMock } from '../../../core/public/mocks';
 
 describe('workspace utils: featureMatchesConfig', () => {
   it('feature configured with `*` should match any features', () => {
@@ -89,5 +90,21 @@ describe('workspace utils: featureMatchesConfig', () => {
     expect(match({ id: 'integrations', category: { id: 'management', label: 'Management' } })).toBe(
       true
     );
+  });
+});
+
+const basePathWithoutWorkspaceBasePath = httpServiceMock.createSetupContract().basePath;
+
+describe('#formatUrlWithWorkspaceId', () => {
+  it('return url with workspace prefix when format with a id provided', () => {
+    expect(
+      formatUrlWithWorkspaceId('/app/dashboard', 'foo', basePathWithoutWorkspaceBasePath)
+    ).toEqual('http://localhost/w/foo/app/dashboard');
+  });
+
+  it('return url without workspace prefix when format without a id', () => {
+    expect(
+      formatUrlWithWorkspaceId('/w/foo/app/dashboard', '', basePathWithoutWorkspaceBasePath)
+    ).toEqual('http://localhost/app/dashboard');
   });
 });
