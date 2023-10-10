@@ -51,7 +51,7 @@ export function WorkspaceFatalError(props: { error?: string }) {
               </p>
             }
             actions={[
-              <EuiButton color="primary" fill onClick={goBackToHome} data-test-subj="asd">
+              <EuiButton color="primary" fill onClick={goBackToHome}>
                 <FormattedMessage
                   id="core.fatalErrors.goBackToHome"
                   defaultMessage="Go back to home"
