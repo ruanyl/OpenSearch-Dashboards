@@ -72,8 +72,6 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
 
     this.proxyWorkspaceTrafficToRealHandler(core);
 
-    this.proxyWorkspaceTrafficToRealHandler(core);
-
     registerRoutes({
       http: core.http,
       logger: this.logger,
