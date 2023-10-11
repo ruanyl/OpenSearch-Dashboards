@@ -351,5 +351,3 @@ export { __osdBootstrap__ } from './osd_bootstrap';
 export { WorkspacesStart, WorkspacesSetup, WorkspacesService } from './workspace';
 
 export { WORKSPACE_TYPE } from '../utils';
-
-export { getWorkspaceIdFromUrl, formatUrlWithWorkspaceId } from './utils';

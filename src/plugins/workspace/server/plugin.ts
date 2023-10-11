@@ -12,6 +12,7 @@ import {
 import { IWorkspaceDBImpl } from './types';
 import { WorkspaceClientWithSavedObject } from './workspace_client';
 import { registerRoutes } from './routes';
+import { cleanWorkspaceId, getWorkspaceIdFromUrl } from '../../../core/server/utils';
 
 export class WorkspacePlugin implements Plugin<{}, {}> {
   private readonly logger: Logger;
@@ -22,12 +23,11 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
      * Proxy all {basePath}/w/{workspaceId}{osdPath*} paths to {basePath}{osdPath*}
      */
     setupDeps.http.registerOnPreRouting(async (request, response, toolkit) => {
-      const regexp = /\/w\/([^\/]*)/;
-      const matchedResult = request.url.pathname.match(regexp);
+      const workspaceId = getWorkspaceIdFromUrl(request.url.toString());
 
-      if (matchedResult) {
+      if (workspaceId) {
         const requestUrl = new URL(request.url.toString());
-        requestUrl.pathname = requestUrl.pathname.replace(regexp, '');
+        requestUrl.pathname = cleanWorkspaceId(requestUrl.pathname);
         return toolkit.rewriteUrl(requestUrl.toString());
       }
       return toolkit.next();

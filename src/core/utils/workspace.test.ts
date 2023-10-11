@@ -4,7 +4,7 @@
  */
 
 import { getWorkspaceIdFromUrl, formatUrlWithWorkspaceId } from './workspace';
-import { httpServiceMock } from '../mocks';
+import { httpServiceMock } from '../public/mocks';
 
 describe('#getWorkspaceIdFromUrl', () => {
   it('return workspace when there is a match', () => {

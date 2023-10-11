@@ -13,6 +13,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
+import { IBasePath } from 'opensearch-dashboards/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 
@@ -24,7 +25,7 @@ export function WorkspaceFatalError(props: { error?: string }) {
     window.location.href = formatUrlWithWorkspaceId(
       application?.getUrlForApp('home') || '',
       '',
-      http?.basePath
+      http?.basePath as IBasePath
     );
   };
   return (

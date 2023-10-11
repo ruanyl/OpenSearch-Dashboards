@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { WORKSPACE_PATH_PREFIX } from './index';
-import { IBasePath } from '../index';
+import { WORKSPACE_PATH_PREFIX } from './constants';
+import { IBasePath } from '../public';
 
 export const getWorkspaceIdFromUrl = (url: string): string => {
   const regexp = /\/w\/([^\/]*)/;
@@ -17,23 +17,21 @@ export const getWorkspaceIdFromUrl = (url: string): string => {
   return '';
 };
 
-export const formatUrlWithWorkspaceId = (
-  url: string,
-  workspaceId: string,
-  basePath?: IBasePath
-) => {
+export const cleanWorkspaceId = (path: string) => {
+  return path.replace(/^\/w\/([^\/]*)/, '');
+};
+
+export const formatUrlWithWorkspaceId = (url: string, workspaceId: string, basePath: IBasePath) => {
   const newUrl = new URL(url, window.location.href);
   /**
    * Patch workspace id into path
    */
-  if (basePath) {
-    newUrl.pathname = basePath.remove(newUrl.pathname);
-  }
+  newUrl.pathname = basePath.remove(newUrl.pathname);
 
   if (workspaceId) {
     newUrl.pathname = `${WORKSPACE_PATH_PREFIX}/${workspaceId}${newUrl.pathname}`;
   } else {
-    newUrl.pathname = newUrl.pathname.replace(/^\/w\/([^\/]*)/, '');
+    newUrl.pathname = cleanWorkspaceId(newUrl.pathname);
   }
 
   newUrl.pathname =
