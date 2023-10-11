@@ -16,8 +16,6 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
     return getWorkspaceIdFromUrl(window.location.href);
   }
   public async setup(core: CoreSetup) {
-    core.workspaces.workspaceEnabled$.next(true);
-
     const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
     await workspaceClient.init();
 
