@@ -6,15 +6,7 @@
 import { i18n } from '@osd/i18n';
 import React, { useState } from 'react';
 import { useObservable } from 'react-use';
-import {
-  EuiCollapsibleNavGroup,
-  EuiContextMenu,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiPopover,
-  EuiText,
-} from '@elastic/eui';
+import { EuiCollapsibleNavGroup, EuiContextMenu, EuiIcon, EuiPopover, EuiText } from '@elastic/eui';
 
 import {
   ApplicationStart,
@@ -139,43 +131,30 @@ export const WorkspaceMenu = ({ basePath, getUrlForApp, workspaces }: Props) => 
   };
 
   const currentWorkspaceButton = (
-    <EuiCollapsibleNavGroup>
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiIcon type="logoOpenSearch" size="l" />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText>
-            <strong> {currentWorkspaceName} </strong>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiIcon type="arrowDown" onClick={onButtonClick} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiCollapsibleNavGroup>
-  );
-
-  const currentWorkspaceTitle = (
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <EuiIcon type="logoOpenSearch" size="l" />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiText>
-          <strong> {currentWorkspaceName} </strong>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiIcon type="cross" onClick={closePopover} />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiCollapsibleNavGroup
+      title={
+        <h3
+          style={{
+            width: '202px',
+            whiteSpace: 'nowrap',
+            textOverflow: 'ellipsis',
+            overflow: 'hidden',
+          }}
+        >
+          {currentWorkspaceName}
+        </h3>
+      }
+      iconType={currentWorkspace?.icon ?? 'users'}
+      isCollapsible={true}
+      initialIsOpen={false}
+      onClick={onButtonClick}
+      forceState={isPopoverOpen ? 'open' : 'closed'}
+    />
   );
 
   const panels = [
     {
       id: 0,
-      title: currentWorkspaceTitle,
       items: [
         {
           name: (
@@ -213,11 +192,12 @@ export const WorkspaceMenu = ({ basePath, getUrlForApp, workspaces }: Props) => 
   return (
     <EuiPopover
       id="contextMenuExample"
+      display="block"
       button={currentWorkspaceButton}
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       panelPaddingSize="none"
-      anchorPosition="downLeft"
+      anchorPosition="downCenter"
     >
       <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiPopover>
