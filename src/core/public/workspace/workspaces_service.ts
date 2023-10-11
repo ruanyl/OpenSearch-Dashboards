@@ -10,11 +10,31 @@ import { CoreService, WorkspaceAttribute } from '../../types';
 
 type WorkspaceObject = WorkspaceAttribute & { readonly?: boolean };
 
-export interface WorkspaceObservables {
+interface WorkspaceObservables {
+  /**
+   * Indicates the current activated workspace id, the value should be changed every time
+   * when switching to a different workspace
+   */
   currentWorkspaceId$: BehaviorSubject<string>;
+
+  /**
+   * The workspace that is derived from `currentWorkspaceId` and `workspaceList`, if
+   * `currentWorkspaceId` cannot be found from `workspaceList`, it will return an error
+   *
+   * This value MUST NOT set manually from outside of WorkspacesService
+   */
   currentWorkspace$: BehaviorSubject<WorkspaceObject | null>;
+
+  /**
+   * The list of available workspaces. This workspace list should be set by whoever
+   * the workspace functionalities
+   */
   workspaceList$: BehaviorSubject<WorkspaceObject[]>;
-  workspaceEnabled$: BehaviorSubject<boolean>;
+
+  /**
+   * This is a flag which indicates the WorkspacesService module is initialized and ready
+   * for consuming by others. For example, the `workspaceList` has been set, etc
+   */
   initialized$: BehaviorSubject<boolean>;
 }
 
@@ -30,7 +50,6 @@ export class WorkspacesService implements CoreService<WorkspacesSetup, Workspace
   private workspaceList$ = new BehaviorSubject<WorkspaceObject[]>([]);
   private currentWorkspace$ = new BehaviorSubject<WorkspaceObject | null>(null);
   private initialized$ = new BehaviorSubject<boolean>(false);
-  private workspaceEnabled$ = new BehaviorSubject<boolean>(false);
 
   constructor() {
     combineLatest([this.initialized$, this.workspaceList$, this.currentWorkspaceId$]).subscribe(
@@ -67,7 +86,6 @@ export class WorkspacesService implements CoreService<WorkspacesSetup, Workspace
       currentWorkspace$: this.currentWorkspace$,
       workspaceList$: this.workspaceList$,
       initialized$: this.initialized$,
-      workspaceEnabled$: this.workspaceEnabled$,
     };
   }
 
@@ -77,7 +95,6 @@ export class WorkspacesService implements CoreService<WorkspacesSetup, Workspace
       currentWorkspace$: this.currentWorkspace$,
       workspaceList$: this.workspaceList$,
       initialized$: this.initialized$,
-      workspaceEnabled$: this.workspaceEnabled$,
     };
   }
 
@@ -85,7 +102,6 @@ export class WorkspacesService implements CoreService<WorkspacesSetup, Workspace
     this.currentWorkspace$.unsubscribe();
     this.currentWorkspaceId$.unsubscribe();
     this.workspaceList$.unsubscribe();
-    this.workspaceEnabled$.unsubscribe();
     this.initialized$.unsubscribe();
   }
 }
