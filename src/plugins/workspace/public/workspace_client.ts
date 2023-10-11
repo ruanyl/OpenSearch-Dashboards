@@ -216,10 +216,10 @@ export class WorkspaceClient {
    *
    * @param {object} [options={}]
    * @property {string} options.search
-   * @property {string} options.search_fields - see OpenSearch Simple Query String
+   * @property {string} options.searchFields - see OpenSearch Simple Query String
    *                                        Query field argument for more information
    * @property {integer} [options.page=1]
-   * @property {integer} [options.per_page=20]
+   * @property {integer} [options.perPage=20]
    * @property {array} options.fields
    * @property {string array} permissionModes
    * @returns A find result with workspaces matching the specified search.
