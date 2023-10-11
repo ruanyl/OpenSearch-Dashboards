@@ -26,7 +26,10 @@ export const formatUrlWithWorkspaceId = (
   /**
    * Patch workspace id into path
    */
-  newUrl.pathname = basePath?.remove(newUrl.pathname) || '';
+  if (basePath) {
+    newUrl.pathname = basePath.remove(newUrl.pathname);
+  }
+
   if (workspaceId) {
     newUrl.pathname = `${WORKSPACE_PATH_PREFIX}/${workspaceId}${newUrl.pathname}`;
   } else {

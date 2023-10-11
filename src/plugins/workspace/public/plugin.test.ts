@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { waitFor } from '@testing-library/dom';
 import { workspaceClientMock, WorkspaceClientMock } from './workspace_client.mock';
 import { applicationServiceMock, chromeServiceMock, coreMock } from '../../../core/public/mocks';
 import { WorkspacePlugin } from './plugin';
@@ -57,13 +58,19 @@ describe('Workspace plugin', () => {
     expect(WorkspaceClientMock).toBeCalledTimes(1);
     expect(workspaceClientMock.enterWorkspace).toBeCalledWith('workspaceId');
     expect(setupMock.getStartServices).toBeCalledTimes(1);
-    await new Promise((resolve: any) => setTimeout(resolve, 1000));
-    expect(applicationStartMock.navigateToApp).toBeCalledWith(WORKSPACE_FATAL_ERROR_APP_ID, {
-      replace: true,
-      state: {
-        error: 'error',
+    await waitFor(
+      () => {
+        expect(applicationStartMock.navigateToApp).toBeCalledWith(WORKSPACE_FATAL_ERROR_APP_ID, {
+          replace: true,
+          state: {
+            error: 'error',
+          },
+        });
       },
-    });
+      {
+        container: document.body,
+      }
+    );
     windowSpy.mockRestore();
   });
 
@@ -101,9 +108,7 @@ describe('Workspace plugin', () => {
 
     const workspacePlugin = new WorkspacePlugin();
     await workspacePlugin.setup(setupMock);
-    await new Promise((resolve: any) => setTimeout(resolve, 0));
     currentAppIdSubscriber?.next(WORKSPACE_FATAL_ERROR_APP_ID);
-    await new Promise((resolve: any) => setTimeout(resolve, 0));
     expect(applicationStartMock.navigateToApp).toBeCalledWith(WORKSPACE_OVERVIEW_APP_ID);
     windowSpy.mockRestore();
   });
