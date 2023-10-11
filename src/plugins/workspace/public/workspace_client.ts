@@ -91,7 +91,7 @@ export class WorkspaceClient {
     }
   };
 
-  private getPath(path: Array<string | undefined>): string {
+  private getPath(...path: Array<string | undefined>): string {
     return [WORKSPACES_API_BASE_URL, join(...path)].filter((item) => item).join('/');
   }
 
@@ -152,7 +152,7 @@ export class WorkspaceClient {
   public async create(
     attributes: Omit<WorkspaceAttribute, 'id'>
   ): Promise<IResponse<WorkspaceAttribute>> {
-    const path = this.getPath([]);
+    const path = this.getPath();
 
     const result = await this.safeFetch<WorkspaceAttribute>(path, {
       method: 'POST',
@@ -175,7 +175,7 @@ export class WorkspaceClient {
    * @returns
    */
   public async delete(id: string): Promise<IResponse<null>> {
-    const result = await this.safeFetch<null>(this.getPath([id]), { method: 'DELETE' });
+    const result = await this.safeFetch<null>(this.getPath(id), { method: 'DELETE' });
 
     if (result.success) {
       await this.updateWorkspaceList();
@@ -207,7 +207,7 @@ export class WorkspaceClient {
       page: number;
     }>
   > => {
-    const path = this.getPath(['_list']);
+    const path = this.getPath('_list');
     return this.safeFetch(path, {
       method: 'POST',
       body: JSON.stringify(options || {}),
@@ -221,7 +221,7 @@ export class WorkspaceClient {
    * @returns The workspace for the given id.
    */
   public async get(id: string): Promise<IResponse<WorkspaceAttribute>> {
-    const path = this.getPath([id]);
+    const path = this.getPath(id);
     return this.safeFetch(path, {
       method: 'GET',
     });
@@ -238,7 +238,7 @@ export class WorkspaceClient {
     id: string,
     attributes: Partial<WorkspaceAttribute>
   ): Promise<IResponse<boolean>> {
-    const path = this.getPath([id]);
+    const path = this.getPath(id);
     const body = {
       attributes,
     };
