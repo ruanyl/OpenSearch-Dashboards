@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { IntlProvider } from 'react-intl';
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import { WorkspaceFatalError } from './workspace_fatal_error';
 
 describe('<WorkspaceFatalError />', () => {
@@ -47,7 +47,14 @@ describe('<WorkspaceFatalError />', () => {
       </IntlProvider>
     );
     fireEvent.click(getByText('Go back to home'));
-    expect(setHrefSpy).toBeCalledTimes(1);
+    await waitFor(
+      () => {
+        expect(setHrefSpy).toBeCalledTimes(1);
+      },
+      {
+        container: document.body,
+      }
+    );
     window.location = location;
   });
 });
