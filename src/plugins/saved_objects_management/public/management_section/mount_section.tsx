@@ -39,7 +39,6 @@ import { PageWrapper } from './page_wrapper';
 import { StartDependencies, SavedObjectsManagementPluginStart } from '../plugin';
 import { ISavedObjectsManagementServiceRegistry } from '../services';
 import { getAllowedTypes } from './../lib';
-import { WORKSPACE_TYPE } from '../../../../core/public';
 
 interface MountParams {
   core: CoreSetup<StartDependencies, SavedObjectsManagementPluginStart>;
