@@ -416,6 +416,7 @@ export const WorkspaceForm = ({
 
   const cancelModal = (
     <EuiConfirmModal
+      data-test-subj="workspaceForm-cancelModal"
       title={i18n.translate('workspace.form.cancelModal.title', {
         defaultMessage: 'Discard changes?',
       })}
@@ -456,30 +457,36 @@ export const WorkspaceForm = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="m">
-              <EuiText textAlign="right">
-                <EuiButtonEmpty color="ghost" onClick={showCancelModal}>
-                  {i18n.translate('workspace.form.bottomBar.cancel', {
-                    defaultMessage: 'Cancel',
-                  })}
-                </EuiButtonEmpty>
-              </EuiText>
+              <EuiButtonEmpty
+                color="ghost"
+                onClick={showCancelModal}
+                data-test-subj="workspaceForm-bottomBar-cancelButton"
+              >
+                {i18n.translate('workspace.form.bottomBar.cancel', {
+                  defaultMessage: 'Cancel',
+                })}
+              </EuiButtonEmpty>
               <EuiSpacer />
-              <EuiText textAlign="right">
-                {opType === WORKSPACE_OP_TYPE_CREATE && (
-                  <EuiButton form={formIdRef.current} type="submit" fill color="primary">
-                    {i18n.translate('workspace.form.bottomBar.createWorkspace', {
-                      defaultMessage: 'Create workspace',
-                    })}
-                  </EuiButton>
-                )}
-                {opType === WORKSPACE_OP_TYPE_UPDATE && (
-                  <EuiButton form={formIdRef.current} type="submit" fill color="primary">
-                    {i18n.translate('workspace.form.bottomBar.saveChanges', {
-                      defaultMessage: 'Save changes',
-                    })}
-                  </EuiButton>
-                )}
-              </EuiText>
+              {opType === WORKSPACE_OP_TYPE_CREATE && (
+                <EuiButton
+                  fill
+                  type="submit"
+                  color="primary"
+                  form={formIdRef.current}
+                  data-test-subj="workspaceForm-bottomBar-createButton"
+                >
+                  {i18n.translate('workspace.form.bottomBar.createWorkspace', {
+                    defaultMessage: 'Create workspace',
+                  })}
+                </EuiButton>
+              )}
+              {opType === WORKSPACE_OP_TYPE_UPDATE && (
+                <EuiButton form={formIdRef.current} type="submit" fill color="primary">
+                  {i18n.translate('workspace.form.bottomBar.saveChanges', {
+                    defaultMessage: 'Save changes',
+                  })}
+                </EuiButton>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -531,6 +538,7 @@ export const WorkspaceForm = ({
             value={name}
             onChange={handleNameInputChange}
             readOnly={workspaceNameReadOnly}
+            data-test-subj="workspaceForm-workspaceDetails-nameInputText"
           />
         </EuiFormRow>
         <EuiFormRow
@@ -544,7 +552,11 @@ export const WorkspaceForm = ({
               'Valid characters are a-z, A-Z, 0-9, (), [], _ (underscore), - (hyphen) and (space).',
           })}
         >
-          <EuiFieldText value={description} onChange={handleDescriptionInputChange} />
+          <EuiFieldText
+            value={description}
+            onChange={handleDescriptionInputChange}
+            data-test-subj="workspaceForm-workspaceDetails-descriptionInputText"
+          />
         </EuiFormRow>
         <EuiFormRow
           label={i18n.translate('workspace.form.workspaceDetails.color.label', {
@@ -560,7 +572,11 @@ export const WorkspaceForm = ({
               })}
             </EuiText>
             <EuiSpacer size={'s'} />
-            <EuiColorPicker color={color} onChange={handleColorChange} />
+            <EuiColorPicker
+              color={color}
+              onChange={handleColorChange}
+              data-test-subj="workspaceForm-workspaceDetails-colorPicker"
+            />
           </div>
         </EuiFormRow>
         <EuiFormRow
@@ -584,6 +600,7 @@ export const WorkspaceForm = ({
             value={defaultVISTheme}
             options={defaultVISThemeOptions}
             onChange={onDefaultVISThemeChange}
+            data-test-subj="workspaceForm-workspaceDetails-defaultVISThemeSelector"
           />
         </EuiFormRow>
       </EuiPanel>
@@ -647,7 +664,7 @@ export const WorkspaceForm = ({
                         : handleFeatureCheckboxChange
                     }
                     label={`${featureOrGroup.name}${
-                      features.length > 0 ? `(${selectedIds.length}/${features.length})` : ''
+                      features.length > 0 ? ` (${selectedIds.length}/${features.length})` : ''
                     }`}
                     checked={selectedIds.length > 0}
                     disabled={
@@ -659,6 +676,7 @@ export const WorkspaceForm = ({
                       selectedIds.length > 0 &&
                       selectedIds.length < features.length
                     }
+                    data-test-subj={`workspaceForm-workspaceFeatureVisibility-${featureOrGroup.name}`}
                   />
                   {isWorkspaceFeatureGroup(featureOrGroup) && (
                     <EuiCheckboxGroup
@@ -676,6 +694,7 @@ export const WorkspaceForm = ({
                       )}
                       onChange={handleFeatureChange}
                       style={{ marginLeft: 40 }}
+                      data-test-subj={`workspaceForm-workspaceFeatureVisibility-${featureOrGroup.name}`}
                     />
                   )}
                 </EuiFlexItem>
@@ -696,6 +715,7 @@ export const WorkspaceForm = ({
             value={permissionSettings}
             onChange={setPermissionSettings}
             firstRowDeletable={permissionFirstRowDeletable}
+            data-test-subj={`workspaceForm-permissionSettingPanel`}
           />
         </EuiPanel>
       )}

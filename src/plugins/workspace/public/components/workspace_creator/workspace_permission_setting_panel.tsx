@@ -10,7 +10,6 @@ import {
   EuiComboBox,
   EuiFlexItem,
   EuiButton,
-  EuiButtonIcon,
   EuiButtonGroup,
   EuiFormRow,
   EuiText,
@@ -18,15 +17,9 @@ import {
 } from '@elastic/eui';
 import { WorkspacePermissionMode } from '../../../../../core/public';
 
-export type WorkspacePermissionSetting = (
-  | { type: 'user'; userId: string }
-  | { type: 'group'; group: string }
-) & {
-  type: 'user' | 'group';
-  userId?: string;
-  group?: string;
-  modes: WorkspacePermissionMode[];
-};
+export type WorkspacePermissionSetting =
+  | { type: 'user'; userId: string; modes: WorkspacePermissionMode[] }
+  | { type: 'group'; group: string; modes: WorkspacePermissionMode[] };
 
 enum PermissionModeId {
   Read = 'read',
@@ -68,7 +61,16 @@ const permissionTypeOptions = [
 const generateWorkspacePermissionItemKey = (
   item: Partial<WorkspacePermissionSetting>,
   index?: number
-) => [item.type, item.userId, item.group, ...(item.modes ?? []), index].filter(Boolean).join('-');
+) =>
+  [
+    ...(item.type ?? []),
+    ...(item.type === 'user' ? [item.userId] : []),
+    ...(item.type === 'group' ? [item.group] : []),
+    ...(item.modes ?? []),
+    index,
+  ]
+    .filter(Boolean)
+    .join('-');
 
 interface WorkspacePermissionSettingInputProps {
   index: number;
@@ -108,12 +110,10 @@ const WorkspacePermissionSettingInput = ({
     () => (group || userId ? [{ label: (group || userId) as string }] : []),
     [group, userId]
   );
-  // default permission mode is admin
+
+  // default permission mode id admin
   const permissionModesSelectedId =
     useMemo(() => {
-      if (!modes) {
-        return undefined;
-      }
       for (const key in optionIdToWorkspacePermissionModesMap) {
         if (optionIdToWorkspacePermissionModesMap[key].every((mode) => modes?.includes(mode))) {
           return key;
@@ -174,7 +174,8 @@ const WorkspacePermissionSettingInput = ({
           valueOfSelected={type}
           onChange={handleTypeChange}
           placeholder="User Type"
-          style={{ width: 100 }}
+          style={{ width: 200 }}
+          data-test-subj={`workspaceForm-permissionSettingPanel-${index}-userType`}
         />
       </EuiFlexItem>
       <EuiFlexItem grow>
@@ -185,7 +186,8 @@ const WorkspacePermissionSettingInput = ({
           onCreateOption={handleGroupOrUserIdCreate}
           onChange={handleGroupOrUserIdChange}
           placeholder="Select"
-          style={{ width: 100 }}
+          style={{ width: 200 }}
+          data-test-subj={`workspaceForm-permissionSettingPanel-${index}-userId`}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -264,8 +266,12 @@ export const WorkspacePermissionSettingPanel = ({
     return result;
   }, [value]);
 
+  // default permission mode id admin
   const handleAddNewOne = useCallback(() => {
-    onChange?.([...(transformedValue ?? []), {}]);
+    onChange?.([
+      ...(transformedValue ?? []),
+      { modes: optionIdToWorkspacePermissionModesMap[PermissionModeId.Admin] },
+    ]);
   }, [onChange, transformedValue]);
 
   const handleDelete = useCallback(
@@ -333,7 +339,13 @@ export const WorkspacePermissionSettingPanel = ({
           </EuiFormRow>
         </React.Fragment>
       ))}
-      <EuiButton fill onClick={handleAddNewOne} fullWidth={false} color={'text'}>
+      <EuiButton
+        fill
+        onClick={handleAddNewOne}
+        fullWidth={false}
+        color={'text'}
+        data-test-subj="workspaceForm-permissionSettingPanel-addNew"
+      >
         Add New
       </EuiButton>
     </div>

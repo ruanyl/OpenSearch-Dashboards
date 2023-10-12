@@ -20,7 +20,11 @@ export const WorkspaceIconSelector = ({
   const options = icons.map((item) => ({
     value: item,
     inputDisplay: (
-      <EuiFlexGroup gutterSize="s" alignItems="center">
+      <EuiFlexGroup
+        gutterSize="s"
+        alignItems="center"
+        data-test-subj={`workspaceForm-workspaceDetails-iconSelector-${item}`}
+      >
         <EuiFlexItem grow={false} key={item + '-1'}>
           <EuiIcon type={item.toLowerCase()} color={color} />
         </EuiFlexItem>
@@ -31,6 +35,11 @@ export const WorkspaceIconSelector = ({
     ),
   }));
   return (
-    <EuiSuperSelect options={options} valueOfSelected={value} onChange={(icon) => onChange(icon)} />
+    <EuiSuperSelect
+      data-test-subj="workspaceForm-workspaceDetails-iconSelector"
+      options={options}
+      valueOfSelected={value}
+      onChange={(icon) => onChange(icon)}
+    />
   );
 };
