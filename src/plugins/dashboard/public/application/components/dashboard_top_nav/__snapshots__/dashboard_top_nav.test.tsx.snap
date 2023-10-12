@@ -104,6 +104,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                 "catalogue": Object {},
                 "management": Object {},
                 "navLinks": Object {},
+                "workspaces": Object {},
               },
               "currentAppId$": Observable {
                 "_isScalar": false,
@@ -879,15 +880,6 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                 "thrownError": null,
               },
               "initialized$": BehaviorSubject {
-                "_isScalar": false,
-                "_value": false,
-                "closed": false,
-                "hasError": false,
-                "isStopped": false,
-                "observers": Array [],
-                "thrownError": null,
-              },
-              "workspaceEnabled$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": false,
                 "closed": false,
@@ -1068,6 +1060,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                 "catalogue": Object {},
                 "management": Object {},
                 "navLinks": Object {},
+                "workspaces": Object {},
               },
               "currentAppId$": Observable {
                 "_isScalar": false,
@@ -1843,15 +1836,6 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                 "thrownError": null,
               },
               "initialized$": BehaviorSubject {
-                "_isScalar": false,
-                "_value": false,
-                "closed": false,
-                "hasError": false,
-                "isStopped": false,
-                "observers": Array [],
-                "thrownError": null,
-              },
-              "workspaceEnabled$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": false,
                 "closed": false,
@@ -2032,6 +2016,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                 "catalogue": Object {},
                 "management": Object {},
                 "navLinks": Object {},
+                "workspaces": Object {},
               },
               "currentAppId$": Observable {
                 "_isScalar": false,
@@ -2807,15 +2792,6 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                 "thrownError": null,
               },
               "initialized$": BehaviorSubject {
-                "_isScalar": false,
-                "_value": false,
-                "closed": false,
-                "hasError": false,
-                "isStopped": false,
-                "observers": Array [],
-                "thrownError": null,
-              },
-              "workspaceEnabled$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": false,
                 "closed": false,
@@ -2996,6 +2972,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                 "catalogue": Object {},
                 "management": Object {},
                 "navLinks": Object {},
+                "workspaces": Object {},
               },
               "currentAppId$": Observable {
                 "_isScalar": false,
@@ -3771,15 +3748,6 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                 "thrownError": null,
               },
               "initialized$": BehaviorSubject {
-                "_isScalar": false,
-                "_value": false,
-                "closed": false,
-                "hasError": false,
-                "isStopped": false,
-                "observers": Array [],
-                "thrownError": null,
-              },
-              "workspaceEnabled$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": false,
                 "closed": false,
@@ -3960,6 +3928,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                 "catalogue": Object {},
                 "management": Object {},
                 "navLinks": Object {},
+                "workspaces": Object {},
               },
               "currentAppId$": Observable {
                 "_isScalar": false,
@@ -4735,15 +4704,6 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                 "thrownError": null,
               },
               "initialized$": BehaviorSubject {
-                "_isScalar": false,
-                "_value": false,
-                "closed": false,
-                "hasError": false,
-                "isStopped": false,
-                "observers": Array [],
-                "thrownError": null,
-              },
-              "workspaceEnabled$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": false,
                 "closed": false,
@@ -4924,6 +4884,7 @@ exports[`Dashboard top nav render with all components 1`] = `
                 "catalogue": Object {},
                 "management": Object {},
                 "navLinks": Object {},
+                "workspaces": Object {},
               },
               "currentAppId$": Observable {
                 "_isScalar": false,
@@ -5699,15 +5660,6 @@ exports[`Dashboard top nav render with all components 1`] = `
                 "thrownError": null,
               },
               "initialized$": BehaviorSubject {
-                "_isScalar": false,
-                "_value": false,
-                "closed": false,
-                "hasError": false,
-                "isStopped": false,
-                "observers": Array [],
-                "thrownError": null,
-              },
-              "workspaceEnabled$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": false,
                 "closed": false,
