@@ -7,6 +7,8 @@ import React from 'react';
 import { IntlProvider } from 'react-intl';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { WorkspaceFatalError } from './workspace_fatal_error';
+import { context } from '../../../../opensearch_dashboards_react/public';
+import { coreMock } from '../../../../../core/public/mocks';
 
 describe('<WorkspaceFatalError />', () => {
   it('render normally', async () => {
@@ -41,9 +43,18 @@ describe('<WorkspaceFatalError />', () => {
       get: () => 'http://localhost/',
       set: setHrefSpy,
     });
+    const coreStartMock = coreMock.createStart();
     const { getByText } = render(
       <IntlProvider locale="en">
-        <WorkspaceFatalError error="errorInCallout" />
+        <context.Provider
+          value={
+            {
+              services: coreStartMock,
+            } as any
+          }
+        >
+          <WorkspaceFatalError error="errorInCallout" />
+        </context.Provider>
       </IntlProvider>
     );
     fireEvent.click(getByText('Go back to home'));
