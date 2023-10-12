@@ -196,7 +196,7 @@ export class WorkspaceClient {
    * @property {array} options.fields
    * @returns A find result with workspaces matching the specified search.
    */
-  public list = (
+  public list(
     options?: WorkspaceFindOptions
   ): Promise<
     IResponse<{
@@ -205,13 +205,13 @@ export class WorkspaceClient {
       per_page: number;
       page: number;
     }>
-  > => {
+  > {
     const path = this.getPath('_list');
     return this.safeFetch(path, {
       method: 'POST',
       body: JSON.stringify(options || {}),
     });
-  };
+  }
 
   /**
    * Fetches a single workspace
@@ -219,7 +219,7 @@ export class WorkspaceClient {
    * @param {string} id
    * @returns The workspace for the given id.
    */
-  public async get(id: string): Promise<IResponse<WorkspaceAttribute>> {
+  public get(id: string): Promise<IResponse<WorkspaceAttribute>> {
     const path = this.getPath(id);
     return this.safeFetch(path, {
       method: 'GET',
