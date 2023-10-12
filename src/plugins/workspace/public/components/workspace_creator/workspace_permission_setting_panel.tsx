@@ -68,9 +68,7 @@ const generateWorkspacePermissionItemKey = (
     ...(item.type === 'group' ? [item.group] : []),
     ...(item.modes ?? []),
     index,
-  ]
-    .filter(Boolean)
-    .join('-');
+  ].join('-');
 
 interface WorkspacePermissionSettingInputProps {
   index: number;
