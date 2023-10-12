@@ -416,61 +416,61 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
           onClick={[Function]}
           type="button"
         />
+        <EuiCollapsibleNavGroup>
+          <div
+            className="euiCollapsibleNavGroup"
+            id="mockId"
+          >
+            <div
+              className="euiCollapsibleNavGroup__children"
+            >
+              <EuiFlexGroup>
+                <div
+                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                >
+                  <EuiFlexItem>
+                    <div
+                      className="euiFlexItem"
+                    >
+                      <EuiIcon
+                        size="l"
+                        type="logoOpenSearch"
+                      >
+                        <span
+                          data-euiicon-type="logoOpenSearch"
+                          size="l"
+                        />
+                      </EuiIcon>
+                    </div>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <div
+                      className="euiFlexItem"
+                    >
+                      <EuiText>
+                        <div
+                          className="euiText euiText--medium"
+                        >
+                          <strong>
+                             
+                            OpenSearch Dashboards
+                             
+                          </strong>
+                        </div>
+                      </EuiText>
+                    </div>
+                  </EuiFlexItem>
+                </div>
+              </EuiFlexGroup>
+            </div>
+          </div>
+        </EuiCollapsibleNavGroup>
         <EuiFlexItem
           className="eui-yScroll"
         >
           <div
             className="euiFlexItem eui-yScroll"
           >
-            <EuiCollapsibleNavGroup>
-              <div
-                className="euiCollapsibleNavGroup"
-                id="mockId"
-              >
-                <div
-                  className="euiCollapsibleNavGroup__children"
-                >
-                  <EuiFlexGroup>
-                    <div
-                      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
-                    >
-                      <EuiFlexItem>
-                        <div
-                          className="euiFlexItem"
-                        >
-                          <EuiIcon
-                            size="l"
-                            type="logoOpenSearch"
-                          >
-                            <span
-                              data-euiicon-type="logoOpenSearch"
-                              size="l"
-                            />
-                          </EuiIcon>
-                        </div>
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <div
-                          className="euiFlexItem"
-                        >
-                          <EuiText>
-                            <div
-                              className="euiText euiText--medium"
-                            >
-                              <strong>
-                                 
-                                OpenSearch Dashboards
-                                 
-                              </strong>
-                            </div>
-                          </EuiText>
-                        </div>
-                      </EuiFlexItem>
-                    </div>
-                  </EuiFlexGroup>
-                </div>
-              </div>
-            </EuiCollapsibleNavGroup>
             <EuiCollapsibleNavGroup
               data-test-opensearch-logo="clock"
               data-test-subj="collapsibleNavGroup-recentlyVisited"
@@ -2689,61 +2689,61 @@ exports[`CollapsibleNav renders the default nav 3`] = `
         data-test-subj="collapsibleNav"
         role={null}
       >
+        <EuiCollapsibleNavGroup>
+          <div
+            className="euiCollapsibleNavGroup"
+            id="mockId"
+          >
+            <div
+              className="euiCollapsibleNavGroup__children"
+            >
+              <EuiFlexGroup>
+                <div
+                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                >
+                  <EuiFlexItem>
+                    <div
+                      className="euiFlexItem"
+                    >
+                      <EuiIcon
+                        size="l"
+                        type="logoOpenSearch"
+                      >
+                        <span
+                          data-euiicon-type="logoOpenSearch"
+                          size="l"
+                        />
+                      </EuiIcon>
+                    </div>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <div
+                      className="euiFlexItem"
+                    >
+                      <EuiText>
+                        <div
+                          className="euiText euiText--medium"
+                        >
+                          <strong>
+                             
+                            OpenSearch Dashboards
+                             
+                          </strong>
+                        </div>
+                      </EuiText>
+                    </div>
+                  </EuiFlexItem>
+                </div>
+              </EuiFlexGroup>
+            </div>
+          </div>
+        </EuiCollapsibleNavGroup>
         <EuiFlexItem
           className="eui-yScroll"
         >
           <div
             className="euiFlexItem eui-yScroll"
           >
-            <EuiCollapsibleNavGroup>
-              <div
-                className="euiCollapsibleNavGroup"
-                id="mockId"
-              >
-                <div
-                  className="euiCollapsibleNavGroup__children"
-                >
-                  <EuiFlexGroup>
-                    <div
-                      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
-                    >
-                      <EuiFlexItem>
-                        <div
-                          className="euiFlexItem"
-                        >
-                          <EuiIcon
-                            size="l"
-                            type="logoOpenSearch"
-                          >
-                            <span
-                              data-euiicon-type="logoOpenSearch"
-                              size="l"
-                            />
-                          </EuiIcon>
-                        </div>
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <div
-                          className="euiFlexItem"
-                        >
-                          <EuiText>
-                            <div
-                              className="euiText euiText--medium"
-                            >
-                              <strong>
-                                 
-                                OpenSearch Dashboards
-                                 
-                              </strong>
-                            </div>
-                          </EuiText>
-                        </div>
-                      </EuiFlexItem>
-                    </div>
-                  </EuiFlexGroup>
-                </div>
-              </div>
-            </EuiCollapsibleNavGroup>
             <EuiCollapsibleNavGroup
               data-test-opensearch-logo="clock"
               data-test-subj="collapsibleNavGroup-recentlyVisited"
@@ -3399,61 +3399,61 @@ exports[`CollapsibleNav with custom branding renders the nav bar in dark mode 1`
           onClick={[Function]}
           type="button"
         />
+        <EuiCollapsibleNavGroup>
+          <div
+            className="euiCollapsibleNavGroup"
+            id="mockId"
+          >
+            <div
+              className="euiCollapsibleNavGroup__children"
+            >
+              <EuiFlexGroup>
+                <div
+                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                >
+                  <EuiFlexItem>
+                    <div
+                      className="euiFlexItem"
+                    >
+                      <EuiIcon
+                        size="l"
+                        type="logoOpenSearch"
+                      >
+                        <span
+                          data-euiicon-type="logoOpenSearch"
+                          size="l"
+                        />
+                      </EuiIcon>
+                    </div>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <div
+                      className="euiFlexItem"
+                    >
+                      <EuiText>
+                        <div
+                          className="euiText euiText--medium"
+                        >
+                          <strong>
+                             
+                            OpenSearch Dashboards
+                             
+                          </strong>
+                        </div>
+                      </EuiText>
+                    </div>
+                  </EuiFlexItem>
+                </div>
+              </EuiFlexGroup>
+            </div>
+          </div>
+        </EuiCollapsibleNavGroup>
         <EuiFlexItem
           className="eui-yScroll"
         >
           <div
             className="euiFlexItem eui-yScroll"
           >
-            <EuiCollapsibleNavGroup>
-              <div
-                className="euiCollapsibleNavGroup"
-                id="mockId"
-              >
-                <div
-                  className="euiCollapsibleNavGroup__children"
-                >
-                  <EuiFlexGroup>
-                    <div
-                      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
-                    >
-                      <EuiFlexItem>
-                        <div
-                          className="euiFlexItem"
-                        >
-                          <EuiIcon
-                            size="l"
-                            type="logoOpenSearch"
-                          >
-                            <span
-                              data-euiicon-type="logoOpenSearch"
-                              size="l"
-                            />
-                          </EuiIcon>
-                        </div>
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <div
-                          className="euiFlexItem"
-                        >
-                          <EuiText>
-                            <div
-                              className="euiText euiText--medium"
-                            >
-                              <strong>
-                                 
-                                OpenSearch Dashboards
-                                 
-                              </strong>
-                            </div>
-                          </EuiText>
-                        </div>
-                      </EuiFlexItem>
-                    </div>
-                  </EuiFlexGroup>
-                </div>
-              </div>
-            </EuiCollapsibleNavGroup>
             <EuiCollapsibleNavGroup
               data-test-opensearch-logo="clock"
               data-test-subj="collapsibleNavGroup-recentlyVisited"
@@ -4543,61 +4543,61 @@ exports[`CollapsibleNav with custom branding renders the nav bar in default mode
           onClick={[Function]}
           type="button"
         />
+        <EuiCollapsibleNavGroup>
+          <div
+            className="euiCollapsibleNavGroup"
+            id="mockId"
+          >
+            <div
+              className="euiCollapsibleNavGroup__children"
+            >
+              <EuiFlexGroup>
+                <div
+                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                >
+                  <EuiFlexItem>
+                    <div
+                      className="euiFlexItem"
+                    >
+                      <EuiIcon
+                        size="l"
+                        type="logoOpenSearch"
+                      >
+                        <span
+                          data-euiicon-type="logoOpenSearch"
+                          size="l"
+                        />
+                      </EuiIcon>
+                    </div>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <div
+                      className="euiFlexItem"
+                    >
+                      <EuiText>
+                        <div
+                          className="euiText euiText--medium"
+                        >
+                          <strong>
+                             
+                            OpenSearch Dashboards
+                             
+                          </strong>
+                        </div>
+                      </EuiText>
+                    </div>
+                  </EuiFlexItem>
+                </div>
+              </EuiFlexGroup>
+            </div>
+          </div>
+        </EuiCollapsibleNavGroup>
         <EuiFlexItem
           className="eui-yScroll"
         >
           <div
             className="euiFlexItem eui-yScroll"
           >
-            <EuiCollapsibleNavGroup>
-              <div
-                className="euiCollapsibleNavGroup"
-                id="mockId"
-              >
-                <div
-                  className="euiCollapsibleNavGroup__children"
-                >
-                  <EuiFlexGroup>
-                    <div
-                      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
-                    >
-                      <EuiFlexItem>
-                        <div
-                          className="euiFlexItem"
-                        >
-                          <EuiIcon
-                            size="l"
-                            type="logoOpenSearch"
-                          >
-                            <span
-                              data-euiicon-type="logoOpenSearch"
-                              size="l"
-                            />
-                          </EuiIcon>
-                        </div>
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <div
-                          className="euiFlexItem"
-                        >
-                          <EuiText>
-                            <div
-                              className="euiText euiText--medium"
-                            >
-                              <strong>
-                                 
-                                OpenSearch Dashboards
-                                 
-                              </strong>
-                            </div>
-                          </EuiText>
-                        </div>
-                      </EuiFlexItem>
-                    </div>
-                  </EuiFlexGroup>
-                </div>
-              </div>
-            </EuiCollapsibleNavGroup>
             <EuiCollapsibleNavGroup
               data-test-opensearch-logo="clock"
               data-test-subj="collapsibleNavGroup-recentlyVisited"
@@ -5680,61 +5680,61 @@ exports[`CollapsibleNav without custom branding renders the nav bar in dark mode
           onClick={[Function]}
           type="button"
         />
+        <EuiCollapsibleNavGroup>
+          <div
+            className="euiCollapsibleNavGroup"
+            id="mockId"
+          >
+            <div
+              className="euiCollapsibleNavGroup__children"
+            >
+              <EuiFlexGroup>
+                <div
+                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                >
+                  <EuiFlexItem>
+                    <div
+                      className="euiFlexItem"
+                    >
+                      <EuiIcon
+                        size="l"
+                        type="logoOpenSearch"
+                      >
+                        <span
+                          data-euiicon-type="logoOpenSearch"
+                          size="l"
+                        />
+                      </EuiIcon>
+                    </div>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <div
+                      className="euiFlexItem"
+                    >
+                      <EuiText>
+                        <div
+                          className="euiText euiText--medium"
+                        >
+                          <strong>
+                             
+                            OpenSearch Dashboards
+                             
+                          </strong>
+                        </div>
+                      </EuiText>
+                    </div>
+                  </EuiFlexItem>
+                </div>
+              </EuiFlexGroup>
+            </div>
+          </div>
+        </EuiCollapsibleNavGroup>
         <EuiFlexItem
           className="eui-yScroll"
         >
           <div
             className="euiFlexItem eui-yScroll"
           >
-            <EuiCollapsibleNavGroup>
-              <div
-                className="euiCollapsibleNavGroup"
-                id="mockId"
-              >
-                <div
-                  className="euiCollapsibleNavGroup__children"
-                >
-                  <EuiFlexGroup>
-                    <div
-                      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
-                    >
-                      <EuiFlexItem>
-                        <div
-                          className="euiFlexItem"
-                        >
-                          <EuiIcon
-                            size="l"
-                            type="logoOpenSearch"
-                          >
-                            <span
-                              data-euiicon-type="logoOpenSearch"
-                              size="l"
-                            />
-                          </EuiIcon>
-                        </div>
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <div
-                          className="euiFlexItem"
-                        >
-                          <EuiText>
-                            <div
-                              className="euiText euiText--medium"
-                            >
-                              <strong>
-                                 
-                                OpenSearch Dashboards
-                                 
-                              </strong>
-                            </div>
-                          </EuiText>
-                        </div>
-                      </EuiFlexItem>
-                    </div>
-                  </EuiFlexGroup>
-                </div>
-              </div>
-            </EuiCollapsibleNavGroup>
             <EuiCollapsibleNavGroup
               data-test-opensearch-logo="clock"
               data-test-subj="collapsibleNavGroup-recentlyVisited"
@@ -6813,61 +6813,61 @@ exports[`CollapsibleNav without custom branding renders the nav bar in default m
           onClick={[Function]}
           type="button"
         />
+        <EuiCollapsibleNavGroup>
+          <div
+            className="euiCollapsibleNavGroup"
+            id="mockId"
+          >
+            <div
+              className="euiCollapsibleNavGroup__children"
+            >
+              <EuiFlexGroup>
+                <div
+                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                >
+                  <EuiFlexItem>
+                    <div
+                      className="euiFlexItem"
+                    >
+                      <EuiIcon
+                        size="l"
+                        type="logoOpenSearch"
+                      >
+                        <span
+                          data-euiicon-type="logoOpenSearch"
+                          size="l"
+                        />
+                      </EuiIcon>
+                    </div>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <div
+                      className="euiFlexItem"
+                    >
+                      <EuiText>
+                        <div
+                          className="euiText euiText--medium"
+                        >
+                          <strong>
+                             
+                            OpenSearch Dashboards
+                             
+                          </strong>
+                        </div>
+                      </EuiText>
+                    </div>
+                  </EuiFlexItem>
+                </div>
+              </EuiFlexGroup>
+            </div>
+          </div>
+        </EuiCollapsibleNavGroup>
         <EuiFlexItem
           className="eui-yScroll"
         >
           <div
             className="euiFlexItem eui-yScroll"
           >
-            <EuiCollapsibleNavGroup>
-              <div
-                className="euiCollapsibleNavGroup"
-                id="mockId"
-              >
-                <div
-                  className="euiCollapsibleNavGroup__children"
-                >
-                  <EuiFlexGroup>
-                    <div
-                      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
-                    >
-                      <EuiFlexItem>
-                        <div
-                          className="euiFlexItem"
-                        >
-                          <EuiIcon
-                            size="l"
-                            type="logoOpenSearch"
-                          >
-                            <span
-                              data-euiicon-type="logoOpenSearch"
-                              size="l"
-                            />
-                          </EuiIcon>
-                        </div>
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <div
-                          className="euiFlexItem"
-                        >
-                          <EuiText>
-                            <div
-                              className="euiText euiText--medium"
-                            >
-                              <strong>
-                                 
-                                OpenSearch Dashboards
-                                 
-                              </strong>
-                            </div>
-                          </EuiText>
-                        </div>
-                      </EuiFlexItem>
-                    </div>
-                  </EuiFlexGroup>
-                </div>
-              </div>
-            </EuiCollapsibleNavGroup>
             <EuiCollapsibleNavGroup
               data-test-opensearch-logo="clock"
               data-test-subj="collapsibleNavGroup-recentlyVisited"

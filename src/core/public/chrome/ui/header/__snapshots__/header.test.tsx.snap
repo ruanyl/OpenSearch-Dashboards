@@ -6154,61 +6154,61 @@ exports[`Header handles visibility and lock changes 1`] = `
             data-test-subj="collapsibleNav"
             role={null}
           >
+            <EuiCollapsibleNavGroup>
+              <div
+                className="euiCollapsibleNavGroup"
+                id="mockId"
+              >
+                <div
+                  className="euiCollapsibleNavGroup__children"
+                >
+                  <EuiFlexGroup>
+                    <div
+                      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    >
+                      <EuiFlexItem>
+                        <div
+                          className="euiFlexItem"
+                        >
+                          <EuiIcon
+                            size="l"
+                            type="logoOpenSearch"
+                          >
+                            <span
+                              data-euiicon-type="logoOpenSearch"
+                              size="l"
+                            />
+                          </EuiIcon>
+                        </div>
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <div
+                          className="euiFlexItem"
+                        >
+                          <EuiText>
+                            <div
+                              className="euiText euiText--medium"
+                            >
+                              <strong>
+                                 
+                                OpenSearch Dashboards
+                                 
+                              </strong>
+                            </div>
+                          </EuiText>
+                        </div>
+                      </EuiFlexItem>
+                    </div>
+                  </EuiFlexGroup>
+                </div>
+              </div>
+            </EuiCollapsibleNavGroup>
             <EuiFlexItem
               className="eui-yScroll"
             >
               <div
                 className="euiFlexItem eui-yScroll"
               >
-                <EuiCollapsibleNavGroup>
-                  <div
-                    className="euiCollapsibleNavGroup"
-                    id="mockId"
-                  >
-                    <div
-                      className="euiCollapsibleNavGroup__children"
-                    >
-                      <EuiFlexGroup>
-                        <div
-                          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
-                        >
-                          <EuiFlexItem>
-                            <div
-                              className="euiFlexItem"
-                            >
-                              <EuiIcon
-                                size="l"
-                                type="logoOpenSearch"
-                              >
-                                <span
-                                  data-euiicon-type="logoOpenSearch"
-                                  size="l"
-                                />
-                              </EuiIcon>
-                            </div>
-                          </EuiFlexItem>
-                          <EuiFlexItem>
-                            <div
-                              className="euiFlexItem"
-                            >
-                              <EuiText>
-                                <div
-                                  className="euiText euiText--medium"
-                                >
-                                  <strong>
-                                     
-                                    OpenSearch Dashboards
-                                     
-                                  </strong>
-                                </div>
-                              </EuiText>
-                            </div>
-                          </EuiFlexItem>
-                        </div>
-                      </EuiFlexGroup>
-                    </div>
-                  </div>
-                </EuiCollapsibleNavGroup>
                 <EuiCollapsibleNavGroup
                   data-test-opensearch-logo="clock"
                   data-test-subj="collapsibleNavGroup-recentlyVisited"

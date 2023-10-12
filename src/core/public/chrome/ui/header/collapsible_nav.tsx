@@ -204,24 +204,23 @@ export function CollapsibleNav({
       onClose={closeNav}
       outsideClickCloses={false}
     >
+      {collapsibleNavHeaderRender ? (
+        collapsibleNavHeaderRender()
+      ) : (
+        <EuiCollapsibleNavGroup>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiIcon type="logoOpenSearch" size="l" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText>
+                <strong> {defaultHeaderName} </strong>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiCollapsibleNavGroup>
+      )}
       <EuiFlexItem className="eui-yScroll">
-        {collapsibleNavHeaderRender ? (
-          collapsibleNavHeaderRender()
-        ) : (
-          <EuiCollapsibleNavGroup>
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiIcon type="logoOpenSearch" size="l" />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText>
-                  <strong> {defaultHeaderName} </strong>
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiCollapsibleNavGroup>
-        )}
-
         {/* merged NavLinks */}
         {mergedNavLinks.map((item, i) => {
           if (typeof item === 'string') {
