@@ -34,10 +34,9 @@ export const formatUrlWithWorkspaceId = (url: string, workspaceId: string, baseP
     newUrl.pathname = cleanWorkspaceId(newUrl.pathname);
   }
 
-  newUrl.pathname =
-    basePath?.prepend(newUrl.pathname, {
-      withoutWorkspace: true,
-    }) || '';
+  newUrl.pathname = basePath.prepend(newUrl.pathname, {
+    withoutWorkspace: true,
+  });
 
   return newUrl.toString();
 };
