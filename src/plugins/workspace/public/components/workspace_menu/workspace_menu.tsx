@@ -132,18 +132,7 @@ export const WorkspaceMenu = ({ basePath, getUrlForApp, workspaces }: Props) => 
 
   const currentWorkspaceButton = (
     <EuiCollapsibleNavGroup
-      title={
-        <h3
-          style={{
-            width: '202px',
-            whiteSpace: 'nowrap',
-            textOverflow: 'ellipsis',
-            overflow: 'hidden',
-          }}
-        >
-          {currentWorkspaceName}
-        </h3>
-      }
+      title={currentWorkspaceName}
       iconType={currentWorkspace?.icon ?? 'users'}
       isCollapsible={true}
       initialIsOpen={false}
@@ -191,7 +180,7 @@ export const WorkspaceMenu = ({ basePath, getUrlForApp, workspaces }: Props) => 
 
   return (
     <EuiPopover
-      id="contextMenuExample"
+      id="workspaceContextMenu"
       display="block"
       button={currentWorkspaceButton}
       isOpen={isPopoverOpen}
