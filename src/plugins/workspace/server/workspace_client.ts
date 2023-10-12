@@ -196,8 +196,9 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
           }),
         };
       }
-      await savedObjectClient.delete(WORKSPACE_TYPE, id);
       await savedObjectClient.deleteByWorkspace(id);
+      // delete workspace itself at last, deleteByWorkspace depends on the workspace to do permission check
+      await savedObjectClient.delete(WORKSPACE_TYPE, id);
       return {
         success: true,
         result: true,

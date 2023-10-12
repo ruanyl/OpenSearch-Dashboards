@@ -25,6 +25,7 @@ describe('workspace service', () => {
           workspace: {
             enabled: true,
           },
+          migrations: { skip: false },
         },
       },
     });
@@ -120,6 +121,16 @@ describe('workspace service', () => {
         .expect(200);
 
       await osdTestServer.request
+        .post(root, `/api/saved_objects/index-pattern/logstash-*`)
+        .send({
+          attributes: {
+            title: 'logstash-*',
+          },
+          workspaces: [result.body.result.id],
+        })
+        .expect(200);
+
+      await osdTestServer.request
         .delete(root, `/api/workspaces/${result.body.result.id}`)
         .expect(200);
 
@@ -129,6 +140,11 @@ describe('workspace service', () => {
       );
 
       expect(getResult.body.success).toEqual(false);
+
+      // saved objects been deleted
+      await osdTestServer.request
+        .get(root, `/api/saved_objects/index-pattern/logstash-*`)
+        .expect(404);
     });
     it('delete reserved workspace', async () => {
       const reservedWorkspace: WorkspaceAttribute = { ...testWorkspace, reserved: true };
