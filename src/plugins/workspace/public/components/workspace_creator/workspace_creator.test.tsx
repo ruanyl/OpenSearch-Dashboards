@@ -124,7 +124,6 @@ describe('WorkspaceCreator', () => {
       target: { value: 'test workspace name' },
     });
     fireEvent.click(getByTestId('workspaceForm-workspaceFeatureVisibility-app1'));
-    expect(document.body).toMatchSnapshot();
     fireEvent.click(getByText('category1 (0/2)'));
     fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
     expect(workspaceClientCreate).toHaveBeenCalled();
@@ -151,12 +150,23 @@ describe('WorkspaceCreator', () => {
     fireEvent.click(getByTestId('workspaceForm-permissionSettingPanel-addNew'));
     const userTypeSelection = getByTestId('workspaceForm-permissionSettingPanel-0-userType');
     const userIdInput = getByTestId('workspaceForm-permissionSettingPanel-0-userId');
-    fireEvent.change(userTypeSelection, { target: { value: 'user' } });
-    fireEvent.change(userIdInput, { target: { value: 'test user id' } });
+    fireEvent.click(userTypeSelection);
+    fireEvent.click(getByText('User'));
+    fireEvent.click(userIdInput);
+    fireEvent.input(getByTestId('comboBoxSearchInput'), {
+      target: { value: 'test user id' },
+    });
+    fireEvent.blur(getByTestId('comboBoxSearchInput'));
     fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
     expect(workspaceClientCreate).toHaveBeenCalled();
     const workspaceCreateProps: WorkspaceFormSubmitData = workspaceClientCreate.mock.calls[0][0];
-    expect(workspaceCreateProps).toBe({});
+    const permissionProp = workspaceCreateProps.permissions[0] as any;
+    expect(permissionProp.type).toBe('user');
+    expect(permissionProp.userId).toBe('test user id');
+    await waitFor(() => {
+      expect(notificationToastsAddSuccess).toHaveBeenCalled();
+    });
+    expect(notificationToastsAddDanger).not.toHaveBeenCalled();
   });
 
   it('create workspace failed ', async () => {
