@@ -503,11 +503,11 @@ export const WorkspaceForm = ({
   const usersAndPermissionsTitle = i18n.translate('workspace.form.usersAndPermissions.title', {
     defaultMessage: 'Users & Permissions',
   });
-  const libraryCategoryId = i18n.translate('core.ui.libraryNavList.label', {
+  const libraryCategoryLabel = i18n.translate('core.ui.libraryNavList.label', {
     defaultMessage: 'Library',
   });
   const categoryToDescription: { [key: string]: string } = {
-    [libraryCategoryId]: i18n.translate(
+    [libraryCategoryLabel]: i18n.translate(
       'workspace.form.featureVisibility.libraryCategory.Description',
       {
         defaultMessage: 'Workspace-owned library items',
