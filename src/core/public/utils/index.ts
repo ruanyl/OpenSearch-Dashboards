@@ -33,9 +33,9 @@ export { Sha256 } from './crypto';
 export { MountWrapper, mountReactNode } from './mount';
 export {
   WORKSPACE_PATH_PREFIX,
-  PUBLIC_WORKSPACE_ID,
-  MANAGEMENT_WORKSPACE_ID,
   WORKSPACE_TYPE,
   formatUrlWithWorkspaceId,
   getWorkspaceIdFromUrl,
+  PUBLIC_WORKSPACE_ID,
+  MANAGEMENT_WORKSPACE_ID,
 } from '../../utils';
