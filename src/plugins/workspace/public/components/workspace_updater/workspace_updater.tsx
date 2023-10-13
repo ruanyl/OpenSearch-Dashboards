@@ -160,7 +160,7 @@ export const WorkspaceUpdater = () => {
       <EuiPageBody>
         <EuiPageHeader
           restrictWidth
-          pageTitle={(currentWorkspace?.name ?? 'Workspace') + ' details'}
+          pageTitle={`${currentWorkspace?.name ?? 'Workspace'} details`}
           rightSideItems={
             hideDeleteButton
               ? []
