@@ -740,9 +740,9 @@ export class SavedObjectsRepository {
   }
 
   /**
-   * Deletes all objects from the provided workspace.
+   * Deletes all objects from the provided workspace. It used when deleting a workspace.
    *
-   * @param {string} workspace - workspace id
+   * @param {string} workspace
    * @param options SavedObjectsDeleteByWorkspaceOptions
    * @returns {promise} - { took, timed_out, total, deleted, batches, version_conflicts, noops, retries, failures }
    */
