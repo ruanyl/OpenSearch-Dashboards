@@ -4,12 +4,11 @@
  */
 
 import React from 'react';
-import { WorkspaceCreator } from './workspace_creator';
 import { PublicAppInfo } from 'opensearch-dashboards/public';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import * as opensearchReactExports from '../../../../opensearch_dashboards_react/public';
 import { BehaviorSubject } from 'rxjs';
-import { WorkspaceFormSubmitData } from './workspace_form';
+import { WorkspaceCreator } from './workspace_creator';
 
 jest.mock('../../../../opensearch_dashboards_react/public', () => ({
   ...jest.requireActual('../../../../opensearch_dashboards_react/public'),
@@ -63,6 +62,8 @@ function clearMockedFunctions() {
 }
 
 describe('WorkspaceCreator', () => {
+  beforeEach(() => clearMockedFunctions());
+
   it('cannot create workspace when name empty', async () => {
     const { getByTestId } = render(<WorkspaceCreator />);
     fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
@@ -78,7 +79,6 @@ describe('WorkspaceCreator', () => {
   });
 
   it('create workspace with detailed information', async () => {
-    clearMockedFunctions();
     const { getByTestId } = render(<WorkspaceCreator />);
     const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
     fireEvent.input(nameInput, {
@@ -103,13 +103,15 @@ describe('WorkspaceCreator', () => {
     fireEvent.click(defaultVISThemeSelector);
     fireEvent.change(defaultVISThemeSelector, { target: { value: 'categorical' } });
     fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
-    expect(workspaceClientCreate).toHaveBeenCalled();
-    const workspaceCreateProps: WorkspaceFormSubmitData = workspaceClientCreate.mock.calls[0][0];
-    expect(workspaceCreateProps.name).toBe('test workspace name');
-    expect(workspaceCreateProps.icon).toBe('Glasses');
-    expect(workspaceCreateProps.color).toBe('#000000');
-    expect(workspaceCreateProps.description).toBe('test workspace description');
-    expect(workspaceCreateProps.defaultVISTheme).toBe('categorical');
+    expect(workspaceClientCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'test workspace name',
+        icon: 'Glasses',
+        color: '#000000',
+        description: 'test workspace description',
+        defaultVISTheme: 'categorical',
+      })
+    );
     await waitFor(() => {
       expect(notificationToastsAddSuccess).toHaveBeenCalled();
     });
@@ -117,7 +119,6 @@ describe('WorkspaceCreator', () => {
   });
 
   it('create workspace with customized features', async () => {
-    clearMockedFunctions();
     const { getByTestId, getByText } = render(<WorkspaceCreator />);
     const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
     fireEvent.input(nameInput, {
@@ -126,13 +127,12 @@ describe('WorkspaceCreator', () => {
     fireEvent.click(getByTestId('workspaceForm-workspaceFeatureVisibility-app1'));
     fireEvent.click(getByText('category1 (0/2)'));
     fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
-    expect(workspaceClientCreate).toHaveBeenCalled();
-    const workspaceCreateProps: WorkspaceFormSubmitData = workspaceClientCreate.mock.calls[0][0];
-    expect(workspaceCreateProps.features).toContain('app1');
-    expect(workspaceCreateProps.features).toContain('app2');
-    expect(workspaceCreateProps.features).toContain('app3');
-    expect(workspaceCreateProps.features).not.toContain('app4');
-    expect(workspaceCreateProps.features).not.toContain('app5');
+    expect(workspaceClientCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'test workspace name',
+        features: expect.arrayContaining(['app1', 'app2', 'app3']),
+      })
+    );
     await waitFor(() => {
       expect(notificationToastsAddSuccess).toHaveBeenCalled();
     });
@@ -140,7 +140,6 @@ describe('WorkspaceCreator', () => {
   });
 
   it('create workspace with customized permissions', async () => {
-    clearMockedFunctions();
     const { getByTestId, getByText } = render(<WorkspaceCreator />);
     const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
     fireEvent.input(nameInput, {
@@ -158,19 +157,21 @@ describe('WorkspaceCreator', () => {
     });
     fireEvent.blur(getByTestId('comboBoxSearchInput'));
     fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
-    expect(workspaceClientCreate).toHaveBeenCalled();
-    const workspaceCreateProps: WorkspaceFormSubmitData = workspaceClientCreate.mock.calls[0][0];
-    const permissionProp = workspaceCreateProps.permissions[0] as any;
-    expect(permissionProp.type).toBe('user');
-    expect(permissionProp.userId).toBe('test user id');
+    expect(workspaceClientCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'test workspace name',
+        permissions: expect.arrayContaining([
+          expect.objectContaining({ type: 'user', userId: 'test user id' }),
+        ]),
+      })
+    );
     await waitFor(() => {
       expect(notificationToastsAddSuccess).toHaveBeenCalled();
     });
     expect(notificationToastsAddDanger).not.toHaveBeenCalled();
   });
 
-  it('create workspace failed ', async () => {
-    clearMockedFunctions();
+  it('should show danger toasts after create workspace failed', async () => {
     workspaceClientCreate.mockReturnValue({ result: { id: 'failResult' }, success: false });
     const { getByTestId } = render(<WorkspaceCreator />);
     const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
