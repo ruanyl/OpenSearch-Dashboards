@@ -166,29 +166,29 @@ const WorkspacePermissionSettingInput = ({
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="l">
-      <EuiFlexItem grow={3}>
+      <EuiFlexItem grow={false}>
         <EuiSuperSelect
-          fullWidth
           options={permissionTypeOptions}
           valueOfSelected={type}
           onChange={handleTypeChange}
           placeholder="User Type"
+          style={{ width: 200 }}
           data-test-subj={`workspaceForm-permissionSettingPanel-${index}-userType`}
         />
       </EuiFlexItem>
-      <EuiFlexItem grow={3}>
+      <EuiFlexItem>
         <EuiComboBox
-          fullWidth
           isDisabled={!type}
           singleSelection
           selectedOptions={groupOrUserIdSelectedOptions}
           onCreateOption={handleGroupOrUserIdCreate}
           onChange={handleGroupOrUserIdChange}
           placeholder="Select"
+          style={{ width: 200 }}
           data-test-subj={`workspaceForm-permissionSettingPanel-${index}-userId`}
         />
       </EuiFlexItem>
-      <EuiFlexItem grow={1}>
+      <EuiFlexItem grow={false}>
         <EuiButtonGroup
           type="single"
           isDisabled={!deletable}
@@ -198,7 +198,7 @@ const WorkspacePermissionSettingInput = ({
           onChange={handlePermissionModeOptionChange}
         />
       </EuiFlexItem>
-      <EuiFlexItem grow={1}>
+      <EuiFlexItem grow={false}>
         <EuiButton
           color={'text'}
           onClick={handleDelete}
