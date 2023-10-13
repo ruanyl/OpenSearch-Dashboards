@@ -46,7 +46,7 @@ export const WorkspaceUpdater = () => {
     services: { application, workspaces, notifications, http, workspaceClient },
   } = useOpenSearchDashboards<{ workspaceClient: WorkspaceClient }>();
 
-  const isPermissionEnabld = application?.capabilities.workspaces.permissionEnabled;
+  const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
 
   const currentWorkspace = useObservable(workspaces ? workspaces.currentWorkspace$ : of(null));
   const hideDeleteButton = !!currentWorkspace?.reserved; // hide delete button for reserved workspace
@@ -193,7 +193,7 @@ export const WorkspaceUpdater = () => {
               onSubmit={handleWorkspaceFormSubmit}
               defaultValues={currentWorkspaceFormData}
               opType={WORKSPACE_OP_TYPE_UPDATE}
-              permissionEnabld={isPermissionEnabld}
+              permissionEnabled={isPermissionEnabled}
             />
           )}
         </EuiPageContent>
