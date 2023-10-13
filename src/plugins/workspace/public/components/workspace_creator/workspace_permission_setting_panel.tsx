@@ -321,7 +321,7 @@ export const WorkspacePermissionSettingPanel = ({
   return (
     <div>
       <EuiText>User / User Group / Role</EuiText>
-      <EuiSpacer size={'s'} />
+      <EuiSpacer size="s" />
       {transformedValue?.map((item, index) => (
         <React.Fragment key={generateWorkspacePermissionItemKey(item, index)}>
           <EuiFormRow isInvalid={!!errors?.[index]} error={errors?.[index]}>
