@@ -200,7 +200,7 @@ const WorkspacePermissionSettingInput = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButton
-          color={'text'}
+          color="text"
           onClick={handleDelete}
           isDisabled={!deletable}
           aria-label="Delete permission setting"
