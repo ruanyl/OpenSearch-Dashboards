@@ -6,7 +6,6 @@
 import React, { useCallback, useState, FormEventHandler, useRef, useMemo, useEffect } from 'react';
 import { groupBy } from 'lodash';
 import {
-  EuiBottomBar,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
@@ -15,8 +14,6 @@ import {
   EuiFieldText,
   EuiSelect,
   EuiText,
-  EuiButton,
-  EuiButtonEmpty,
   EuiFlexItem,
   htmlIdGenerator,
   EuiCheckbox,
@@ -29,7 +26,6 @@ import {
   EuiHorizontalRule,
   EuiFlexGroup,
   EuiPageHeader,
-  EuiConfirmModal,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import {
@@ -40,18 +36,14 @@ import {
   MANAGEMENT_WORKSPACE_ID,
 } from '../../../../../core/public';
 import { useApplications } from '../../hooks';
-import {
-  WORKSPACE_OP_TYPE_CREATE,
-  WORKSPACE_OP_TYPE_UPDATE,
-  DEFAULT_CHECKED_FEATURES_IDS,
-  WORKSPACE_LIST_APP_ID,
-} from '../../../common/constants';
+import { DEFAULT_CHECKED_FEATURES_IDS } from '../../../common/constants';
 import {
   isFeatureDependBySelectedFeatures,
   getFinalFeatureIdsByDependency,
   generateFeatureDependencyMap,
 } from '../utils/feature';
-
+import { WorkspaceBottomBar } from './workspace_bottom_bar';
+import { WorkspaceCancelModal } from './workspace_cancel_modal';
 import { WorkspaceIconSelector } from './workspace_icon_selector';
 import {
   WorkspacePermissionSetting,
@@ -414,86 +406,6 @@ export const WorkspaceForm = ({
   const closeCancelModal = () => setIsCancelModalVisible(false);
   const showCancelModal = () => setIsCancelModalVisible(true);
 
-  const cancelModal = (
-    <EuiConfirmModal
-      data-test-subj="workspaceForm-cancelModal"
-      title={i18n.translate('workspace.form.cancelModal.title', {
-        defaultMessage: 'Discard changes?',
-      })}
-      onCancel={closeCancelModal}
-      onConfirm={() => application?.navigateToApp(WORKSPACE_LIST_APP_ID)}
-      cancelButtonText={i18n.translate('workspace.form.cancelButtonText.', {
-        defaultMessage: 'Continue editing',
-      })}
-      confirmButtonText={i18n.translate('workspace.form.confirmButtonText.', {
-        defaultMessage: 'Discard changes',
-      })}
-      buttonColor="danger"
-      defaultFocusedButton="confirm"
-    >
-      {i18n.translate('workspace.form.cancelModal.body', {
-        defaultMessage: 'This will discard all changes. Are you sure?',
-      })}
-    </EuiConfirmModal>
-  );
-
-  // Number of saved changes will be implemented in workspace update page PR
-  const bottomBar = (
-    <div>
-      <EuiSpacer size="xl" />
-      <EuiSpacer size="xl" />
-      <EuiBottomBar>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s">
-              {opType === WORKSPACE_OP_TYPE_UPDATE && (
-                <EuiText textAlign="left">
-                  {i18n.translate('workspace.form.bottomBar.unsavedChanges', {
-                    defaultMessage: '1 Unsaved change(s)',
-                  })}
-                </EuiText>
-              )}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="m">
-              <EuiButtonEmpty
-                color="ghost"
-                onClick={showCancelModal}
-                data-test-subj="workspaceForm-bottomBar-cancelButton"
-              >
-                {i18n.translate('workspace.form.bottomBar.cancel', {
-                  defaultMessage: 'Cancel',
-                })}
-              </EuiButtonEmpty>
-              <EuiSpacer />
-              {opType === WORKSPACE_OP_TYPE_CREATE && (
-                <EuiButton
-                  fill
-                  type="submit"
-                  color="primary"
-                  form={formIdRef.current}
-                  data-test-subj="workspaceForm-bottomBar-createButton"
-                >
-                  {i18n.translate('workspace.form.bottomBar.createWorkspace', {
-                    defaultMessage: 'Create workspace',
-                  })}
-                </EuiButton>
-              )}
-              {opType === WORKSPACE_OP_TYPE_UPDATE && (
-                <EuiButton form={formIdRef.current} type="submit" fill color="primary">
-                  {i18n.translate('workspace.form.bottomBar.saveChanges', {
-                    defaultMessage: 'Save changes',
-                  })}
-                </EuiButton>
-              )}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiBottomBar>
-    </div>
-  );
-
   const workspaceDetailsTitle = i18n.translate('workspace.form.workspaceDetails.title', {
     defaultMessage: 'Workspace Details',
   });
@@ -733,8 +645,16 @@ export const WorkspaceForm = ({
           />
         </EuiPanel>
       )}
-      {bottomBar}
-      {isCancelModalVisible && cancelModal}
+      <WorkspaceBottomBar
+        opType={opType}
+        showCancelModal={showCancelModal}
+        formId={formIdRef.current}
+      />
+      <WorkspaceCancelModal
+        application={application}
+        closeCancelModal={closeCancelModal}
+        visible={isCancelModalVisible}
+      />
     </EuiForm>
   );
 };
