@@ -7,6 +7,8 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSuperSelect, EuiText } from '@elastic/eui';
 
+const icons = ['Glasses', 'Search', 'Bell', 'Package'];
+
 export const WorkspaceIconSelector = ({
   color,
   value,
@@ -16,7 +18,6 @@ export const WorkspaceIconSelector = ({
   value?: string;
   onChange: (value: string) => void;
 }) => {
-  const icons = ['Glasses', 'Search', 'Bell', 'Package'];
   const options = icons.map((item) => ({
     value: item,
     inputDisplay: (
