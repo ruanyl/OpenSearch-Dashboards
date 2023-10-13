@@ -128,6 +128,7 @@ export class HomePublicPlugin
           injectedMetadata: coreStart.injectedMetadata,
           dataSource,
           sectionTypes: this.sectionTypeService,
+          workspaces: coreStart.workspaces,
         });
         coreStart.chrome.docTitle.change(
           i18n.translate('home.pageTitle', { defaultMessage: 'Home' })
