@@ -109,7 +109,7 @@ const WorkspacePermissionSettingInput = ({
     [group, userId]
   );
 
-  // default permission mode id admin
+  // default permission mode is read
   const permissionModesSelectedId =
     useMemo(() => {
       for (const key in optionIdToWorkspacePermissionModesMap) {
@@ -117,7 +117,7 @@ const WorkspacePermissionSettingInput = ({
           return key;
         }
       }
-    }, [modes]) ?? PermissionModeId.Admin;
+    }, [modes]) ?? PermissionModeId.Read;
 
   const handleTypeChange = useCallback(
     (newType: 'user' | 'group') => {
@@ -268,7 +268,7 @@ export const WorkspacePermissionSettingPanel = ({
   const handleAddNewOne = useCallback(() => {
     onChange?.([
       ...(transformedValue ?? []),
-      { modes: optionIdToWorkspacePermissionModesMap[PermissionModeId.Admin] },
+      { modes: optionIdToWorkspacePermissionModesMap[PermissionModeId.Read] },
     ]);
   }, [onChange, transformedValue]);
 
