@@ -25,10 +25,10 @@ export const WorkspaceIconSelector = ({
         alignItems="center"
         data-test-subj={`workspaceForm-workspaceDetails-iconSelector-${item}`}
       >
-        <EuiFlexItem grow={false} key={item + '-1'}>
+        <EuiFlexItem grow={false}>
           <EuiIcon type={item.toLowerCase()} color={color} />
         </EuiFlexItem>
-        <EuiFlexItem key={item + '-2'}>
+        <EuiFlexItem>
           <EuiText color={'subdued'}>{item}</EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
