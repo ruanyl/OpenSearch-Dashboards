@@ -3,12 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { Observable, Subscriber } from 'rxjs';
 import { waitFor } from '@testing-library/dom';
 import { workspaceClientMock, WorkspaceClientMock } from './workspace_client.mock';
 import { applicationServiceMock, chromeServiceMock, coreMock } from '../../../core/public/mocks';
 import { WorkspacePlugin } from './plugin';
 import { WORKSPACE_FATAL_ERROR_APP_ID, WORKSPACE_OVERVIEW_APP_ID } from '../common/constants';
-import { Observable, Subscriber } from 'rxjs';
+import { savedObjectsManagementPluginMock } from '../../saved_objects_management/public/mocks';
 
 describe('Workspace plugin', () => {
   beforeEach(() => {
@@ -18,8 +19,14 @@ describe('Workspace plugin', () => {
   it('#setup', async () => {
     const setupMock = coreMock.createSetup();
     const workspacePlugin = new WorkspacePlugin();
-    await workspacePlugin.setup(setupMock);
-    expect(setupMock.application.register).toBeCalledTimes(1);
+    await workspacePlugin.setup(
+      {
+        ...setupMock,
+        chrome: chromeServiceMock.createSetupContract(),
+      },
+      { savedObjectsManagement: savedObjectsManagementPluginMock.createSetupContract() }
+    );
+    expect(setupMock.application.register).toBeCalledTimes(5);
     expect(WorkspaceClientMock).toBeCalledTimes(1);
     expect(workspaceClientMock.enterWorkspace).toBeCalledTimes(0);
   });
@@ -53,8 +60,14 @@ describe('Workspace plugin', () => {
     });
 
     const workspacePlugin = new WorkspacePlugin();
-    await workspacePlugin.setup(setupMock);
-    expect(setupMock.application.register).toBeCalledTimes(1);
+    await workspacePlugin.setup(
+      {
+        ...setupMock,
+        chrome: chromeServiceMock.createSetupContract(),
+      },
+      { savedObjectsManagement: savedObjectsManagementPluginMock.createSetupContract() }
+    );
+    expect(setupMock.application.register).toBeCalledTimes(5);
     expect(WorkspaceClientMock).toBeCalledTimes(1);
     expect(workspaceClientMock.enterWorkspace).toBeCalledWith('workspaceId');
     expect(setupMock.getStartServices).toBeCalledTimes(1);
@@ -107,7 +120,13 @@ describe('Workspace plugin', () => {
     });
 
     const workspacePlugin = new WorkspacePlugin();
-    await workspacePlugin.setup(setupMock);
+    await workspacePlugin.setup(
+      {
+        ...setupMock,
+        chrome: chromeServiceMock.createSetupContract(),
+      },
+      { savedObjectsManagement: savedObjectsManagementPluginMock.createSetupContract() }
+    );
     currentAppIdSubscriber?.next(WORKSPACE_FATAL_ERROR_APP_ID);
     expect(applicationStartMock.navigateToApp).toBeCalledWith(WORKSPACE_OVERVIEW_APP_ID);
     windowSpy.mockRestore();
