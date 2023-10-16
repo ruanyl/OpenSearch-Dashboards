@@ -43,7 +43,6 @@ import {
   generateFeatureDependencyMap,
 } from '../utils/feature';
 import { WorkspaceBottomBar } from './workspace_bottom_bar';
-import { WorkspaceCancelModal } from './workspace_cancel_modal';
 import { WorkspaceIconSelector } from './workspace_icon_selector';
 import {
   WorkspacePermissionSetting,
@@ -130,7 +129,6 @@ export const WorkspaceForm = ({
   const [defaultVISTheme, setDefaultVISTheme] = useState(defaultValues?.defaultVISTheme);
   const isEditingManagementWorkspace = defaultValues?.id === MANAGEMENT_WORKSPACE_ID;
   const [tabFeatureSelected, setTabFeatureSelected] = useState(!isEditingManagementWorkspace);
-  const [isCancelModalVisible, setIsCancelModalVisible] = useState(false);
 
   // The matched feature id list based on original feature config,
   // the feature category will be expanded to list of feature ids
@@ -403,9 +401,6 @@ export const WorkspaceForm = ({
     setDefaultVISTheme(e.target.value);
   };
 
-  const closeCancelModal = () => setIsCancelModalVisible(false);
-  const showCancelModal = () => setIsCancelModalVisible(true);
-
   const workspaceDetailsTitle = i18n.translate('workspace.form.workspaceDetails.title', {
     defaultMessage: 'Workspace Details',
   });
@@ -645,16 +640,7 @@ export const WorkspaceForm = ({
           />
         </EuiPanel>
       )}
-      <WorkspaceBottomBar
-        opType={opType}
-        showCancelModal={showCancelModal}
-        formId={formIdRef.current}
-      />
-      <WorkspaceCancelModal
-        application={application}
-        closeCancelModal={closeCancelModal}
-        visible={isCancelModalVisible}
-      />
+      <WorkspaceBottomBar opType={opType} formId={formIdRef.current} application={application} />
     </EuiForm>
   );
 };

@@ -13,21 +13,23 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import React from 'react';
+import React, { useState } from 'react';
+import { ApplicationStart } from 'opensearch-dashboards/public';
 import { WORKSPACE_OP_TYPE_CREATE, WORKSPACE_OP_TYPE_UPDATE } from '../../../common/constants';
+import { WorkspaceCancelModal } from './workspace_cancel_modal';
 
 interface WorkspaceBottomBarProps {
   formId: string;
   opType?: string;
-  showCancelModal: () => void;
+  application: ApplicationStart;
 }
 
 // Number of saved changes will be implemented in workspace update page PR
-export const WorkspaceBottomBar = ({
-  formId,
-  opType,
-  showCancelModal,
-}: WorkspaceBottomBarProps) => {
+export const WorkspaceBottomBar = ({ formId, opType, application }: WorkspaceBottomBarProps) => {
+  const [isCancelModalVisible, setIsCancelModalVisible] = useState(false);
+  const closeCancelModal = () => setIsCancelModalVisible(false);
+  const showCancelModal = () => setIsCancelModalVisible(true);
+
   return (
     <div>
       <EuiSpacer size="xl" />
@@ -81,6 +83,11 @@ export const WorkspaceBottomBar = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiBottomBar>
+      <WorkspaceCancelModal
+        application={application}
+        visible={isCancelModalVisible}
+        closeCancelModal={closeCancelModal}
+      />
     </div>
   );
 };
