@@ -50,6 +50,11 @@ import {
 } from './workspace_permission_setting_panel';
 import { featureMatchesConfig } from '../../utils';
 
+enum WorkspaceFormTabs {
+  FeatureVisibility,
+  UsersAndPermissions,
+}
+
 interface WorkspaceFeature extends Pick<App, 'dependencies'> {
   id: string;
   name: string;
@@ -128,7 +133,7 @@ export const WorkspaceForm = ({
   const [icon, setIcon] = useState(defaultValues?.icon);
   const [defaultVISTheme, setDefaultVISTheme] = useState(defaultValues?.defaultVISTheme);
   const isEditingManagementWorkspace = defaultValues?.id === MANAGEMENT_WORKSPACE_ID;
-  const [tabFeatureSelected, setTabFeatureSelected] = useState(!isEditingManagementWorkspace);
+  const [selectedTab, setSelectedTab] = useState(WorkspaceFormTabs.FeatureVisibility);
 
   // The matched feature id list based on original feature config,
   // the feature category will be expanded to list of feature ids
@@ -390,11 +395,11 @@ export const WorkspaceForm = ({
   }, []);
 
   const handleTabFeatureClick = useCallback(() => {
-    setTabFeatureSelected(true);
+    setSelectedTab(WorkspaceFormTabs.FeatureVisibility);
   }, []);
 
   const handleTabPermissionClick = useCallback(() => {
-    setTabFeatureSelected(false);
+    setSelectedTab(WorkspaceFormTabs.UsersAndPermissions);
   }, []);
 
   const onDefaultVISThemeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -519,19 +524,19 @@ export const WorkspaceForm = ({
             : [
                 {
                   label: featureVisibilityTitle,
-                  isSelected: tabFeatureSelected,
+                  isSelected: selectedTab === WorkspaceFormTabs.FeatureVisibility,
                   onClick: handleTabFeatureClick,
                 },
               ]),
           {
             label: usersAndPermissionsTitle,
-            isSelected: !tabFeatureSelected,
+            isSelected: selectedTab === WorkspaceFormTabs.UsersAndPermissions,
             onClick: handleTabPermissionClick,
           },
         ]}
       />
 
-      {tabFeatureSelected && (
+      {selectedTab === WorkspaceFormTabs.FeatureVisibility && (
         <EuiPanel>
           <EuiTitle size="s">
             <h2>{featureVisibilityTitle}</h2>
@@ -611,7 +616,7 @@ export const WorkspaceForm = ({
         </EuiPanel>
       )}
 
-      {!tabFeatureSelected && (
+      {selectedTab === WorkspaceFormTabs.UsersAndPermissions && (
         <EuiPanel>
           <EuiTitle size="s">
             <h2>{usersAndPermissionsTitle}</h2>
