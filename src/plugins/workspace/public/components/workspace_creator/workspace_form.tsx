@@ -587,7 +587,7 @@ export const WorkspaceForm = ({
                       selectedIds.length > 0 &&
                       selectedIds.length < features.length
                     }
-                    data-test-subj={`workspaceForm-workspaceFeatureVisibility-category-${featureOrGroupId}`}
+                    data-test-subj={`workspaceForm-workspaceFeatureVisibility-${featureOrGroupId}`}
                   />
                   {isWorkspaceFeatureGroup(featureOrGroup) && (
                     <EuiCheckboxGroup
@@ -605,7 +605,7 @@ export const WorkspaceForm = ({
                       )}
                       onChange={handleFeatureChange}
                       style={{ marginLeft: 40 }}
-                      data-test-subj={`workspaceForm-workspaceFeatureVisibility-feature-${featureOrGroupId}`}
+                      data-test-subj={`workspaceForm-workspaceFeatureVisibility-featureWithCategory-${featureOrGroupId}`}
                     />
                   )}
                 </EuiFlexItem>

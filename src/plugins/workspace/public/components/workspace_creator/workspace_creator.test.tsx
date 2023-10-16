@@ -9,11 +9,7 @@ import { fireEvent, render, waitFor } from '@testing-library/react';
 import * as opensearchReactExports from '../../../../opensearch_dashboards_react/public';
 import { BehaviorSubject } from 'rxjs';
 import { WorkspaceCreator } from './workspace_creator';
-
-jest.mock('../../../../opensearch_dashboards_react/public', () => ({
-  ...jest.requireActual('../../../../opensearch_dashboards_react/public'),
-  __esModule: true,
-}));
+import { coreMock } from '../../../../../core/public/mocks';
 
 const workspaceClientCreate = jest
   .fn()
@@ -30,27 +26,35 @@ const PublicAPPInfoMap = new Map([
   ['app5', { id: 'app5', category: { id: 'category2', label: 'category2' } }],
 ]);
 
+jest.mock('../../../../opensearch_dashboards_react/public', () => ({
+  ...jest.requireActual('../../../../opensearch_dashboards_react/public'),
+  __esModule: true,
+}));
+
 jest.spyOn(opensearchReactExports, 'useOpenSearchDashboards').mockReturnValue({
   services: {
-    application: {
-      navigateToApp,
-      getUrlForApp: jest.fn(),
-      applications$: new BehaviorSubject<Map<string, PublicAppInfo>>(PublicAPPInfoMap as any),
-    },
-    http: {
-      basePath: {
-        remove: jest.fn(),
-        prepend: jest.fn(),
+    ...coreMock.createStart(),
+    ...{
+      application: {
+        navigateToApp,
+        getUrlForApp: jest.fn(),
+        applications$: new BehaviorSubject<Map<string, PublicAppInfo>>(PublicAPPInfoMap as any),
       },
-    },
-    notifications: {
-      toasts: {
-        addDanger: notificationToastsAddDanger,
-        addSuccess: notificationToastsAddSuccess,
+      http: {
+        basePath: {
+          remove: jest.fn(),
+          prepend: jest.fn(),
+        },
       },
-    },
-    workspaceClient: {
-      create: workspaceClientCreate,
+      notifications: {
+        toasts: {
+          addDanger: notificationToastsAddDanger,
+          addSuccess: notificationToastsAddSuccess,
+        },
+      },
+      workspaceClient: {
+        create: workspaceClientCreate,
+      },
     },
   },
 });
@@ -119,13 +123,13 @@ describe('WorkspaceCreator', () => {
   });
 
   it('create workspace with customized features', async () => {
-    const { getByTestId, getByText } = render(<WorkspaceCreator />);
+    const { getByTestId } = render(<WorkspaceCreator />);
     const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
     fireEvent.input(nameInput, {
       target: { value: 'test workspace name' },
     });
     fireEvent.click(getByTestId('workspaceForm-workspaceFeatureVisibility-app1'));
-    fireEvent.click(getByText('category1 (0/2)'));
+    fireEvent.click(getByTestId('workspaceForm-workspaceFeatureVisibility-category1'));
     fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
     expect(workspaceClientCreate).toHaveBeenCalledWith(
       expect.objectContaining({
