@@ -460,6 +460,14 @@ describe('SavedObjectsRepository', () => {
       },
     };
     const workspace = 'foo-workspace';
+    const permissions = {
+      read: {
+        users: ['user1'],
+      },
+      write: {
+        groups: ['groups1'],
+      },
+    };
 
     const getMockBulkCreateResponse = (objects, namespace) => {
       return {
@@ -773,6 +781,18 @@ describe('SavedObjectsRepository', () => {
           expect.objectContaining({ body }),
           expect.anything()
         );
+      });
+
+      it(`accepts permissions property when providing permissions info`, async () => {
+        const objects = [obj1, obj2].map((obj) => ({ ...obj, permissions: permissions }));
+        await bulkCreateSuccess(objects);
+        const expected = expect.objectContaining({ permissions });
+        const body = [expect.any(Object), expected, expect.any(Object), expected];
+        expect(client.bulk).toHaveBeenCalledWith(
+          expect.objectContaining({ body }),
+          expect.anything()
+        );
+        client.bulk.mockClear();
       });
     });
 
@@ -2255,6 +2275,16 @@ describe('SavedObjectsRepository', () => {
               namespace: expect.anything(),
               namespaces: expect.anything(),
             }),
+          }),
+          expect.anything()
+        );
+      });
+
+      it(`accepts permissions property`, async () => {
+        await createSuccess(type, attributes, { id, permissions });
+        expect(client.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            body: expect.objectContaining({ permissions }),
           }),
           expect.anything()
         );
