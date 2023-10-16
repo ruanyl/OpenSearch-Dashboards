@@ -15,6 +15,7 @@ import {
   EuiText,
   EuiSpacer,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { WorkspacePermissionMode } from '../../../../../core/public';
 
 export type WorkspacePermissionSetting =
@@ -30,15 +31,24 @@ enum PermissionModeId {
 const permissionModeOptions = [
   {
     id: PermissionModeId.Read,
-    label: 'Read',
+    label: i18n.translate('workspace.form.permissionSettingPanel.permissionModeOptions.read', {
+      defaultMessage: 'Read',
+    }),
   },
   {
     id: PermissionModeId.ReadAndWrite,
-    label: 'Read + Write',
+    label: i18n.translate(
+      'workspace.form.permissionSettingPanel.permissionModeOptions.readAndWrite',
+      {
+        defaultMessage: 'Read + Write',
+      }
+    ),
   },
   {
     id: PermissionModeId.Admin,
-    label: 'Admin',
+    label: i18n.translate('workspace.form.permissionSettingPanel.permissionModeOptions.admin', {
+      defaultMessage: 'Admin',
+    }),
   },
 ];
 
@@ -205,7 +215,9 @@ const WorkspacePermissionSettingInput = ({
           isDisabled={!deletable}
           aria-label="Delete permission setting"
         >
-          Remove
+          {i18n.translate('workspace.form.permissionSettingPanel.remove', {
+            defaultMessage: 'Remove',
+          })}
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -344,7 +356,9 @@ export const WorkspacePermissionSettingPanel = ({
         color={'text'}
         data-test-subj="workspaceForm-permissionSettingPanel-addNew"
       >
-        Add New
+        {i18n.translate('workspace.form.permissionSettingPanel.addNew', {
+          defaultMessage: 'Add New',
+        })}
       </EuiButton>
     </div>
   );
