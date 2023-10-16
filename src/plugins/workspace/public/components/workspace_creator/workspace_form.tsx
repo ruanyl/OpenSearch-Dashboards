@@ -688,9 +688,9 @@ export const WorkspaceForm = ({
           </EuiTitle>
           <WorkspacePermissionSettingPanel
             errors={formErrors.permissions}
-            value={permissionSettings}
             onChange={setPermissionSettings}
-            firstRowDeletable={permissionFirstRowDeletable}
+            permissionSettings={permissionSettings}
+            firstUserDeletable={permissionFirstUserDeletable}
           />
         </EuiPanel>
       )}
