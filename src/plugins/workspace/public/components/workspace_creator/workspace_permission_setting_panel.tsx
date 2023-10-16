@@ -3,13 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import {
   EuiFlexGroup,
-  EuiSuperSelect,
   EuiComboBox,
   EuiFlexItem,
   EuiButton,
+  EuiButtonIcon,
   EuiButtonGroup,
   EuiFormRow,
   EuiText,
@@ -18,9 +18,14 @@ import {
 import { i18n } from '@osd/i18n';
 import { WorkspacePermissionMode } from '../../../../../core/public';
 
+export enum WorkspacePermissionItemType {
+  User = 'user',
+  Group = 'group',
+}
+
 export type WorkspacePermissionSetting =
-  | { type: 'user'; userId: string; modes: WorkspacePermissionMode[] }
-  | { type: 'group'; group: string; modes: WorkspacePermissionMode[] };
+  | { type: WorkspacePermissionItemType.User; userId: string; modes: WorkspacePermissionMode[] }
+  | { type: WorkspacePermissionItemType.Group; group: string; modes: WorkspacePermissionMode[] };
 
 enum PermissionModeId {
   Read = 'read',
@@ -40,7 +45,7 @@ const permissionModeOptions = [
     label: i18n.translate(
       'workspace.form.permissionSettingPanel.permissionModeOptions.readAndWrite',
       {
-        defaultMessage: 'Read + Write',
+        defaultMessage: 'Read & Write',
       }
     ),
   },
@@ -63,19 +68,14 @@ const optionIdToWorkspacePermissionModesMap: {
   [PermissionModeId.Admin]: [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
 };
 
-const permissionTypeOptions = [
-  { value: 'user' as const, inputDisplay: 'User' },
-  { value: 'group' as const, inputDisplay: 'Group' },
-];
-
 const generateWorkspacePermissionItemKey = (
   item: Partial<WorkspacePermissionSetting>,
   index?: number
 ) =>
   [
     ...(item.type ?? []),
-    ...(item.type === 'user' ? [item.userId] : []),
-    ...(item.type === 'group' ? [item.group] : []),
+    ...(item.type === WorkspacePermissionItemType.User ? [item.userId] : []),
+    ...(item.type === WorkspacePermissionItemType.Group ? [item.group] : []),
     ...(item.modes ?? []),
     index,
   ].join('-');
@@ -83,16 +83,14 @@ const generateWorkspacePermissionItemKey = (
 interface WorkspacePermissionSettingInputProps {
   index: number;
   deletable: boolean;
-  type?: 'user' | 'group';
+  type: WorkspacePermissionItemType;
   userId?: string;
   group?: string;
   modes?: WorkspacePermissionMode[];
-  onTypeChange: (type: 'user' | 'group', index: number) => void;
   onGroupOrUserIdChange: (
     groupOrUserId:
-      | { type: 'user'; userId: string }
-      | { type: 'group'; group: string }
-      | { type: 'user' | 'group' },
+      | { type: WorkspacePermissionItemType.User; userId?: string }
+      | { type: WorkspacePermissionItemType.Group; group?: string },
     index: number
   ) => void;
   onPermissionModesChange: (
@@ -110,7 +108,6 @@ const WorkspacePermissionSettingInput = ({
   group,
   modes,
   onDelete,
-  onTypeChange,
   onGroupOrUserIdChange,
   onPermissionModesChange,
 }: WorkspacePermissionSettingInputProps) => {
@@ -129,20 +126,12 @@ const WorkspacePermissionSettingInput = ({
       }
     }, [modes]) ?? PermissionModeId.Read;
 
-  const handleTypeChange = useCallback(
-    (newType: 'user' | 'group') => {
-      onTypeChange(newType, index);
-    },
-    [onTypeChange, index]
-  );
-
   const handleGroupOrUserIdCreate = useCallback(
     (groupOrUserId) => {
-      if (!type) {
-        return;
-      }
       onGroupOrUserIdChange(
-        type === 'group' ? { type, group: groupOrUserId } : { type, userId: groupOrUserId },
+        type === WorkspacePermissionItemType.Group
+          ? { type, group: groupOrUserId }
+          : { type, userId: groupOrUserId },
         index
       );
     },
@@ -151,9 +140,6 @@ const WorkspacePermissionSettingInput = ({
 
   const handleGroupOrUserIdChange = useCallback(
     (options) => {
-      if (!type) {
-        return;
-      }
       if (options.length === 0) {
         onGroupOrUserIdChange({ type }, index);
       }
@@ -176,19 +162,8 @@ const WorkspacePermissionSettingInput = ({
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="l">
-      <EuiFlexItem grow={false}>
-        <EuiSuperSelect
-          options={permissionTypeOptions}
-          valueOfSelected={type}
-          onChange={handleTypeChange}
-          placeholder="User Type"
-          style={{ width: 200 }}
-          data-test-subj={`workspaceForm-permissionSettingPanel-${index}-userType`}
-        />
-      </EuiFlexItem>
       <EuiFlexItem>
         <EuiComboBox
-          isDisabled={!type}
           singleSelection
           selectedOptions={groupOrUserIdSelectedOptions}
           onCreateOption={handleGroupOrUserIdCreate}
@@ -209,16 +184,15 @@ const WorkspacePermissionSettingInput = ({
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButton
-          color="text"
+        <EuiButtonIcon
+          color="danger"
+          aria-label="Delete permission setting"
+          iconType="trash"
+          display="base"
+          size="m"
           onClick={handleDelete}
           isDisabled={!deletable}
-          aria-label="Delete permission setting"
-        >
-          {i18n.translate('workspace.form.permissionSettingPanel.remove', {
-            defaultMessage: 'Remove',
-          })}
-        </EuiButton>
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -226,19 +200,26 @@ const WorkspacePermissionSettingInput = ({
 
 interface WorkspacePermissionSettingPanelProps {
   errors?: string[];
-  value?: Array<Partial<WorkspacePermissionSetting>>;
+  firstUserDeletable?: boolean;
+  permissionSettings?: Array<Partial<WorkspacePermissionSetting>>;
   onChange?: (value: Array<Partial<WorkspacePermissionSetting>>) => void;
-  firstRowDeletable?: boolean;
 }
 
-export const WorkspacePermissionSettingPanel = ({
+interface UserOrGroupSectionProps extends WorkspacePermissionSettingPanelProps {
+  title: string;
+  type: WorkspacePermissionItemType;
+}
+
+const UserOrGroupSection = ({
+  type,
+  title,
   errors,
-  value,
   onChange,
-  firstRowDeletable,
-}: WorkspacePermissionSettingPanelProps) => {
+  permissionSettings,
+  firstUserDeletable,
+}: UserOrGroupSectionProps) => {
   const transformedValue = useMemo(() => {
-    if (!value) {
+    if (!permissionSettings) {
       return [];
     }
     const result: Array<Partial<WorkspacePermissionSetting>> = [];
@@ -246,8 +227,8 @@ export const WorkspacePermissionSettingPanel = ({
      * One workspace permission setting may include multi setting options,
      * for loop the workspace permission setting array to separate it to multi rows.
      **/
-    for (let i = 0; i < value.length; i++) {
-      const valueItem = value[i];
+    for (let i = 0; i < permissionSettings.length; i++) {
+      const valueItem = permissionSettings[i];
       // Incomplete workspace permission setting don't need to separate to multi rows
       if (
         !valueItem.modes ||
@@ -274,15 +255,15 @@ export const WorkspacePermissionSettingPanel = ({
       }
     }
     return result;
-  }, [value]);
+  }, [permissionSettings]);
 
-  // default permission mode id admin
+  // default permission mode is read
   const handleAddNewOne = useCallback(() => {
     onChange?.([
       ...(transformedValue ?? []),
-      { modes: optionIdToWorkspacePermissionModesMap[PermissionModeId.Read] },
+      { type, modes: optionIdToWorkspacePermissionModesMap[PermissionModeId.Read] },
     ]);
-  }, [onChange, transformedValue]);
+  }, [onChange, type, transformedValue]);
 
   const handleDelete = useCallback(
     (index: number) => {
@@ -304,17 +285,6 @@ export const WorkspacePermissionSettingPanel = ({
     [onChange, transformedValue]
   );
 
-  const handleTypeChange = useCallback<WorkspacePermissionSettingInputProps['onTypeChange']>(
-    (type, index) => {
-      onChange?.(
-        (transformedValue ?? []).map((item, itemIndex) =>
-          index === itemIndex ? { ...item, type } : item
-        )
-      );
-    },
-    [onChange, transformedValue]
-  );
-
   const handleGroupOrUserIdChange = useCallback<
     WorkspacePermissionSettingInputProps['onGroupOrUserIdChange']
   >(
@@ -330,19 +300,24 @@ export const WorkspacePermissionSettingPanel = ({
     [onChange, transformedValue]
   );
 
+  // assume that group items are always deletable
   return (
     <div>
-      <EuiText>User / User Group / Role</EuiText>
+      <EuiText>
+        <strong>{title}</strong>
+      </EuiText>
       <EuiSpacer size="s" />
       {transformedValue?.map((item, index) => (
         <React.Fragment key={generateWorkspacePermissionItemKey(item, index)}>
           <EuiFormRow isInvalid={!!errors?.[index]} error={errors?.[index]}>
             <WorkspacePermissionSettingInput
               {...item}
+              type={type}
               index={index}
-              deletable={firstRowDeletable || index !== 0}
+              deletable={
+                type === WorkspacePermissionItemType.Group || firstUserDeletable || index !== 0
+              }
               onDelete={handleDelete}
-              onTypeChange={handleTypeChange}
               onGroupOrUserIdChange={handleGroupOrUserIdChange}
               onPermissionModesChange={handlePermissionModesChange}
             />
@@ -351,15 +326,65 @@ export const WorkspacePermissionSettingPanel = ({
       ))}
       <EuiButton
         fill
-        onClick={handleAddNewOne}
         fullWidth={false}
-        color={'text'}
-        data-test-subj="workspaceForm-permissionSettingPanel-addNew"
+        onClick={handleAddNewOne}
+        data-test-subj={`workspaceForm-permissionSettingPanel-${type}-addNew`}
       >
         {i18n.translate('workspace.form.permissionSettingPanel.addNew', {
           defaultMessage: 'Add New',
         })}
       </EuiButton>
+    </div>
+  );
+};
+
+export const WorkspacePermissionSettingPanel = ({
+  errors,
+  onChange,
+  permissionSettings,
+  firstUserDeletable,
+}: WorkspacePermissionSettingPanelProps) => {
+  const [userPermissionSettings, setUserPermissionSettings] = useState<
+    Array<Partial<WorkspacePermissionSetting>>
+  >(
+    permissionSettings?.filter(
+      (permissionSettingItem) => permissionSettingItem.type === WorkspacePermissionItemType.User
+    ) ?? []
+  );
+  const [groupPermissionSettings, setGroupPermissionSettings] = useState<
+    Array<Partial<WorkspacePermissionSetting>>
+  >(
+    permissionSettings?.filter(
+      (permissionSettingItem) => permissionSettingItem.type === WorkspacePermissionItemType.Group
+    ) ?? []
+  );
+
+  useEffect(() => {
+    onChange?.([...userPermissionSettings, ...groupPermissionSettings]);
+  }, [onChange, userPermissionSettings, groupPermissionSettings]);
+
+  return (
+    <div>
+      <UserOrGroupSection
+        title={i18n.translate('workspace.form.permissionSettingPanel.userTitle', {
+          defaultMessage: 'User',
+        })}
+        errors={errors}
+        onChange={setUserPermissionSettings}
+        permissionSettings={userPermissionSettings}
+        firstUserDeletable={firstUserDeletable}
+        type={WorkspacePermissionItemType.User}
+      />
+      <EuiSpacer size="s" />
+      <UserOrGroupSection
+        title={i18n.translate('workspace.form.permissionSettingPanel.userGroupTitle', {
+          defaultMessage: 'User Groups',
+        })}
+        errors={errors}
+        onChange={setGroupPermissionSettings}
+        permissionSettings={groupPermissionSettings}
+        type={WorkspacePermissionItemType.Group}
+      />
     </div>
   );
 };

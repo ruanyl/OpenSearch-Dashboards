@@ -46,6 +46,7 @@ import { WorkspaceBottomBar } from './workspace_bottom_bar';
 import { WorkspaceIconSelector } from './workspace_icon_selector';
 import {
   WorkspacePermissionSetting,
+  WorkspacePermissionItemType,
   WorkspacePermissionSettingPanel,
 } from './workspace_permission_setting_panel';
 import { featureMatchesConfig } from '../../utils';
@@ -93,7 +94,8 @@ const isValidWorkspacePermissionSetting = (
 ): setting is WorkspacePermissionSetting =>
   !!setting.modes &&
   setting.modes.length > 0 &&
-  ((setting.type === 'user' && !!setting.userId) || (setting.type === 'group' && !!setting.group));
+  ((setting.type === WorkspacePermissionItemType.User && !!setting.userId) ||
+    (setting.type === WorkspacePermissionItemType.Group && !!setting.group));
 
 const isDefaultCheckedFeatureId = (id: string) => {
   return DEFAULT_CHECKED_FEATURES_IDS.indexOf(id) > -1;
@@ -113,8 +115,8 @@ interface WorkspaceFormProps {
   onSubmit?: (formData: WorkspaceFormSubmitData) => void;
   defaultValues?: WorkspaceFormData;
   opType?: string;
-  permissionFirstRowDeletable?: boolean;
   permissionEnabled?: boolean;
+  permissionFirstUserDeletable?: boolean;
 }
 
 export const WorkspaceForm = ({
@@ -122,8 +124,8 @@ export const WorkspaceForm = ({
   onSubmit,
   defaultValues,
   opType,
-  permissionFirstRowDeletable,
   permissionEnabled,
+  permissionFirstUserDeletable,
 }: WorkspaceFormProps) => {
   const applications = useApplications(application);
   const workspaceNameReadOnly = defaultValues?.reserved;
@@ -134,7 +136,6 @@ export const WorkspaceForm = ({
   const [defaultVISTheme, setDefaultVISTheme] = useState(defaultValues?.defaultVISTheme);
   const isEditingManagementWorkspace = defaultValues?.id === MANAGEMENT_WORKSPACE_ID;
   const [selectedTab, setSelectedTab] = useState(WorkspaceFormTabs.FeatureVisibility);
-
   // The matched feature id list based on original feature config,
   // the feature category will be expanded to list of feature ids
   const defaultFeatures = useMemo(() => {
@@ -339,13 +340,13 @@ export const WorkspaceForm = ({
           });
           continue;
         }
-        if (permission.type === 'user' && !permission.userId) {
+        if (permission.type === WorkspacePermissionItemType.User && !permission.userId) {
           permissionErrors[i] = i18n.translate('workspace.form.permission.invalidate.userId', {
             defaultMessage: 'Invalid userId',
           });
           continue;
         }
-        if (permission.type === 'group' && !permission.group) {
+        if (permission.type === WorkspacePermissionItemType.Group && !permission.group) {
           permissionErrors[i] = i18n.translate('workspace.form.permission.invalidate.group', {
             defaultMessage: 'Invalid user group',
           });
@@ -623,9 +624,9 @@ export const WorkspaceForm = ({
           <EuiHorizontalRule margin="xs" />
           <WorkspacePermissionSettingPanel
             errors={formErrors.permissions}
-            value={permissionSettings}
             onChange={setPermissionSettings}
-            firstRowDeletable={permissionFirstRowDeletable}
+            permissionSettings={permissionSettings}
+            firstUserDeletable={permissionFirstUserDeletable}
             data-test-subj={`workspaceForm-permissionSettingPanel`}
           />
         </EuiPanel>

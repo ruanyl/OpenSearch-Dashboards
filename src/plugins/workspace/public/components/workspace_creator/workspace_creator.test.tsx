@@ -150,11 +150,8 @@ describe('WorkspaceCreator', () => {
       target: { value: 'test workspace name' },
     });
     fireEvent.click(getByText('Users & Permissions'));
-    fireEvent.click(getByTestId('workspaceForm-permissionSettingPanel-addNew'));
-    const userTypeSelection = getByTestId('workspaceForm-permissionSettingPanel-0-userType');
+    fireEvent.click(getByTestId('workspaceForm-permissionSettingPanel-user-addNew'));
     const userIdInput = getByTestId('workspaceForm-permissionSettingPanel-0-userId');
-    fireEvent.click(userTypeSelection);
-    fireEvent.click(getByText('User'));
     fireEvent.click(userIdInput);
     fireEvent.input(getByTestId('comboBoxSearchInput'), {
       target: { value: 'test user id' },
