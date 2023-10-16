@@ -553,7 +553,7 @@ export const WorkspaceForm = ({
             );
             return (
               <EuiFlexGroup key={featureOrGroup.name}>
-                <EuiFlexItem key={featureOrGroup.name + '-1'}>
+                <EuiFlexItem>
                   <div>
                     <EuiText>
                       <strong>{featureOrGroup.name}</strong>
@@ -563,7 +563,7 @@ export const WorkspaceForm = ({
                     )}
                   </div>
                 </EuiFlexItem>
-                <EuiFlexItem key={featureOrGroup.name + '-2'}>
+                <EuiFlexItem>
                   <EuiCheckbox
                     id={
                       isWorkspaceFeatureGroup(featureOrGroup)
