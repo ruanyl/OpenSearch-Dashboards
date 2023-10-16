@@ -2278,7 +2278,8 @@ describe('SavedObjectsRepository', () => {
             body: expect.objectContaining({
               workspaces: ['foo'],
             }),
-          })
+          }),
+          expect.anything()
         );
       });
 
