@@ -551,6 +551,9 @@ export const WorkspaceForm = ({
                 : [featureOrGroup]
               ).find((item) => item.id === id)
             );
+            const featureOrGroupId = isWorkspaceFeatureGroup(featureOrGroup)
+              ? featureOrGroup.name
+              : featureOrGroup.id;
             return (
               <EuiFlexGroup key={featureOrGroup.name}>
                 <EuiFlexItem>
@@ -565,11 +568,7 @@ export const WorkspaceForm = ({
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiCheckbox
-                    id={
-                      isWorkspaceFeatureGroup(featureOrGroup)
-                        ? featureOrGroup.name
-                        : featureOrGroup.id
-                    }
+                    id={featureOrGroupId}
                     onChange={
                       isWorkspaceFeatureGroup(featureOrGroup)
                         ? handleFeatureGroupChange
@@ -588,7 +587,7 @@ export const WorkspaceForm = ({
                       selectedIds.length > 0 &&
                       selectedIds.length < features.length
                     }
-                    data-test-subj={`workspaceForm-workspaceFeatureVisibility-${featureOrGroup.name}`}
+                    data-test-subj={`workspaceForm-workspaceFeatureVisibility-category-${featureOrGroupId}`}
                   />
                   {isWorkspaceFeatureGroup(featureOrGroup) && (
                     <EuiCheckboxGroup
@@ -606,7 +605,7 @@ export const WorkspaceForm = ({
                       )}
                       onChange={handleFeatureChange}
                       style={{ marginLeft: 40 }}
-                      data-test-subj={`workspaceForm-workspaceFeatureVisibility-${featureOrGroup.name}`}
+                      data-test-subj={`workspaceForm-workspaceFeatureVisibility-feature-${featureOrGroupId}`}
                     />
                   )}
                 </EuiFlexItem>
