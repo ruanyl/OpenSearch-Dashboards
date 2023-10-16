@@ -54,7 +54,8 @@ describe('workspace service', () => {
         .expect(200);
       await Promise.all(
         listResult.body.result.workspaces.map((item: WorkspaceAttribute) =>
-          // this will delete reserved workspace
+          // workspace delete API will not able to delete reserved workspace
+          // to clean up the test data, change it saved objects delete API
           osdTestServer.request
             .delete(root, `/api/saved_objects/${WORKSPACE_TYPE}/${item.id}`)
             .expect(200)
