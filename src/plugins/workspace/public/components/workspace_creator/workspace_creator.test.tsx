@@ -74,6 +74,28 @@ describe('WorkspaceCreator', () => {
     expect(workspaceClientCreate).not.toHaveBeenCalled();
   });
 
+  it('cannot create workspace with invalid name', async () => {
+    const { getByTestId } = render(<WorkspaceCreator />);
+    const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
+    fireEvent.input(nameInput, {
+      target: { value: '~' },
+    });
+    expect(workspaceClientCreate).not.toHaveBeenCalled();
+  });
+
+  it('cannot create workspace with invalid description', async () => {
+    const { getByTestId } = render(<WorkspaceCreator />);
+    const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
+    fireEvent.input(nameInput, {
+      target: { value: 'test workspace name' },
+    });
+    const descriptionInput = getByTestId('workspaceForm-workspaceDetails-descriptionInputText');
+    fireEvent.input(descriptionInput, {
+      target: { value: '~' },
+    });
+    expect(workspaceClientCreate).not.toHaveBeenCalled();
+  });
+
   it('cancel create workspace', async () => {
     const { findByText, getByTestId } = render(<WorkspaceCreator />);
     fireEvent.click(getByTestId('workspaceForm-bottomBar-cancelButton'));
