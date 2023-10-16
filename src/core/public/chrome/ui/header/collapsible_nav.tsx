@@ -32,13 +32,10 @@ import './collapsible_nav.scss';
 import {
   EuiCollapsibleNav,
   EuiCollapsibleNavGroup,
-  EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiListGroup,
   EuiListGroupItem,
   EuiShowFor,
-  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { groupBy, sortBy } from 'lodash';
@@ -185,13 +182,6 @@ export function CollapsibleNav({
     });
   };
 
-  const defaultHeaderName = i18n.translate(
-    'core.ui.primaryNav.workspacePickerMenu.defaultHeaderName',
-    {
-      defaultMessage: 'OpenSearch Dashboards',
-    }
-  );
-
   return (
     <EuiCollapsibleNav
       data-test-subj="collapsibleNav"
@@ -204,22 +194,7 @@ export function CollapsibleNav({
       onClose={closeNav}
       outsideClickCloses={false}
     >
-      {collapsibleNavHeaderRender ? (
-        collapsibleNavHeaderRender()
-      ) : (
-        <EuiCollapsibleNavGroup>
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiIcon type="logoOpenSearch" size="l" />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText>
-                <strong> {defaultHeaderName} </strong>
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiCollapsibleNavGroup>
-      )}
+      {collapsibleNavHeaderRender && collapsibleNavHeaderRender()}
       <EuiFlexItem className="eui-yScroll">
         {/* merged NavLinks */}
         {mergedNavLinks.map((item, i) => {
