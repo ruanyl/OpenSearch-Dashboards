@@ -106,6 +106,28 @@ const appendDefaultFeatureIds = (ids: string[]) => {
   return Array.from(new Set(ids.concat(DEFAULT_CHECKED_FEATURES_IDS)));
 };
 
+const isValidNameOrDescription = (input?: string) => {
+  if (!input) {
+    return true;
+  }
+  const regex = /^[0-9a-zA-Z()_\[\]\-\s]+$/;
+  return regex.test(input);
+};
+
+const getNumberOfErrors = (formErrors: WorkspaceFormErrors) => {
+  let numberOfErrors = 0;
+  if (formErrors.name) {
+    numberOfErrors += 1;
+  }
+  if (formErrors.description) {
+    numberOfErrors += 1;
+  }
+  if (formErrors.permissions) {
+    numberOfErrors += formErrors.permissions.length;
+  }
+  return numberOfErrors;
+};
+
 const workspaceHtmlIdGenerator = htmlIdGenerator();
 
 const defaultVISThemeOptions = [{ value: 'categorical', text: 'Categorical' }];
@@ -136,6 +158,7 @@ export const WorkspaceForm = ({
   const [defaultVISTheme, setDefaultVISTheme] = useState(defaultValues?.defaultVISTheme);
   const isEditingManagementWorkspace = defaultValues?.id === MANAGEMENT_WORKSPACE_ID;
   const [selectedTab, setSelectedTab] = useState(WorkspaceFormTabs.FeatureVisibility);
+  const [numberOfErrors, setNumberOfErrors] = useState(0);
   // The matched feature id list based on original feature config,
   // the feature category will be expanded to list of feature ids
   const defaultFeatures = useMemo(() => {
@@ -313,14 +336,31 @@ export const WorkspaceForm = ({
   const handleFormSubmit = useCallback<FormEventHandler>(
     (e) => {
       e.preventDefault();
+      let currentFormErrors: WorkspaceFormErrors = {};
       const formData = getFormDataRef.current();
       if (!formData.name) {
-        setFormErrors({
-          name: i18n.translate('workspace.form.name.empty', {
+        currentFormErrors = {
+          ...currentFormErrors,
+          name: i18n.translate('workspace.form.detail.name.empty', {
             defaultMessage: "Name can't be empty.",
           }),
-        });
-        return;
+        };
+      }
+      if (!isValidNameOrDescription(formData.name)) {
+        currentFormErrors = {
+          ...currentFormErrors,
+          name: i18n.translate('workspace.form.detail.name.invalid', {
+            defaultMessage: 'Invalid workspace name',
+          }),
+        };
+      }
+      if (!isValidNameOrDescription(formData.description)) {
+        currentFormErrors = {
+          ...currentFormErrors,
+          description: i18n.translate('workspace.form.detail.description.invalid', {
+            defaultMessage: 'Invalid workspace description',
+          }),
+        };
       }
       const permissionErrors: string[] = new Array(formData.permissions.length);
       for (let i = 0; i < formData.permissions.length; i++) {
@@ -354,7 +394,15 @@ export const WorkspaceForm = ({
         }
       }
       if (permissionErrors.some((error) => !!error)) {
-        setFormErrors({ permissions: permissionErrors });
+        currentFormErrors = {
+          ...currentFormErrors,
+          permissions: permissionErrors,
+        };
+      }
+      const currentNumberOfErrors = getNumberOfErrors(currentFormErrors);
+      setFormErrors(currentFormErrors);
+      setNumberOfErrors(currentNumberOfErrors);
+      if (currentNumberOfErrors > 0) {
         return;
       }
 
@@ -373,10 +421,9 @@ export const WorkspaceForm = ({
       }
 
       const permissions = formData.permissions.filter(isValidWorkspacePermissionSetting);
-      setFormErrors({});
       onSubmit?.({ ...formData, name: formData.name, permissions });
     },
-    [onSubmit, defaultFeatures, defaultValues?.features]
+    [defaultFeatures, onSubmit, defaultValues?.features]
   );
 
   const handleNameInputChange = useCallback<Required<EuiFieldTextProps>['onChange']>((e) => {
@@ -464,6 +511,8 @@ export const WorkspaceForm = ({
             defaultMessage:
               'Valid characters are a-z, A-Z, 0-9, (), [], _ (underscore), - (hyphen) and (space).',
           })}
+          isInvalid={!!formErrors.description}
+          error={formErrors.description}
         >
           <EuiFieldText
             value={description}
@@ -645,7 +694,12 @@ export const WorkspaceForm = ({
           />
         </EuiPanel>
       )}
-      <WorkspaceBottomBar opType={opType} formId={formIdRef.current} application={application} />
+      <WorkspaceBottomBar
+        opType={opType}
+        formId={formIdRef.current}
+        application={application}
+        numberOfErrors={numberOfErrors}
+      />
     </EuiForm>
   );
 };
