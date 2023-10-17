@@ -216,8 +216,8 @@ export function CollapsibleNav({
 
       <EuiFlexItem className="eui-yScroll">
         {sortedLinksAndCategories.map((item, i) => {
-          if (!('title' in item)) {
-            // CollapsibleNavLink has title property, while AppCategory does not have
+          if (!('href' in item)) {
+            // CollapsibleNavLink has href property, while AppCategory does not have
             const category = item;
             const opensearchLinkLogo =
               category.id === DEFAULT_APP_CATEGORIES.opensearchDashboards.id
