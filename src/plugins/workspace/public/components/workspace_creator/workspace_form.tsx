@@ -52,6 +52,7 @@ import {
 import { featureMatchesConfig } from '../../utils';
 
 enum WorkspaceFormTabs {
+  NotSelected,
   FeatureVisibility,
   UsersAndPermissions,
 }
@@ -157,7 +158,16 @@ export const WorkspaceForm = ({
   const [icon, setIcon] = useState(defaultValues?.icon);
   const [defaultVISTheme, setDefaultVISTheme] = useState(defaultValues?.defaultVISTheme);
   const isEditingManagementWorkspace = defaultValues?.id === MANAGEMENT_WORKSPACE_ID;
-  const [selectedTab, setSelectedTab] = useState(WorkspaceFormTabs.FeatureVisibility);
+
+  // feature visibility section will be hidden in management workspace
+  // permission section will be hidden when permission is not enabled
+  const [selectedTab, setSelectedTab] = useState(
+    !isEditingManagementWorkspace
+      ? WorkspaceFormTabs.FeatureVisibility
+      : permissionEnabled
+      ? WorkspaceFormTabs.UsersAndPermissions
+      : WorkspaceFormTabs.NotSelected
+  );
   const [numberOfErrors, setNumberOfErrors] = useState(0);
   // The matched feature id list based on original feature config,
   // the feature category will be expanded to list of feature ids
@@ -578,11 +588,15 @@ export const WorkspaceForm = ({
                   onClick: handleTabFeatureClick,
                 },
               ]),
-          {
-            label: usersAndPermissionsTitle,
-            isSelected: selectedTab === WorkspaceFormTabs.UsersAndPermissions,
-            onClick: handleTabPermissionClick,
-          },
+          ...(!permissionEnabled
+            ? []
+            : [
+                {
+                  label: usersAndPermissionsTitle,
+                  isSelected: selectedTab === WorkspaceFormTabs.UsersAndPermissions,
+                  onClick: handleTabPermissionClick,
+                },
+              ]),
         ]}
       />
 
@@ -681,19 +695,6 @@ export const WorkspaceForm = ({
         </EuiPanel>
       )}
       <EuiSpacer />
-      {permissionEnabled && (
-        <EuiPanel>
-          <EuiTitle size="s">
-            <h2>Members & permissions</h2>
-          </EuiTitle>
-          <WorkspacePermissionSettingPanel
-            errors={formErrors.permissions}
-            onChange={setPermissionSettings}
-            permissionSettings={permissionSettings}
-            firstUserDeletable={permissionFirstUserDeletable}
-          />
-        </EuiPanel>
-      )}
       <WorkspaceBottomBar
         opType={opType}
         formId={formIdRef.current}
