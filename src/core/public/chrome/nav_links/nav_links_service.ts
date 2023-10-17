@@ -162,8 +162,8 @@ export class NavLinksService {
     return {
       getNavLinks$: () => {
         return combineLatest([allNavLinks$, displayedNavLinks$]).pipe(
-          map(([allNavLinks, navLinks]) =>
-            navLinks === undefined ? sortLinks(allNavLinks) : sortLinks(navLinks)
+          map(([allNavLinks, displayedNavLinks]) =>
+            displayedNavLinks === undefined ? sortLinks(allNavLinks) : sortLinks(displayedNavLinks)
           ),
           takeUntil(this.stop$)
         );
