@@ -25,7 +25,6 @@ import {
   EuiColorPickerProps,
   EuiHorizontalRule,
   EuiFlexGroup,
-  EuiPageHeader,
   EuiTab,
   EuiTabs,
 } from '@elastic/eui';
