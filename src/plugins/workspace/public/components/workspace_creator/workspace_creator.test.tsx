@@ -6,10 +6,10 @@
 import React from 'react';
 import { PublicAppInfo } from 'opensearch-dashboards/public';
 import { fireEvent, render, waitFor } from '@testing-library/react';
-import * as opensearchReactExports from '../../../../opensearch_dashboards_react/public';
 import { BehaviorSubject } from 'rxjs';
-import { WorkspaceCreator } from './workspace_creator';
+import { WorkspaceCreator as WorkspaceCreatorComponent } from './workspace_creator';
 import { coreMock } from '../../../../../core/public/mocks';
+import { createOpenSearchDashboardsReactContext } from '../../../../opensearch_dashboards_react/public';
 
 const workspaceClientCreate = jest
   .fn()
@@ -26,17 +26,16 @@ const PublicAPPInfoMap = new Map([
   ['app5', { id: 'app5', category: { id: 'category2', label: 'category2' } }],
 ]);
 
-jest.mock('../../../../opensearch_dashboards_react/public', () => ({
-  ...jest.requireActual('../../../../opensearch_dashboards_react/public'),
-  __esModule: true,
-}));
+const mockCoreStart = coreMock.createStart();
 
-jest.spyOn(opensearchReactExports, 'useOpenSearchDashboards').mockReturnValue({
-  services: {
-    ...coreMock.createStart(),
+const WorkspaceCreator = (props: any) => {
+  const { Provider } = createOpenSearchDashboardsReactContext({
+    ...mockCoreStart,
     ...{
       application: {
+        ...mockCoreStart.application,
         capabilities: {
+          ...mockCoreStart.application.capabilities,
           workspaces: {
             permissionEnabled: true,
           },
@@ -46,15 +45,16 @@ jest.spyOn(opensearchReactExports, 'useOpenSearchDashboards').mockReturnValue({
         applications$: new BehaviorSubject<Map<string, PublicAppInfo>>(PublicAPPInfoMap as any),
       },
       http: {
+        ...mockCoreStart.http,
         basePath: {
-          ...coreMock.createStart().http.basePath,
+          ...mockCoreStart.http.basePath,
           remove: jest.fn(),
           prepend: jest.fn(),
         },
       },
       notifications: {
         toasts: {
-          ...coreMock.createStart().notifications.toasts,
+          ...mockCoreStart.notifications.toasts,
           addDanger: notificationToastsAddDanger,
           addSuccess: notificationToastsAddSuccess,
         },
@@ -63,8 +63,14 @@ jest.spyOn(opensearchReactExports, 'useOpenSearchDashboards').mockReturnValue({
         create: workspaceClientCreate,
       },
     },
-  },
-});
+  });
+
+  return (
+    <Provider>
+      <WorkspaceCreatorComponent {...props} />
+    </Provider>
+  );
+};
 
 function clearMockedFunctions() {
   workspaceClientCreate.mockClear();
@@ -73,7 +79,27 @@ function clearMockedFunctions() {
 }
 
 describe('WorkspaceCreator', () => {
-  beforeEach(() => clearMockedFunctions());
+  const { location } = window;
+  const setHrefSpy = jest.fn((href) => href);
+  beforeEach(() => {
+    clearMockedFunctions();
+  });
+
+  beforeAll(() => {
+    if (window.location) {
+      // @ts-ignore
+      delete window.location;
+    }
+    window.location = {} as Location;
+    Object.defineProperty(window.location, 'href', {
+      get: () => 'http://localhost/',
+      set: setHrefSpy,
+    });
+  });
+
+  afterAll(() => {
+    window.location = location;
+  });
 
   it('cannot create workspace when name empty', async () => {
     const { getByTestId } = render(<WorkspaceCreator />);
