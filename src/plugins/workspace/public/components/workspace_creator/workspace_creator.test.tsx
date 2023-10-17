@@ -53,6 +53,7 @@ const WorkspaceCreator = (props: any) => {
         },
       },
       notifications: {
+        ...mockCoreStart.notifications,
         toasts: {
           ...mockCoreStart.notifications.toasts,
           addDanger: notificationToastsAddDanger,
@@ -60,6 +61,7 @@ const WorkspaceCreator = (props: any) => {
         },
       },
       workspaceClient: {
+        ...mockCoreStart.workspaces,
         create: workspaceClientCreate,
       },
     },
