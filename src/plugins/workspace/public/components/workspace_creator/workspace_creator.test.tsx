@@ -36,18 +36,25 @@ jest.spyOn(opensearchReactExports, 'useOpenSearchDashboards').mockReturnValue({
     ...coreMock.createStart(),
     ...{
       application: {
+        capabilities: {
+          workspaces: {
+            permissionEnabled: true,
+          },
+        },
         navigateToApp,
         getUrlForApp: jest.fn(),
         applications$: new BehaviorSubject<Map<string, PublicAppInfo>>(PublicAPPInfoMap as any),
       },
       http: {
         basePath: {
+          ...coreMock.createStart().http.basePath,
           remove: jest.fn(),
           prepend: jest.fn(),
         },
       },
       notifications: {
         toasts: {
+          ...coreMock.createStart().notifications.toasts,
           addDanger: notificationToastsAddDanger,
           addSuccess: notificationToastsAddSuccess,
         },
