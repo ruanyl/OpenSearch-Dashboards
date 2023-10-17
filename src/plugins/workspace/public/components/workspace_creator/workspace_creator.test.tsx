@@ -79,11 +79,9 @@ function clearMockedFunctions() {
 }
 
 describe('WorkspaceCreator', () => {
+  beforeEach(() => clearMockedFunctions());
   const { location } = window;
   const setHrefSpy = jest.fn((href) => href);
-  beforeEach(() => {
-    clearMockedFunctions();
-  });
 
   beforeAll(() => {
     if (window.location) {
