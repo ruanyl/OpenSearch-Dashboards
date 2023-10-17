@@ -47,7 +47,6 @@ import {
 import { WorkspaceBottomBar } from './workspace_bottom_bar';
 import { WorkspaceIconSelector } from './workspace_icon_selector';
 import {
-  sortPermissions,
   WorkspacePermissionSetting,
   WorkspacePermissionItemType,
   WorkspacePermissionSettingPanel,
@@ -195,7 +194,7 @@ export const WorkspaceForm = ({
     Array<Partial<WorkspacePermissionSetting>>
   >(
     defaultValues?.permissions && defaultValues.permissions.length > 0
-      ? sortPermissions(defaultValues.permissions)
+      ? defaultValues.permissions
       : []
   );
 

@@ -4,7 +4,6 @@
  */
 
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
-import { sortBy } from 'lodash';
 import {
   EuiFlexGroup,
   EuiComboBox,
@@ -89,20 +88,6 @@ const getPermissionModeId = (modes: WorkspacePermissionMode[]) => {
     }
   }
   return PermissionModeId.Read;
-};
-
-export const sortPermissions = (permissions: WorkspacePermissionSetting[]) => {
-  const permissionOrder = [
-    PermissionModeId.Admin,
-    PermissionModeId.ReadAndWrite,
-    PermissionModeId.Read,
-  ];
-  return sortBy(permissions, (permission) => {
-    const index = permissionOrder.indexOf(
-      getPermissionModeId(permission.modes) as PermissionModeId
-    );
-    return index === -1 ? permissionOrder.length : index;
-  });
 };
 
 interface WorkspacePermissionSettingInputProps {
