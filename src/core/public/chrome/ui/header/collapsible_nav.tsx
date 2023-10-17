@@ -67,38 +67,28 @@ function getAllCategories(allCategorizedLinks: Record<string, CollapsibleNavLink
   return allCategories;
 }
 
-function getOrderedCategories(
-  mainCategories: Record<string, CollapsibleNavLink[]>,
-  categoryDictionary: ReturnType<typeof getAllCategories>
-) {
-  return sortBy(
-    Object.keys(mainCategories),
-    (categoryName) => categoryDictionary[categoryName]?.order
-  );
-}
-
-function getMergedNavLinks(
-  orderedCategories: string[],
+function getSortedLinksAndCategories(
   uncategorizedLinks: CollapsibleNavLink[],
   categoryDictionary: ReturnType<typeof getAllCategories>
-): Array<string | CollapsibleNavLink> {
-  const uncategorizedLinksWithOrder = sortBy(
-    uncategorizedLinks.filter((link) => link.order !== null),
-    'order'
-  );
+): Array<AppCategory | CollapsibleNavLink> {
+  // uncategorized links and categories are ranked according the order
+  // if order is not defined, categories will be placed above uncategorized links
+  const categories = Object.values(categoryDictionary).filter(
+    (category) => category !== undefined
+  ) as AppCategory[];
+  const uncategorizedLinksWithOrder = uncategorizedLinks.filter((link) => link.order !== null);
   const uncategorizedLinksWithoutOrder = uncategorizedLinks.filter((link) => link.order === null);
-  const orderedCategoryWithOrder = orderedCategories
-    .filter((categoryName) => categoryDictionary[categoryName]?.order !== null)
-    .map((categoryName) => ({ categoryName, order: categoryDictionary[categoryName]?.order }));
-  const orderedCategoryWithoutOrder = orderedCategories.filter(
-    (categoryName) => categoryDictionary[categoryName]?.order === null
-  );
-  const mergedNavLinks = sortBy(
-    [...uncategorizedLinksWithOrder, ...orderedCategoryWithOrder],
+  const categoriesWithOrder = categories.filter((category) => category.order !== null);
+  const categoriesWithoutOrder = categories.filter((category) => category.order === null);
+  const sortedLinksAndCategories = sortBy(
+    [...uncategorizedLinksWithOrder, ...categoriesWithOrder],
     'order'
-  ).map((navLink) => ('categoryName' in navLink ? navLink.categoryName : navLink));
-  // if order is not defined , categorized links will be placed before uncategorized links
-  return [...mergedNavLinks, ...orderedCategoryWithoutOrder, ...uncategorizedLinksWithoutOrder];
+  );
+  return [
+    ...sortedLinksAndCategories,
+    ...categoriesWithoutOrder,
+    ...uncategorizedLinksWithoutOrder,
+  ];
 }
 
 function getCategoryLocalStorageKey(id: string) {
@@ -166,9 +156,7 @@ export function CollapsibleNav({
   const groupedNavLinks = groupBy(allNavLinks, (link) => link?.category?.id);
   const { undefined: uncategorizedLinks = [], ...allCategorizedLinks } = groupedNavLinks;
   const categoryDictionary = getAllCategories(allCategorizedLinks);
-  const orderedCategories = getOrderedCategories(allCategorizedLinks, categoryDictionary);
-  const mergedNavLinks = getMergedNavLinks(
-    orderedCategories,
+  const sortedLinksAndCategories = getSortedLinksAndCategories(
     uncategorizedLinks,
     categoryDictionary
   );
@@ -227,9 +215,10 @@ export function CollapsibleNav({
       )}
 
       <EuiFlexItem className="eui-yScroll">
-        {mergedNavLinks.map((item, i) => {
-          if (typeof item === 'string') {
-            const category = categoryDictionary[item]!;
+        {sortedLinksAndCategories.map((item, i) => {
+          if (!('title' in item)) {
+            // CollapsibleNavLink has title property, while AppCategory does not have
+            const category = item;
             const opensearchLinkLogo =
               category.id === DEFAULT_APP_CATEGORIES.opensearchDashboards.id
                 ? logos.Mark.url
@@ -253,7 +242,7 @@ export function CollapsibleNav({
                     defaultMessage: 'Primary navigation links, {category}',
                     values: { category: category.label },
                   })}
-                  listItems={allCategorizedLinks[item].map((link) => readyForEUI(link))}
+                  listItems={allCategorizedLinks[item.id].map((link) => readyForEUI(link))}
                   maxWidth="none"
                   color="subdued"
                   gutterSize="none"

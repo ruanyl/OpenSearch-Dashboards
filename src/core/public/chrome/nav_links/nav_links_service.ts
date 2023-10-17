@@ -126,9 +126,6 @@ type LinksUpdater = (navLinks: Map<string, NavLinkWrapper>) => Map<string, NavLi
 
 export class NavLinksService {
   private readonly stop$ = new ReplaySubject(1);
-  private navLinks$ = new BehaviorSubject<ReadonlyMap<string, ChromeNavLink> | undefined>(
-    undefined
-  );
 
   public start({ application, http }: StartDeps): ChromeNavLinks {
     const appLinks$ = application.applications$.pipe(
@@ -145,6 +142,9 @@ export class NavLinksService {
     // manual link modifications to be able to re-apply then after every
     // availableApps$ changes.
     const linkUpdaters$ = new BehaviorSubject<LinksUpdater[]>([]);
+    const displayedNavLinks$ = new BehaviorSubject<ReadonlyMap<string, ChromeNavLink> | undefined>(
+      undefined
+    );
     const allNavLinks$ = new BehaviorSubject<ReadonlyMap<string, NavLinkWrapper>>(new Map());
 
     combineLatest([appLinks$, linkUpdaters$])
@@ -161,20 +161,20 @@ export class NavLinksService {
 
     return {
       getNavLinks$: () => {
-        return combineLatest([allNavLinks$, this.navLinks$]).pipe(
+        return combineLatest([allNavLinks$, displayedNavLinks$]).pipe(
           map(([allNavLinks, navLinks]) =>
-            navLinks === undefined ? sortNavLinks(allNavLinks) : sortChromeNavLinks(navLinks)
+            navLinks === undefined ? sortLinks(allNavLinks) : sortLinks(navLinks)
           ),
           takeUntil(this.stop$)
         );
       },
 
-      setNavLinks: (filteredNavLinks: ReadonlyMap<string, ChromeNavLink>) => {
-        this.navLinks$.next(filteredNavLinks);
+      setNavLinks: (navLinks: ReadonlyMap<string, ChromeNavLink>) => {
+        displayedNavLinks$.next(navLinks);
       },
 
       getAllNavLinks$: () => {
-        return allNavLinks$.pipe(map(sortNavLinks), takeUntil(this.stop$));
+        return allNavLinks$.pipe(map(sortLinks), takeUntil(this.stop$));
       },
 
       get(id: string) {
@@ -183,7 +183,7 @@ export class NavLinksService {
       },
 
       getAll() {
-        return sortNavLinks(allNavLinks$.value);
+        return sortLinks(allNavLinks$.value);
       },
 
       has(id: string) {
@@ -235,16 +235,9 @@ export class NavLinksService {
   }
 }
 
-function sortNavLinks(navLinks: ReadonlyMap<string, NavLinkWrapper>) {
+function sortLinks(links: ReadonlyMap<string, NavLinkWrapper | ChromeNavLink>) {
   return sortBy(
-    [...navLinks.values()].map((link) => link.properties),
-    'order'
-  );
-}
-
-function sortChromeNavLinks(chromeNavLinks: ReadonlyMap<string, ChromeNavLink>) {
-  return sortBy(
-    [...chromeNavLinks.values()].map((link) => link as Readonly<ChromeNavLink>),
+    [...links.values()].map((link) => ('properties' in link ? link.properties : link)),
     'order'
   );
 }
