@@ -4,6 +4,7 @@
  */
 
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
+import { sortBy } from 'lodash';
 import {
   EuiFlexGroup,
   EuiComboBox,
@@ -80,6 +81,30 @@ const generateWorkspacePermissionItemKey = (
     index,
   ].join('-');
 
+// default permission mode is read
+const getPermissionModeId = (modes: WorkspacePermissionMode[]) => {
+  for (const key in optionIdToWorkspacePermissionModesMap) {
+    if (optionIdToWorkspacePermissionModesMap[key].every((mode) => modes?.includes(mode))) {
+      return key;
+    }
+  }
+  return PermissionModeId.Read;
+};
+
+export const sortPermissions = (permissions: WorkspacePermissionSetting[]) => {
+  const permissionOrder = [
+    PermissionModeId.Admin,
+    PermissionModeId.ReadAndWrite,
+    PermissionModeId.Read,
+  ];
+  return sortBy(permissions, (permission) => {
+    const index = permissionOrder.indexOf(
+      getPermissionModeId(permission.modes) as PermissionModeId
+    );
+    return index === -1 ? permissionOrder.length : index;
+  });
+};
+
 interface WorkspacePermissionSettingInputProps {
   index: number;
   deletable: boolean;
@@ -116,16 +141,7 @@ const WorkspacePermissionSettingInput = ({
     [group, userId]
   );
 
-  // default permission mode is read
-  const permissionModesSelectedId =
-    useMemo(() => {
-      for (const key in optionIdToWorkspacePermissionModesMap) {
-        if (optionIdToWorkspacePermissionModesMap[key].every((mode) => modes?.includes(mode))) {
-          return key;
-        }
-      }
-    }, [modes]) ?? PermissionModeId.Read;
-
+  const permissionModesSelectedId = useMemo(() => getPermissionModeId(modes ?? []), [modes]);
   const handleGroupOrUserIdCreate = useCallback(
     (groupOrUserId) => {
       onGroupOrUserIdChange(
@@ -201,7 +217,7 @@ const WorkspacePermissionSettingInput = ({
 interface WorkspacePermissionSettingPanelProps {
   errors?: string[];
   firstUserDeletable?: boolean;
-  permissionSettings?: Array<Partial<WorkspacePermissionSetting>>;
+  permissionSettings: Array<Partial<WorkspacePermissionSetting>>;
   onChange?: (value: Array<Partial<WorkspacePermissionSetting>>) => void;
 }
 
