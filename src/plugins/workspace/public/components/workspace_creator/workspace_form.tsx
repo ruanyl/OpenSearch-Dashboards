@@ -26,6 +26,8 @@ import {
   EuiHorizontalRule,
   EuiFlexGroup,
   EuiPageHeader,
+  EuiTab,
+  EuiTabs,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import {
@@ -578,28 +580,25 @@ export const WorkspaceForm = ({
         </EuiFormRow>
       </EuiPanel>
       <EuiSpacer />
-      <EuiPageHeader
-        tabs={[
-          ...(isEditingManagementWorkspace
-            ? []
-            : [
-                {
-                  label: featureVisibilityTitle,
-                  isSelected: selectedTab === WorkspaceFormTabs.FeatureVisibility,
-                  onClick: handleTabFeatureClick,
-                },
-              ]),
-          ...(!permissionEnabled
-            ? []
-            : [
-                {
-                  label: usersAndPermissionsTitle,
-                  isSelected: selectedTab === WorkspaceFormTabs.UsersAndPermissions,
-                  onClick: handleTabPermissionClick,
-                },
-              ]),
-        ]}
-      />
+
+      <EuiTabs>
+        {!isEditingManagementWorkspace && (
+          <EuiTab
+            onClick={handleTabFeatureClick}
+            isSelected={selectedTab === WorkspaceFormTabs.FeatureVisibility}
+          >
+            <EuiText>{featureVisibilityTitle}</EuiText>
+          </EuiTab>
+        )}
+        {permissionEnabled && (
+          <EuiTab
+            onClick={handleTabPermissionClick}
+            isSelected={selectedTab === WorkspaceFormTabs.UsersAndPermissions}
+          >
+            <EuiText>{usersAndPermissionsTitle}</EuiText>
+          </EuiTab>
+        )}
+      </EuiTabs>
 
       {selectedTab === WorkspaceFormTabs.FeatureVisibility && (
         <EuiPanel>
