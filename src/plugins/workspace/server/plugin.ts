@@ -16,7 +16,10 @@ import { IWorkspaceDBImpl } from './types';
 import { WorkspaceClientWithSavedObject } from './workspace_client';
 import { WorkspaceSavedObjectsClientWrapper } from './saved_objects';
 import { registerRoutes } from './routes';
-import { WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID } from '../common/constants';
+import {
+  WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
+  WORKSPACE_CONFLICT_CONTROL_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
+} from '../common/constants';
 import {
   SavedObjectsPermissionControl,
   SavedObjectsPermissionControlContract,
@@ -24,12 +27,14 @@ import {
 import { registerPermissionCheckRoutes } from './permission_control/routes';
 import { WorkspacePluginConfigType } from '../config';
 import { cleanWorkspaceId, getWorkspaceIdFromUrl } from '../../../core/server/utils';
+import { WorkspaceConflictSavedObjectsClientWrapper } from './saved_objects/saved_objects_wrapper_for_check_workspace_conflict';
 
 export class WorkspacePlugin implements Plugin<{}, {}> {
   private readonly logger: Logger;
   private client?: IWorkspaceDBImpl;
   private permissionControl?: SavedObjectsPermissionControlContract;
   private readonly config$: Observable<WorkspacePluginConfigType>;
+  private workspaceConflictControl?: WorkspaceConflictSavedObjectsClientWrapper;
 
   private proxyWorkspaceTrafficToRealHandler(setupDeps: CoreSetup) {
     /**
@@ -83,6 +88,13 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
     }
 
     this.proxyWorkspaceTrafficToRealHandler(core);
+    this.workspaceConflictControl = new WorkspaceConflictSavedObjectsClientWrapper();
+
+    core.savedObjects.addClientWrapper(
+      -1,
+      WORKSPACE_CONFLICT_CONTROL_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
+      this.workspaceConflictControl.wrapperFactory
+    );
 
     registerRoutes({
       http: core.http,
@@ -110,6 +122,7 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
     this.logger.debug('Starting SavedObjects service');
     this.permissionControl?.setup(core.savedObjects.getScopedClient);
     this.client?.setSavedObjects(core.savedObjects);
+    this.workspaceConflictControl?.setSerializer(core.savedObjects.createSerializer());
 
     return {
       client: this.client as IWorkspaceDBImpl,
