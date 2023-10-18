@@ -72,7 +72,7 @@ export function createEuiListItem({
       }
 
       if (
-        !link.externalLink && // ignore external links
+        !externalLink && // ignore external links
         event.button === 0 && // ignore everything but left clicks
         !isModifiedOrPrevented(event)
       ) {

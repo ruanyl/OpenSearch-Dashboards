@@ -126,9 +126,6 @@ type LinksUpdater = (navLinks: Map<string, NavLinkWrapper>) => Map<string, NavLi
 
 export class NavLinksService {
   private readonly stop$ = new ReplaySubject(1);
-  private filteredNavLinks$ = new BehaviorSubject<ReadonlyMap<string, ChromeNavLink> | undefined>(
-    undefined
-  );
 
   public start({ application, http }: StartDeps): ChromeNavLinks {
     const appLinks$ = application.applications$.pipe(
@@ -178,21 +175,6 @@ export class NavLinksService {
 
       getAllNavLinks$: () => {
         return allNavLinks$.pipe(map(sortLinks), takeUntil(this.stop$));
-      },
-
-      setFilteredNavLinks: (filteredNavLinks: ReadonlyMap<string, ChromeNavLink>) => {
-        this.filteredNavLinks$.next(filteredNavLinks);
-      },
-
-      getFilteredNavLinks$: () => {
-        return combineLatest([navLinks$, this.filteredNavLinks$]).pipe(
-          map(([navLinks, filteredNavLinks]) =>
-            filteredNavLinks === undefined
-              ? sortNavLinks(navLinks)
-              : sortChromeNavLinks(filteredNavLinks)
-          ),
-          takeUntil(this.stop$)
-        );
       },
 
       get(id: string) {
@@ -256,13 +238,6 @@ export class NavLinksService {
 function sortLinks(links: ReadonlyMap<string, NavLinkWrapper | ChromeNavLink>) {
   return sortBy(
     [...links.values()].map((link) => ('properties' in link ? link.properties : link)),
-    'order'
-  );
-}
-
-function sortChromeNavLinks(chromeNavLinks: ReadonlyMap<string, ChromeNavLink>) {
-  return sortBy(
-    [...chromeNavLinks.values()].map((link) => link as Readonly<ChromeNavLink>),
     'order'
   );
 }

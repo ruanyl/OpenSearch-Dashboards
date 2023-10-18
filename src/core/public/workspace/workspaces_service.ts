@@ -44,8 +44,8 @@ export type WorkspacesStart = WorkspaceObservables;
 
 export class WorkspacesService implements CoreService<WorkspacesSetup, WorkspacesStart> {
   private currentWorkspaceId$ = new BehaviorSubject<string>('');
-  private workspaceList$ = new BehaviorSubject<WorkspaceAttribute[]>([]);
-  private currentWorkspace$ = new BehaviorSubject<WorkspaceAttribute | null>(null);
+  private workspaceList$ = new BehaviorSubject<WorkspaceObject[]>([]);
+  private currentWorkspace$ = new BehaviorSubject<WorkspaceObject | null>(null);
   private initialized$ = new BehaviorSubject<boolean>(false);
 
   constructor() {
