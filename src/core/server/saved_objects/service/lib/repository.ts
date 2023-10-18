@@ -368,21 +368,12 @@ export class SavedObjectsRepository {
 
       if (object.id == null) object.id = uuid.v1();
 
-      let opensearchRequestIndexPayload = {};
-
-      if (requiresNamespacesCheck) {
-        opensearchRequestIndexPayload = {
-          opensearchRequestIndex: bulkGetRequestIndexCounter,
-        };
-        bulkGetRequestIndexCounter++;
-      }
-
       return {
         tag: 'Right' as 'Right',
         value: {
           method,
           object,
-          ...opensearchRequestIndexPayload,
+          ...(requiresNamespacesCheck && { opensearchRequestIndex: bulkGetRequestIndexCounter++ }),
         },
       };
     });
