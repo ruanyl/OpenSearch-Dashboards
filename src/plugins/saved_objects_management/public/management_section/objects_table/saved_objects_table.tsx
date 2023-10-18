@@ -1111,7 +1111,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             onTableChange={this.onTableChange}
             filters={filters}
             onExport={this.onExport}
-            canDelete={applications.capabilities.savedObjectsManagement.delete as boolean}
+            canDelete={applications.capabilities.savedObjectsManagement?.delete as boolean}
             onDelete={this.onDelete}
             onDuplicateSelected={() =>
               this.setState({

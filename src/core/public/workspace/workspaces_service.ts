@@ -5,10 +5,7 @@
 
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { isEqual } from 'lodash';
-
-import { CoreService, WorkspaceAttribute } from '../../types';
-
-type WorkspaceObject = WorkspaceAttribute & { libraryReadonly?: boolean };
+import { CoreService, WorkspaceObject } from '../../types';
 
 interface WorkspaceObservables {
   /**
