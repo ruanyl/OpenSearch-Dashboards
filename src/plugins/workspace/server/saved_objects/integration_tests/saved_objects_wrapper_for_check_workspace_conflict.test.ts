@@ -2,10 +2,11 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+
 import { SavedObject } from 'src/core/types';
 import { isEqual } from 'lodash';
-import * as osdTestServer from '../../../../../test_helpers/osd_server';
 import { Readable } from 'stream';
+import * as osdTestServer from '../../../../../core/test_helpers/osd_server';
 
 const dashboard: Omit<SavedObject, 'id'> = {
   type: 'dashboard',
@@ -13,12 +14,19 @@ const dashboard: Omit<SavedObject, 'id'> = {
   references: [],
 };
 
-describe('repository integration test', () => {
+describe('saved_objects_wrapper_for_check_workspace_conflict integration test', () => {
   let root: ReturnType<typeof osdTestServer.createRoot>;
   let opensearchServer: osdTestServer.TestOpenSearchUtils;
   beforeAll(async () => {
     const { startOpenSearch, startOpenSearchDashboards } = osdTestServer.createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
+      settings: {
+        osd: {
+          workspace: {
+            enabled: true,
+          },
+        },
+      },
     });
     opensearchServer = await startOpenSearch();
     const startOSDResp = await startOpenSearchDashboards();
@@ -35,7 +43,7 @@ describe('repository integration test', () => {
         (await osdTestServer.request.delete(root, `/api/saved_objects/${object.type}/${object.id}`))
           .statusCode
       )
-    );
+    ).toEqual(true);
   };
 
   const getItem = async (object: Pick<SavedObject, 'id' | 'type'>) => {
