@@ -106,17 +106,17 @@ describe('NavLinksService', () => {
   });
 
   describe('#getNavLinks$() when non null', () => {
-    // set filtered nav links, nav link with order smaller than 0 will be filtered
+    // set nav links, nav link with order smaller than 0 will be filtered
     beforeEach(() => {
-      const filteredNavLinks = new Map<string, ChromeNavLink>();
+      const navLinks = new Map<string, ChromeNavLink>();
       start.getAllNavLinks$().subscribe((links) =>
         links.forEach((link) => {
           if (link.order !== undefined && link.order >= 0) {
-            filteredNavLinks.set(link.id, link);
+            navLinks.set(link.id, link);
           }
         })
       );
-      start.setNavLinks(filteredNavLinks);
+      start.setNavLinks(navLinks);
     });
 
     it('does not include `app2` applications', async () => {
