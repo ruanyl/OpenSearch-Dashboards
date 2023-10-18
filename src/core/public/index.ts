@@ -103,7 +103,7 @@ export {
   StringValidation,
   StringValidationRegex,
   StringValidationRegexString,
-  WorkspaceAttribute,
+  WorkspaceObject,
 } from '../types';
 
 export {
