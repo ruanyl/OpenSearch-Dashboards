@@ -39,63 +39,9 @@ interface WorkspacePluginSetupDeps {
 export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps> {
   private coreStart?: CoreStart;
   private currentWorkspaceSubscription?: Subscription;
+
   private getWorkspaceIdFromURL(): string | null {
     return getWorkspaceIdFromUrl(window.location.href);
-  }
-
-  private filterByWorkspace(workspace: WorkspaceObject | null, allNavLinks: ChromeNavLink[]) {
-    if (!workspace) return allNavLinks;
-    const features = workspace.features ?? ['*'];
-    return allNavLinks.filter(featureMatchesConfig(features));
-  }
-
-  private filterNavLinks(core: CoreStart) {
-    const navLinksService = core.chrome.navLinks;
-    const allNavLinks$ = navLinksService.getAllNavLinks$();
-    const currentWorkspace$ = core.workspaces.currentWorkspace$;
-    combineLatest([
-      allNavLinks$.pipe(map(this.changeCategoryNameByWorkspaceFeatureFlag)),
-      currentWorkspace$,
-    ]).subscribe(([allNavLinks, currentWorkspace]) => {
-      const filteredNavLinks = this.filterByWorkspace(currentWorkspace, allNavLinks);
-      const navLinks = new Map<string, ChromeNavLink>();
-      filteredNavLinks.forEach((chromeNavLink) => {
-        navLinks.set(chromeNavLink.id, chromeNavLink);
-      });
-      navLinksService.setNavLinks(navLinks);
-    });
-  }
-
-  /**
-   * The category "Opensearch Dashboards" needs to be renamed as "Library"
-   * when workspace feature flag is on, we need to do it here and generate
-   * a new item without polluting the original ChromeNavLink.
-   */
-  private changeCategoryNameByWorkspaceFeatureFlag(chromeLinks: ChromeNavLink[]): ChromeNavLink[] {
-    return chromeLinks.map((item) => {
-      if (item.category?.id === DEFAULT_APP_CATEGORIES.opensearchDashboards.id) {
-        return {
-          ...item,
-          category: {
-            ...item.category,
-            label: i18n.translate('core.ui.libraryNavList.label', {
-              defaultMessage: 'Library',
-            }),
-          },
-        };
-      }
-      return item;
-    });
-  }
-
-  private _changeSavedObjectCurrentWorkspace() {
-    if (this.coreStart) {
-      return this.coreStart.workspaces.currentWorkspaceId$.subscribe((currentWorkspaceId) => {
-        if (currentWorkspaceId) {
-          this.coreStart?.savedObjects.client.setCurrentWorkspace(currentWorkspaceId);
-        }
-      });
-    }
   }
 
   public async setup(core: CoreSetup, { savedObjectsManagement }: WorkspacePluginSetupDeps) {
@@ -221,6 +167,61 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     });
 
     return {};
+  }
+
+  private _changeSavedObjectCurrentWorkspace() {
+    if (this.coreStart) {
+      return this.coreStart.workspaces.currentWorkspaceId$.subscribe((currentWorkspaceId) => {
+        if (currentWorkspaceId) {
+          this.coreStart?.savedObjects.client.setCurrentWorkspace(currentWorkspaceId);
+        }
+      });
+    }
+  }
+
+  private filterByWorkspace(workspace: WorkspaceObject | null, allNavLinks: ChromeNavLink[]) {
+    if (!workspace) return allNavLinks;
+    const features = workspace.features ?? ['*'];
+    return allNavLinks.filter(featureMatchesConfig(features));
+  }
+
+  private filterNavLinks(core: CoreStart) {
+    const navLinksService = core.chrome.navLinks;
+    const allNavLinks$ = navLinksService.getAllNavLinks$();
+    const currentWorkspace$ = core.workspaces.currentWorkspace$;
+    combineLatest([
+      allNavLinks$.pipe(map(this.changeCategoryNameByWorkspaceFeatureFlag)),
+      currentWorkspace$,
+    ]).subscribe(([allNavLinks, currentWorkspace]) => {
+      const filteredNavLinks = this.filterByWorkspace(currentWorkspace, allNavLinks);
+      const navLinks = new Map<string, ChromeNavLink>();
+      filteredNavLinks.forEach((chromeNavLink) => {
+        navLinks.set(chromeNavLink.id, chromeNavLink);
+      });
+      navLinksService.setNavLinks(navLinks);
+    });
+  }
+
+  /**
+   * The category "Opensearch Dashboards" needs to be renamed as "Library"
+   * when workspace feature flag is on, we need to do it here and generate
+   * a new item without polluting the original ChromeNavLink.
+   */
+  private changeCategoryNameByWorkspaceFeatureFlag(chromeLinks: ChromeNavLink[]): ChromeNavLink[] {
+    return chromeLinks.map((item) => {
+      if (item.category?.id === DEFAULT_APP_CATEGORIES.opensearchDashboards.id) {
+        return {
+          ...item,
+          category: {
+            ...item.category,
+            label: i18n.translate('core.ui.libraryNavList.label', {
+              defaultMessage: 'Library',
+            }),
+          },
+        };
+      }
+      return item;
+    });
   }
 
   public start(core: CoreStart) {
