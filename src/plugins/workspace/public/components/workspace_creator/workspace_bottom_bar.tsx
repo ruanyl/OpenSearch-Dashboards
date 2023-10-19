@@ -21,7 +21,8 @@ import { WorkspaceCancelModal } from './workspace_cancel_modal';
 interface WorkspaceBottomBarProps {
   formId: string;
   opType?: string;
-  numberOfErrors: number;
+  errorsCount: number;
+  unsavedChangesCount: number;
   application: ApplicationStart;
 }
 
@@ -29,7 +30,8 @@ interface WorkspaceBottomBarProps {
 export const WorkspaceBottomBar = ({
   formId,
   opType,
-  numberOfErrors,
+  errorsCount,
+  unsavedChangesCount,
   application,
 }: WorkspaceBottomBarProps) => {
   const [isCancelModalVisible, setIsCancelModalVisible] = useState(false);
@@ -47,13 +49,13 @@ export const WorkspaceBottomBar = ({
               {opType === WORKSPACE_OP_TYPE_UPDATE ? (
                 <EuiText textAlign="left">
                   {i18n.translate('workspace.form.bottomBar.unsavedChanges', {
-                    defaultMessage: '1 Unsaved change(s)',
+                    defaultMessage: `${unsavedChangesCount} Unsaved change(s)`,
                   })}
                 </EuiText>
               ) : (
                 <EuiText textAlign="left">
                   {i18n.translate('workspace.form.bottomBar.errors', {
-                    defaultMessage: `${numberOfErrors} Error(s)`,
+                    defaultMessage: `${errorsCount} Error(s)`,
                   })}
                 </EuiText>
               )}

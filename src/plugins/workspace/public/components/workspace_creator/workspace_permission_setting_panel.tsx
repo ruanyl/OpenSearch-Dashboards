@@ -81,7 +81,7 @@ const generateWorkspacePermissionItemKey = (
   ].join('-');
 
 // default permission mode is read
-const getPermissionModeId = (modes: WorkspacePermissionMode[]) => {
+export const getPermissionModeId = (modes: WorkspacePermissionMode[]) => {
   for (const key in optionIdToWorkspacePermissionModesMap) {
     if (optionIdToWorkspacePermissionModesMap[key].every((mode) => modes?.includes(mode))) {
       return key;

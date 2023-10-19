@@ -35,9 +35,14 @@ import {
   ApplicationStart,
   DEFAULT_APP_CATEGORIES,
   MANAGEMENT_WORKSPACE_ID,
+  WorkspacePermissionMode,
 } from '../../../../../core/public';
 import { useApplications } from '../../hooks';
-import { DEFAULT_CHECKED_FEATURES_IDS } from '../../../common/constants';
+import {
+  DEFAULT_CHECKED_FEATURES_IDS,
+  WORKSPACE_OP_TYPE_CREATE,
+  WORKSPACE_OP_TYPE_UPDATE,
+} from '../../../common/constants';
 import {
   isFeatureDependBySelectedFeatures,
   getFinalFeatureIdsByDependency,
@@ -46,6 +51,7 @@ import {
 import { WorkspaceBottomBar } from './workspace_bottom_bar';
 import { WorkspaceIconSelector } from './workspace_icon_selector';
 import {
+  getPermissionModeId,
   WorkspacePermissionSetting,
   WorkspacePermissionItemType,
   WorkspacePermissionSettingPanel,
@@ -54,6 +60,7 @@ import { featureMatchesConfig } from '../../utils';
 
 enum WorkspaceFormTabs {
   NotSelected,
+  WorkspaceSettings,
   FeatureVisibility,
   UsersAndPermissions,
 }
@@ -116,18 +123,129 @@ const isValidNameOrDescription = (input?: string) => {
   return regex.test(input);
 };
 
-const getNumberOfErrors = (formErrors: WorkspaceFormErrors) => {
-  let numberOfErrors = 0;
+const getErrorsCount = (formErrors: WorkspaceFormErrors) => {
+  let errorsCount = 0;
   if (formErrors.name) {
-    numberOfErrors += 1;
+    errorsCount += 1;
   }
   if (formErrors.description) {
-    numberOfErrors += 1;
+    errorsCount += 1;
   }
   if (formErrors.permissions) {
-    numberOfErrors += formErrors.permissions.length;
+    errorsCount += formErrors.permissions.length;
   }
-  return numberOfErrors;
+  return errorsCount;
+};
+
+// when editing, attributes could be undefined in workspace form
+type WorkspaceFormEditingData = Partial<
+  Omit<WorkspaceFormSubmitData, 'permissions'> & {
+    permissions: Array<Partial<WorkspacePermissionSetting>>;
+  }
+>;
+
+type UserOrGroupPermissionEditingData = Array<
+  Partial<{ id: string; modes: WorkspacePermissionMode[] }>
+>;
+
+const getUserAndGroupPermissions = (permissions: Array<Partial<WorkspacePermissionSetting>>) => {
+  const userPermissions: UserOrGroupPermissionEditingData = [];
+  const groupPermissions: UserOrGroupPermissionEditingData = [];
+  if (permissions) {
+    for (const permission of permissions) {
+      if (permission.type === WorkspacePermissionItemType.User) {
+        userPermissions.push({ id: permission.userId, modes: permission.modes });
+      }
+      if (permission.type === WorkspacePermissionItemType.Group) {
+        groupPermissions.push({ id: permission.group, modes: permission.modes });
+      }
+    }
+  }
+  return [userPermissions, groupPermissions];
+};
+
+const getUnsavedUserOrGroupPermissionChangesCount = (
+  initialPermissions: UserOrGroupPermissionEditingData,
+  currentPermissions: UserOrGroupPermissionEditingData
+) => {
+  // for user or group permissions, unsaved changes is the sum of
+  // # deleted permissions, # added permissions and # edited permissions
+  let addedPermissions = 0;
+  let editedPermissions = 0;
+  const initialPermissionMap = new Map<string, WorkspacePermissionMode[]>();
+  for (const permission of initialPermissions) {
+    if (permission.id) {
+      initialPermissionMap.set(permission.id, permission.modes ?? []);
+    }
+  }
+
+  for (const permission of currentPermissions) {
+    if (!permission.id) {
+      addedPermissions += 1; // added permissions
+    } else {
+      const permissionModes = initialPermissionMap.get(permission.id);
+      if (!permissionModes) {
+        addedPermissions += 1;
+      } else if (
+        getPermissionModeId(permissionModes) !== getPermissionModeId(permission.modes ?? [])
+      ) {
+        editedPermissions += 1; // added or edited permissions
+      }
+    }
+  }
+
+  // currentPermissions.length = initialPermissions.length + # added permissions - # deleted permissions
+  const deletedPermissions =
+    addedPermissions + initialPermissions.length - currentPermissions.length;
+
+  return addedPermissions + editedPermissions + deletedPermissions;
+};
+
+const getUnsavedChangesCount = (
+  initialFormData: WorkspaceFormEditingData,
+  currentFormData: WorkspaceFormEditingData
+) => {
+  let unsavedChangesCount = 0;
+  if (initialFormData.name !== currentFormData.name) {
+    unsavedChangesCount += 1;
+  }
+  // initial and current description could be undefined
+  const initialDescription = initialFormData.description ?? '';
+  const currentDescription = currentFormData.description ?? '';
+  if (initialDescription !== currentDescription) {
+    unsavedChangesCount += 1;
+  }
+  if (initialFormData.color !== currentFormData.color) {
+    unsavedChangesCount += 1;
+  }
+  if (initialFormData.icon !== currentFormData.icon) {
+    unsavedChangesCount += 1;
+  }
+  if (initialFormData.defaultVISTheme !== currentFormData.defaultVISTheme) {
+    unsavedChangesCount += 1;
+  }
+  const featureIntersectionCount = (
+    initialFormData.features?.filter((feature) => currentFormData.features?.includes(feature)) ?? []
+  ).length;
+  // for features, unsaved changes is the sum of # deleted features and # added features
+  unsavedChangesCount += (initialFormData.features?.length ?? 0) - featureIntersectionCount;
+  unsavedChangesCount += (currentFormData.features?.length ?? 0) - featureIntersectionCount;
+  // for permissions, unsaved changes is the sum of # unsaved user permissions and # unsaved group permissions
+  const [initialUserPermissions, initialGroupPermissions] = getUserAndGroupPermissions(
+    initialFormData.permissions ?? []
+  );
+  const [currentUserPermissions, currentGroupPermissions] = getUserAndGroupPermissions(
+    currentFormData.permissions ?? []
+  );
+  unsavedChangesCount += getUnsavedUserOrGroupPermissionChangesCount(
+    initialUserPermissions,
+    currentUserPermissions
+  );
+  unsavedChangesCount += getUnsavedUserOrGroupPermissionChangesCount(
+    initialGroupPermissions,
+    currentGroupPermissions
+  );
+  return unsavedChangesCount;
 };
 
 const isUserOrGroupPermissionSettingDuplicated = (
@@ -183,7 +301,7 @@ export const WorkspaceForm = ({
       ? WorkspaceFormTabs.UsersAndPermissions
       : WorkspaceFormTabs.NotSelected
   );
-  const [numberOfErrors, setNumberOfErrors] = useState(0);
+  const [errorsCount, setErrorsCount] = useState(0);
   // The matched feature id list based on original feature config,
   // the feature category will be expanded to list of feature ids
   const defaultFeatures = useMemo(() => {
@@ -211,6 +329,18 @@ export const WorkspaceForm = ({
       : []
   );
 
+  const libraryCategoryLabel = i18n.translate('core.ui.libraryNavList.label', {
+    defaultMessage: 'Library',
+  });
+  const categoryToDescription: { [key: string]: string } = {
+    [libraryCategoryLabel]: i18n.translate(
+      'workspace.form.featureVisibility.libraryCategory.Description',
+      {
+        defaultMessage: 'Workspace-owned library items',
+      }
+    ),
+  };
+
   const [formErrors, setFormErrors] = useState<WorkspaceFormErrors>({});
   const formIdRef = useRef<string>();
   const getFormData = () => ({
@@ -225,6 +355,28 @@ export const WorkspaceForm = ({
   const getFormDataRef = useRef(getFormData);
   getFormDataRef.current = getFormData;
 
+  const unsavedChangesCount = useMemo(() => {
+    const currentFormData = {
+      name,
+      description,
+      features: selectedFeatureIds,
+      color,
+      icon,
+      defaultVISTheme,
+      permissions: permissionSettings,
+    };
+    return getUnsavedChangesCount(defaultValues ?? {}, currentFormData);
+  }, [
+    defaultValues,
+    name,
+    description,
+    color,
+    icon,
+    defaultVISTheme,
+    selectedFeatureIds,
+    permissionSettings,
+  ]);
+
   const featureOrGroups = useMemo(() => {
     const transformedApplications = applications.map((app) => {
       if (app.category?.id === DEFAULT_APP_CATEGORIES.opensearchDashboards.id) {
@@ -232,9 +384,7 @@ export const WorkspaceForm = ({
           ...app,
           category: {
             ...app.category,
-            label: i18n.translate('core.ui.libraryNavList.label', {
-              defaultMessage: 'Library',
-            }),
+            label: libraryCategoryLabel,
           },
         };
       }
@@ -271,7 +421,7 @@ export const WorkspaceForm = ({
         },
       ];
     }, []);
-  }, [applications]);
+  }, [applications, libraryCategoryLabel]);
 
   const allFeatures = useMemo(
     () =>
@@ -432,10 +582,10 @@ export const WorkspaceForm = ({
           permissions: permissionErrors,
         };
       }
-      const currentNumberOfErrors = getNumberOfErrors(currentFormErrors);
+      const currentErrorsCount = getErrorsCount(currentFormErrors);
       setFormErrors(currentFormErrors);
-      setNumberOfErrors(currentNumberOfErrors);
-      if (currentNumberOfErrors > 0) {
+      setErrorsCount(currentErrorsCount);
+      if (currentErrorsCount > 0) {
         return;
       }
 
@@ -483,6 +633,10 @@ export const WorkspaceForm = ({
     setSelectedTab(WorkspaceFormTabs.UsersAndPermissions);
   }, []);
 
+  const handleTabWorkspaceSettingsClick = useCallback(() => {
+    setSelectedTab(WorkspaceFormTabs.WorkspaceSettings);
+  }, []);
+
   const onDefaultVISThemeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setDefaultVISTheme(e.target.value);
   };
@@ -493,114 +647,111 @@ export const WorkspaceForm = ({
   const featureVisibilityTitle = i18n.translate('workspace.form.featureVisibility.title', {
     defaultMessage: 'Feature Visibility',
   });
+  const workspaceSettingsTitle = i18n.translate('workspace.form.workspaceSettings.title', {
+    defaultMessage: 'Workspace Settings',
+  });
   const usersAndPermissionsTitle = i18n.translate('workspace.form.usersAndPermissions.title', {
     defaultMessage: 'Users & Permissions',
   });
-  const libraryCategoryLabel = i18n.translate('core.ui.libraryNavList.label', {
-    defaultMessage: 'Library',
-  });
-  const categoryToDescription: { [key: string]: string } = {
-    [libraryCategoryLabel]: i18n.translate(
-      'workspace.form.featureVisibility.libraryCategory.Description',
-      {
-        defaultMessage: 'Workspace-owned library items',
-      }
-    ),
-  };
+
+  const workspaceInfoTab = (
+    <EuiPanel>
+      <EuiTitle size="s">
+        <h2>
+          {opType === WORKSPACE_OP_TYPE_UPDATE ? workspaceSettingsTitle : workspaceDetailsTitle}
+        </h2>
+      </EuiTitle>
+      <EuiHorizontalRule margin="xs" />
+      <EuiSpacer size="s" />
+      <EuiFormRow
+        label={i18n.translate('workspace.form.workspaceDetails.name.label', {
+          defaultMessage: 'Name',
+        })}
+        helpText={i18n.translate('workspace.form.workspaceDetails.name.helpText', {
+          defaultMessage:
+            'Valid characters are a-z, A-Z, 0-9, (), [], _ (underscore), - (hyphen) and (space).',
+        })}
+        isInvalid={!!formErrors.name}
+        error={formErrors.name}
+      >
+        <EuiFieldText
+          value={name}
+          onChange={handleNameInputChange}
+          readOnly={workspaceNameReadOnly}
+          data-test-subj="workspaceForm-workspaceDetails-nameInputText"
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        label={
+          <>
+            Description - <i>optional</i>
+          </>
+        }
+        helpText={i18n.translate('workspace.form.workspaceDetails.description.helpText', {
+          defaultMessage:
+            'Valid characters are a-z, A-Z, 0-9, (), [], _ (underscore), - (hyphen) and (space).',
+        })}
+        isInvalid={!!formErrors.description}
+        error={formErrors.description}
+      >
+        <EuiFieldText
+          value={description}
+          onChange={handleDescriptionInputChange}
+          data-test-subj="workspaceForm-workspaceDetails-descriptionInputText"
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        label={i18n.translate('workspace.form.workspaceDetails.color.label', {
+          defaultMessage: 'Color',
+        })}
+        isInvalid={!!formErrors.color}
+        error={formErrors.color}
+      >
+        <div>
+          <EuiText size="xs" color="subdued">
+            {i18n.translate('workspace.form.workspaceDetails.color.helpText', {
+              defaultMessage: 'Accent color for your workspace',
+            })}
+          </EuiText>
+          <EuiSpacer size={'s'} />
+          <EuiColorPicker
+            color={color}
+            onChange={handleColorChange}
+            data-test-subj="workspaceForm-workspaceDetails-colorPicker"
+          />
+        </div>
+      </EuiFormRow>
+      <EuiFormRow
+        label={i18n.translate('workspace.form.workspaceDetails.icon.label', {
+          defaultMessage: 'Icon',
+        })}
+        isInvalid={!!formErrors.icon}
+        error={formErrors.icon}
+      >
+        <WorkspaceIconSelector value={icon} onChange={handleIconChange} color={color} />
+      </EuiFormRow>
+      <EuiFormRow
+        label={i18n.translate('workspace.form.workspaceDetails.defaultVisualizationTheme.label', {
+          defaultMessage: 'Default visualization theme',
+        })}
+        isInvalid={!!formErrors.defaultVISTheme}
+        error={formErrors.defaultVISTheme}
+      >
+        <EuiSelect
+          hasNoInitialSelection
+          value={defaultVISTheme}
+          options={defaultVISThemeOptions}
+          onChange={onDefaultVISThemeChange}
+          data-test-subj="workspaceForm-workspaceDetails-defaultVISThemeSelector"
+        />
+      </EuiFormRow>
+    </EuiPanel>
+  );
 
   return (
     <EuiForm id={formIdRef.current} onSubmit={handleFormSubmit} component="form">
-      <EuiPanel>
-        <EuiTitle size="s">
-          <h2>{workspaceDetailsTitle}</h2>
-        </EuiTitle>
-        <EuiHorizontalRule margin="xs" />
-        <EuiSpacer size="s" />
-        <EuiFormRow
-          label={i18n.translate('workspace.form.workspaceDetails.name.label', {
-            defaultMessage: 'Name',
-          })}
-          helpText={i18n.translate('workspace.form.workspaceDetails.name.helpText', {
-            defaultMessage:
-              'Valid characters are a-z, A-Z, 0-9, (), [], _ (underscore), - (hyphen) and (space).',
-          })}
-          isInvalid={!!formErrors.name}
-          error={formErrors.name}
-        >
-          <EuiFieldText
-            value={name}
-            onChange={handleNameInputChange}
-            readOnly={workspaceNameReadOnly}
-            data-test-subj="workspaceForm-workspaceDetails-nameInputText"
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          label={
-            <>
-              Description - <i>optional</i>
-            </>
-          }
-          helpText={i18n.translate('workspace.form.workspaceDetails.description.helpText', {
-            defaultMessage:
-              'Valid characters are a-z, A-Z, 0-9, (), [], _ (underscore), - (hyphen) and (space).',
-          })}
-          isInvalid={!!formErrors.description}
-          error={formErrors.description}
-        >
-          <EuiFieldText
-            value={description}
-            onChange={handleDescriptionInputChange}
-            data-test-subj="workspaceForm-workspaceDetails-descriptionInputText"
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate('workspace.form.workspaceDetails.color.label', {
-            defaultMessage: 'Color',
-          })}
-          isInvalid={!!formErrors.color}
-          error={formErrors.color}
-        >
-          <div>
-            <EuiText size="xs" color="subdued">
-              {i18n.translate('workspace.form.workspaceDetails.color.helpText', {
-                defaultMessage: 'Accent color for your workspace',
-              })}
-            </EuiText>
-            <EuiSpacer size={'s'} />
-            <EuiColorPicker
-              color={color}
-              onChange={handleColorChange}
-              data-test-subj="workspaceForm-workspaceDetails-colorPicker"
-            />
-          </div>
-        </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate('workspace.form.workspaceDetails.icon.label', {
-            defaultMessage: 'Icon',
-          })}
-          isInvalid={!!formErrors.icon}
-          error={formErrors.icon}
-        >
-          <WorkspaceIconSelector value={icon} onChange={handleIconChange} color={color} />
-        </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate('workspace.form.workspaceDetails.defaultVisualizationTheme.label', {
-            defaultMessage: 'Default visualization theme',
-          })}
-          isInvalid={!!formErrors.defaultVISTheme}
-          error={formErrors.defaultVISTheme}
-        >
-          <EuiSelect
-            hasNoInitialSelection
-            value={defaultVISTheme}
-            options={defaultVISThemeOptions}
-            onChange={onDefaultVISThemeChange}
-            data-test-subj="workspaceForm-workspaceDetails-defaultVISThemeSelector"
-          />
-        </EuiFormRow>
-      </EuiPanel>
-      <EuiSpacer />
-
+      {opType === WORKSPACE_OP_TYPE_CREATE && workspaceInfoTab}
+      {opType === WORKSPACE_OP_TYPE_CREATE && <EuiSpacer />}
       <EuiTabs>
         {!isEditingManagementWorkspace && (
           <EuiTab
@@ -608,6 +759,14 @@ export const WorkspaceForm = ({
             isSelected={selectedTab === WorkspaceFormTabs.FeatureVisibility}
           >
             <EuiText>{featureVisibilityTitle}</EuiText>
+          </EuiTab>
+        )}
+        {opType === WORKSPACE_OP_TYPE_UPDATE && (
+          <EuiTab
+            onClick={handleTabWorkspaceSettingsClick}
+            isSelected={selectedTab === WorkspaceFormTabs.WorkspaceSettings}
+          >
+            <EuiText>{workspaceSettingsTitle}</EuiText>
           </EuiTab>
         )}
         {permissionEnabled && (
@@ -619,6 +778,10 @@ export const WorkspaceForm = ({
           </EuiTab>
         )}
       </EuiTabs>
+
+      {opType === WORKSPACE_OP_TYPE_UPDATE &&
+        selectedTab === WorkspaceFormTabs.WorkspaceSettings &&
+        workspaceInfoTab}
 
       {selectedTab === WorkspaceFormTabs.FeatureVisibility && (
         <EuiPanel>
@@ -719,7 +882,8 @@ export const WorkspaceForm = ({
         opType={opType}
         formId={formIdRef.current}
         application={application}
-        numberOfErrors={numberOfErrors}
+        errorsCount={errorsCount}
+        unsavedChangesCount={unsavedChangesCount}
       />
     </EuiForm>
   );
