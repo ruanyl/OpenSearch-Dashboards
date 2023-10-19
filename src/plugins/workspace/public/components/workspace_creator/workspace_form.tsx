@@ -15,6 +15,7 @@ import {
   EuiSelect,
   EuiText,
   EuiFlexItem,
+  EuiFlexGrid,
   htmlIdGenerator,
   EuiCheckbox,
   EuiCheckboxGroup,
@@ -23,7 +24,6 @@ import {
   EuiFieldTextProps,
   EuiColorPicker,
   EuiColorPickerProps,
-  EuiHorizontalRule,
   EuiFlexGroup,
   EuiTab,
   EuiTabs,
@@ -641,6 +641,9 @@ export const WorkspaceForm = ({
     setDefaultVISTheme(e.target.value);
   };
 
+  const workspaceOverviewTitle = i18n.translate('workspace.form.overview.title', {
+    defaultMessage: 'Overview',
+  });
   const workspaceDetailsTitle = i18n.translate('workspace.form.workspaceDetails.title', {
     defaultMessage: 'Workspace Details',
   });
@@ -654,15 +657,73 @@ export const WorkspaceForm = ({
     defaultMessage: 'Users & Permissions',
   });
 
-  const workspaceInfoTab = (
+  const workspaceOverviewSection = (
+    <EuiPanel>
+      <EuiTitle size="s">
+        <h2>{workspaceOverviewTitle}</h2>
+      </EuiTitle>
+      <EuiSpacer size="m" />
+      <EuiFlexGrid columns={3}>
+        <EuiFlexItem>
+          <>
+            <EuiText>
+              <strong>
+                {i18n.translate('workspace.form.overview.workspaceNameTitle', {
+                  defaultMessage: 'Name',
+                })}
+              </strong>
+            </EuiText>
+            <EuiText>{defaultValues?.name}</EuiText>
+          </>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <>
+            <EuiText>
+              <strong>
+                {i18n.translate('workspace.form.overview.lastUpdatedTimeTitle', {
+                  defaultMessage: 'Last Updated',
+                })}
+              </strong>
+            </EuiText>
+            <EuiText>{defaultValues?.name}</EuiText>
+          </>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <>
+            <EuiText>
+              <strong>
+                {i18n.translate('workspace.form.overview.createdTimeTitle', {
+                  defaultMessage: 'Created',
+                })}
+              </strong>
+            </EuiText>
+            <EuiText>{defaultValues?.name}</EuiText>
+          </>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <>
+            <EuiText>
+              <strong>
+                {i18n.translate('workspace.form.overview.workspaceDescriptionTitle', {
+                  defaultMessage: 'Workspace Description',
+                })}
+              </strong>
+            </EuiText>
+            <EuiText>{defaultValues?.description}</EuiText>
+          </>
+        </EuiFlexItem>
+      </EuiFlexGrid>
+    </EuiPanel>
+  );
+
+  const workspaceInfoSection = (
     <EuiPanel>
       <EuiTitle size="s">
         <h2>
           {opType === WORKSPACE_OP_TYPE_UPDATE ? workspaceSettingsTitle : workspaceDetailsTitle}
         </h2>
       </EuiTitle>
-      <EuiHorizontalRule margin="xs" />
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
       <EuiFormRow
         label={i18n.translate('workspace.form.workspaceDetails.name.label', {
           defaultMessage: 'Name',
@@ -750,8 +811,9 @@ export const WorkspaceForm = ({
 
   return (
     <EuiForm id={formIdRef.current} onSubmit={handleFormSubmit} component="form">
-      {opType === WORKSPACE_OP_TYPE_CREATE && workspaceInfoTab}
-      {opType === WORKSPACE_OP_TYPE_CREATE && <EuiSpacer />}
+      {opType === WORKSPACE_OP_TYPE_UPDATE && workspaceOverviewSection}
+      {opType === WORKSPACE_OP_TYPE_CREATE && workspaceInfoSection}
+      <EuiSpacer />
       <EuiTabs>
         {!isEditingManagementWorkspace && (
           <EuiTab
@@ -781,15 +843,14 @@ export const WorkspaceForm = ({
 
       {opType === WORKSPACE_OP_TYPE_UPDATE &&
         selectedTab === WorkspaceFormTabs.WorkspaceSettings &&
-        workspaceInfoTab}
+        workspaceInfoSection}
 
       {selectedTab === WorkspaceFormTabs.FeatureVisibility && (
         <EuiPanel>
           <EuiTitle size="s">
             <h2>{featureVisibilityTitle}</h2>
           </EuiTitle>
-          <EuiHorizontalRule margin="xs" />
-          <EuiSpacer size="s" />
+          <EuiSpacer size="m" />
           {featureOrGroups.map((featureOrGroup) => {
             const features = isWorkspaceFeatureGroup(featureOrGroup) ? featureOrGroup.features : [];
             const selectedIds = selectedFeatureIds.filter((id) =>
@@ -867,7 +928,7 @@ export const WorkspaceForm = ({
           <EuiTitle size="s">
             <h2>{usersAndPermissionsTitle}</h2>
           </EuiTitle>
-          <EuiHorizontalRule margin="xs" />
+          <EuiSpacer size="s" />
           <WorkspacePermissionSettingPanel
             errors={formErrors.permissions}
             onChange={setPermissionSettings}
