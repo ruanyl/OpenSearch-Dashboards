@@ -359,36 +359,35 @@ export const WorkspacePermissionSettingPanel = ({
       (permissionSettingItem) => permissionSettingItem.type === WorkspacePermissionItemType.Group
     ) ?? []
   );
-  const [userNonDeletableIndex, setUserNonDeletableIndex] = useState<number>(-1);
-  const [groupNonDeletableIndex, setGroupNonDeletableIndex] = useState<number>(-1);
 
   useEffect(() => {
+    onChange?.([...userPermissionSettings, ...groupPermissionSettings]);
+  }, [onChange, userPermissionSettings, groupPermissionSettings]);
+
+  const nonDeletableIndex = useMemo(() => {
+    let userNonDeletableIndex = -1;
+    let groupNonDeletableIndex = -1;
     const newPermissionSettings = [...userPermissionSettings, ...groupPermissionSettings];
-    onChange?.(newPermissionSettings);
     if (!lastAdminItemDeletable) {
       const adminPermissionSettings = newPermissionSettings.filter(
         (permission) => getPermissionModeId(permission.modes ?? []) === PermissionModeId.Admin
       );
       if (adminPermissionSettings.length === 1) {
         if (adminPermissionSettings[0].type === WorkspacePermissionItemType.User) {
-          setUserNonDeletableIndex(
-            userPermissionSettings.findIndex(
-              (permission) => getPermissionModeId(permission.modes ?? []) === PermissionModeId.Admin
-            )
+          userNonDeletableIndex = userPermissionSettings.findIndex(
+            (permission) => getPermissionModeId(permission.modes ?? []) === PermissionModeId.Admin
           );
         } else {
-          setGroupNonDeletableIndex(
-            groupPermissionSettings.findIndex(
-              (permission) => getPermissionModeId(permission.modes ?? []) === PermissionModeId.Admin
-            )
+          groupNonDeletableIndex = groupPermissionSettings.findIndex(
+            (permission) => getPermissionModeId(permission.modes ?? []) === PermissionModeId.Admin
           );
         }
-        return;
       }
     }
-    setUserNonDeletableIndex(-1);
-    setGroupNonDeletableIndex(-1);
-  }, [onChange, userPermissionSettings, groupPermissionSettings, lastAdminItemDeletable]);
+    return { userNonDeletableIndex, groupNonDeletableIndex };
+  }, [userPermissionSettings, groupPermissionSettings, lastAdminItemDeletable]);
+
+  const { userNonDeletableIndex, groupNonDeletableIndex } = nonDeletableIndex;
 
   return (
     <div>
