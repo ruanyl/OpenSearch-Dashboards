@@ -11,11 +11,21 @@ import type {
   WorkspaceAttribute,
   SavedObjectsServiceStart,
 } from '../../../core/server';
-import { WORKSPACE_TYPE } from '../../../core/server';
+import {
+  DEFAULT_APP_CATEGORIES,
+  MANAGEMENT_WORKSPACE_ID,
+  PUBLIC_WORKSPACE_ID,
+  WORKSPACE_TYPE,
+  Logger,
+} from '../../../core/server';
 import { IWorkspaceDBImpl, WorkspaceFindOptions, IResponse, IRequestDetail } from './types';
 import { workspace } from './saved_objects';
 import { generateRandomId } from './utils';
-import { WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID } from '../common/constants';
+import {
+  WORKSPACE_OVERVIEW_APP_ID,
+  WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
+  WORKSPACE_UPDATE_APP_ID,
+} from '../common/constants';
 
 const WORKSPACE_ID_SIZE = 6;
 
@@ -23,12 +33,19 @@ const DUPLICATE_WORKSPACE_NAME_ERROR = i18n.translate('workspace.duplicate.name.
   defaultMessage: 'workspace name has already been used, try with a different name',
 });
 
+const RESERVED_WORKSPACE_NAME_ERROR = i18n.translate('workspace.reserved.name.error', {
+  defaultMessage: 'reserved workspace name cannot be changed',
+});
+
 export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
   private setupDep: CoreSetup;
+  private logger: Logger;
+
   private savedObjects?: SavedObjectsServiceStart;
 
-  constructor(core: CoreSetup) {
+  constructor(core: CoreSetup, logger: Logger) {
     this.setupDep = core;
+    this.logger = logger;
   }
 
   private getScopedClientWithoutPermission(
@@ -54,6 +71,55 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
   }
   private formatError(error: Error | any): string {
     return error.message || error.error || 'Error';
+  }
+  private async checkAndCreateWorkspace(
+    savedObjectClient: SavedObjectsClientContract | undefined,
+    workspaceId: string,
+    workspaceAttribute: Omit<WorkspaceAttribute, 'id' | 'permissions'>
+  ) {
+    try {
+      await savedObjectClient?.get(WORKSPACE_TYPE, workspaceId);
+    } catch (error) {
+      this.logger.debug(error?.toString() || '');
+      this.logger.info(`Workspace ${workspaceId} is not found, create it by using internal user`);
+      try {
+        const createResult = await savedObjectClient?.create(WORKSPACE_TYPE, workspaceAttribute, {
+          id: workspaceId,
+        });
+        if (createResult?.id) {
+          this.logger.info(`Created workspace ${createResult.id}.`);
+        }
+      } catch (e) {
+        this.logger.error(`Create ${workspaceId} workspace error: ${e?.toString() || ''}`);
+      }
+    }
+  }
+  private async setupPublicWorkspace(savedObjectClient?: SavedObjectsClientContract) {
+    return this.checkAndCreateWorkspace(savedObjectClient, PUBLIC_WORKSPACE_ID, {
+      name: i18n.translate('workspaces.public.workspace.default.name', {
+        defaultMessage: 'Global workspace',
+      }),
+      features: ['*', `!@${DEFAULT_APP_CATEGORIES.management.id}`],
+      reserved: true,
+    });
+  }
+  private async setupManagementWorkspace(savedObjectClient?: SavedObjectsClientContract) {
+    const DSM_APP_ID = 'dataSources';
+    const DEV_TOOLS_APP_ID = 'dev_tools';
+
+    return this.checkAndCreateWorkspace(savedObjectClient, MANAGEMENT_WORKSPACE_ID, {
+      name: i18n.translate('workspaces.management.workspace.default.name', {
+        defaultMessage: 'Management',
+      }),
+      features: [
+        `@${DEFAULT_APP_CATEGORIES.management.id}`,
+        WORKSPACE_OVERVIEW_APP_ID,
+        WORKSPACE_UPDATE_APP_ID,
+        DSM_APP_ID,
+        DEV_TOOLS_APP_ID,
+      ],
+      reserved: true,
+    });
   }
   public async setup(core: CoreSetup): Promise<IResponse<boolean>> {
     this.setupDep.savedObjects.registerType(workspace);
@@ -105,7 +171,7 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
     options: WorkspaceFindOptions
   ): ReturnType<IWorkspaceDBImpl['list']> {
     try {
-      const {
+      let {
         saved_objects: savedObjects,
         ...others
       } = await this.getSavedObjectClientsFromRequestDetail(requestDetail).find<WorkspaceAttribute>(
@@ -114,6 +180,49 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
           type: WORKSPACE_TYPE,
         }
       );
+      const scopedClientWithoutPermissionCheck = this.getScopedClientWithoutPermission(
+        requestDetail
+      );
+      const tasks: Array<Promise<unknown>> = [];
+
+      /**
+       * Setup public workspace if public workspace can not be found
+       */
+      const hasPublicWorkspace = savedObjects.some((item) => item.id === PUBLIC_WORKSPACE_ID);
+
+      if (!hasPublicWorkspace) {
+        tasks.push(this.setupPublicWorkspace(scopedClientWithoutPermissionCheck));
+      }
+
+      /**
+       * Setup management workspace if management workspace can not be found
+       */
+      const hasManagementWorkspace = savedObjects.some(
+        (item) => item.id === MANAGEMENT_WORKSPACE_ID
+      );
+      if (!hasManagementWorkspace) {
+        tasks.push(this.setupManagementWorkspace(scopedClientWithoutPermissionCheck));
+      }
+
+      try {
+        await Promise.all(tasks);
+        if (tasks.length) {
+          const {
+            saved_objects: retryFindSavedObjects,
+            ...retryFindOthers
+          } = await this.getSavedObjectClientsFromRequestDetail(requestDetail).find<
+            WorkspaceAttribute
+          >({
+            ...options,
+            type: WORKSPACE_TYPE,
+          });
+          savedObjects = retryFindSavedObjects;
+          others = retryFindOthers;
+        }
+      } catch (e) {
+        this.logger.error(`Some error happened when initializing reserved workspace: ${e}`);
+      }
+
       return {
         success: true,
         result: {
@@ -157,6 +266,9 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
       const client = this.getSavedObjectClientsFromRequestDetail(requestDetail);
       const workspaceInDB: SavedObject<WorkspaceAttribute> = await client.get(WORKSPACE_TYPE, id);
       if (workspaceInDB.attributes.name !== attributes.name) {
+        if (workspaceInDB.attributes.reserved) {
+          throw new Error(RESERVED_WORKSPACE_NAME_ERROR);
+        }
         const existingWorkspaceRes = await this.getScopedClientWithoutPermission(
           requestDetail
         )?.find({
@@ -169,7 +281,12 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
           throw new Error(DUPLICATE_WORKSPACE_NAME_ERROR);
         }
       }
-      await client.update<Omit<WorkspaceAttribute, 'id'>>(WORKSPACE_TYPE, id, attributes, {});
+
+      await client.create<Omit<WorkspaceAttribute, 'id'>>(WORKSPACE_TYPE, attributes, {
+        id,
+        overwrite: true,
+        version: workspaceInDB.version,
+      });
       return {
         success: true,
         result: true,
