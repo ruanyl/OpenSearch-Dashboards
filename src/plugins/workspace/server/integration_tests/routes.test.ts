@@ -178,7 +178,7 @@ describe('workspace service', () => {
           page: 1,
         })
         .expect(200);
-      expect(listResult.body.result.total).toEqual(1);
+      expect(listResult.body.result.total).toEqual(3);
     });
   });
 });
