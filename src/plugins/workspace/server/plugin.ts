@@ -45,7 +45,7 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
   public async setup(core: CoreSetup) {
     this.logger.debug('Setting up Workspaces service');
 
-    this.client = new WorkspaceClient(core);
+    this.client = new WorkspaceClient(core, this.logger);
 
     await this.client.setup(core);
 
