@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import { of } from 'rxjs';
+import { i18n } from '@osd/i18n';
 import { WorkspaceAttribute } from '../../../../../core/public';
 
 import { useOpenSearchDashboards } from '../../../../../plugins/opensearch_dashboards_react/public';
@@ -27,8 +28,10 @@ import { formatUrlWithWorkspaceId } from '../../utils';
 
 import { WORKSPACE_CREATE_APP_ID } from '../../../common/constants';
 
-const WORKSPACE_LIST_PAGE_DESCRIPTIOIN =
-  'Workspace allow you to save and organize library items, such as index patterns, visualizations, dashboards, saved searches, and share them with other OpenSearch Dashboards users. You can control which features are visible in each workspace, and which users and groups have read and write access to the library items in the workspace.';
+const WORKSPACE_LIST_PAGE_DESCRIPTIOIN = i18n.translate('workspace.list.description', {
+  defaultMessage:
+    'Workspace allow you to save and organize library items, such as index patterns, visualizations, dashboards, saved searches, and share them with other OpenSearch Dashboards users. You can control which features are visible in each workspace, and which users and groups have read and write access to the library items in the workspace.',
+});
 
 export const WorkspaceList = () => {
   const {
@@ -46,7 +49,7 @@ export const WorkspaceList = () => {
   });
 
   // Will be uesed when updating table actions
-  const [_, setSelection] = useState<WorkspaceAttribute[]>([]);
+  const [, setSelection] = useState<WorkspaceAttribute[]>([]);
 
   const handleSwitchWorkspace = useCallback(
     (id: string) => {
@@ -66,27 +69,19 @@ export const WorkspaceList = () => {
     [application, http]
   );
 
-  const searchWorkspaces = useCallback((query: string, list: WorkspaceAttribute[]) => {
-    const normalizedQuery = query.toLowerCase();
-    if (normalizedQuery) {
-      const result = list.filter((item) => {
+  const searchResult = useMemo(() => {
+    if (queryInput) {
+      const normalizedQuery = queryInput.toLowerCase();
+      const result = workspaceList.filter((item) => {
         return (
           item.id.toLowerCase().indexOf(normalizedQuery) > -1 ||
           item.name.toLowerCase().indexOf(normalizedQuery) > -1
         );
       });
       return result;
-    } else {
-      return list;
-    }
-  }, []);
-
-  const searchResult = useMemo(() => {
-    if (queryInput) {
-      return searchWorkspaces(queryInput, workspaceList);
     }
     return workspaceList;
-  }, [workspaceList, queryInput, searchWorkspaces]);
+  }, [workspaceList, queryInput]);
 
   const columns = [
     {
