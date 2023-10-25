@@ -17,21 +17,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { WorkspacePermissionMode } from '../../../../../core/public';
-
-export enum WorkspacePermissionItemType {
-  User = 'user',
-  Group = 'group',
-}
-
-export type WorkspacePermissionSetting =
-  | { type: WorkspacePermissionItemType.User; userId: string; modes: WorkspacePermissionMode[] }
-  | { type: WorkspacePermissionItemType.Group; group: string; modes: WorkspacePermissionMode[] };
-
-enum PermissionModeId {
-  Read = 'read',
-  ReadAndWrite = 'read+write',
-  Admin = 'admin',
-}
+import { WorkspacePermissionSetting, WorkspacePermissionItemType } from './types';
+import { PermissionModeId, OptionIdToWorkspacePermissionModesMap } from './constants';
+import { getPermissionModeId } from './utils';
 
 const permissionModeOptions = [
   {
@@ -57,17 +45,6 @@ const permissionModeOptions = [
   },
 ];
 
-const optionIdToWorkspacePermissionModesMap: {
-  [key: string]: WorkspacePermissionMode[];
-} = {
-  [PermissionModeId.Read]: [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.Read],
-  [PermissionModeId.ReadAndWrite]: [
-    WorkspacePermissionMode.LibraryWrite,
-    WorkspacePermissionMode.Read,
-  ],
-  [PermissionModeId.Admin]: [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
-};
-
 const generateWorkspacePermissionItemKey = (
   item: Partial<WorkspacePermissionSetting>,
   index?: number
@@ -79,16 +56,6 @@ const generateWorkspacePermissionItemKey = (
     ...(item.modes ?? []),
     index,
   ].join('-');
-
-// default permission mode is read
-export const getPermissionModeId = (modes: WorkspacePermissionMode[]) => {
-  for (const key in optionIdToWorkspacePermissionModesMap) {
-    if (optionIdToWorkspacePermissionModesMap[key].every((mode) => modes?.includes(mode))) {
-      return key;
-    }
-  }
-  return PermissionModeId.Read;
-};
 
 interface WorkspacePermissionSettingInputProps {
   index: number;
@@ -150,8 +117,8 @@ const WorkspacePermissionSettingInput = ({
 
   const handlePermissionModeOptionChange = useCallback(
     (id: string) => {
-      if (optionIdToWorkspacePermissionModesMap[id]) {
-        onPermissionModesChange([...optionIdToWorkspacePermissionModesMap[id]], index);
+      if (OptionIdToWorkspacePermissionModesMap[id]) {
+        onPermissionModesChange([...OptionIdToWorkspacePermissionModesMap[id]], index);
       }
     },
     [index, onPermissionModesChange]
@@ -247,11 +214,11 @@ const UserOrGroupSection = ({
        * if one settings includes all permission modes in a specific option,
        * add these permission modes to the result array.
        */
-      for (const key in optionIdToWorkspacePermissionModesMap) {
-        if (!Object.prototype.hasOwnProperty.call(optionIdToWorkspacePermissionModesMap, key)) {
+      for (const key in OptionIdToWorkspacePermissionModesMap) {
+        if (!Object.prototype.hasOwnProperty.call(OptionIdToWorkspacePermissionModesMap, key)) {
           continue;
         }
-        const modesForCertainPermissionId = optionIdToWorkspacePermissionModesMap[key];
+        const modesForCertainPermissionId = OptionIdToWorkspacePermissionModesMap[key];
         if (modesForCertainPermissionId.every((mode) => valueItem.modes?.includes(mode))) {
           result.push({ ...valueItem, modes: modesForCertainPermissionId });
         }
@@ -264,7 +231,7 @@ const UserOrGroupSection = ({
   const handleAddNewOne = useCallback(() => {
     onChange?.([
       ...(transformedValue ?? []),
-      { type, modes: optionIdToWorkspacePermissionModesMap[PermissionModeId.Read] },
+      { type, modes: OptionIdToWorkspacePermissionModesMap[PermissionModeId.Read] },
     ]);
   }, [onChange, type, transformedValue]);
 
