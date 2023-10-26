@@ -4,7 +4,11 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { WorkspacePermissionMode } from '../../../../../core/public';
+import {
+  WorkspacePermissionMode,
+  OptionIdToWorkspacePermissionModesMap,
+  PermissionModeId,
+} from '../../../../../core/public';
 import {
   UserOrGroupPermissionEditingData,
   WorkspaceFormEditingData,
@@ -13,7 +17,6 @@ import {
   WorkspacePermissionItemType,
   WorkspaceFormData,
 } from './types';
-import { OptionIdToWorkspacePermissionModesMap, PermissionModeId } from './constants';
 
 export const isValidWorkspacePermissionSetting = (
   setting: Partial<WorkspacePermissionSetting>

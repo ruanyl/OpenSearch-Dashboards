@@ -16,14 +16,17 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { WorkspacePermissionMode } from '../../../../../core/public';
+import {
+  WorkspacePermissionMode,
+  PermissionModeId,
+  OptionIdToWorkspacePermissionModesMap,
+} from '../../../../../core/public';
 import {
   UserPermissionSetting,
   GroupPermissionSetting,
   WorkspacePermissionSetting,
   WorkspacePermissionItemType,
 } from './types';
-import { PermissionModeId, OptionIdToWorkspacePermissionModesMap } from './constants';
 import { getPermissionModeId } from './utils';
 
 const permissionModeOptions = [

@@ -40,6 +40,8 @@ export { DEFAULT_APP_CATEGORIES } from './default_app_categories';
 export {
   WORKSPACE_PATH_PREFIX,
   WorkspacePermissionMode,
+  PermissionModeId,
+  OptionIdToWorkspacePermissionModesMap,
   PUBLIC_WORKSPACE_ID,
   MANAGEMENT_WORKSPACE_ID,
   WORKSPACE_TYPE,

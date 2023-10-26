@@ -354,6 +354,8 @@ export { WorkspacesStart, WorkspacesSetup, WorkspacesService } from './workspace
 
 export {
   WorkspacePermissionMode,
+  OptionIdToWorkspacePermissionModesMap,
+  PermissionModeId,
   PUBLIC_WORKSPACE_ID,
   MANAGEMENT_WORKSPACE_ID,
   WORKSPACE_TYPE,
