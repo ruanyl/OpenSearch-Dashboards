@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useMemo, useState, useEffect } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiComboBox,
@@ -17,7 +17,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { WorkspacePermissionMode } from '../../../../../core/public';
-import { WorkspacePermissionSetting, WorkspacePermissionItemType } from './types';
+import {
+  UserPermissionSetting,
+  GroupPermissionSetting,
+  WorkspacePermissionSetting,
+  WorkspacePermissionItemType,
+} from './types';
 import { PermissionModeId, OptionIdToWorkspacePermissionModesMap } from './constants';
 import { getPermissionModeId } from './utils';
 
@@ -167,17 +172,22 @@ const WorkspacePermissionSettingInput = ({
 };
 
 interface WorkspacePermissionSettingPanelProps {
-  errors?: string[];
-  lastAdminItemDeletable: boolean;
-  permissionSettings: Array<Partial<WorkspacePermissionSetting>>;
-  onChange?: (value: Array<Partial<WorkspacePermissionSetting>>) => void;
+  userErrors?: string[];
+  groupErrors?: string[];
+  lastAdminItemDeletable?: boolean;
+  userPermissionSettings: Array<Partial<UserPermissionSetting>>;
+  groupPermissionSettings: Array<Partial<GroupPermissionSetting>>;
+  onUserPermissionChange: (value: Array<Partial<UserPermissionSetting>>) => void;
+  onGroupPermissionChange: (value: Array<Partial<GroupPermissionSetting>>) => void;
 }
 
-interface UserOrGroupSectionProps
-  extends Omit<WorkspacePermissionSettingPanelProps, 'lastAdminItemDeletable'> {
+interface UserOrGroupSectionProps {
   title: string;
+  errors?: string[];
   nonDeletableIndex: number;
   type: WorkspacePermissionItemType;
+  permissionSettings: Array<Partial<WorkspacePermissionSetting>>;
+  onChange: (value: Array<Partial<WorkspacePermissionSetting>>) => void;
 }
 
 const UserOrGroupSection = ({
@@ -307,29 +317,14 @@ const UserOrGroupSection = ({
 };
 
 export const WorkspacePermissionSettingPanel = ({
-  errors,
-  onChange,
-  permissionSettings,
+  userErrors,
+  groupErrors,
+  onUserPermissionChange,
+  onGroupPermissionChange,
+  userPermissionSettings,
+  groupPermissionSettings,
   lastAdminItemDeletable,
 }: WorkspacePermissionSettingPanelProps) => {
-  const [userPermissionSettings, setUserPermissionSettings] = useState<
-    Array<Partial<WorkspacePermissionSetting>>
-  >(
-    permissionSettings?.filter(
-      (permissionSettingItem) => permissionSettingItem.type === WorkspacePermissionItemType.User
-    ) ?? []
-  );
-  const [groupPermissionSettings, setGroupPermissionSettings] = useState<
-    Array<Partial<WorkspacePermissionSetting>>
-  >(
-    permissionSettings?.filter(
-      (permissionSettingItem) => permissionSettingItem.type === WorkspacePermissionItemType.Group
-    ) ?? []
-  );
-
-  useEffect(() => {
-    onChange?.([...userPermissionSettings, ...groupPermissionSettings]);
-  }, [onChange, userPermissionSettings, groupPermissionSettings]);
 
   const nonDeletableIndex = useMemo(() => {
     let userNonDeletableIndex = -1;
@@ -362,8 +357,8 @@ export const WorkspacePermissionSettingPanel = ({
         title={i18n.translate('workspace.form.permissionSettingPanel.userTitle', {
           defaultMessage: 'User',
         })}
-        errors={errors}
-        onChange={setUserPermissionSettings}
+        errors={userErrors}
+        onChange={onUserPermissionChange as any}
         nonDeletableIndex={userNonDeletableIndex}
         permissionSettings={userPermissionSettings}
         type={WorkspacePermissionItemType.User}
@@ -373,8 +368,8 @@ export const WorkspacePermissionSettingPanel = ({
         title={i18n.translate('workspace.form.permissionSettingPanel.userGroupTitle', {
           defaultMessage: 'User Groups',
         })}
-        errors={errors}
-        onChange={setGroupPermissionSettings}
+        errors={groupErrors}
+        onChange={onGroupPermissionChange as any}
         nonDeletableIndex={groupNonDeletableIndex}
         permissionSettings={groupPermissionSettings}
         type={WorkspacePermissionItemType.Group}

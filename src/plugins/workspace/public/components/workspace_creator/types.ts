@@ -33,25 +33,37 @@ export type WorkspaceFormErrors = Omit<
   { [key in keyof WorkspaceFormData]?: string },
   'permissions'
 > & {
-  permissions?: string[];
+  userPermissions?: string[];
+  groupPermissions?: string[];
 };
+
+export enum WorkspacePermissionItemType {
+  User = 'user',
+  Group = 'group',
+}
+
+export interface UserPermissionSetting {
+  type: WorkspacePermissionItemType.User;
+  userId: string;
+  modes: WorkspacePermissionMode[];
+}
+
+export interface GroupPermissionSetting {
+  type: WorkspacePermissionItemType.Group;
+  group: string;
+  modes: WorkspacePermissionMode[];
+}
+
+export type WorkspacePermissionSetting = UserPermissionSetting | GroupPermissionSetting;
 
 // when editing, attributes could be undefined in workspace form
 export type WorkspaceFormEditingData = Partial<
   Omit<WorkspaceFormSubmitData, 'permissions'> & {
-    permissions: Array<Partial<WorkspacePermissionSetting>>;
+    userPermissions: Array<Partial<UserPermissionSetting>>;
+    groupPermissions: Array<Partial<GroupPermissionSetting>>;
   }
 >;
 
 export type UserOrGroupPermissionEditingData = Array<
   Partial<{ id: string; modes: WorkspacePermissionMode[] }>
 >;
-
-export type WorkspacePermissionSetting =
-  | { type: WorkspacePermissionItemType.User; userId: string; modes: WorkspacePermissionMode[] }
-  | { type: WorkspacePermissionItemType.Group; group: string; modes: WorkspacePermissionMode[] };
-
-export enum WorkspacePermissionItemType {
-  User = 'user',
-  Group = 'group',
-}

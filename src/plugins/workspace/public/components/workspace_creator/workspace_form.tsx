@@ -50,15 +50,21 @@ import { WorkspaceBottomBar } from './workspace_bottom_bar';
 import { WorkspaceIconSelector } from './workspace_icon_selector';
 import { WorkspacePermissionSettingPanel } from './workspace_permission_setting_panel';
 import { featureMatchesConfig } from '../../utils';
-import { getErrorsCount, getUnsavedChangesCount, isValidWorkspacePermissionSetting } from './utils';
+import {
+  getErrorsCount,
+  getPermissionErrors,
+  getUnsavedChangesCount,
+  getUserAndGroupPermissions,
+  isValidWorkspacePermissionSetting,
+} from './utils';
 import {
   WorkspaceFeature,
   WorkspaceFeatureGroup,
   WorkspaceFormData,
   WorkspaceFormErrors,
   WorkspaceFormSubmitData,
-  WorkspacePermissionSetting,
-  WorkspacePermissionItemType,
+  UserPermissionSetting,
+  GroupPermissionSetting,
 } from './types';
 
 enum WorkspaceFormTabs {
@@ -148,12 +154,16 @@ export const WorkspaceForm = ({
   const [selectedFeatureIds, setSelectedFeatureIds] = useState(
     appendDefaultFeatureIds(defaultFeatures)
   );
-  const [permissionSettings, setPermissionSettings] = useState<
-    Array<Partial<WorkspacePermissionSetting>>
-  >(
+  const [initialUserPermissions, initialGroupPermissions] = getUserAndGroupPermissions(
     defaultValues?.permissions && defaultValues.permissions.length > 0
       ? defaultValues.permissions
       : []
+  );
+  const [userPermissions, setUserPermissions] = useState<Array<Partial<UserPermissionSetting>>>(
+    initialUserPermissions
+  );
+  const [groupPermissions, setGroupPermissions] = useState<Array<Partial<GroupPermissionSetting>>>(
+    initialGroupPermissions
   );
 
   const libraryCategoryLabel = i18n.translate('core.ui.libraryNavList.label', {
@@ -177,7 +187,8 @@ export const WorkspaceForm = ({
     color,
     icon,
     defaultVISTheme,
-    permissions: permissionSettings,
+    userPermissions,
+    groupPermissions,
   });
   const getFormDataRef = useRef(getFormData);
   getFormDataRef.current = getFormData;
@@ -190,18 +201,20 @@ export const WorkspaceForm = ({
       color,
       icon,
       defaultVISTheme,
-      permissions: permissionSettings,
+      userPermissions,
+      groupPermissions,
     };
-    return getUnsavedChangesCount(defaultValues ?? {}, currentFormData);
+    return getUnsavedChangesCount(defaultValues ?? ({} as any), currentFormData);
   }, [
-    defaultValues,
     name,
     description,
+    selectedFeatureIds,
     color,
     icon,
     defaultVISTheme,
-    selectedFeatureIds,
-    permissionSettings,
+    userPermissions,
+    groupPermissions,
+    defaultValues,
   ]);
 
   const featureOrGroups = useMemo(() => {
@@ -364,49 +377,18 @@ export const WorkspaceForm = ({
           }),
         };
       }
-      const permissionErrors: string[] = new Array(formData.permissions.length);
-      for (let i = 0; i < formData.permissions.length; i++) {
-        const permission = formData.permissions[i];
-        if (isValidWorkspacePermissionSetting(permission)) {
-          if (
-            isUserOrGroupPermissionSettingDuplicated(formData.permissions.slice(0, i), permission)
-          ) {
-            permissionErrors[i] = i18n.translate('workspace.form.permission.invalidate.group', {
-              defaultMessage: 'Duplicate permission setting',
-            });
-            continue;
-          }
-          continue;
-        }
-        if (!permission.type) {
-          permissionErrors[i] = i18n.translate('workspace.form.permission.invalidate.type', {
-            defaultMessage: 'Invalid type',
-          });
-          continue;
-        }
-        if (!permission.modes || permission.modes.length === 0) {
-          permissionErrors[i] = i18n.translate('workspace.form.permission.invalidate.modes', {
-            defaultMessage: 'Invalid permission modes',
-          });
-          continue;
-        }
-        if (permission.type === WorkspacePermissionItemType.User && !permission.userId) {
-          permissionErrors[i] = i18n.translate('workspace.form.permission.invalidate.userId', {
-            defaultMessage: 'Invalid userId',
-          });
-          continue;
-        }
-        if (permission.type === WorkspacePermissionItemType.Group && !permission.group) {
-          permissionErrors[i] = i18n.translate('workspace.form.permission.invalidate.group', {
-            defaultMessage: 'Invalid user group',
-          });
-          continue; // this line is need for more conditions
-        }
-      }
-      if (permissionErrors.some((error) => !!error)) {
+      const userPermissionErrors = getPermissionErrors(formData.userPermissions);
+      const groupPermissionErrors = getPermissionErrors(formData.groupPermissions);
+      if (userPermissionErrors.some((error) => !!error)) {
         currentFormErrors = {
           ...currentFormErrors,
-          permissions: permissionErrors,
+          userPermissions: userPermissionErrors,
+        };
+      }
+      if (groupPermissionErrors.some((error) => !!error)) {
+        currentFormErrors = {
+          ...currentFormErrors,
+          groupPermissions: groupPermissionErrors,
         };
       }
       const currentErrorsCount = getErrorsCount(currentFormErrors);
@@ -430,8 +412,14 @@ export const WorkspaceForm = ({
         formData.features = defaultValues?.features ?? [];
       }
 
-      const permissions = formData.permissions.filter(isValidWorkspacePermissionSetting);
-      onSubmit?.({ ...formData, name: formData.name!, permissions });
+      onSubmit?.({
+        ...formData,
+        name: formData.name!,
+        permissions: [
+          ...formData.userPermissions.filter(isValidWorkspacePermissionSetting),
+          ...formData.groupPermissions.filter(isValidWorkspacePermissionSetting),
+        ] as any,
+      });
     },
     [defaultFeatures, onSubmit, defaultValues?.features]
   );
@@ -760,9 +748,12 @@ export const WorkspaceForm = ({
           </EuiTitle>
           <EuiSpacer size="s" />
           <WorkspacePermissionSettingPanel
-            errors={formErrors.permissions}
-            onChange={setPermissionSettings}
-            permissionSettings={permissionSettings}
+            userErrors={formErrors.userPermissions}
+            groupErrors={formErrors.groupPermissions}
+            userPermissionSettings={userPermissions}
+            groupPermissionSettings={groupPermissions}
+            onUserPermissionChange={setUserPermissions}
+            onGroupPermissionChange={setGroupPermissions}
             lastAdminItemDeletable={!!permissionLastAdminItemDeletable}
             data-test-subj={`workspaceForm-permissionSettingPanel`}
           />
