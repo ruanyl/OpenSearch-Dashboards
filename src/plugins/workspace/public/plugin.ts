@@ -6,8 +6,21 @@ import { combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { i18n } from '@osd/i18n';
 import { featureMatchesConfig } from './utils';
-import { AppMountParameters, AppNavLinkStatus, ChromeNavLink, CoreSetup, CoreStart, Plugin, WorkspaceObject, DEFAULT_APP_CATEGORIES } from '../../../core/public';
-import { WORKSPACE_FATAL_ERROR_APP_ID, WORKSPACE_OVERVIEW_APP_ID } from '../common/constants';
+import {
+  AppMountParameters,
+  AppNavLinkStatus,
+  ChromeNavLink,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  WorkspaceObject,
+  DEFAULT_APP_CATEGORIES,
+} from '../../../core/public';
+import {
+  WORKSPACE_FATAL_ERROR_APP_ID,
+  WORKSPACE_OVERVIEW_APP_ID,
+  WORKSPACE_CREATE_APP_ID,
+} from '../common/constants';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
 import { Services } from './types';
 import { WorkspaceClient } from './workspace_client';
@@ -124,6 +137,34 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
       async mount(params: AppMountParameters) {
         const { renderFatalErrorApp } = await import('./application');
         return mountWorkspaceApp(params, renderFatalErrorApp);
+      },
+    });
+
+    // create
+    core.application.register({
+      id: WORKSPACE_CREATE_APP_ID,
+      title: i18n.translate('workspace.settings.workspaceCreate', {
+        defaultMessage: 'Create Workspace',
+      }),
+      navLinkStatus: AppNavLinkStatus.hidden,
+      async mount(params: AppMountParameters) {
+        const { renderCreatorApp } = await import('./application');
+        return mountWorkspaceApp(params, renderCreatorApp);
+      },
+    });
+
+    // overview
+    core.application.register({
+      id: WORKSPACE_OVERVIEW_APP_ID,
+      title: i18n.translate('workspace.settings.workspaceOverview', {
+        defaultMessage: 'Overview',
+      }),
+      order: 0,
+      euiIconType: 'grid',
+      navLinkStatus: !!workspaceId ? AppNavLinkStatus.default : AppNavLinkStatus.hidden,
+      async mount(params: AppMountParameters) {
+        const { renderOverviewApp } = await import('./application');
+        return mountWorkspaceApp(params, renderOverviewApp);
       },
     });
 

@@ -13,6 +13,12 @@ import {
   SavedObjectsServiceStart,
 } from '../../../core/server';
 
+import { WorkspacePermissionItem } from '../common/types';
+
+export interface WorkspaceAttributeWithPermission extends WorkspaceAttribute {
+  permissions?: WorkspacePermissionItem[];
+}
+
 export interface WorkspaceFindOptions {
   page?: number;
   perPage?: number;
@@ -64,3 +70,8 @@ export type IResponse<T> =
       success: false;
       error?: string;
     };
+
+export interface AuthInfo {
+  backend_roles?: string[];
+  user_name?: string;
+}

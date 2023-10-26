@@ -4,11 +4,33 @@
  */
 
 import { schema } from '@osd/config-schema';
+import { ensureRawRequest } from '../../../../core/server';
 
-import { CoreSetup, Logger } from '../../../../core/server';
+import { CoreSetup, Logger, WorkspacePermissionMode } from '../../../../core/server';
 import { IWorkspaceDBImpl } from '../types';
+import { WorkspacePermissionItem } from '../../common/types';
 
-const WORKSPACES_API_BASE_URL = '/api/workspaces';
+export const WORKSPACES_API_BASE_URL = '/api/workspaces';
+
+const workspacePermissionMode = schema.oneOf([
+  schema.literal(WorkspacePermissionMode.Read),
+  schema.literal(WorkspacePermissionMode.Write),
+  schema.literal(WorkspacePermissionMode.LibraryRead),
+  schema.literal(WorkspacePermissionMode.LibraryWrite),
+]);
+
+const workspacePermission = schema.oneOf([
+  schema.object({
+    type: schema.literal('user'),
+    userId: schema.string(),
+    modes: schema.arrayOf(workspacePermissionMode),
+  }),
+  schema.object({
+    type: schema.literal('group'),
+    group: schema.string(),
+    modes: schema.arrayOf(workspacePermissionMode),
+  }),
+]);
 
 const workspaceAttributesSchema = schema.object({
   description: schema.maybe(schema.string()),
@@ -16,8 +38,8 @@ const workspaceAttributesSchema = schema.object({
   features: schema.maybe(schema.arrayOf(schema.string())),
   color: schema.maybe(schema.string()),
   icon: schema.maybe(schema.string()),
-  defaultVISTheme: schema.maybe(schema.string()),
   reserved: schema.maybe(schema.boolean()),
+  defaultVISTheme: schema.maybe(schema.string()),
 });
 
 export function registerRoutes({
@@ -41,6 +63,7 @@ export function registerRoutes({
           page: schema.number({ min: 0, defaultValue: 1 }),
           sortField: schema.maybe(schema.string()),
           searchFields: schema.maybe(schema.arrayOf(schema.string())),
+          permissionModes: schema.maybe(schema.arrayOf(workspacePermissionMode)),
         }),
       },
     },
@@ -85,12 +108,7 @@ export function registerRoutes({
       }
 
       return res.ok({
-        body: {
-          ...result,
-          result: {
-            ...result.result,
-          },
-        },
+        body: result,
       });
     })
   );
@@ -100,11 +118,31 @@ export function registerRoutes({
       validate: {
         body: schema.object({
           attributes: workspaceAttributesSchema,
+          permissions: schema.maybe(
+            schema.oneOf([workspacePermission, schema.arrayOf(workspacePermission)])
+          ),
         }),
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
-      const { attributes } = req.body;
+      const { attributes, permissions: permissionsInRequest } = req.body;
+      const rawRequest = ensureRawRequest(req);
+      const authInfo = rawRequest?.auth?.credentials?.authInfo as { user_name?: string } | null;
+      let permissions: Array<WorkspacePermissionItem<WorkspacePermissionMode>> = [];
+      if (permissionsInRequest) {
+        permissions = Array.isArray(permissionsInRequest)
+          ? permissionsInRequest
+          : [permissionsInRequest];
+      }
+
+      // Assign workspace owner to current user
+      if (!!authInfo?.user_name) {
+        permissions.push({
+          type: 'user',
+          userId: authInfo.user_name,
+          modes: [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
+        });
+      }
 
       const result = await client.create(
         {
@@ -114,6 +152,7 @@ export function registerRoutes({
         },
         {
           ...attributes,
+          ...(permissions.length ? { permissions } : {}),
         }
       );
       return res.ok({ body: result });
@@ -128,12 +167,19 @@ export function registerRoutes({
         }),
         body: schema.object({
           attributes: workspaceAttributesSchema,
+          permissions: schema.maybe(
+            schema.oneOf([workspacePermission, schema.arrayOf(workspacePermission)])
+          ),
         }),
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const { id } = req.params;
-      const { attributes } = req.body;
+      const { attributes, permissions } = req.body;
+      let finalPermissions: Array<WorkspacePermissionItem<WorkspacePermissionMode>> = [];
+      if (permissions) {
+        finalPermissions = Array.isArray(permissions) ? permissions : [permissions];
+      }
 
       const result = await client.update(
         {
@@ -144,6 +190,7 @@ export function registerRoutes({
         id,
         {
           ...attributes,
+          ...(finalPermissions.length ? { finalPermissions } : {}),
         }
       );
       return res.ok({ body: result });

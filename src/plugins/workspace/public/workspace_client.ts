@@ -7,9 +7,11 @@ import {
   HttpFetchError,
   HttpFetchOptions,
   HttpSetup,
-  WorkspaceAttribute,
   WorkspacesSetup,
+  WorkspacePermissionMode,
 } from '../../../core/public';
+import type { WorkspaceAttribute } from '../../../core/types';
+import type { WorkspacePermissionItem } from '../common/types';
 
 const WORKSPACES_API_BASE_URL = '/api/workspaces';
 
@@ -151,7 +153,8 @@ export class WorkspaceClient {
    * @returns
    */
   public async create(
-    attributes: Omit<WorkspaceAttribute, 'id'>
+    attributes: Omit<WorkspaceAttribute, 'id'>,
+    permissions?: Array<WorkspacePermissionItem<WorkspacePermissionMode>>
   ): Promise<IResponse<WorkspaceAttribute>> {
     const path = this.getPath();
 
@@ -159,6 +162,7 @@ export class WorkspaceClient {
       method: 'POST',
       body: JSON.stringify({
         attributes,
+        permissions,
       }),
     });
 
@@ -236,11 +240,13 @@ export class WorkspaceClient {
    */
   public async update(
     id: string,
-    attributes: Partial<WorkspaceAttribute>
+    attributes: Partial<WorkspaceAttribute>,
+    permissions?: WorkspacePermissionItem[]
   ): Promise<IResponse<boolean>> {
     const path = this.getPath(id);
     const body = {
       attributes,
+      permissions,
     };
 
     const result = await this.safeFetch(path, {
