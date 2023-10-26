@@ -53,7 +53,8 @@ export default function ({ getService, getPageObjects }) {
       log.info('found saved search before toggling enableLabs mode');
 
       // Navigate to advanced setting and disable lab mode
-      await PageObjects.settings.navigateTo();
+      await PageObjects.header.clickStackManagement();
+      await PageObjects.settings.clickOpenSearchDashboardsSettings();
       await PageObjects.settings.toggleAdvancedSettingCheckbox(VISUALIZE_ENABLE_LABS_SETTING);
 
       // Expect the discover still to list that saved visualization in the open list
@@ -66,7 +67,8 @@ export default function ({ getService, getPageObjects }) {
 
     after(async () => {
       await PageObjects.discover.closeLoadSaveSearchPanel();
-      await PageObjects.settings.navigateTo();
+      await PageObjects.header.clickStackManagement();
+      await PageObjects.settings.clickOpenSearchDashboardsSettings();
       await PageObjects.settings.clearAdvancedSettings(VISUALIZE_ENABLE_LABS_SETTING);
     });
   });

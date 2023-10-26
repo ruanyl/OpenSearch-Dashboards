@@ -3,21 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  AppMountParameters,
-  CoreSetup,
-  CoreStart,
-  DEFAULT_APP_CATEGORIES,
-  Plugin,
-  StartServicesAccessor,
-} from '../../../core/public';
+import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
 
 import { PLUGIN_NAME } from '../common';
 
 import { ManagementSetup } from '../../management/public';
 import { IndexPatternManagementSetup } from '../../index_pattern_management/public';
 import { DataSourceColumn } from './components/data_source_column/data_source_column';
-import { DataSourceManagementStartDependencies } from './types';
 
 export interface DataSourceManagementSetupDependencies {
   management: ManagementSetup;
@@ -28,7 +20,16 @@ const DSM_APP_ID = 'dataSources';
 
 export class DataSourceManagementPlugin
   implements Plugin<void, void, DataSourceManagementSetupDependencies> {
-  public setup(core: CoreSetup, { indexPatternManagement }: DataSourceManagementSetupDependencies) {
+  public setup(
+    core: CoreSetup,
+    { management, indexPatternManagement }: DataSourceManagementSetupDependencies
+  ) {
+    const opensearchDashboardsSection = management.sections.section.opensearchDashboards;
+
+    if (!opensearchDashboardsSection) {
+      throw new Error('`opensearchDashboards` management section not found.');
+    }
+
     const savedObjectPromise = core
       .getStartServices()
       .then(([coreStart]) => coreStart.savedObjects);
@@ -36,18 +37,14 @@ export class DataSourceManagementPlugin
     const column = new DataSourceColumn(savedObjectPromise, httpPromise);
     indexPatternManagement.columns.register(column);
 
-    core.application.register({
+    opensearchDashboardsSection.registerApp({
       id: DSM_APP_ID,
       title: PLUGIN_NAME,
       order: 1,
-      category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
-      mount: async (params: AppMountParameters) => {
-        const { mountDataSourcesManagementSection } = await import('./management_app');
+      mount: async (params) => {
+        const { mountManagementSection } = await import('./management_app');
 
-        return mountDataSourcesManagementSection(
-          core.getStartServices as StartServicesAccessor<DataSourceManagementStartDependencies>,
-          params
-        );
+        return mountManagementSection(core.getStartServices, params);
       },
     });
   }

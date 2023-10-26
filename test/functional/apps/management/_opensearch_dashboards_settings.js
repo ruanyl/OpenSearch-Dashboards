@@ -40,9 +40,11 @@ export default function ({ getService, getPageObjects }) {
       // delete .kibana index and then wait for OpenSearch Dashboards to re-create it
       await opensearchDashboardsServer.uiSettings.replace({});
       await PageObjects.settings.createIndexPattern('logstash-*');
+      await PageObjects.settings.navigateTo();
     });
 
     after(async function afterAll() {
+      await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickOpenSearchDashboardsIndexPatterns();
       await PageObjects.settings.removeLogstashIndexPatternIfExist();
     });
@@ -88,6 +90,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('setting to true change is preserved', async function () {
+        await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickOpenSearchDashboardsSettings();
         await PageObjects.settings.toggleAdvancedSettingCheckbox('state:storeInSessionStorage');
         const storeInSessionStorage = await PageObjects.settings.getAdvancedSettingCheckbox(
@@ -110,7 +113,8 @@ export default function ({ getService, getPageObjects }) {
 
       it("changing 'state:storeInSessionStorage' also takes effect without full page reload", async () => {
         await PageObjects.dashboard.preserveCrossAppState();
-        await PageObjects.settings.navigateTo();
+        await PageObjects.header.clickStackManagement();
+        await PageObjects.settings.clickOpenSearchDashboardsSettings();
         await PageObjects.settings.toggleAdvancedSettingCheckbox('state:storeInSessionStorage');
         await PageObjects.header.clickDashboard();
         const [globalState, appState] = await getStateFromUrl();

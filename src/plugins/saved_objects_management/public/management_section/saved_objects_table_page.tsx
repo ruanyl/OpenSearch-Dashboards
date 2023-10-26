@@ -30,13 +30,13 @@
 
 import React, { useEffect } from 'react';
 import { get } from 'lodash';
+import { i18n } from '@osd/i18n';
 import { CoreStart, ChromeBreadcrumb } from 'src/core/public';
 import { DataPublicPluginStart } from '../../../data/public';
 import {
   ISavedObjectsManagementServiceRegistry,
   SavedObjectsManagementActionServiceStart,
   SavedObjectsManagementColumnServiceStart,
-  SavedObjectsManagementNamespaceServiceStart,
 } from '../services';
 import { SavedObjectsTable } from './objects_table';
 
@@ -49,7 +49,6 @@ const SavedObjectsTablePage = ({
   columnRegistry,
   namespaceRegistry,
   setBreadcrumbs,
-  title,
 }: {
   coreStart: CoreStart;
   dataStart: DataPublicPluginStart;
@@ -59,7 +58,6 @@ const SavedObjectsTablePage = ({
   columnRegistry: SavedObjectsManagementColumnServiceStart;
   namespaceRegistry: SavedObjectsManagementNamespaceServiceStart;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
-  title: string;
 }) => {
   const capabilities = coreStart.application.capabilities;
   const itemsPerPage = coreStart.uiSettings.get<number>('savedObjects:perPage', 50);
@@ -68,11 +66,13 @@ const SavedObjectsTablePage = ({
   useEffect(() => {
     setBreadcrumbs([
       {
-        text: title,
-        href: undefined,
+        text: i18n.translate('savedObjectsManagement.breadcrumb.index', {
+          defaultMessage: 'Saved objects',
+        }),
+        href: '/',
       },
     ]);
-  }, [setBreadcrumbs, title]);
+  }, [setBreadcrumbs]);
 
   return (
     <SavedObjectsTable
@@ -102,7 +102,6 @@ const SavedObjectsTablePage = ({
         const { inAppUrl } = savedObject.meta;
         return inAppUrl ? Boolean(get(capabilities, inAppUrl.uiCapabilitiesPath)) : false;
       }}
-      title={title}
     />
   );
 };
