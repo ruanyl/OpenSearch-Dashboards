@@ -5,8 +5,8 @@
 
 import React from 'react';
 import { PublicAppInfo, WorkspaceAttribute } from 'opensearch-dashboards/public';
-import { fireEvent, render, waitFor } from '@testing-library/react';
-import { BehaviorSubject, of } from 'rxjs';
+import { fireEvent, render } from '@testing-library/react';
+import { BehaviorSubject } from 'rxjs';
 import { WorkspaceUpdater as WorkspaceUpdaterComponent } from './workspace_updater';
 import { coreMock } from '../../../../../core/public/mocks';
 import { createOpenSearchDashboardsReactContext } from '../../../../opensearch_dashboards_react/public';
@@ -155,111 +155,4 @@ describe('WorkspaceUpdater', () => {
     fireEvent.click(getByTestId('confirmModalConfirmButton'));
     expect(navigateToApp).toHaveBeenCalled();
   });
-
-  /*
-  it('create workspace with detailed information', async () => {
-    const { getByTestId } = render(<WorkspaceUpdater />);
-    const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
-    fireEvent.input(nameInput, {
-      target: { value: 'test workspace name' },
-    });
-    const descriptionInput = getByTestId('workspaceForm-workspaceDetails-descriptionInputText');
-    fireEvent.input(descriptionInput, {
-      target: { value: 'test workspace description' },
-    });
-    const colorSelector = getByTestId(
-      'euiColorPickerAnchor workspaceForm-workspaceDetails-colorPicker'
-    );
-    fireEvent.input(colorSelector, {
-      target: { value: '#000000' },
-    });
-    const iconSelector = getByTestId('workspaceForm-workspaceDetails-iconSelector');
-    fireEvent.click(iconSelector);
-    fireEvent.click(getByTestId('workspaceForm-workspaceDetails-iconSelector-Glasses'));
-    const defaultVISThemeSelector = getByTestId(
-      'workspaceForm-workspaceDetails-defaultVISThemeSelector'
-    );
-    fireEvent.click(defaultVISThemeSelector);
-    fireEvent.change(defaultVISThemeSelector, { target: { value: 'categorical' } });
-    fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
-    expect(workspaceClientCreate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        name: 'test workspace name',
-        icon: 'Glasses',
-        color: '#000000',
-        description: 'test workspace description',
-        defaultVISTheme: 'categorical',
-      })
-    );
-    await waitFor(() => {
-      expect(notificationToastsAddSuccess).toHaveBeenCalled();
-    });
-    expect(notificationToastsAddDanger).not.toHaveBeenCalled();
-  });
-
-  it('create workspace with customized features', async () => {
-    const { getByTestId } = render(<WorkspaceUpdater />);
-    const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
-    fireEvent.input(nameInput, {
-      target: { value: 'test workspace name' },
-    });
-    fireEvent.click(getByTestId('workspaceForm-workspaceFeatureVisibility-app1'));
-    fireEvent.click(getByTestId('workspaceForm-workspaceFeatureVisibility-category1'));
-    fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
-    expect(workspaceClientCreate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        name: 'test workspace name',
-        features: expect.arrayContaining(['app1', 'app2', 'app3']),
-      })
-    );
-    await waitFor(() => {
-      expect(notificationToastsAddSuccess).toHaveBeenCalled();
-    });
-    expect(notificationToastsAddDanger).not.toHaveBeenCalled();
-  });
-
-  it('create workspace with customized permissions', async () => {
-    const { getByTestId, getByText } = render(<WorkspaceUpdater />);
-    const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
-    fireEvent.input(nameInput, {
-      target: { value: 'test workspace name' },
-    });
-    fireEvent.click(getByText('Users & Permissions'));
-    fireEvent.click(getByTestId('workspaceForm-permissionSettingPanel-user-addNew'));
-    const userIdInput = getByTestId('workspaceForm-permissionSettingPanel-0-userId');
-    fireEvent.click(userIdInput);
-    fireEvent.input(getByTestId('comboBoxSearchInput'), {
-      target: { value: 'test user id' },
-    });
-    fireEvent.blur(getByTestId('comboBoxSearchInput'));
-    fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
-    expect(workspaceClientCreate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        name: 'test workspace name',
-        permissions: expect.arrayContaining([
-          expect.objectContaining({ type: 'user', userId: 'test user id' }),
-        ]),
-      })
-    );
-    await waitFor(() => {
-      expect(notificationToastsAddSuccess).toHaveBeenCalled();
-    });
-    expect(notificationToastsAddDanger).not.toHaveBeenCalled();
-  });
-
-  it('should show danger toasts after create workspace failed', async () => {
-    workspaceClientCreate.mockReturnValue({ result: { id: 'failResult' }, success: false });
-    const { getByTestId } = render(<WorkspaceUpdater />);
-    const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
-    fireEvent.input(nameInput, {
-      target: { value: 'test workspace name' },
-    });
-    fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
-    expect(workspaceClientCreate).toHaveBeenCalled();
-    await waitFor(() => {
-      expect(notificationToastsAddDanger).toHaveBeenCalled();
-    });
-    expect(notificationToastsAddSuccess).not.toHaveBeenCalled();
-  });
-   */
 });
