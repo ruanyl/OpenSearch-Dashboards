@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { PublicAppInfo, WorkspaceAttribute } from 'opensearch-dashboards/public';
+import { PublicAppInfo, WorkspaceObject } from 'opensearch-dashboards/public';
 import { fireEvent, render } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import { WorkspaceUpdater as WorkspaceUpdaterComponent } from './workspace_updater';
@@ -74,7 +74,7 @@ const WorkspaceUpdater = (props: any) => {
       },
       workspaces: {
         ...mockCoreStart.workspaces,
-        currentWorkspace$: new BehaviorSubject<WorkspaceAttribute | null>({
+        currentWorkspace$: new BehaviorSubject<WorkspaceObject | null>({
           id: 'test workspace id',
           name: 'test workspace name',
           features: DEFAULT_CHECKED_FEATURES_IDS,

@@ -411,12 +411,18 @@ export const WorkspaceForm = ({
         formData.features = defaultValues?.features ?? [];
       }
 
+      // Create a new object without the specified properties
+      const {
+        ['userPermissions']: formDataUserPermissions,
+        ['groupPermissions']: formDataGroupPermissions,
+        ...formDataWithoutPermissions
+      } = formData;
       onSubmit?.({
-        ...formData,
+        ...formDataWithoutPermissions,
         name: formData.name!,
         permissions: [
-          ...formData.userPermissions.filter(isValidWorkspacePermissionSetting),
-          ...formData.groupPermissions.filter(isValidWorkspacePermissionSetting),
+          ...formDataUserPermissions.filter(isValidWorkspacePermissionSetting),
+          ...formDataGroupPermissions.filter(isValidWorkspacePermissionSetting),
         ] as any,
       });
     },

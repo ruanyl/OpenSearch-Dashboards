@@ -328,7 +328,6 @@ export const WorkspacePermissionSettingPanel = ({
   groupPermissionSettings,
   lastAdminItemDeletable,
 }: WorkspacePermissionSettingPanelProps) => {
-
   const nonDeletableIndex = useMemo(() => {
     let userNonDeletableIndex = -1;
     let groupNonDeletableIndex = -1;
