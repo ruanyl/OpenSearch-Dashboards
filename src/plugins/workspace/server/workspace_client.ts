@@ -134,6 +134,7 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
           type: WORKSPACE_TYPE,
           search: attributes.name,
           searchFields: ['name'],
+          enabledOperators: 'NONE', // disable all operators, treat workspace as literal string
         }
       );
       if (existingWorkspaceRes && existingWorkspaceRes.total > 0) {
@@ -260,6 +261,7 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
           search: attributes.name,
           searchFields: ['name'],
           fields: ['_id'],
+          enabledOperators: 'NONE', // disable all operators, treat workspace as literal string
         });
         if (existingWorkspaceRes && existingWorkspaceRes.total > 0) {
           throw new Error(DUPLICATE_WORKSPACE_NAME_ERROR);

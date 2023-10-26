@@ -801,6 +801,7 @@ export class SavedObjectsRepository {
       workspaces,
       workspacesSearchOperator,
       ACLSearchParams,
+      enabledOperators,
     } = options;
 
     if (!type && !typeToNamespacesMap) {
@@ -877,6 +878,7 @@ export class SavedObjectsRepository {
           workspaces,
           workspacesSearchOperator,
           ACLSearchParams,
+          enabledOperators,
         }),
       },
     };

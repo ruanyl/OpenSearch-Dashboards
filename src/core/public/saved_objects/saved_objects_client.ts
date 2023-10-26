@@ -390,6 +390,7 @@ export class SavedObjectsClient {
       namespaces: 'namespaces',
       preference: 'preference',
       workspaces: 'workspaces',
+      enabledOperators: 'enabledOperators',
     };
 
     const renamedQuery = renameKeys<SavedObjectsFindOptions, any>(renameMap, {

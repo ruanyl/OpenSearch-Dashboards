@@ -506,6 +506,25 @@ describe('#getQueryParams', () => {
           );
         });
       });
+
+      describe('`enabledOperators` parameter', () => {
+        it('does not include flags when `enabledOperators` is not specified', () => {
+          const result = getQueryParams({
+            registry,
+            search,
+          });
+          expectResult(result, expect.not.objectContaining({ flags: expect.anything() }));
+        });
+
+        it('includes flags when `enabledOperators` specified', () => {
+          const result = getQueryParams({
+            registry,
+            search,
+            enabledOperators: 'all',
+          });
+          expectResult(result, expect.objectContaining({ flags: expect.stringMatching('all') }));
+        });
+      });
     });
 
     describe('when using prefix search (query.bool.should)', () => {
