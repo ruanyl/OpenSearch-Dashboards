@@ -134,7 +134,6 @@ export const WorkspaceForm = ({
       ? WorkspaceFormTabs.UsersAndPermissions
       : WorkspaceFormTabs.NotSelected
   );
-  const [errorsCount, setErrorsCount] = useState(0);
   // The matched feature id list based on original feature config,
   // the feature category will be expanded to list of feature ids
   const defaultFeatures = useMemo(() => {
@@ -179,6 +178,7 @@ export const WorkspaceForm = ({
   };
 
   const [formErrors, setFormErrors] = useState<WorkspaceFormErrors>({});
+  const errorsCount = useMemo(() => getErrorsCount(formErrors), [formErrors]);
   const formIdRef = useRef<string>();
   const getFormData = () => ({
     name,
@@ -393,7 +393,6 @@ export const WorkspaceForm = ({
       }
       const currentErrorsCount = getErrorsCount(currentFormErrors);
       setFormErrors(currentFormErrors);
-      setErrorsCount(currentErrorsCount);
       if (currentErrorsCount > 0) {
         return;
       }
