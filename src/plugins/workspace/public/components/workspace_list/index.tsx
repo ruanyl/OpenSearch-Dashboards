@@ -24,8 +24,6 @@ import { useOpenSearchDashboards } from '../../../../../plugins/opensearch_dashb
 import { switchWorkspace, updateWorkspace } from '../utils/workspace';
 import { debounce } from '../utils/common';
 
-import { formatUrlWithWorkspaceId } from '../../utils';
-
 import { WORKSPACE_CREATE_APP_ID } from '../../../common/constants';
 
 const WORKSPACE_LIST_PAGE_DESCRIPTIOIN = i18n.translate('workspace.list.description', {
@@ -129,13 +127,9 @@ export const WorkspaceList = () => {
     if (!application || !http) {
       return '';
     }
-    return formatUrlWithWorkspaceId(
-      application.getUrlForApp(WORKSPACE_CREATE_APP_ID, {
-        absolute: false,
-      }),
-      '',
-      http.basePath
-    );
+    return application.getUrlForApp(WORKSPACE_CREATE_APP_ID, {
+      absolute: false,
+    });
   }, [application, http]);
 
   const debouncedSetQueryInput = useMemo(() => {
