@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { generateRandomId } from './utils';
+import { httpServerMock } from '../../../core/server/mocks';
+import { generateRandomId, getPrincipalsFromRequest } from './utils';
 
 describe('workspace utils', () => {
   it('should generate id with the specified size', () => {
@@ -17,5 +18,40 @@ describe('workspace utils', () => {
       ids.add(generateRandomId(6));
     }
     expect(ids.size).toBe(NUM_OF_ID);
+  });
+
+  it('should return empty map when request do not have authentication', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const result = getPrincipalsFromRequest(mockRequest);
+    expect(result).toEqual({});
+  });
+
+  it('should return normally when request has authentication', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest({
+      auth: {
+        credentials: {
+          authInfo: {
+            backend_roles: ['foo'],
+            user_name: 'bar',
+          },
+        },
+      } as any,
+    });
+    const result = getPrincipalsFromRequest(mockRequest);
+    expect(result.users).toEqual(['bar']);
+    expect(result.groups).toEqual(['foo']);
+  });
+
+  it('should return a fake user when there is auth field but no backend_roles or user name', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest({
+      auth: {
+        credentials: {
+          authInfo: {},
+        },
+      } as any,
+    });
+    const result = getPrincipalsFromRequest(mockRequest);
+    expect(result.users?.[0].startsWith('_user_fake_')).toEqual(true);
+    expect(result.groups).toEqual(undefined);
   });
 });
