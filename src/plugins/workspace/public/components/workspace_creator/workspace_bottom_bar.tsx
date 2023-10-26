@@ -87,7 +87,13 @@ export const WorkspaceBottomBar = ({
                 </EuiButton>
               )}
               {opType === WORKSPACE_OP_TYPE_UPDATE && (
-                <EuiButton form={formId} type="submit" fill color="primary">
+                <EuiButton
+                  form={formId}
+                  type="submit"
+                  fill
+                  color="primary"
+                  data-test-subj="workspaceForm-bottomBar-updateButton"
+                >
                   {i18n.translate('workspace.form.bottomBar.saveChanges', {
                     defaultMessage: 'Save changes',
                   })}

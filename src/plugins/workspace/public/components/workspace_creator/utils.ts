@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { i18n } from '@osd/i18n';
 import { WorkspacePermissionMode } from '../../../../../core/public';
 import {
   UserOrGroupPermissionEditingData,
@@ -10,6 +11,7 @@ import {
   WorkspaceFormErrors,
   WorkspacePermissionSetting,
   WorkspacePermissionItemType,
+  WorkspaceFormData,
 } from './types';
 import { OptionIdToWorkspacePermissionModesMap, PermissionModeId } from './constants';
 
@@ -29,8 +31,11 @@ export const getErrorsCount = (formErrors: WorkspaceFormErrors) => {
   if (formErrors.description) {
     errorsCount += 1;
   }
-  if (formErrors.permissions) {
-    errorsCount += formErrors.permissions.length;
+  if (formErrors.userPermissions) {
+    errorsCount += formErrors.userPermissions.filter((permission) => !!permission).length;
+  }
+  if (formErrors.groupPermissions) {
+    errorsCount += formErrors.groupPermissions.filter((permission) => !!permission).length;
   }
   return errorsCount;
 };
@@ -39,14 +44,12 @@ export const getUserAndGroupPermissions = (
 ) => {
   const userPermissions: UserOrGroupPermissionEditingData = [];
   const groupPermissions: UserOrGroupPermissionEditingData = [];
-  if (permissions) {
-    for (const permission of permissions) {
-      if (permission.type === WorkspacePermissionItemType.User) {
-        userPermissions.push({ id: permission.userId, modes: permission.modes });
-      }
-      if (permission.type === WorkspacePermissionItemType.Group) {
-        groupPermissions.push({ id: permission.group, modes: permission.modes });
-      }
+  for (const permission of permissions) {
+    if (permission.type === WorkspacePermissionItemType.User) {
+      userPermissions.push({ id: permission.userId, modes: permission.modes });
+    }
+    if (permission.type === WorkspacePermissionItemType.Group) {
+      groupPermissions.push({ id: permission.group, modes: permission.modes });
     }
   }
   return [userPermissions, groupPermissions];
@@ -90,7 +93,7 @@ const getUnsavedUserOrGroupPermissionChangesCount = (
 };
 
 export const getUnsavedChangesCount = (
-  initialFormData: WorkspaceFormEditingData,
+  initialFormData: WorkspaceFormData,
   currentFormData: WorkspaceFormEditingData
 ) => {
   let unsavedChangesCount = 0;
@@ -122,16 +125,13 @@ export const getUnsavedChangesCount = (
   const [initialUserPermissions, initialGroupPermissions] = getUserAndGroupPermissions(
     initialFormData.permissions ?? []
   );
-  const [currentUserPermissions, currentGroupPermissions] = getUserAndGroupPermissions(
-    currentFormData.permissions ?? []
-  );
   unsavedChangesCount += getUnsavedUserOrGroupPermissionChangesCount(
     initialUserPermissions,
-    currentUserPermissions
+    currentFormData.userPermissions ?? []
   );
   unsavedChangesCount += getUnsavedUserOrGroupPermissionChangesCount(
     initialGroupPermissions,
-    currentGroupPermissions
+    currentFormData.groupPermissions ?? []
   );
   return unsavedChangesCount;
 };
@@ -144,4 +144,39 @@ export const getPermissionModeId = (modes: WorkspacePermissionMode[]) => {
     }
   }
   return PermissionModeId.Read;
+};
+
+export const getPermissionErrors = (permissions: Array<Partial<WorkspacePermissionSetting>>) => {
+  const permissionErrors: string[] = new Array(permissions.length);
+  for (let i = 0; i < permissions.length; i++) {
+    const permission = permissions[i];
+    if (isValidWorkspacePermissionSetting(permission)) {
+      continue;
+    }
+    if (!permission.type) {
+      permissionErrors[i] = i18n.translate('workspace.form.permission.invalidate.type', {
+        defaultMessage: 'Invalid type',
+      });
+      continue;
+    }
+    if (!permission.modes || permission.modes.length === 0) {
+      permissionErrors[i] = i18n.translate('workspace.form.permission.invalidate.modes', {
+        defaultMessage: 'Invalid permission modes',
+      });
+      continue;
+    }
+    if (permission.type === WorkspacePermissionItemType.User && !permission.userId) {
+      permissionErrors[i] = i18n.translate('workspace.form.permission.invalidate.userId', {
+        defaultMessage: 'Invalid userId',
+      });
+      continue;
+    }
+    if (permission.type === WorkspacePermissionItemType.Group && !permission.group) {
+      permissionErrors[i] = i18n.translate('workspace.form.permission.invalidate.group', {
+        defaultMessage: 'Invalid user group',
+      });
+      continue; // this line is need for more conditions
+    }
+  }
+  return permissionErrors;
 };
