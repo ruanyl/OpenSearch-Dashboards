@@ -26,6 +26,8 @@ import { debounce } from '../utils/common';
 
 import { WORKSPACE_CREATE_APP_ID } from '../../../common/constants';
 
+import { cleanWorkspaceId } from '../../../../../core/public';
+
 const WORKSPACE_LIST_PAGE_DESCRIPTIOIN = i18n.translate('workspace.list.description', {
   defaultMessage:
     'Workspace allow you to save and organize library items, such as index patterns, visualizations, dashboards, saved searches, and share them with other OpenSearch Dashboards users. You can control which features are visible in each workspace, and which users and groups have read and write access to the library items in the workspace.',
@@ -127,9 +129,12 @@ export const WorkspaceList = () => {
     if (!application || !http) {
       return '';
     }
-    return application.getUrlForApp(WORKSPACE_CREATE_APP_ID, {
-      absolute: false,
-    });
+
+    return cleanWorkspaceId(
+      application.getUrlForApp(WORKSPACE_CREATE_APP_ID, {
+        absolute: false,
+      })
+    );
   }, [application, http]);
 
   const debouncedSetQueryInput = useMemo(() => {
