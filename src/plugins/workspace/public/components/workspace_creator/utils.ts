@@ -10,7 +10,7 @@ import {
   PermissionModeId,
 } from '../../../../../core/public';
 import {
-  UserOrGroupPermissionEditingData,
+  PermissionEditingData,
   WorkspaceFormEditingData,
   WorkspaceFormErrors,
   WorkspacePermissionSetting,
@@ -61,8 +61,8 @@ export const getUserAndGroupPermissions = (
 };
 
 const getUnsavedPermissionsCount = (
-  initialPermissions: UserOrGroupPermissionEditingData,
-  currentPermissions: UserOrGroupPermissionEditingData
+  initialPermissions: PermissionEditingData,
+  currentPermissions: PermissionEditingData
 ) => {
   // for user or group permissions, unsaved changes is the sum of
   // # deleted permissions, # added permissions and # edited permissions

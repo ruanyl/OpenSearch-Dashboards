@@ -69,6 +69,4 @@ export type WorkspaceFormEditingData = Partial<
   }
 >;
 
-export type UserOrGroupPermissionEditingData = Array<
-  Partial<{ id: string; modes: WorkspacePermissionMode[] }>
->;
+export type PermissionEditingData = Array<Partial<TypelessPermissionSetting>>;
