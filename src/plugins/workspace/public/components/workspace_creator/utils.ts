@@ -60,7 +60,7 @@ export const getUserAndGroupPermissions = (
   return [userPermissions, groupPermissions];
 };
 
-const getUnsavedUserOrGroupPermissionChangesCount = (
+const getUnsavedPermissionsCount = (
   initialPermissions: UserOrGroupPermissionEditingData,
   currentPermissions: UserOrGroupPermissionEditingData
 ) => {
@@ -130,11 +130,11 @@ export const getUnsavedChangesCount = (
   const [initialUserPermissions, initialGroupPermissions] = getUserAndGroupPermissions(
     initialFormData.permissions ?? []
   );
-  unsavedChangesCount += getUnsavedUserOrGroupPermissionChangesCount(
+  unsavedChangesCount += getUnsavedPermissionsCount(
     initialUserPermissions,
     currentFormData.userPermissions ?? []
   );
-  unsavedChangesCount += getUnsavedUserOrGroupPermissionChangesCount(
+  unsavedChangesCount += getUnsavedPermissionsCount(
     initialGroupPermissions,
     currentFormData.groupPermissions ?? []
   );
