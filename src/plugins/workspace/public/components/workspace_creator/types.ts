@@ -42,7 +42,7 @@ export enum WorkspacePermissionItemType {
   Group = 'group',
 }
 
-export interface TypelessPermissionSetting {
+export interface PermissionFieldData {
   id: string;
   modes: WorkspacePermissionMode[];
 }
@@ -61,12 +61,12 @@ interface GroupPermissionSetting {
 
 export type WorkspacePermissionSetting = UserPermissionSetting | GroupPermissionSetting;
 
+export type PermissionEditingData = Array<Partial<PermissionFieldData>>;
+
 // when editing, attributes could be undefined in workspace form
 export type WorkspaceFormEditingData = Partial<
   Omit<WorkspaceFormSubmitData, 'permissions'> & {
-    userPermissions: Array<Partial<TypelessPermissionSetting>>;
-    groupPermissions: Array<Partial<TypelessPermissionSetting>>;
+    userPermissions: PermissionEditingData;
+    groupPermissions: PermissionEditingData;
   }
 >;
-
-export type PermissionEditingData = Array<Partial<TypelessPermissionSetting>>;

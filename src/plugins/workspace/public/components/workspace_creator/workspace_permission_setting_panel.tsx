@@ -21,10 +21,7 @@ import {
   PermissionModeId,
   OptionIdToWorkspacePermissionModesMap,
 } from '../../../../../core/public';
-import {
-  WorkspacePermissionItemType,
-  TypelessPermissionSetting as PermissionSetting,
-} from './types';
+import { WorkspacePermissionItemType, PermissionEditingData } from './types';
 import { getPermissionModeId } from './utils';
 
 const permissionModeOptions = [
@@ -157,10 +154,10 @@ interface WorkspacePermissionSettingPanelProps {
   userErrors?: string[];
   groupErrors?: string[];
   lastAdminItemDeletable?: boolean;
-  userPermissionSettings: Array<Partial<PermissionSetting>>;
-  groupPermissionSettings: Array<Partial<PermissionSetting>>;
-  onUserPermissionChange: (value: Array<Partial<PermissionSetting>>) => void;
-  onGroupPermissionChange: (value: Array<Partial<PermissionSetting>>) => void;
+  userPermissionSettings: PermissionEditingData;
+  groupPermissionSettings: PermissionEditingData;
+  onUserPermissionChange: (value: PermissionEditingData) => void;
+  onGroupPermissionChange: (value: PermissionEditingData) => void;
 }
 
 interface UserOrGroupSectionProps {
@@ -168,8 +165,8 @@ interface UserOrGroupSectionProps {
   errors?: string[];
   nonDeletableIndex: number;
   type: WorkspacePermissionItemType;
-  permissionSettings: Array<Partial<PermissionSetting>>;
-  onChange: (value: Array<Partial<PermissionSetting>>) => void;
+  permissionSettings: PermissionEditingData;
+  onChange: (value: PermissionEditingData) => void;
 }
 
 const UserOrGroupSection = ({

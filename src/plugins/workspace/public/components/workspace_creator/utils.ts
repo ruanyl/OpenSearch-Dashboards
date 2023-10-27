@@ -16,7 +16,7 @@ import {
   WorkspacePermissionSetting,
   WorkspacePermissionItemType,
   WorkspaceFormData,
-  TypelessPermissionSetting,
+  PermissionFieldData,
 } from './types';
 
 export const isValidWorkspacePermissionSetting = (
@@ -46,9 +46,9 @@ export const getErrorsCount = (formErrors: WorkspaceFormErrors) => {
 
 export const getUserAndGroupPermissions = (
   permissions: WorkspacePermissionSetting[]
-): TypelessPermissionSetting[][] => {
-  const userPermissions: TypelessPermissionSetting[] = [];
-  const groupPermissions: TypelessPermissionSetting[] = [];
+): PermissionFieldData[][] => {
+  const userPermissions: PermissionFieldData[] = [];
+  const groupPermissions: PermissionFieldData[] = [];
   for (const permission of permissions) {
     if (permission.type === WorkspacePermissionItemType.User) {
       userPermissions.push({ id: permission.userId, modes: permission.modes });
@@ -151,7 +151,7 @@ export const getPermissionModeId = (modes: WorkspacePermissionMode[]) => {
   return PermissionModeId.Read;
 };
 
-export const getPermissionErrors = (permissions: Array<Partial<TypelessPermissionSetting>>) => {
+export const getPermissionErrors = (permissions: PermissionEditingData) => {
   const permissionErrors: string[] = new Array(permissions.length);
   for (let i = 0; i < permissions.length; i++) {
     const permission = permissions[i];
@@ -175,8 +175,8 @@ export const getPermissionErrors = (permissions: Array<Partial<TypelessPermissio
 };
 
 export const formatPermissions = (
-  userPermissions: TypelessPermissionSetting[],
-  groupPermissions: TypelessPermissionSetting[]
+  userPermissions: PermissionFieldData[],
+  groupPermissions: PermissionFieldData[]
 ): WorkspacePermissionSetting[] => {
   const permissions: WorkspacePermissionSetting[] = [];
   for (const permission of userPermissions) {

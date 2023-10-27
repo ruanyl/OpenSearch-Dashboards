@@ -63,7 +63,8 @@ import {
   WorkspaceFormData,
   WorkspaceFormErrors,
   WorkspaceFormSubmitData,
-  TypelessPermissionSetting,
+  PermissionFieldData,
+  PermissionEditingData,
 } from './types';
 
 enum WorkspaceFormTabs {
@@ -157,12 +158,12 @@ export const WorkspaceForm = ({
       ? defaultValues.permissions
       : []
   );
-  const [userPermissions, setUserPermissions] = useState<Array<Partial<TypelessPermissionSetting>>>(
+  const [userPermissions, setUserPermissions] = useState<PermissionEditingData>(
     initialUserPermissions
   );
-  const [groupPermissions, setGroupPermissions] = useState<
-    Array<Partial<TypelessPermissionSetting>>
-  >(initialGroupPermissions);
+  const [groupPermissions, setGroupPermissions] = useState<PermissionEditingData>(
+    initialGroupPermissions
+  );
 
   const libraryCategoryLabel = i18n.translate('core.ui.libraryNavList.label', {
     defaultMessage: 'Library',
@@ -421,8 +422,8 @@ export const WorkspaceForm = ({
         ...formDataWithoutPermissions,
         name: formData.name!,
         permissions: formatPermissions(
-          formDataUserPermissions as TypelessPermissionSetting[],
-          formDataGroupPermissions as TypelessPermissionSetting[]
+          formDataUserPermissions as PermissionFieldData[],
+          formDataGroupPermissions as PermissionFieldData[]
         ),
       });
     },
