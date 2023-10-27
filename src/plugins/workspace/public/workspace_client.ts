@@ -241,7 +241,7 @@ export class WorkspaceClient {
   public async update(
     id: string,
     attributes: Partial<WorkspaceAttribute>,
-    permissions?: WorkspacePermissionItem[]
+    permissions?: Array<WorkspacePermissionItem<WorkspacePermissionMode>>
   ): Promise<IResponse<boolean>> {
     const path = this.getPath(id);
     const body = {

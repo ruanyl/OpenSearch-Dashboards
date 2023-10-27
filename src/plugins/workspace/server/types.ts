@@ -11,12 +11,13 @@ import {
   CoreSetup,
   WorkspaceAttribute,
   SavedObjectsServiceStart,
+  WorkspacePermissionMode,
 } from '../../../core/server';
 
 import { WorkspacePermissionItem } from '../common/types';
 
 export interface WorkspaceAttributeWithPermission extends WorkspaceAttribute {
-  permissions?: WorkspacePermissionItem[];
+  permissions?: Array<WorkspacePermissionItem<WorkspacePermissionMode>>;
 }
 
 export interface WorkspaceFindOptions {
