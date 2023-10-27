@@ -28,9 +28,10 @@ export enum PermissionModeId {
   Admin = 'admin',
 }
 
-export const OptionIdToWorkspacePermissionModesMap: {
-  [key: string]: WorkspacePermissionMode[];
-} = {
+export const OptionIdToWorkspacePermissionModesMap: Record<
+  PermissionModeId,
+  WorkspacePermissionMode[]
+> = {
   [PermissionModeId.Read]: [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.Read],
   [PermissionModeId.ReadAndWrite]: [
     WorkspacePermissionMode.LibraryWrite,

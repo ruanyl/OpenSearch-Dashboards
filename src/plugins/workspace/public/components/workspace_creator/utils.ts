@@ -61,14 +61,14 @@ const getUnsavedPermissionsCount = (
   initialPermissions: PermissionEditingData,
   currentPermissions: PermissionEditingData
 ) => {
-  // for user or group permissions, unsaved changes is the sum of
+  // for permission data being edited, unsaved changes is the sum of
   // # deleted permissions, # added permissions and # edited permissions
   let addedPermissions = 0;
   let editedPermissions = 0;
-  const initialPermissionMap = new Map<string, WorkspacePermissionMode[]>();
+  const initialPermissionMap = new Map<string, PermissionModeId>();
   for (const permission of initialPermissions) {
     if (permission.id) {
-      initialPermissionMap.set(permission.id, permission.modes ?? []);
+      initialPermissionMap.set(permission.id, getPermissionModeId(permission.modes ?? []));
     }
   }
 
@@ -76,12 +76,10 @@ const getUnsavedPermissionsCount = (
     if (!permission.id) {
       addedPermissions += 1; // added permissions
     } else {
-      const permissionModes = initialPermissionMap.get(permission.id);
-      if (!permissionModes) {
+      const permissionMode = initialPermissionMap.get(permission.id);
+      if (!permissionMode) {
         addedPermissions += 1;
-      } else if (
-        getPermissionModeId(permissionModes) !== getPermissionModeId(permission.modes ?? [])
-      ) {
+      } else if (permissionMode !== getPermissionModeId(permission.modes ?? [])) {
         editedPermissions += 1; // added or edited permissions
       }
     }
@@ -139,8 +137,9 @@ export const getUnsavedChangesCount = (
 };
 
 // default permission mode is read
-export const getPermissionModeId = (modes: WorkspacePermissionMode[]) => {
-  for (const key in OptionIdToWorkspacePermissionModesMap) {
+export const getPermissionModeId = (modes: WorkspacePermissionMode[]): PermissionModeId => {
+  let key: PermissionModeId;
+  for (key in OptionIdToWorkspacePermissionModesMap) {
     if (OptionIdToWorkspacePermissionModesMap[key].every((mode) => modes?.includes(mode))) {
       return key;
     }
