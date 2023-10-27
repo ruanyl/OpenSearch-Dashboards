@@ -13,12 +13,13 @@ import {
   formatPermissions,
 } from './utils';
 import {
-  TypelessPermissionSetting,
+  PermissionFieldData,
   WorkspaceFormErrors,
   WorkspacePermissionItemType,
   WorkspacePermissionSetting,
 } from './types';
-import { WorkspacePermissionMode, PermissionModeId } from '../../../../../core/public';
+import { WorkspacePermissionMode } from '../../../../../core/public';
+import { PermissionModeId } from '../../../common/constants';
 
 describe('isValidWorkspacePermissionSetting', () => {
   it('should return true with valid user permission setting', () => {
@@ -213,7 +214,7 @@ describe('getPermissionErrors', () => {
 
 describe('formatPermissions', () => {
   it('should get permission errors for both users and groups', () => {
-    const userPermissions: TypelessPermissionSetting[] = [
+    const userPermissions: PermissionFieldData[] = [
       {
         id: 'read user',
         modes: [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.Read],
@@ -223,7 +224,7 @@ describe('formatPermissions', () => {
         modes: [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
       },
     ];
-    const groupPermissions: TypelessPermissionSetting[] = [
+    const groupPermissions: PermissionFieldData[] = [
       {
         id: 'read group',
         modes: [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.Read],

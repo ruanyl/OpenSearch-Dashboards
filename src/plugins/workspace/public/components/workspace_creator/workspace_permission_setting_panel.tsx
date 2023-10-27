@@ -16,11 +16,8 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import {
-  WorkspacePermissionMode,
-  PermissionModeId,
-  OptionIdToWorkspacePermissionModesMap,
-} from '../../../../../core/public';
+import { WorkspacePermissionMode } from '../../../../../core/public';
+import { PermissionModeId, OptionIdToWorkspacePermissionModesMap } from '../../../common/constants';
 import { WorkspacePermissionItemType, PermissionEditingData } from './types';
 import { getPermissionModeId } from './utils';
 
