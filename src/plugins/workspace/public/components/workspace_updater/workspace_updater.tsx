@@ -16,25 +16,21 @@ import {
 import { useObservable } from 'react-use';
 import { i18n } from '@osd/i18n';
 import { of } from 'rxjs';
-import { WorkspaceAttribute } from 'opensearch-dashboards/public';
+import { WorkspaceObject } from 'opensearch-dashboards/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import {
-  WorkspaceForm,
-  WorkspaceFormSubmitData,
-  WorkspaceFormData,
-} from '../workspace_creator/workspace_form';
+import { WorkspaceForm, WorkspaceFormSubmitData, WorkspaceFormData } from '../workspace_creator/';
 import { WORKSPACE_OVERVIEW_APP_ID, WORKSPACE_OP_TYPE_UPDATE } from '../../../common/constants';
 import { DeleteWorkspaceModal } from '../delete_workspace_modal';
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { WorkspaceClient } from '../../workspace_client';
 import { WorkspacePermissionSetting } from '../';
 
-interface WorkspaceWithPermission extends WorkspaceAttribute {
+interface WorkspaceWithPermission extends WorkspaceObject {
   permissions?: WorkspacePermissionSetting[];
 }
 
 function getFormDataFromWorkspace(
-  currentWorkspace: WorkspaceAttribute | null | undefined
+  currentWorkspace: WorkspaceObject | null | undefined
 ): WorkspaceFormData {
   const currentWorkspaceWithPermission = (currentWorkspace || {}) as WorkspaceWithPermission;
   return {

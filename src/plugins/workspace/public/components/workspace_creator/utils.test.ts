@@ -10,9 +10,10 @@ import {
   getUnsavedChangesCount,
   getPermissionModeId,
   getPermissionErrors,
+  formatPermissions,
 } from './utils';
 import {
-  UserPermissionSetting,
+  TypelessPermissionSetting,
   WorkspaceFormErrors,
   WorkspacePermissionItemType,
   WorkspacePermissionSetting,
@@ -86,20 +87,19 @@ describe('getErrorsCount', () => {
 describe('getUserAndGroupPermissions', () => {
   it('should split user and group permissions from all permissions', () => {
     const permissions = [
-      { modes: [] },
-      { userId: 'test user id 1' },
-      { group: 'test group id 1' },
-      { type: WorkspacePermissionItemType.User, userId: 'test user id 2', modes: [] },
+      { type: WorkspacePermissionItemType.User, userId: 'test user id 1', modes: [] },
+      { type: WorkspacePermissionItemType.Group, group: 'test group id 1', modes: [] },
       { type: WorkspacePermissionItemType.Group, group: 'test group id 2', modes: [] },
-      { type: WorkspacePermissionItemType.Group, group: 'test group id 3', modes: [] },
-    ];
-    expect(getUserAndGroupPermissions(permissions)).toStrictEqual([
-      [{ id: 'test user id 2', modes: [] }],
-      [
-        { id: 'test group id 2', modes: [] },
-        { id: 'test group id 3', modes: [] },
-      ],
-    ]);
+    ] as any;
+    expect(getUserAndGroupPermissions(permissions)).toEqual(
+      expect.arrayContaining([
+        [{ id: 'test user id 1', modes: [] }],
+        [
+          { id: 'test group id 1', modes: [] },
+          { id: 'test group id 2', modes: [] },
+        ],
+      ])
+    );
   });
 });
 
@@ -154,15 +154,14 @@ describe('getUnsavedChangesCount', () => {
       name: 'test workspace name',
       userPermissions: [
         {
-          userId: 'test user id 1',
-          type: WorkspacePermissionItemType.User,
+          id: 'test user id 1',
           modes: [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
         },
-      ] as UserPermissionSetting[],
+      ] as any,
       groupPermissions: [],
     };
     // 1 deleted permission and 1 edited permission
-    expect(getUnsavedChangesCount(initialFormData, currentFormData)).toBe(false);
+    expect(getUnsavedChangesCount(initialFormData, currentFormData)).toBe(2);
   });
 });
 
@@ -194,34 +193,61 @@ describe('getPermissionErrors', () => {
   it('should get permission errors for both users and groups', () => {
     const permissions = [
       {},
-      { type: WorkspacePermissionItemType.User },
+      { id: 'test permission id' },
+      { id: 'test permission id', modes: [] },
       {
-        type: WorkspacePermissionItemType.User,
-        modes: [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.Read],
-      },
-      {
-        type: WorkspacePermissionItemType.Group,
-        modes: [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.Read],
-      },
-      {
-        userId: 'test user id',
-        type: WorkspacePermissionItemType.User,
-        modes: [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.Read],
-      },
-      {
-        group: 'test group id',
-        type: WorkspacePermissionItemType.Group,
+        id: 'test permission id',
         modes: [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.Read],
       },
     ];
     const expectedPermissionErrors = [
-      'Invalid type',
+      'Invalid id',
       'Invalid permission modes',
-      'Invalid userId',
-      'Invalid user group',
+      'Invalid permission modes',
     ];
     expect(getPermissionErrors(permissions)).toEqual(
       expect.arrayContaining(expectedPermissionErrors)
+    );
+  });
+});
+
+describe('formatPermissions', () => {
+  it('should get permission errors for both users and groups', () => {
+    const userPermissions: TypelessPermissionSetting[] = [
+      {
+        id: 'read user',
+        modes: [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.Read],
+      },
+      {
+        id: 'admin user',
+        modes: [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
+      },
+    ];
+    const groupPermissions: TypelessPermissionSetting[] = [
+      {
+        id: 'read group',
+        modes: [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.Read],
+      },
+    ];
+    const expectedPermissions: WorkspacePermissionSetting[] = [
+      {
+        userId: 'read user',
+        type: WorkspacePermissionItemType.User,
+        modes: [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.Read],
+      },
+      {
+        userId: 'admin user',
+        type: WorkspacePermissionItemType.User,
+        modes: [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
+      },
+      {
+        group: 'read group',
+        type: WorkspacePermissionItemType.Group,
+        modes: [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.Read],
+      },
+    ];
+    expect(formatPermissions(userPermissions, groupPermissions)).toEqual(
+      expect.arrayContaining(expectedPermissions)
     );
   });
 });

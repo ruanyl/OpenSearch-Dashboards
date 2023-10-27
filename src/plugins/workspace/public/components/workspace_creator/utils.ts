@@ -16,6 +16,7 @@ import {
   WorkspacePermissionSetting,
   WorkspacePermissionItemType,
   WorkspaceFormData,
+  TypelessPermissionSetting,
 } from './types';
 
 export const isValidWorkspacePermissionSetting = (
@@ -42,11 +43,12 @@ export const getErrorsCount = (formErrors: WorkspaceFormErrors) => {
   }
   return errorsCount;
 };
+
 export const getUserAndGroupPermissions = (
-  permissions: Array<Partial<WorkspacePermissionSetting>>
-) => {
-  const userPermissions: UserOrGroupPermissionEditingData = [];
-  const groupPermissions: UserOrGroupPermissionEditingData = [];
+  permissions: WorkspacePermissionSetting[]
+): TypelessPermissionSetting[][] => {
+  const userPermissions: TypelessPermissionSetting[] = [];
+  const groupPermissions: TypelessPermissionSetting[] = [];
   for (const permission of permissions) {
     if (permission.type === WorkspacePermissionItemType.User) {
       userPermissions.push({ id: permission.userId, modes: permission.modes });
@@ -149,16 +151,16 @@ export const getPermissionModeId = (modes: WorkspacePermissionMode[]) => {
   return PermissionModeId.Read;
 };
 
-export const getPermissionErrors = (permissions: Array<Partial<WorkspacePermissionSetting>>) => {
+export const getPermissionErrors = (permissions: Array<Partial<TypelessPermissionSetting>>) => {
   const permissionErrors: string[] = new Array(permissions.length);
   for (let i = 0; i < permissions.length; i++) {
     const permission = permissions[i];
     if (isValidWorkspacePermissionSetting(permission)) {
       continue;
     }
-    if (!permission.type) {
-      permissionErrors[i] = i18n.translate('workspace.form.permission.invalidate.type', {
-        defaultMessage: 'Invalid type',
+    if (!permission.id) {
+      permissionErrors[i] = i18n.translate('workspace.form.permission.invalidate.id', {
+        defaultMessage: 'Invalid id',
       });
       continue;
     }
@@ -166,20 +168,30 @@ export const getPermissionErrors = (permissions: Array<Partial<WorkspacePermissi
       permissionErrors[i] = i18n.translate('workspace.form.permission.invalidate.modes', {
         defaultMessage: 'Invalid permission modes',
       });
-      continue;
-    }
-    if (permission.type === WorkspacePermissionItemType.User && !permission.userId) {
-      permissionErrors[i] = i18n.translate('workspace.form.permission.invalidate.userId', {
-        defaultMessage: 'Invalid userId',
-      });
-      continue;
-    }
-    if (permission.type === WorkspacePermissionItemType.Group && !permission.group) {
-      permissionErrors[i] = i18n.translate('workspace.form.permission.invalidate.group', {
-        defaultMessage: 'Invalid user group',
-      });
       continue; // this line is need for more conditions
     }
   }
   return permissionErrors;
+};
+
+export const formatPermissions = (
+  userPermissions: TypelessPermissionSetting[],
+  groupPermissions: TypelessPermissionSetting[]
+): WorkspacePermissionSetting[] => {
+  const permissions: WorkspacePermissionSetting[] = [];
+  for (const permission of userPermissions) {
+    permissions.push({
+      userId: permission.id,
+      modes: permission.modes,
+      type: WorkspacePermissionItemType.User,
+    });
+  }
+  for (const permission of groupPermissions) {
+    permissions.push({
+      group: permission.id,
+      modes: permission.modes,
+      type: WorkspacePermissionItemType.Group,
+    });
+  }
+  return permissions;
 };

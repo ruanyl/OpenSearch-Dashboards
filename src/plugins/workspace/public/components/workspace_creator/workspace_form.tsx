@@ -51,11 +51,11 @@ import { WorkspaceIconSelector } from './workspace_icon_selector';
 import { WorkspacePermissionSettingPanel } from './workspace_permission_setting_panel';
 import { featureMatchesConfig } from '../../utils';
 import {
+  formatPermissions,
   getErrorsCount,
   getPermissionErrors,
   getUnsavedChangesCount,
   getUserAndGroupPermissions,
-  isValidWorkspacePermissionSetting,
 } from './utils';
 import {
   WorkspaceFeature,
@@ -63,8 +63,7 @@ import {
   WorkspaceFormData,
   WorkspaceFormErrors,
   WorkspaceFormSubmitData,
-  UserPermissionSetting,
-  GroupPermissionSetting,
+  TypelessPermissionSetting,
 } from './types';
 
 enum WorkspaceFormTabs {
@@ -158,12 +157,12 @@ export const WorkspaceForm = ({
       ? defaultValues.permissions
       : []
   );
-  const [userPermissions, setUserPermissions] = useState<Array<Partial<UserPermissionSetting>>>(
+  const [userPermissions, setUserPermissions] = useState<Array<Partial<TypelessPermissionSetting>>>(
     initialUserPermissions
   );
-  const [groupPermissions, setGroupPermissions] = useState<Array<Partial<GroupPermissionSetting>>>(
-    initialGroupPermissions
-  );
+  const [groupPermissions, setGroupPermissions] = useState<
+    Array<Partial<TypelessPermissionSetting>>
+  >(initialGroupPermissions);
 
   const libraryCategoryLabel = i18n.translate('core.ui.libraryNavList.label', {
     defaultMessage: 'Library',
@@ -407,11 +406,12 @@ export const WorkspaceForm = ({
         // such as `['@management']` or `['*']`. The form value `formData.features` will be
         // expanded to array of individual feature id, if the feature hasn't changed, we will
         // set the feature config back to the original value so that category wildcard won't
-        // expanded to feature ids
+        // be expanded to feature ids
         formData.features = defaultValues?.features ?? [];
       }
 
       // Create a new object without the specified properties
+      // If there are no form errors, attributes are available in TypelessPermissionSetting
       const {
         ['userPermissions']: formDataUserPermissions,
         ['groupPermissions']: formDataGroupPermissions,
@@ -420,10 +420,10 @@ export const WorkspaceForm = ({
       onSubmit?.({
         ...formDataWithoutPermissions,
         name: formData.name!,
-        permissions: [
-          ...formDataUserPermissions.filter(isValidWorkspacePermissionSetting),
-          ...formDataGroupPermissions.filter(isValidWorkspacePermissionSetting),
-        ] as any,
+        permissions: formatPermissions(
+          formDataUserPermissions as TypelessPermissionSetting[],
+          formDataGroupPermissions as TypelessPermissionSetting[]
+        ),
       });
     },
     [defaultFeatures, onSubmit, defaultValues?.features]

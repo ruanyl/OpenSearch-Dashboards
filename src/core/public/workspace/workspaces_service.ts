@@ -53,7 +53,6 @@ export class WorkspacesService implements CoreService<WorkspacesSetup, Workspace
       ([workspaceInitialized, workspaceList, currentWorkspaceId]) => {
         if (workspaceInitialized) {
           const currentWorkspace = workspaceList.find((w) => w && w.id === currentWorkspaceId);
-
           /**
            * Do a simple idempotent verification here
            */
