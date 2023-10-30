@@ -18,7 +18,7 @@ import {
   WorkspacePermissionItemType,
   WorkspacePermissionSetting,
 } from './types';
-import { WorkspacePermissionMode } from '../../../../../core/public';
+import { PublicAppInfo, WorkspacePermissionMode } from '../../../../../core/public';
 import { PermissionModeId } from '../../../common/constants';
 
 describe('isValidWorkspacePermissionSetting', () => {
@@ -58,7 +58,7 @@ describe('isValidWorkspacePermissionSetting', () => {
         type: WorkspacePermissionItemType.Group,
         userId: 'test user id',
         modes: [],
-      } as any)
+      } as Partial<WorkspacePermissionSetting>)
     ).toBe(false);
   });
 
@@ -68,7 +68,7 @@ describe('isValidWorkspacePermissionSetting', () => {
         type: WorkspacePermissionItemType.User,
         group: 'test user id',
         modes: [],
-      } as any)
+      } as Partial<WorkspacePermissionSetting>)
     ).toBe(false);
   });
 });
@@ -91,7 +91,7 @@ describe('getUserAndGroupPermissions', () => {
       { type: WorkspacePermissionItemType.User, userId: 'test user id 1', modes: [] },
       { type: WorkspacePermissionItemType.Group, group: 'test group id 1', modes: [] },
       { type: WorkspacePermissionItemType.Group, group: 'test group id 2', modes: [] },
-    ] as any;
+    ] as WorkspacePermissionSetting[];
     expect(getUserAndGroupPermissions(permissions)).toEqual(
       expect.arrayContaining([
         [{ id: 'test user id 1', modes: [] }],
@@ -110,7 +110,7 @@ describe('getUnsavedChangesCount', () => {
     { id: 'feature 1-2', category: { id: 'category 1' } },
     { id: 'feature 2-1', category: { id: 'category 2' } },
     { id: 'feature 2-2', category: { id: 'category 2' } },
-  ] as any;
+  ] as PublicAppInfo[];
 
   it('should return number of unsaved changes in workspace metadata', () => {
     const initialFormData = {
@@ -180,7 +180,7 @@ describe('getUnsavedChangesCount', () => {
           id: 'test user id 1',
           modes: [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
         },
-      ] as any,
+      ],
       groupPermissions: [],
     };
     // 1 deleted permission and 1 edited permission

@@ -204,7 +204,11 @@ export const WorkspaceForm = ({
       userPermissions,
       groupPermissions,
     };
-    return getUnsavedChangesCount(defaultValues ?? ({} as any), currentFormData, applications);
+    return getUnsavedChangesCount(
+      defaultValues ?? ({} as WorkspaceFormData),
+      currentFormData,
+      applications
+    );
   }, [
     name,
     description,
