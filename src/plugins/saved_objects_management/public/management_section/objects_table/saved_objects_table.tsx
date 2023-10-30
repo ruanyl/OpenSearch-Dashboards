@@ -67,7 +67,6 @@ import {
   NotificationsStart,
   ApplicationStart,
 } from 'src/core/public';
-import { Subscription } from 'rxjs';
 import { RedirectAppLinks } from '../../../../opensearch_dashboards_react/public';
 import { IndexPatternsContract } from '../../../../data/public';
 import {
@@ -145,8 +144,6 @@ export interface SavedObjectsTableState {
 
 export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedObjectsTableState> {
   private _isMounted = false;
-  private currentWorkspaceIdSubscription?: Subscription;
-  private workspacesSubscription?: Subscription;
 
   constructor(props: SavedObjectsTableProps) {
     super(props);
@@ -842,8 +839,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       filteredItemCount,
       isSearching,
       savedObjectCounts,
-      workspaceEnabled,
-      currentWorkspaceId: workspaceId,
     } = this.state;
     const { http, allowedTypes, applications, namespaceRegistry } = this.props;
 
