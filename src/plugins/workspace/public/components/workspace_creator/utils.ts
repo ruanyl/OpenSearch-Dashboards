@@ -4,7 +4,8 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { WorkspacePermissionMode } from '../../../../../core/public';
+import { PublicAppInfo, WorkspacePermissionMode } from '../../../../../core/public';
+import { featureMatchesConfig } from '../../utils';
 import { OptionIdToWorkspacePermissionModesMap, PermissionModeId } from '../../../common/constants';
 import {
   PermissionEditingData,
@@ -57,6 +58,20 @@ export const getUserAndGroupPermissions = (
   return [userPermissions, groupPermissions];
 };
 
+const getUnsavedFeaturesCount = (
+  initialFeatureConfig: string[],
+  currentFeatureConfig: string[],
+  allApplications: PublicAppInfo[]
+) => {
+  // for features, unsaved changes is the sum of # deleted features and # added features
+  const initialFeatures = allApplications.filter(featureMatchesConfig(initialFeatureConfig));
+  const currentFeatures = allApplications.filter(featureMatchesConfig(currentFeatureConfig));
+  const featureIntersectionCount = (
+    initialFeatures.filter((feature) => currentFeatures.includes(feature)) ?? []
+  ).length;
+  return initialFeatures.length + currentFeatures.length - featureIntersectionCount * 2;
+};
+
 const getUnsavedPermissionsCount = (
   initialPermissions: PermissionEditingData,
   currentPermissions: PermissionEditingData
@@ -94,7 +109,8 @@ const getUnsavedPermissionsCount = (
 
 export const getUnsavedChangesCount = (
   initialFormData: WorkspaceFormData,
-  currentFormData: WorkspaceFormEditingData
+  currentFormData: WorkspaceFormEditingData,
+  allApplications: PublicAppInfo[]
 ) => {
   let unsavedChangesCount = 0;
   if (initialFormData.name !== currentFormData.name) {
@@ -115,12 +131,11 @@ export const getUnsavedChangesCount = (
   if (initialFormData.defaultVISTheme !== currentFormData.defaultVISTheme) {
     unsavedChangesCount += 1;
   }
-  const featureIntersectionCount = (
-    initialFormData.features?.filter((feature) => currentFormData.features?.includes(feature)) ?? []
-  ).length;
-  // for features, unsaved changes is the sum of # deleted features and # added features
-  unsavedChangesCount += (initialFormData.features?.length ?? 0) - featureIntersectionCount;
-  unsavedChangesCount += (currentFormData.features?.length ?? 0) - featureIntersectionCount;
+  unsavedChangesCount += getUnsavedFeaturesCount(
+    initialFormData.features ?? [],
+    currentFormData.features ?? [],
+    allApplications
+  );
   // for permissions, unsaved changes is the sum of # unsaved user permissions and # unsaved group permissions
   const [initialUserPermissions, initialGroupPermissions] = getUserAndGroupPermissions(
     initialFormData.permissions ?? []

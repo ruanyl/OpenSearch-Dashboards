@@ -204,7 +204,7 @@ export const WorkspaceForm = ({
       userPermissions,
       groupPermissions,
     };
-    return getUnsavedChangesCount(defaultValues ?? ({} as any), currentFormData);
+    return getUnsavedChangesCount(defaultValues ?? ({} as any), currentFormData, applications);
   }, [
     name,
     description,
@@ -215,6 +215,7 @@ export const WorkspaceForm = ({
     userPermissions,
     groupPermissions,
     defaultValues,
+    applications,
   ]);
 
   const featureOrGroups = useMemo(() => {

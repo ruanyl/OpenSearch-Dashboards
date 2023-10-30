@@ -18,7 +18,7 @@ import {
   WorkspacePermissionItemType,
   WorkspacePermissionSetting,
 } from './types';
-import { WorkspacePermissionMode } from '../../../../../core/public';
+import { PublicAppInfo, WorkspacePermissionMode } from '../../../../../core/public';
 import { PermissionModeId } from '../../../common/constants';
 
 describe('isValidWorkspacePermissionSetting', () => {
@@ -105,6 +105,13 @@ describe('getUserAndGroupPermissions', () => {
 });
 
 describe('getUnsavedChangesCount', () => {
+  const allApplications = [
+    { id: 'feature 1-1', category: { id: 'category 1' } },
+    { id: 'feature 1-2', category: { id: 'category 1' } },
+    { id: 'feature 2-1', category: { id: 'category 2' } },
+    { id: 'feature 2-2', category: { id: 'category 2' } },
+  ] as any;
+
   it('should return number of unsaved changes in workspace metadata', () => {
     const initialFormData = {
       id: 'test workspace id',
@@ -116,7 +123,7 @@ describe('getUnsavedChangesCount', () => {
       name: 'changed workspace name',
       description: 'changed workspace description',
     };
-    expect(getUnsavedChangesCount(initialFormData, currentFormData)).toBe(2);
+    expect(getUnsavedChangesCount(initialFormData, currentFormData, allApplications)).toBe(2);
   });
 
   it('should return number of unsaved changes in workspace features', () => {
@@ -124,14 +131,29 @@ describe('getUnsavedChangesCount', () => {
       id: 'test workspace id',
       name: 'test workspace name',
       permissions: [],
-      features: ['feature 1', 'feature 2', 'feature 3'],
+      features: ['feature 1-1', 'feature 1-2', 'feature 2-1'],
     };
     const currentFormData = {
       name: 'test workspace name',
-      features: ['feature 1', 'feature 2', 'feature 4'],
+      features: ['feature 1-1', 'feature 1-2', 'feature 2-2'],
     };
     // 1 deleted feature and 1 added feature
-    expect(getUnsavedChangesCount(initialFormData, currentFormData)).toBe(2);
+    expect(getUnsavedChangesCount(initialFormData, currentFormData, allApplications)).toBe(2);
+  });
+
+  it('should return number of unsaved changes in workspace features with feature configs', () => {
+    const initialFormData = {
+      id: 'test workspace id',
+      name: 'test workspace name',
+      permissions: [],
+      features: ['@category 1', '@category 2'],
+    };
+    const currentFormData = {
+      name: 'test workspace name',
+      features: ['@category 1', '!@category 2'],
+    };
+    // 1 deleted feature and 1 added feature
+    expect(getUnsavedChangesCount(initialFormData, currentFormData, allApplications)).toBe(2);
   });
 
   it('should return number of unsaved changes in workspace permissions', () => {
@@ -162,7 +184,7 @@ describe('getUnsavedChangesCount', () => {
       groupPermissions: [],
     };
     // 1 deleted permission and 1 edited permission
-    expect(getUnsavedChangesCount(initialFormData, currentFormData)).toBe(2);
+    expect(getUnsavedChangesCount(initialFormData, currentFormData, allApplications)).toBe(2);
   });
 });
 
