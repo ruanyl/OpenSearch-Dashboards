@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { WorkspacePermissionMode } from '../../../core/public';
-
 export const WORKSPACE_CREATE_APP_ID = 'workspace_create';
 export const WORKSPACE_LIST_APP_ID = 'workspace_list';
 export const WORKSPACE_UPDATE_APP_ID = 'workspace_update';
@@ -21,21 +19,3 @@ export const PATHS = {
 export const WORKSPACE_OP_TYPE_CREATE = 'create';
 export const WORKSPACE_OP_TYPE_UPDATE = 'update';
 export const WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID = 'workspace';
-
-export enum PermissionModeId {
-  Read = 'read',
-  ReadAndWrite = 'read+write',
-  Admin = 'admin',
-}
-
-export const OptionIdToWorkspacePermissionModesMap: Record<
-  PermissionModeId,
-  WorkspacePermissionMode[]
-> = {
-  [PermissionModeId.Read]: [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.Read],
-  [PermissionModeId.ReadAndWrite]: [
-    WorkspacePermissionMode.LibraryWrite,
-    WorkspacePermissionMode.Read,
-  ],
-  [PermissionModeId.Admin]: [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
-};

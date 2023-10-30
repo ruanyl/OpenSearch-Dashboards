@@ -6,7 +6,10 @@
 import { i18n } from '@osd/i18n';
 import { PublicAppInfo, WorkspacePermissionMode } from '../../../../../core/public';
 import { featureMatchesConfig } from '../../utils';
-import { OptionIdToWorkspacePermissionModesMap, PermissionModeId } from '../../../common/constants';
+import {
+  OptionIdToWorkspacePermissionModesMap,
+  PermissionModeId,
+} from '../../../common/permission/constants';
 import {
   PermissionEditingData,
   WorkspaceFormEditingData,

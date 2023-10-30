@@ -17,7 +17,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { WorkspacePermissionMode } from '../../../../../core/public';
-import { PermissionModeId, OptionIdToWorkspacePermissionModesMap } from '../../../common/constants';
+import {
+  PermissionModeId,
+  OptionIdToWorkspacePermissionModesMap,
+} from '../../../common/permission/constants';
 import { WorkspacePermissionItemType, PermissionEditingData } from './types';
 import { getPermissionModeId } from './utils';
 
@@ -98,8 +101,11 @@ const WorkspacePermissionSettingInput = ({
 
   const handlePermissionModeOptionChange = useCallback(
     (changedId: string) => {
-      if (OptionIdToWorkspacePermissionModesMap[changedId]) {
-        onPermissionModesChange([...OptionIdToWorkspacePermissionModesMap[changedId]], index);
+      if (OptionIdToWorkspacePermissionModesMap[changedId as PermissionModeId]) {
+        onPermissionModesChange(
+          [...OptionIdToWorkspacePermissionModesMap[changedId as PermissionModeId]],
+          index
+        );
       }
     },
     [index, onPermissionModesChange]
