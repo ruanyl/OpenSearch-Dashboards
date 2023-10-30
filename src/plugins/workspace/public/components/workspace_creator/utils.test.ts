@@ -18,7 +18,7 @@ import {
   WorkspacePermissionItemType,
   WorkspacePermissionSetting,
 } from './types';
-import { PublicAppInfo, WorkspacePermissionMode } from '../../../../../core/public';
+import { WorkspacePermissionMode } from '../../../../../core/public';
 import { PermissionModeId } from '../../../common/constants';
 
 describe('isValidWorkspacePermissionSetting', () => {
