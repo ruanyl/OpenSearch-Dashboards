@@ -4,9 +4,8 @@
  */
 
 import { schema } from '@osd/config-schema';
-
 import { CoreSetup, Logger } from '../../../../core/server';
-import { IWorkspaceDBImpl } from '../types';
+import { IWorkspaceClientImpl } from '../types';
 
 const WORKSPACES_API_BASE_URL = '/api/workspaces';
 
@@ -25,7 +24,7 @@ export function registerRoutes({
   logger,
   http,
 }: {
-  client: IWorkspaceDBImpl;
+  client: IWorkspaceClientImpl;
   logger: Logger;
   http: CoreSetup['http'];
 }) {
@@ -80,17 +79,9 @@ export function registerRoutes({
         },
         id
       );
-      if (!result.success) {
-        return res.ok({ body: result });
-      }
 
       return res.ok({
-        body: {
-          ...result,
-          result: {
-            ...result.result,
-          },
-        },
+        body: result,
       });
     })
   );
@@ -112,9 +103,7 @@ export function registerRoutes({
           request: req,
           logger,
         },
-        {
-          ...attributes,
-        }
+        attributes
       );
       return res.ok({ body: result });
     })
@@ -142,9 +131,7 @@ export function registerRoutes({
           logger,
         },
         id,
-        {
-          ...attributes,
-        }
+        attributes
       );
       return res.ok({ body: result });
     })

@@ -10,14 +10,14 @@ import {
   Logger,
   CoreStart,
 } from '../../../core/server';
-import { IWorkspaceDBImpl } from './types';
+import { IWorkspaceClientImpl } from './types';
 import { WorkspaceClientWithSavedObject } from './workspace_client';
 import { registerRoutes } from './routes';
 import { cleanWorkspaceId, getWorkspaceIdFromUrl } from '../../../core/server/utils';
 
 export class WorkspacePlugin implements Plugin<{}, {}> {
   private readonly logger: Logger;
-  private client?: IWorkspaceDBImpl;
+  private client?: IWorkspaceClientImpl;
 
   private proxyWorkspaceTrafficToRealHandler(setupDeps: CoreSetup) {
     /**
@@ -51,7 +51,7 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
     registerRoutes({
       http: core.http,
       logger: this.logger,
-      client: this.client as IWorkspaceDBImpl,
+      client: this.client as IWorkspaceClientImpl,
     });
 
     return {
@@ -64,7 +64,7 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
     this.client?.setSavedObjects(core.savedObjects);
 
     return {
-      client: this.client as IWorkspaceDBImpl,
+      client: this.client as IWorkspaceClientImpl,
     };
   }
 

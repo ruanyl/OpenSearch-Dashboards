@@ -18,7 +18,7 @@ import {
   WORKSPACE_TYPE,
   Logger,
 } from '../../../core/server';
-import { IWorkspaceDBImpl, WorkspaceFindOptions, IResponse, IRequestDetail } from './types';
+import { IWorkspaceClientImpl, WorkspaceFindOptions, IResponse, IRequestDetail } from './types';
 import { workspace } from './saved_objects';
 import { generateRandomId } from './utils';
 import {
@@ -37,7 +37,7 @@ const RESERVED_WORKSPACE_NAME_ERROR = i18n.translate('workspace.reserved.name.er
   defaultMessage: 'reserved workspace name cannot be changed',
 });
 
-export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
+export class WorkspaceClientWithSavedObject implements IWorkspaceClientImpl {
   private setupDep: CoreSetup;
   private logger: Logger;
 
@@ -53,13 +53,16 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
   ): SavedObjectsClientContract | undefined {
     return this.savedObjects?.getScopedClient(requestDetail.request, {
       excludedWrappers: [WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID],
+      includedHiddenTypes: [WORKSPACE_TYPE],
     });
   }
 
   private getSavedObjectClientsFromRequestDetail(
     requestDetail: IRequestDetail
   ): SavedObjectsClientContract {
-    return requestDetail.context.core.savedObjects.client;
+    return this.savedObjects?.getScopedClient(requestDetail.request, {
+      includedHiddenTypes: [WORKSPACE_TYPE],
+    }) as SavedObjectsClientContract;
   }
   private getFlattenedResultWithSavedObject(
     savedObject: SavedObject<WorkspaceAttribute>
@@ -131,7 +134,7 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
   public async create(
     requestDetail: IRequestDetail,
     payload: Omit<WorkspaceAttribute, 'id'>
-  ): ReturnType<IWorkspaceDBImpl['create']> {
+  ): ReturnType<IWorkspaceClientImpl['create']> {
     try {
       const attributes = payload;
       const id = generateRandomId(WORKSPACE_ID_SIZE);
@@ -169,7 +172,7 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
   public async list(
     requestDetail: IRequestDetail,
     options: WorkspaceFindOptions
-  ): ReturnType<IWorkspaceDBImpl['list']> {
+  ): ReturnType<IWorkspaceClientImpl['list']> {
     try {
       let {
         saved_objects: savedObjects,

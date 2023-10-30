@@ -4,9 +4,13 @@
  */
 
 import { WorkspaceAttribute } from 'src/core/types';
-import { omit } from 'lodash';
 import * as osdTestServer from '../../../../core/test_helpers/osd_server';
 import { WORKSPACE_TYPE } from '../../../../core/server';
+
+const omitId = <T extends { id?: string }>(object: T): Omit<T, 'id'> => {
+  const { id, ...others } = object;
+  return others;
+};
 
 const testWorkspace: WorkspaceAttribute = {
   id: 'fake_id',
@@ -32,12 +36,12 @@ describe('workspace service', () => {
     opensearchServer = await startOpenSearch();
     const startOSDResp = await startOpenSearchDashboards();
     root = startOSDResp.root;
-  }, 30000);
+  });
   afterAll(async () => {
     await root.shutdown();
     await opensearchServer.stop();
   });
-  describe('Workspace CRUD apis', () => {
+  describe('Workspace CRUD APIs', () => {
     afterEach(async () => {
       const listResult = await osdTestServer.request
         .post(root, `/api/workspaces/_list`)
@@ -47,6 +51,7 @@ describe('workspace service', () => {
         .expect(200);
       await Promise.all(
         listResult.body.result.workspaces.map((item: WorkspaceAttribute) =>
+          // TODO delete through opensearch
           // this will delete reserved workspace
           osdTestServer.request
             .delete(root, `/api/saved_objects/${WORKSPACE_TYPE}/${item.id}`)
@@ -65,7 +70,7 @@ describe('workspace service', () => {
       const result: any = await osdTestServer.request
         .post(root, `/api/workspaces`)
         .send({
-          attributes: omit(testWorkspace, 'id'),
+          attributes: omitId(testWorkspace),
         })
         .expect(200);
 
@@ -76,7 +81,7 @@ describe('workspace service', () => {
       const result = await osdTestServer.request
         .post(root, `/api/workspaces`)
         .send({
-          attributes: omit(testWorkspace, 'id'),
+          attributes: omitId(testWorkspace),
         })
         .expect(200);
 
@@ -90,7 +95,7 @@ describe('workspace service', () => {
       const result: any = await osdTestServer.request
         .post(root, `/api/workspaces`)
         .send({
-          attributes: omit(testWorkspace, 'id'),
+          attributes: omitId(testWorkspace),
         })
         .expect(200);
 
@@ -98,7 +103,7 @@ describe('workspace service', () => {
         .put(root, `/api/workspaces/${result.body.result.id}`)
         .send({
           attributes: {
-            ...omit(testWorkspace, 'id'),
+            ...omitId(testWorkspace),
             name: 'updated',
           },
         })
@@ -116,7 +121,7 @@ describe('workspace service', () => {
       const result: any = await osdTestServer.request
         .post(root, `/api/workspaces`)
         .send({
-          attributes: omit(testWorkspace, 'id'),
+          attributes: omitId(testWorkspace),
         })
         .expect(200);
 
@@ -151,7 +156,7 @@ describe('workspace service', () => {
       const result: any = await osdTestServer.request
         .post(root, `/api/workspaces`)
         .send({
-          attributes: omit(reservedWorkspace, 'id'),
+          attributes: omitId(reservedWorkspace),
         })
         .expect(200);
 
@@ -168,7 +173,17 @@ describe('workspace service', () => {
       await osdTestServer.request
         .post(root, `/api/workspaces`)
         .send({
-          attributes: omit(testWorkspace, 'id'),
+          attributes: omitId(testWorkspace),
+        })
+        .expect(200);
+
+      await osdTestServer.request
+        .post(root, `/api/workspaces`)
+        .send({
+          attributes: {
+            ...omitId(testWorkspace),
+            name: 'another test workspace',
+          },
         })
         .expect(200);
 
@@ -178,6 +193,68 @@ describe('workspace service', () => {
           page: 1,
         })
         .expect(200);
+      expect(listResult.body.result.total).toEqual(4);
+    });
+    it('unable to perform operations on workspace by calling saved objects APIs', async () => {
+      const result = await osdTestServer.request
+        .post(root, `/api/workspaces`)
+        .send({
+          attributes: omitId(testWorkspace),
+        })
+        .expect(200);
+
+      /**
+       * Can not create workspace by saved objects API
+       */
+      await osdTestServer.request
+        .post(root, `/api/saved_objects/workspace`)
+        .send({
+          attributes: {
+            ...omitId(testWorkspace),
+            name: 'another test workspace',
+          },
+        })
+        .expect(400);
+
+      /**
+       * Can not get workspace by saved objects API
+       */
+      await osdTestServer.request
+        .get(root, `/api/saved_objects/workspace/${result.body.result.id}`)
+        .expect(404);
+
+      /**
+       * Can not update workspace by saved objects API
+       */
+      await osdTestServer.request
+        .put(root, `/api/saved_objects/workspace/${result.body.result.id}`)
+        .send({
+          attributes: {
+            name: 'another test workspace',
+          },
+        })
+        .expect(404);
+
+      /**
+       * Can not delete workspace by saved objects API
+       */
+      await osdTestServer.request
+        .delete(root, `/api/saved_objects/workspace/${result.body.result.id}`)
+        .expect(404);
+
+      /**
+       * Can not find workspace by saved objects API
+       */
+      const findResult = await osdTestServer.request
+        .get(root, `/api/saved_objects/_find?type=workspace`)
+        .expect(200);
+      const listResult = await osdTestServer.request
+        .post(root, `/api/workspaces/_list`)
+        .send({
+          page: 1,
+        })
+        .expect(200);
+      expect(findResult.body.total).toEqual(0);
       expect(listResult.body.result.total).toEqual(3);
     });
   });

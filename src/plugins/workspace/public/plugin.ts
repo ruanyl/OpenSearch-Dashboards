@@ -2,11 +2,21 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+
 import { combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { i18n } from '@osd/i18n';
 import { featureMatchesConfig } from './utils';
-import { AppMountParameters, AppNavLinkStatus, ChromeNavLink, CoreSetup, CoreStart, Plugin, WorkspaceObject, DEFAULT_APP_CATEGORIES } from '../../../core/public';
+import {
+  AppMountParameters,
+  AppNavLinkStatus,
+  ChromeNavLink,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  WorkspaceObject,
+  DEFAULT_APP_CATEGORIES,
+} from '../../../core/public';
 import { WORKSPACE_FATAL_ERROR_APP_ID, WORKSPACE_OVERVIEW_APP_ID } from '../common/constants';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
 import { Services } from './types';
