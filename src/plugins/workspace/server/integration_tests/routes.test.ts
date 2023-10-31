@@ -5,7 +5,6 @@
 
 import { WorkspaceAttribute } from 'src/core/types';
 import * as osdTestServer from '../../../../core/test_helpers/osd_server';
-import { WORKSPACE_TYPE } from '../../../../core/server';
 
 const omitId = <T extends { id?: string }>(object: T): Omit<T, 'id'> => {
   const { id, ...others } = object;
@@ -37,28 +36,26 @@ describe('workspace service', () => {
     const startOSDResp = await startOpenSearchDashboards();
     root = startOSDResp.root;
   });
+  const clearWorkspaces = async () => {
+    await opensearchServer.opensearch.getClient().deleteByQuery({
+      body: {
+        query: {
+          match: {
+            type: 'workspace',
+          },
+        },
+      },
+      index: '.kibana*',
+      refresh: true,
+    });
+  };
   afterAll(async () => {
     await root.shutdown();
     await opensearchServer.stop();
   });
   describe('Workspace CRUD APIs', () => {
-    afterEach(async () => {
-      const listResult = await osdTestServer.request
-        .post(root, `/api/workspaces/_list`)
-        .send({
-          page: 1,
-        })
-        .expect(200);
-      await Promise.all(
-        listResult.body.result.workspaces.map((item: WorkspaceAttribute) =>
-          // TODO delete through opensearch
-          // this will delete reserved workspace
-          osdTestServer.request
-            .delete(root, `/api/saved_objects/${WORKSPACE_TYPE}/${item.id}`)
-            .expect(200)
-        )
-      );
-    });
+    beforeEach(clearWorkspaces);
+    afterAll(clearWorkspaces);
     it('create', async () => {
       await osdTestServer.request
         .post(root, `/api/workspaces`)
