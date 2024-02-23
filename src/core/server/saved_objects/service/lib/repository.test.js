@@ -1004,12 +1004,6 @@ describe('SavedObjectsRepository', () => {
             {
               found: true,
               _source: {
-                type: obj1.type,
-              },
-            },
-            {
-              found: true,
-              _source: {
                 type: obj.type,
                 namespaces: ['bar-namespace'],
               },
@@ -1030,11 +1024,7 @@ describe('SavedObjectsRepository', () => {
         expect(client.mget).toHaveBeenCalled();
 
         const body1 = {
-          docs: [
-            expect.objectContaining({ _id: `${obj1.type}:${obj1.id}` }),
-            expect.objectContaining({ _id: `${obj.type}:${obj.id}` }),
-            expect.objectContaining({ _id: `${obj2.type}:${obj2.id}` }),
-          ],
+          docs: [expect.objectContaining({ _id: `${obj.type}:${obj.id}` })],
         };
         expect(client.mget).toHaveBeenCalledWith(
           expect.objectContaining({ body: body1 }),
