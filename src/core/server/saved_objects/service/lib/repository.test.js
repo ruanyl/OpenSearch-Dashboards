@@ -651,7 +651,6 @@ describe('SavedObjectsRepository', () => {
     };
 
     const bulkCreateSuccess = async (objects, options) => {
-      const originalObjects = JSON.parse(JSON.stringify(objects));
       const multiNamespaceObjects = objects.filter(
         ({ type, id }) => registry.isMultiNamespace(type) && id
       );
@@ -666,9 +665,7 @@ describe('SavedObjectsRepository', () => {
         opensearchClientMock.createSuccessTransportRequestPromise(response)
       );
       const result = await savedObjectsRepository.bulkCreate(objects, options);
-      expect(client.mget).toHaveBeenCalledTimes(
-        multiNamespaceObjects?.length || originalObjects?.some((item) => item.id) ? 1 : 0
-      );
+      expect(client.mget).toHaveBeenCalledTimes(multiNamespaceObjects?.length ? 1 : 0);
       return result;
     };
 
@@ -726,10 +723,7 @@ describe('SavedObjectsRepository', () => {
         await bulkCreateSuccess(objects);
         expect(client.bulk).toHaveBeenCalledTimes(1);
         expect(client.mget).toHaveBeenCalledTimes(1);
-        const docs = [
-          expect.objectContaining({ _id: `${obj1.type}:${obj1.id}` }),
-          expect.objectContaining({ _id: `${MULTI_NAMESPACE_TYPE}:${obj2.id}` }),
-        ];
+        const docs = [expect.objectContaining({ _id: `${MULTI_NAMESPACE_TYPE}:${obj2.id}` })];
         expect(client.mget.mock.calls[0][0].body).toEqual({ docs });
       });
 
@@ -2050,17 +2044,9 @@ describe('SavedObjectsRepository', () => {
 
     const createSuccess = async (type, attributes, options) => {
       const result = await savedObjectsRepository.create(type, attributes, options);
-      let count = 0;
-      if (options?.overwrite && options?.id) {
-        /**
-         * workspace will call extra one to get latest status of current object
-         */
-        count++;
-      }
-      if (registry.isMultiNamespace(type) && options.overwrite) {
-        count++;
-      }
-      expect(client.get).toHaveBeenCalledTimes(count);
+      expect(client.get).toHaveBeenCalledTimes(
+        registry.isMultiNamespace(type) && options.overwrite ? 1 : 0
+      );
       return result;
     };
 
