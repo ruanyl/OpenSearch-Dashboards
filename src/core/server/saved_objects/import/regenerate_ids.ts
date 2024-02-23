@@ -68,7 +68,7 @@ export const regenerateIdsWithReference = async (props: {
       return acc;
     }
 
-    const filteredWorkspaces = SavedObjectsUtils.filterWorkspacesAccordingToBaseWorkspaces(
+    const filteredWorkspaces = SavedObjectsUtils.filterWorkspacesAccordingToSourceWorkspaces(
       workspaces,
       object.workspaces
     );
