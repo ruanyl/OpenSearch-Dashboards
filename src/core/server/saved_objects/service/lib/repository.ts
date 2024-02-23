@@ -615,7 +615,7 @@ export class SavedObjectsRepository {
         let workspaceConflict = false;
         if (options.workspaces) {
           const transformedObject = this._serializer.rawToSavedObject(doc as SavedObjectsRawDoc);
-          const filteredWorkspaces = SavedObjectsUtils.filterWorkspacesAccordingToBaseWorkspaces(
+          const filteredWorkspaces = SavedObjectsUtils.filterWorkspacesAccordingToSourceWorkspaces(
             options.workspaces,
             transformedObject.workspaces
           );
