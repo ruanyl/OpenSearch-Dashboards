@@ -11,6 +11,7 @@ import {
   Plugin,
   Logger,
   SavedObjectsClient,
+  WORKSPACE_TYPE,
 } from '../../../core/server';
 import { IWorkspaceClientImpl } from './types';
 import { WorkspaceClientWithSavedObject } from './workspace_client';
@@ -92,7 +93,11 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
 
     core.savedObjects.setClientFactoryProvider(
       (repositoryFactory) => ({ includedHiddenTypes }: { includedHiddenTypes?: string[] }) =>
-        new SavedObjectsClient(repositoryFactory.createInternalRepository(includedHiddenTypes))
+        new SavedObjectsClient(
+          repositoryFactory.createInternalRepository([
+            ...new Set([WORKSPACE_TYPE, ...(includedHiddenTypes || [])]),
+          ])
+        )
     );
 
     core.capabilities.registerProvider(() => ({
