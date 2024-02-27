@@ -1914,7 +1914,6 @@ describe('SavedObjectsRepository', () => {
     const obj5 = { type: MULTI_NAMESPACE_TYPE, id: 'five' };
     const obj6 = { type: NAMESPACE_AGNOSTIC_TYPE, id: 'six' };
     const obj7 = { type: NAMESPACE_AGNOSTIC_TYPE, id: 'seven' };
-    const obj8 = { type: 'dashboard', id: 'eight', workspaces: ['foo'] };
     const namespace = 'foo-namespace';
 
     const checkConflicts = async (objects, options) =>
@@ -2006,8 +2005,6 @@ describe('SavedObjectsRepository', () => {
             { found: false },
             getMockGetResponse(obj6),
             { found: false },
-            getMockGetResponse(obj7),
-            getMockGetResponse(obj8),
           ],
         };
         client.mget.mockResolvedValue(
