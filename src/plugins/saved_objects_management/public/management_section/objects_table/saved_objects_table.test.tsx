@@ -62,6 +62,9 @@ import {
 } from './saved_objects_table';
 import { Flyout, Relationships } from './components';
 import { SavedObjectWithMetadata } from '../../types';
+import { WorkspaceObject } from 'opensearch-dashboards/public';
+import { TableProps } from './components/table';
+import { waitFor } from '@testing-library/dom';
 
 const allowedTypes = ['index-pattern', 'visualization', 'dashboard', 'search'];
 
@@ -643,6 +646,148 @@ describe('SavedObjectsTable', () => {
         { force: true }
       );
       expect(component.state('selectedSavedObjects').length).toBe(0);
+    });
+
+    it('show workspace filter when workspace turn on and not in any workspace', async () => {
+      const applications = applicationServiceMock.createStartContract();
+      applications.capabilities = {
+        navLinks: {},
+        management: {},
+        catalogue: {},
+        savedObjectsManagement: {
+          read: true,
+          edit: false,
+          delete: false,
+        },
+        workspaces: {
+          enabled: true,
+        },
+      };
+
+      const workspaceList: WorkspaceObject[] = [
+        {
+          id: 'workspace1',
+          name: 'foo',
+        },
+        {
+          id: 'workspace2',
+          name: 'bar',
+        },
+      ];
+      workspaces.workspaceList$.next(workspaceList);
+      workspaces.currentWorkspaceId$.next('');
+      workspaces.currentWorkspace$.next(null);
+
+      const component = shallowRender({ applications, workspaces });
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      const props = component.find('Table').props() as TableProps;
+      const filters = props.filters;
+      expect(filters.length).toBe(2);
+      expect(filters[0].field).toBe('type');
+      expect(filters[1].field).toBe('workspaces');
+      expect(filters[1].options.length).toBe(2);
+      expect(filters[1].options[0].value).toBe('foo');
+      expect(filters[1].options[1].value).toBe('bar');
+    });
+
+    it('show workspace filter when workspace turn on and enter a workspace', async () => {
+      const applications = applicationServiceMock.createStartContract();
+      applications.capabilities = {
+        navLinks: {},
+        management: {},
+        catalogue: {},
+        savedObjectsManagement: {
+          read: true,
+          edit: false,
+          delete: false,
+        },
+        workspaces: {
+          enabled: true,
+        },
+      };
+
+      const workspaceList: WorkspaceObject[] = [
+        {
+          id: 'workspace1',
+          name: 'foo',
+        },
+        {
+          id: 'workspace2',
+          name: 'bar',
+        },
+      ];
+      workspaces.workspaceList$.next(workspaceList);
+      workspaces.currentWorkspaceId$.next('workspace1');
+      workspaces.currentWorkspace$.next(workspaceList[0]);
+
+      const component = shallowRender({ applications, workspaces });
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      const props = component.find('Table').props() as TableProps;
+      const filters = props.filters;
+      const wsFilter = filters.filter((f) => f.field === 'workspaces');
+      expect(wsFilter.length).toBe(1);
+      expect(wsFilter[0].options.length).toBe(1);
+      expect(wsFilter[0].options[0].value).toBe('foo');
+    });
+
+    it('workspace exists in query options when workspace on', async () => {
+      const applications = applicationServiceMock.createStartContract();
+      applications.capabilities = {
+        navLinks: {},
+        management: {},
+        catalogue: {},
+        savedObjectsManagement: {
+          read: true,
+          edit: false,
+          delete: false,
+        },
+        workspaces: {
+          enabled: true,
+        },
+      };
+
+      const workspaceList: WorkspaceObject[] = [
+        {
+          id: 'workspace1',
+          name: 'foo',
+        },
+        {
+          id: 'workspace2',
+          name: 'bar',
+        },
+      ];
+      workspaces.workspaceList$.next(workspaceList);
+      workspaces.currentWorkspaceId$.next('workspace1');
+      workspaces.currentWorkspace$.next(workspaceList[0]);
+
+      const component = shallowRender({ applications, workspaces });
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      waitFor(
+        () => {
+          expect(http.get).toHaveBeenCalledWith(
+            expect.stringMatching('/api/opensearch-dashboards/management/saved_objects/_find'),
+            expect.objectContaining({
+              workspaces: expect.arrayContaining(['workspace1']),
+            })
+          );
+        },
+        { timeout: 1000 }
+      );
     });
   });
 });
