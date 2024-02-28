@@ -62,6 +62,9 @@ export const registerResolveImportErrorsRoute = (router: IRouter, config: SavedO
             schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
           ),
           dataSourceId: schema.maybe(schema.string({ defaultValue: '' })),
+          workspaces: schema.maybe(
+            schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
+          ),
         }),
         body: schema.object({
           file: schema.stream(),
