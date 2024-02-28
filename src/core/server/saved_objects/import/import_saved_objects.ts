@@ -38,7 +38,7 @@ import { validateReferences } from './validate_references';
 import { checkOriginConflicts } from './check_origin_conflicts';
 import { createSavedObjects } from './create_saved_objects';
 import { checkConflicts } from './check_conflicts';
-import { regenerateIds, regenerateIdsWithReference } from './regenerate_ids';
+import { regenerateIds } from './regenerate_ids';
 import { checkConflictsForDataSource } from './check_conflict_for_data_source';
 
 /**
