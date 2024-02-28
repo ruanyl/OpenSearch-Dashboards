@@ -86,13 +86,6 @@ export async function importSavedObjectsFromStream({
     // randomly generated id
     importIdMap = regenerateIds(collectSavedObjectsResult.collectedObjects, dataSourceId);
   } else {
-    importIdMap = await regenerateIdsWithReference({
-      savedObjects: collectSavedObjectsResult.collectedObjects,
-      savedObjectsClient,
-      workspaces,
-      objectLimit,
-      importIdMap,
-    });
     // in check conclict and override mode
     // Check single-namespace objects for conflicts in this namespace, and check multi-namespace objects for conflicts across all namespaces
     const checkConflictsParams = {
