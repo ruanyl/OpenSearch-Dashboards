@@ -191,6 +191,8 @@ export interface SavedObjectsImportOptions {
   workspaces?: string[];
   dataSourceId?: string;
   dataSourceTitle?: string;
+  /** if specified, will import in given workspaces */
+  workspaces?: string[];
 }
 
 /**
