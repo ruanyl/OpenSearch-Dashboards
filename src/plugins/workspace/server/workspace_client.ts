@@ -398,9 +398,9 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceClientImpl {
             type: WORKSPACE_TYPE,
             ...(permissionModes ? { ACLSearchParams: { permissionModes } } : {}),
           });
-          const { saved_objects: retrySavedObjects, ...retrySavedOthers } = retryFindResp;
+          const { saved_objects: retrySavedObjects, ...retryOthers } = retryFindResp;
           savedObjects = retryFindResp.saved_objects;
-          others = retrySavedOthers;
+          others = retryOthers;
         }
       } catch (e) {
         this.logger.error(`Some error happened when initializing reserved workspace: ${e}`);
