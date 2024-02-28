@@ -71,10 +71,6 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
   initialNamespaces?: string[];
   /** permission control describe by ACL object */
   permissions?: Permissions;
-  /**
-   * workspaces the new created objects belong to
-   */
-  workspaces?: string[];
 }
 
 /**
