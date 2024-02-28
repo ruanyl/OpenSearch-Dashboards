@@ -412,7 +412,6 @@ export class SavedObjectsRepository {
         object: { initialNamespaces, version, ...object },
         method,
       } = expectedBulkGetResult.value;
-      let savedObjectWorkspaces: string[] | undefined;
       if (opensearchRequestIndex !== undefined) {
         const indexFound = bulkGetResponse?.statusCode !== 404;
         const actualResult = indexFound
@@ -459,7 +458,7 @@ export class SavedObjectsRepository {
         versionProperties = getExpectedVersionProperties(version);
       }
 
-      savedObjectWorkspaces = options.workspaces;
+      let savedObjectWorkspaces = options.workspaces;
 
       if (expectedBulkGetResult.value.method !== 'create') {
         savedObjectWorkspaces = object.workspaces;

@@ -113,6 +113,7 @@ export interface SavedObjectsFindOptions {
   typeToNamespacesMap?: Map<string, string[] | undefined>;
   /** An optional OpenSearch preference value to be used for the query **/
   preference?: string;
+  /** If specified, will only retrieve objects that are in the workspaces */
   workspaces?: string[];
   /**
    * The params here will be combined with bool clause and is used for filtering with ACL structure.
@@ -131,6 +132,7 @@ export interface SavedObjectsFindOptions {
 export interface SavedObjectsBaseOptions {
   /** Specify the namespace for this operation */
   namespace?: string;
+  /** Specify the workspaces for this operation */
   workspaces?: string[];
 }
 

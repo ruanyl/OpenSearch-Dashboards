@@ -12,7 +12,7 @@ import {
   Logger,
   SavedObjectsClient,
 } from '../../../core/server';
-import { IWorkspaceDBImpl } from './types';
+import { IWorkspaceClientImpl } from './types';
 import { WorkspaceClientWithSavedObject } from './workspace_client';
 import { WorkspaceSavedObjectsClientWrapper } from './saved_objects';
 import { registerRoutes } from './routes';
@@ -25,15 +25,16 @@ import {
   SavedObjectsPermissionControlContract,
 } from './permission_control/client';
 import { registerPermissionCheckRoutes } from './permission_control/routes';
-import { WorkspacePluginConfigType } from '../config';
+import { ConfigSchema } from '../config';
 import { cleanWorkspaceId, getWorkspaceIdFromUrl } from '../../../core/server/utils';
 import { WorkspaceConflictSavedObjectsClientWrapper } from './saved_objects/saved_objects_wrapper_for_check_workspace_conflict';
 
 export class WorkspacePlugin implements Plugin<{}, {}> {
   private readonly logger: Logger;
-  private client?: IWorkspaceDBImpl;
+  private client?: IWorkspaceClientImpl;
   private permissionControl?: SavedObjectsPermissionControlContract;
-  private readonly config$: Observable<WorkspacePluginConfigType>;
+  private readonly config$: Observable<ConfigSchema>;
+  private workspaceSavedObjectsClientWrapper?: WorkspaceSavedObjectsClientWrapper;
   private workspaceConflictControl?: WorkspaceConflictSavedObjectsClientWrapper;
 
   private proxyWorkspaceTrafficToRealHandler(setupDeps: CoreSetup) {
@@ -53,13 +54,13 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
   }
 
   constructor(initializerContext: PluginInitializerContext) {
-    this.logger = initializerContext.logger.get();
-    this.config$ = initializerContext.config.create<WorkspacePluginConfigType>();
+    this.logger = initializerContext.logger.get('plugins', 'workspace');
+    this.config$ = initializerContext.config.create<ConfigSchema>();
   }
 
   public async setup(core: CoreSetup) {
     this.logger.debug('Setting up Workspaces service');
-    const config: WorkspacePluginConfigType = await this.config$.pipe(first()).toPromise();
+    const config: ConfigSchema = await this.config$.pipe(first()).toPromise();
     const isPermissionControlEnabled =
       config.permission.enabled === undefined ? true : config.permission.enabled;
 
@@ -76,14 +77,14 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
         permissionControl: this.permissionControl,
       });
 
-      const workspaceSavedObjectsClientWrapper = new WorkspaceSavedObjectsClientWrapper(
+      this.workspaceSavedObjectsClientWrapper = new WorkspaceSavedObjectsClientWrapper(
         this.permissionControl
       );
 
       core.savedObjects.addClientWrapper(
         0,
         WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
-        workspaceSavedObjectsClientWrapper.wrapperFactory
+        this.workspaceSavedObjectsClientWrapper.wrapperFactory
       );
     }
 
@@ -99,11 +100,12 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
     registerRoutes({
       http: core.http,
       logger: this.logger,
-      client: this.client as IWorkspaceDBImpl,
+      client: this.client as IWorkspaceClientImpl,
     });
 
-    core.savedObjects.setClientFactoryProvider((repositoryFactory) => () =>
-      new SavedObjectsClient(repositoryFactory.createInternalRepository())
+    core.savedObjects.setClientFactoryProvider(
+      (repositoryFactory) => ({ includedHiddenTypes }: { includedHiddenTypes?: string[] }) =>
+        new SavedObjectsClient(repositoryFactory.createInternalRepository(includedHiddenTypes))
     );
 
     core.capabilities.registerProvider(() => ({
@@ -122,10 +124,11 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
     this.logger.debug('Starting SavedObjects service');
     this.permissionControl?.setup(core.savedObjects.getScopedClient);
     this.client?.setSavedObjects(core.savedObjects);
+    this.workspaceSavedObjectsClientWrapper?.setScopedClient(core.savedObjects.getScopedClient);
     this.workspaceConflictControl?.setSerializer(core.savedObjects.createSerializer());
 
     return {
-      client: this.client as IWorkspaceDBImpl,
+      client: this.client as IWorkspaceClientImpl,
     };
   }
 
