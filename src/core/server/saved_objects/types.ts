@@ -29,7 +29,7 @@
  */
 
 import { SavedObjectsClient } from './service/saved_objects_client';
-import { SavedObjectsTypeMappingDefinition } from './mappings';
+import { SavedObjectsFieldMapping, SavedObjectsTypeMappingDefinition } from './mappings';
 import { SavedObjectMigrationMap } from './migrations';
 
 export {
@@ -246,7 +246,7 @@ export interface SavedObjectsType {
   /**
    * The {@link SavedObjectsTypeMappingDefinition | mapping definition} for the type.
    */
-  mappings: SavedObjectsTypeMappingDefinition;
+  mappings: SavedObjectsTypeMappingDefinition | SavedObjectsFieldMapping;
   /**
    * An optional map of {@link SavedObjectMigrationFn | migrations} to be used to migrate the type.
    */

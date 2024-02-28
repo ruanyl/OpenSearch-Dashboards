@@ -24,6 +24,7 @@ import {
 import { registerPermissionCheckRoutes } from './permission_control/routes';
 import { ConfigSchema } from '../config';
 import { cleanWorkspaceId, getWorkspaceIdFromUrl } from '../../../core/server/utils';
+import { permission, workspaces } from './saved_objects/workspace';
 
 export class WorkspacePlugin implements Plugin<{}, {}> {
   private readonly logger: Logger;
@@ -59,6 +60,8 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
       config.permission.enabled === undefined ? true : config.permission.enabled;
 
     this.client = new WorkspaceClientWithSavedObject(core, this.logger);
+    core.savedObjects.registerType(permission);
+    core.savedObjects.registerType(workspaces);
 
     await this.client.setup(core);
 

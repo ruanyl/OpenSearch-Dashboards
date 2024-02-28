@@ -186,18 +186,18 @@ function defaultMapping(): IndexMapping {
           },
         },
       },
-      workspaces: {
-        type: 'keyword',
-      },
-      permissions: {
-        properties: {
-          read: principals,
-          write: principals,
-          management: principals,
-          library_read: principals,
-          library_write: principals,
-        },
-      },
+      // workspaces: {
+      //   type: 'keyword',
+      // },
+      // permissions: {
+      //   properties: {
+      //     read: principals,
+      //     write: principals,
+      //     management: principals,
+      //     library_read: principals,
+      //     library_write: principals,
+      //   },
+      // },
     },
   };
 }
