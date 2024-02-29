@@ -37,7 +37,7 @@ import {
 import { loggingSystemMock } from '../../../logging/logging_system.mock';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectsType } from '../../types';
-import { configMock } from 'packages/osd-config/target/config.mock';
+import { configMock } from '../../../config/mocks';
 
 const createRegistry = (types: Array<Partial<SavedObjectsType>>) => {
   const registry = new SavedObjectTypeRegistry();
@@ -148,6 +148,8 @@ type MockedOptions = OpenSearchDashboardsMigratorOptions & {
 };
 
 const mockOptions = () => {
+  const rawConfig = configMock.create();
+  rawConfig.get.mockReturnValue(true);
   const options: MockedOptions = {
     logger: loggingSystemMock.create().get(),
     opensearchDashboardsVersion: '8.2.3',
@@ -187,7 +189,7 @@ const mockOptions = () => {
       skip: false,
     },
     client: opensearchClientMock.createOpenSearchClient(),
-    opensearchDashboardsRawConfig: configMock.create(),
+    opensearchDashboardsRawConfig: rawConfig,
   };
   return options;
 };
