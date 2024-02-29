@@ -35,6 +35,7 @@
 
 import { OpenSearchDashboardsConfigType } from 'src/core/server/opensearch_dashboards_config';
 import { BehaviorSubject } from 'rxjs';
+import { Config } from 'packages/osd-config/target';
 
 import { Logger } from '../../../logging';
 import { IndexMapping, SavedObjectsTypeMappingDefinitions } from '../../mappings';
@@ -54,6 +55,7 @@ export interface OpenSearchDashboardsMigratorOptions {
   opensearchDashboardsConfig: OpenSearchDashboardsConfigType;
   opensearchDashboardsVersion: string;
   logger: Logger;
+  opensearchDashboardsRawConfig: Config;
 }
 
 export type IOpenSearchDashboardsMigrator = Pick<
@@ -83,6 +85,7 @@ export class OpenSearchDashboardsMigrator {
     status: 'waiting',
   });
   private readonly activeMappings: IndexMapping;
+  private readonly opensearchDashboardsRawConfig: Config;
 
   /**
    * Creates an instance of OpenSearchDashboardsMigrator.
@@ -94,6 +97,7 @@ export class OpenSearchDashboardsMigrator {
     savedObjectsConfig,
     opensearchDashboardsVersion,
     logger,
+    opensearchDashboardsRawConfig,
   }: OpenSearchDashboardsMigratorOptions) {
     this.client = client;
     this.opensearchDashboardsConfig = opensearchDashboardsConfig;
@@ -109,7 +113,11 @@ export class OpenSearchDashboardsMigrator {
     });
     // Building the active mappings (and associated md5sums) is an expensive
     // operation so we cache the result
-    this.activeMappings = buildActiveMappings(this.mappingProperties);
+    this.opensearchDashboardsRawConfig = opensearchDashboardsRawConfig;
+    this.activeMappings = buildActiveMappings(
+      this.mappingProperties,
+      this.opensearchDashboardsRawConfig
+    );
   }
 
   /**
@@ -181,6 +189,7 @@ export class OpenSearchDashboardsMigrator {
             ? 'opensearch_dashboards_index_template*'
             : undefined,
         convertToAliasScript: indexMap[index].script,
+        opensearchDashboardsRawConfig: this.opensearchDashboardsRawConfig,
       });
     });
 
