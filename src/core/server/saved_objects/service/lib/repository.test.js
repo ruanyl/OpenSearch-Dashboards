@@ -499,9 +499,7 @@ describe('SavedObjectsRepository', () => {
         opensearchClientMock.createSuccessTransportRequestPromise(response)
       );
       const result = await savedObjectsRepository.bulkCreate(objects, options);
-      expect(client.mget).toHaveBeenCalledTimes(
-        multiNamespaceObjects?.length || options?.workspaces ? 1 : 0
-      );
+      expect(client.mget).toHaveBeenCalledTimes(multiNamespaceObjects?.length ? 1 : 0);
       return result;
     };
 
@@ -2057,17 +2055,9 @@ describe('SavedObjectsRepository', () => {
 
     const createSuccess = async (type, attributes, options) => {
       const result = await savedObjectsRepository.create(type, attributes, options);
-      let count = 0;
-      if (options?.overwrite && options.id && options.workspaces) {
-        /**
-         * workspace will call extra one to get latest status of current object
-         */
-        count++;
-      }
-      if (registry.isMultiNamespace(type) && options.overwrite) {
-        count++;
-      }
-      expect(client.get).toHaveBeenCalledTimes(count);
+      expect(client.get).toHaveBeenCalledTimes(
+        registry.isMultiNamespace(type) && options.overwrite ? 1 : 0
+      );
       return result;
     };
 

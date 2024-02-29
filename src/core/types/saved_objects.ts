@@ -114,7 +114,7 @@ export interface SavedObject<T = unknown> {
    * space.
    */
   originId?: string;
-  /** Workspaces that this saved object exists in. */
+  /** Workspace(s) that this saved object exists in. */
   workspaces?: string[];
   /** ACL description of this saved object */
   permissions?: Permissions;
