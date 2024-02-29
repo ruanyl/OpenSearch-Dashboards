@@ -5,10 +5,17 @@
 
 import React, { useState } from 'react';
 
-import { EuiButton, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
+import { DeleteWorkspaceModal } from '../delete_workspace_modal';
+import { WorkspaceAttribute } from '../../../../../core/public';
 
-export const WorkspaceActionsMenu = () => {
+interface Props {
+  workspace: WorkspaceAttribute;
+}
+
+export const WorkspaceActionsMenu = ({ workspace }: Props) => {
   const [isPopoverOpen, setPopover] = useState(false);
+  const [deleteWorkspaceModalVisible, setDeleteWorkspaceModalVisible] = useState(false);
 
   const onButtonClick = () => {
     setPopover(!isPopoverOpen);
@@ -18,28 +25,48 @@ export const WorkspaceActionsMenu = () => {
     setPopover(false);
   };
 
+  const handleDeleteWorkspace = () => {
+    setDeleteWorkspaceModalVisible(true);
+    closePopover();
+  };
+
   const items = [
-    <EuiContextMenuItem key="delete" icon="trash" onClick={closePopover}>
+    <EuiContextMenuItem key="delete" icon="trash" onClick={handleDeleteWorkspace}>
       Delete
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem key="delete" icon="trash" onClick={closePopover}>
+      Achive
     </EuiContextMenuItem>,
   ];
 
   const button = (
-    <EuiButton iconType="arrowDown" iconSide="right" onClick={onButtonClick}>
-      Actions
-    </EuiButton>
+    <EuiButtonIcon
+      iconType="boxesHorizontal"
+      aria-label="Heart"
+      color="accent"
+      onClick={onButtonClick}
+    />
   );
 
   return (
-    <EuiPopover
-      id="smallContextMenuExample"
-      button={button}
-      isOpen={isPopoverOpen}
-      closePopover={closePopover}
-      panelPaddingSize="none"
-      anchorPosition="downLeft"
-    >
-      <EuiContextMenuPanel size="s" items={items} />
-    </EuiPopover>
+    <>
+      {deleteWorkspaceModalVisible && (
+        <DeleteWorkspaceModal
+          selectedWorkspace={workspace}
+          onClose={() => setDeleteWorkspaceModalVisible(false)}
+          ifNavigate={false}
+        />
+      )}
+      <EuiPopover
+        id="workspace_actions_menu"
+        button={button}
+        isOpen={isPopoverOpen}
+        closePopover={closePopover}
+        panelPaddingSize="none"
+        anchorPosition="downLeft"
+      >
+        <EuiContextMenuPanel size="m" items={items} />
+      </EuiPopover>
+    </>
   );
 };

@@ -21,7 +21,7 @@ export const WorkspaceListApp = () => {
     chrome?.setBreadcrumbs([
       {
         text: i18n.translate('workspace.workspaceListTitle', {
-          defaultMessage: 'Workspace List',
+          defaultMessage: 'Workspaces',
         }),
       },
     ]);

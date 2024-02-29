@@ -12,7 +12,6 @@ import {
   EuiLink,
   EuiButton,
   EuiInMemoryTable,
-  EuiTableSelectionType,
   EuiSearchBarProps,
 } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
@@ -27,6 +26,7 @@ import { debounce } from '../utils/common';
 import { WORKSPACE_CREATE_APP_ID } from '../../../common/constants';
 
 import { cleanWorkspaceId } from '../../../../../core/public';
+import { WorkspaceActionsMenu } from './workspace_actions_menu';
 
 const WORKSPACE_LIST_PAGE_DESCRIPTIOIN = i18n.translate('workspace.list.description', {
   defaultMessage:
@@ -47,9 +47,6 @@ export const WorkspaceList = () => {
     pageSize: 5,
     pageSizeOptions: [5, 10, 20],
   });
-
-  // Will be uesed when updating table actions
-  const [, setSelection] = useState<WorkspaceAttribute[]>([]);
 
   const handleSwitchWorkspace = useCallback(
     (id: string) => {
@@ -118,8 +115,11 @@ export const WorkspaceList = () => {
           name: 'Edit',
           icon: 'pencil',
           type: 'icon',
-          description: 'edit workspace',
+          description: 'Edit workspace',
           onClick: ({ id }: WorkspaceAttribute) => handleUpdateWorkspace(id),
+        },
+        {
+          render: (item: WorkspaceAttribute) => <WorkspaceActionsMenu workspace={item} />,
         },
       ],
     },
@@ -157,13 +157,6 @@ export const WorkspaceList = () => {
     ],
   };
 
-  const selectionValue: EuiTableSelectionType<WorkspaceAttribute> = {
-    selectable: () => true,
-    onSelectionChange: (selection) => {
-      setSelection(selection);
-    },
-  };
-
   return (
     <EuiPage paddingSize="none">
       <EuiPageBody panelled>
@@ -171,6 +164,7 @@ export const WorkspaceList = () => {
           restrictWidth
           pageTitle="Workspaces"
           description={WORKSPACE_LIST_PAGE_DESCRIPTIOIN}
+          style={{ paddingBottom: 0, borderBottom: 0 }}
         />
         <EuiPageContent
           verticalPosition="center"
@@ -197,7 +191,6 @@ export const WorkspaceList = () => {
               },
             }}
             isSelectable={true}
-            selection={selectionValue}
             search={search}
           />
         </EuiPageContent>

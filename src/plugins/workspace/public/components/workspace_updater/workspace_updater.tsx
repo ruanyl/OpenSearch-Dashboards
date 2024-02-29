@@ -114,47 +114,6 @@ export const WorkspaceUpdater = () => {
   if (!currentWorkspaceFormData.name) {
     return null;
   }
-  const deleteWorkspace = async () => {
-    if (currentWorkspace?.id) {
-      let result;
-      try {
-        result = await workspaceClient.delete(currentWorkspace?.id);
-      } catch (error) {
-        notifications?.toasts.addDanger({
-          title: i18n.translate('workspace.delete.failed', {
-            defaultMessage: 'Failed to delete workspace',
-          }),
-          text: error instanceof Error ? error.message : JSON.stringify(error),
-        });
-        return setDeleteWorkspaceModalVisible(false);
-      }
-      if (result?.success) {
-        notifications?.toasts.addSuccess({
-          title: i18n.translate('workspace.delete.success', {
-            defaultMessage: 'Delete workspace successfully',
-          }),
-        });
-        setDeleteWorkspaceModalVisible(false);
-        if (http && application) {
-          const homeUrl = application.getUrlForApp('home', {
-            path: '/',
-            absolute: false,
-          });
-          const targetUrl = http.basePath.prepend(http.basePath.remove(homeUrl), {
-            withoutWorkspace: true,
-          });
-          await application.navigateToUrl(targetUrl);
-        }
-      } else {
-        notifications?.toasts.addDanger({
-          title: i18n.translate('workspace.delete.failed', {
-            defaultMessage: 'Failed to delete workspace',
-          }),
-          text: result?.error,
-        });
-      }
-    }
-  };
 
   return (
     <EuiPage paddingSize="none">
@@ -184,9 +143,9 @@ export const WorkspaceUpdater = () => {
           {deleteWorkspaceModalVisible && (
             <EuiPanel>
               <DeleteWorkspaceModal
-                onConfirm={deleteWorkspace}
+                selectedWorkspace={currentWorkspace}
                 onClose={() => setDeleteWorkspaceModalVisible(false)}
-                selectedItems={currentWorkspace?.name ? [currentWorkspace.name] : []}
+                ifNavigate={true}
               />
             </EuiPanel>
           )}
