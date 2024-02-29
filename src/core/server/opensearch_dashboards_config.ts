@@ -90,6 +90,9 @@ export const config = {
         defaultValue: 'https://survey.opensearch.org',
       }),
     }),
+    permission: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+    }),
   }),
   deprecations,
 };

@@ -43,14 +43,14 @@ import { buildActiveMappings, IndexMigrator, MigrationResult, MigrationStatus } 
 import { DocumentMigrator, VersionedTransformer } from '../core/document_migrator';
 import { MigrationOpenSearchClient } from '../core/';
 import { createIndexMap } from '../core/build_index_map';
-import { SavedObjectsMigrationConfigType } from '../../saved_objects_config';
+import { SavedObjectConfig, SavedObjectsMigrationConfigType } from '../../saved_objects_config';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectsType } from '../../types';
 
 export interface OpenSearchDashboardsMigratorOptions {
   client: MigrationOpenSearchClient;
   typeRegistry: ISavedObjectTypeRegistry;
-  savedObjectsConfig: SavedObjectsMigrationConfigType;
+  savedObjectsConfig: SavedObjectConfig;
   opensearchDashboardsConfig: OpenSearchDashboardsConfigType;
   opensearchDashboardsVersion: string;
   logger: Logger;
@@ -71,7 +71,7 @@ export interface OpenSearchDashboardsMigratorStatus {
  */
 export class OpenSearchDashboardsMigrator {
   private readonly client: MigrationOpenSearchClient;
-  private readonly savedObjectsConfig: SavedObjectsMigrationConfigType;
+  private readonly savedObjectsConfig: SavedObjectConfig;
   private readonly documentMigrator: VersionedTransformer;
   private readonly opensearchDashboardsConfig: OpenSearchDashboardsConfigType;
   private readonly log: Logger;
@@ -109,7 +109,10 @@ export class OpenSearchDashboardsMigrator {
     });
     // Building the active mappings (and associated md5sums) is an expensive
     // operation so we cache the result
-    this.activeMappings = buildActiveMappings(this.mappingProperties);
+    this.activeMappings = buildActiveMappings(
+      this.mappingProperties,
+      this.savedObjectsConfig.permissionControlEnabled
+    );
   }
 
   /**
@@ -166,14 +169,14 @@ export class OpenSearchDashboardsMigrator {
 
     const migrators = Object.keys(indexMap).map((index) => {
       return new IndexMigrator({
-        batchSize: this.savedObjectsConfig.batchSize,
+        batchSize: this.savedObjectsConfig.migration.batchSize,
         client: this.client,
         documentMigrator: this.documentMigrator,
         index,
         log: this.log,
         mappingProperties: indexMap[index].typeMappings,
-        pollInterval: this.savedObjectsConfig.pollInterval,
-        scrollDuration: this.savedObjectsConfig.scrollDuration,
+        pollInterval: this.savedObjectsConfig.migration.pollInterval,
+        scrollDuration: this.savedObjectsConfig.migration.scrollDuration,
         serializer: this.serializer,
         // Only necessary for the migrator of the opensearch-dashboards index.
         obsoleteIndexTemplatePattern:
@@ -181,6 +184,7 @@ export class OpenSearchDashboardsMigrator {
             ? 'opensearch_dashboards_index_template*'
             : undefined,
         convertToAliasScript: indexMap[index].script,
+        permissionControlEnabled: this.savedObjectsConfig.permissionControlEnabled,
       });
     });
 

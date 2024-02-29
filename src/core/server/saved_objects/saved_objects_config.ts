@@ -49,12 +49,16 @@ export const savedObjectsConfig = {
   schema: schema.object({
     maxImportPayloadBytes: schema.byteSize({ defaultValue: 26214400 }),
     maxImportExportSize: schema.byteSize({ defaultValue: 10000 }),
+    permission: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+    }),
   }),
 };
 
 export class SavedObjectConfig {
   public maxImportPayloadBytes: number;
   public maxImportExportSize: number;
+  public permissionControlEnabled: boolean;
 
   public migration: SavedObjectsMigrationConfigType;
 
@@ -65,5 +69,6 @@ export class SavedObjectConfig {
     this.maxImportPayloadBytes = rawConfig.maxImportPayloadBytes.getValueInBytes();
     this.maxImportExportSize = rawConfig.maxImportExportSize.getValueInBytes();
     this.migration = rawMigrationConfig;
+    this.permissionControlEnabled = rawConfig.permission.enabled;
   }
 }

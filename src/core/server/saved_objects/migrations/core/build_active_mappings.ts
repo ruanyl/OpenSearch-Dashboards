@@ -48,9 +48,36 @@ import {
  * @param typeDefinitions - the type definitions to build mapping from.
  */
 export function buildActiveMappings(
-  typeDefinitions: SavedObjectsTypeMappingDefinitions | SavedObjectsMappingProperties
+  typeDefinitions: SavedObjectsTypeMappingDefinitions | SavedObjectsMappingProperties,
+  permissionControlEnabled?: boolean
 ): IndexMapping {
   const mapping = defaultMapping();
+
+  // if permission control is enabled, the permissions field should be added to the mapping
+  if (permissionControlEnabled) {
+    const principals: SavedObjectsFieldMapping = {
+      properties: {
+        users: {
+          type: 'keyword',
+        },
+        groups: {
+          type: 'keyword',
+        },
+      },
+    };
+    mapping.properties = {
+      ...mapping.properties,
+      permissions: {
+        properties: {
+          read: principals,
+          write: principals,
+          management: principals,
+          library_read: principals,
+          library_write: principals,
+        },
+      },
+    };
+  }
 
   const mergedProperties = validateAndMerge(mapping.properties, typeDefinitions);
 
@@ -138,16 +165,6 @@ function findChangedProp(actual: any, expected: any) {
  * @returns {IndexMapping}
  */
 function defaultMapping(): IndexMapping {
-  const principals: SavedObjectsFieldMapping = {
-    properties: {
-      users: {
-        type: 'keyword',
-      },
-      groups: {
-        type: 'keyword',
-      },
-    },
-  };
   return {
     dynamic: 'strict',
     properties: {
@@ -188,15 +205,6 @@ function defaultMapping(): IndexMapping {
       },
       workspaces: {
         type: 'keyword',
-      },
-      permissions: {
-        properties: {
-          read: principals,
-          write: principals,
-          management: principals,
-          library_read: principals,
-          library_write: principals,
-        },
       },
     },
   };

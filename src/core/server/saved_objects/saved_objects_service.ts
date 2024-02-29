@@ -433,7 +433,7 @@ export class SavedObjectsService
 
     const migrator = this.createMigrator(
       opensearchDashboardsConfig,
-      this.config.migration,
+      this.config,
       opensearch.client,
       migrationsRetryDelay
     );
@@ -544,7 +544,7 @@ export class SavedObjectsService
 
   private createMigrator(
     opensearchDashboardsConfig: OpenSearchDashboardsConfigType,
-    savedObjectsConfig: SavedObjectsMigrationConfigType,
+    savedObjectsConfig: SavedObjectConfig,
     client: IClusterClient,
     migrationsRetryDelay?: number
   ): IOpenSearchDashboardsMigrator {

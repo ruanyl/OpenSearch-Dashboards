@@ -59,6 +59,7 @@ export interface MigrationOpts {
   documentMigrator: VersionedTransformer;
   serializer: SavedObjectsSerializer;
   convertToAliasScript?: string;
+  permissionControlEnabled?: boolean;
 
   /**
    * If specified, templates matching the specified pattern will be removed
@@ -93,7 +94,12 @@ export async function migrationContext(opts: MigrationOpts): Promise<Context> {
   const { log, client } = opts;
   const alias = opts.index;
   const source = createSourceContext(await Index.fetchInfo(client, alias), alias);
-  const dest = createDestContext(source, alias, opts.mappingProperties);
+  const dest = createDestContext(
+    source,
+    alias,
+    opts.mappingProperties,
+    opts.permissionControlEnabled
+  );
 
   return {
     client,
@@ -125,10 +131,11 @@ function createSourceContext(source: Index.FullIndexInfo, alias: string) {
 function createDestContext(
   source: Index.FullIndexInfo,
   alias: string,
-  typeMappingDefinitions: SavedObjectsTypeMappingDefinitions
+  typeMappingDefinitions: SavedObjectsTypeMappingDefinitions,
+  permissionControlEnabled?: boolean
 ): Index.FullIndexInfo {
   const targetMappings = disableUnknownTypeMappingFields(
-    buildActiveMappings(typeMappingDefinitions),
+    buildActiveMappings(typeMappingDefinitions, permissionControlEnabled),
     source.mappings
   );
 
