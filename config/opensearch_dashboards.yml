@@ -288,4 +288,4 @@
 # vis_augmenter.pluginAugmentationEnabled: true
 
 # Set the value to true enable workspace feature
-# workspace.enabled: true
+# workspace.enabled: false
