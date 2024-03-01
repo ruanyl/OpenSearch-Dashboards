@@ -8,7 +8,16 @@ import { combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { i18n } from '@osd/i18n';
 import { featureMatchesConfig } from './utils';
-import { AppMountParameters, AppNavLinkStatus, ChromeNavLink, CoreSetup, CoreStart, Plugin, WorkspaceObject, DEFAULT_APP_CATEGORIES } from '../../../core/public';
+import {
+  AppMountParameters,
+  AppNavLinkStatus,
+  ChromeNavLink,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  WorkspaceObject,
+  DEFAULT_APP_CATEGORIES,
+} from '../../../core/public';
 import { WORKSPACE_FATAL_ERROR_APP_ID, WORKSPACE_OVERVIEW_APP_ID } from '../common/constants';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
 import { WorkspaceClient } from './workspace_client';
@@ -19,15 +28,6 @@ type WorkspaceAppType = (params: AppMountParameters, services: Services) => () =
 export class WorkspacePlugin implements Plugin<{}, {}, {}> {
   private coreStart?: CoreStart;
   private currentWorkspaceSubscription?: Subscription;
-  private _changeSavedObjectCurrentWorkspace() {
-    if (this.coreStart) {
-      return this.coreStart.workspaces.currentWorkspaceId$.subscribe((currentWorkspaceId) => {
-        if (currentWorkspaceId) {
-          this.coreStart?.savedObjects.client.setCurrentWorkspace(currentWorkspaceId);
-        }
-      });
-    }
-  }
   private getWorkspaceIdFromURL(): string | null {
     return getWorkspaceIdFromUrl(window.location.href);
   }
@@ -75,6 +75,16 @@ export class WorkspacePlugin implements Plugin<{}, {}, {}> {
       }
       return item;
     });
+  }
+
+  private _changeSavedObjectCurrentWorkspace() {
+    if (this.coreStart) {
+      return this.coreStart.workspaces.currentWorkspaceId$.subscribe((currentWorkspaceId) => {
+        if (currentWorkspaceId) {
+          this.coreStart?.savedObjects.client.setCurrentWorkspace(currentWorkspaceId);
+        }
+      });
+    }
   }
 
   public async setup(core: CoreSetup) {

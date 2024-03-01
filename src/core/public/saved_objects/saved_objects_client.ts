@@ -307,7 +307,7 @@ export class SavedObjectsClient {
    * @returns The result of the create operation containing created saved objects.
    */
   public bulkCreate = (
-    objects: SavedObjectsBulkCreateObject[] = [],
+    objects: Array<Omit<SavedObjectsBulkCreateObject, 'workspaces'>> = [],
     options: SavedObjectsBulkCreateOptions = { overwrite: false }
   ) => {
     const path = this.getPath(['_bulk_create']);
