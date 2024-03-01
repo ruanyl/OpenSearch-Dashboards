@@ -34,9 +34,6 @@ export const WorkspaceActionsMenu = ({ workspace }: Props) => {
     <EuiContextMenuItem key="delete" icon="trash" onClick={handleDeleteWorkspace}>
       Delete
     </EuiContextMenuItem>,
-    <EuiContextMenuItem key="delete" icon="trash" onClick={closePopover}>
-      Achive
-    </EuiContextMenuItem>,
   ];
 
   const button = (
