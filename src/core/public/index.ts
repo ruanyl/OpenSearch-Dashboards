@@ -63,6 +63,7 @@ import {
   ChromeNavLinks,
   ChromeNavLinkUpdateableFields,
   ChromeDocTitle,
+  ChromeSetup,
   ChromeStart,
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
@@ -87,6 +88,7 @@ import {
   HandlerParameters,
 } from './context';
 import { Branding } from '../types';
+import { WorkspacesStart, WorkspacesSetup } from './workspace';
 
 export type { Logos } from '../common';
 export { PackageInfo, EnvironmentMode } from '../server/types';
@@ -102,6 +104,7 @@ export {
   StringValidation,
   StringValidationRegex,
   StringValidationRegexString,
+  WorkspaceAttribute,
 } from '../types';
 
 export {
@@ -219,6 +222,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
    * @deprecated
    */
   context: ContextSetup;
+  /** {@link ChromeSetup} */
+  chrome: ChromeSetup;
   /** {@link FatalErrorsSetup} */
   fatalErrors: FatalErrorsSetup;
   /** {@link HttpSetup} */
@@ -239,6 +244,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   };
   /** {@link StartServicesAccessor} */
   getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
+  /** {@link WorkspacesSetup} */
+  workspaces: WorkspacesSetup;
 }
 
 /**
@@ -293,6 +300,8 @@ export interface CoreStart {
     getInjectedVar: (name: string, defaultValue?: any) => unknown;
     getBranding: () => Branding;
   };
+  /** {@link WorkspacesStart} */
+  workspaces: WorkspacesStart;
 }
 
 export {
@@ -341,3 +350,5 @@ export {
 };
 
 export { __osdBootstrap__ } from './osd_bootstrap';
+
+export { WorkspacesStart, WorkspacesSetup } from './workspace';
