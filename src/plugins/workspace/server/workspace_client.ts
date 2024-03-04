@@ -12,7 +12,6 @@ import type {
   SavedObjectsServiceStart,
   Logger,
   Permissions,
-  OpenSearchDashboardsRequest,
 } from '../../../core/server';
 import {
   ACL,
@@ -21,7 +20,6 @@ import {
   PUBLIC_WORKSPACE_ID,
   WORKSPACE_TYPE,
   WorkspacePermissionMode,
-  PERSONAL_WORKSPACE_ID_PREFIX,
 } from '../../../core/server';
 import {
   IWorkspaceClientImpl,
@@ -32,7 +30,7 @@ import {
   WorkspacePermissionItem,
 } from './types';
 import { workspace } from './saved_objects';
-import { generateRandomId, getPrincipalsFromRequest } from './utils';
+import { generateRandomId } from './utils';
 import {
   WORKSPACE_OVERVIEW_APP_ID,
   WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
@@ -254,30 +252,7 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceClientImpl {
       managementWorkspaceACL.getPermissions()
     );
   }
-  private async setupPersonalWorkspace(
-    request: OpenSearchDashboardsRequest,
-    savedObjectClient?: SavedObjectsClientContract
-  ) {
-    const principals = getPrincipalsFromRequest(request);
-    const personalWorkspaceACL = new ACL().addPermission(
-      [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
-      {
-        users: principals.users,
-      }
-    );
-    return this.checkAndCreateWorkspace(
-      savedObjectClient,
-      `${PERSONAL_WORKSPACE_ID_PREFIX}-${principals.users?.[0] || ''}`,
-      {
-        name: i18n.translate('workspaces.personal.workspace.default.name', {
-          defaultMessage: 'Personal workspace',
-        }),
-        features: ['*', `!@${DEFAULT_APP_CATEGORIES.management.id}`],
-        reserved: true,
-      },
-      personalWorkspaceACL.getPermissions()
-    );
-  }
+
   public async setup(core: CoreSetup): Promise<IResponse<boolean>> {
     this.setupDep.savedObjects.registerType(workspace);
     return {
@@ -370,24 +345,6 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceClientImpl {
         tasks.push(this.setupManagementWorkspace(scopedClientWithoutPermissionCheck));
       }
 
-      /**
-       * Setup personal workspace
-       */
-      const principals = getPrincipalsFromRequest(requestDetail.request);
-      /**
-       * Only when authentication is enabled will personal workspace be created.
-       * and the personal workspace id will be like "personal-{userId}"
-       */
-      if (principals.users && principals.users?.[0]) {
-        const hasPersonalWorkspace = savedObjects.find(
-          (item) => `${PERSONAL_WORKSPACE_ID_PREFIX}-${principals.users?.[0] || ''}` === item.id
-        );
-        if (!hasPersonalWorkspace) {
-          tasks.push(
-            this.setupPersonalWorkspace(requestDetail.request, scopedClientWithoutPermissionCheck)
-          );
-        }
-      }
       try {
         await Promise.all(tasks);
         if (tasks.length) {
