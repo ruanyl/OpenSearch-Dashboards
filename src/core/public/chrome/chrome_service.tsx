@@ -89,7 +89,7 @@ interface ConstructorParams {
   browserSupportsCsp: boolean;
 }
 
-interface StartDeps {
+export interface StartDeps {
   application: InternalApplicationStart;
   docLinks: DocLinksStart;
   http: HttpStart;
@@ -154,6 +154,12 @@ export class ChromeService {
   public setup() {
     return {
       registerCollapsibleNavHeader: (render: CollapsibleNavHeaderRender) => {
+        if (this.collapsibleNavHeaderRender) {
+          // eslint-disable-next-line no-console
+          console.warn(
+            '[ChromeService] An existing custom collapsible navigation bar header render has been overridden.'
+          );
+        }
         this.collapsibleNavHeaderRender = render;
       },
     };
@@ -277,7 +283,7 @@ export class ChromeService {
           homeHref={http.basePath.prepend('/app/home')}
           isVisible$={this.isVisible$}
           opensearchDashboardsVersion={injectedMetadata.getOpenSearchDashboardsVersion()}
-          navLinks$={navLinks.getFilteredNavLinks$()}
+          navLinks$={navLinks.getNavLinks$()}
           customNavLink$={customNavLink$.pipe(takeUntil(this.stop$))}
           recentlyAccessed$={recentlyAccessed.get$()}
           navControlsLeft$={navControls.getLeft$()}
@@ -290,9 +296,7 @@ export class ChromeService {
           branding={injectedMetadata.getBranding()}
           logos={logos}
           survey={injectedMetadata.getSurvey()}
-          collapsibleNavHeaderRender={
-            this.collapsibleNavHeaderRender ? collapsibleNavHeaderRender : undefined
-          }
+          collapsibleNavHeaderRender={collapsibleNavHeaderRender}
         />
       ),
 

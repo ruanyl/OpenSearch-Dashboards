@@ -63,8 +63,8 @@ import {
   ChromeNavLinks,
   ChromeNavLinkUpdateableFields,
   ChromeDocTitle,
-  ChromeStart,
   ChromeSetup,
+  ChromeStart,
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
   NavType,
@@ -104,6 +104,7 @@ export {
   StringValidation,
   StringValidationRegex,
   StringValidationRegexString,
+  WorkspaceObject,
   WorkspaceAttribute,
 } from '../types';
 
@@ -222,6 +223,7 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
    * @deprecated
    */
   context: ContextSetup;
+  /** {@link ChromeSetup} */
   chrome: ChromeSetup;
   /** {@link FatalErrorsSetup} */
   fatalErrors: FatalErrorsSetup;
@@ -357,4 +359,5 @@ export {
   PUBLIC_WORKSPACE_ID,
   MANAGEMENT_WORKSPACE_ID,
   WORKSPACE_TYPE,
+  cleanWorkspaceId,
 } from '../utils';

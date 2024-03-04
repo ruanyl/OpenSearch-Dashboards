@@ -506,6 +506,25 @@ describe('#getQueryParams', () => {
           );
         });
       });
+
+      describe('`flags` parameter', () => {
+        it('does not include flags when `flags` is not specified', () => {
+          const result = getQueryParams({
+            registry,
+            search,
+          });
+          expectResult(result, expect.not.objectContaining({ flags: expect.anything() }));
+        });
+
+        it('includes flags when specified', () => {
+          const result = getQueryParams({
+            registry,
+            search,
+            flags: 'abc',
+          });
+          expectResult(result, expect.objectContaining({ flags: expect.stringMatching('abc') }));
+        });
+      });
     });
 
     describe('when using prefix search (query.bool.should)', () => {
@@ -623,6 +642,27 @@ describe('#getQueryParams', () => {
           { 'saved.title': { query: 'foo', boost: 3 } },
           { 'saved.description': { query: 'foo', boost: 1 } },
         ]);
+      });
+    });
+
+    describe('when using workspace search', () => {
+      it('using normal workspaces', () => {
+        const result: Result = getQueryParams({
+          registry,
+          workspaces: ['foo'],
+        });
+        expect(result.query.bool.filter[1]).toEqual({
+          bool: {
+            should: [
+              {
+                bool: {
+                  must: [{ term: { workspaces: 'foo' } }],
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        });
       });
     });
   });

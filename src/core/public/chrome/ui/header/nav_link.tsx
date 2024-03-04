@@ -39,8 +39,16 @@ export const isModifiedOrPrevented = (event: React.MouseEvent<HTMLButtonElement,
   event.metaKey || event.altKey || event.ctrlKey || event.shiftKey || event.defaultPrevented;
 
 export type CollapsibleNavLink = ChromeNavLink | RecentNavLink;
+// TODO: replace hard-coded values with a registration function, so that apps can control active nav links similar to breadcrumbs
+const aliasedApps: { [key: string]: string[] } = {
+  discover: ['data-explorer'],
+};
+
+export const isActiveNavLink = (appId: string | undefined, linkId: string): boolean =>
+  !!(appId === linkId || aliasedApps[linkId]?.includes(appId || ''));
+
 interface Props {
-  link: ChromeNavLink | RecentNavLink;
+  link: CollapsibleNavLink;
   appId?: string;
   basePath?: HttpStart['basePath'];
   dataTestSubj: string;
@@ -60,7 +68,7 @@ export function createEuiListItem({
   navigateToApp,
   dataTestSubj,
 }: Props) {
-  const { href, id, title, disabled, euiIconType, icon, tooltip } = link;
+  const { href, id, title, disabled, euiIconType, icon, tooltip, externalLink } = link;
 
   return {
     label: tooltip ?? title,
@@ -72,7 +80,7 @@ export function createEuiListItem({
       }
 
       if (
-        !link.externalLink && // ignore external links
+        !externalLink && // ignore external links
         event.button === 0 && // ignore everything but left clicks
         !isModifiedOrPrevented(event)
       ) {
@@ -80,7 +88,7 @@ export function createEuiListItem({
         navigateToApp(id);
       }
     },
-    isActive: appId === id,
+    isActive: isActiveNavLink(appId, id),
     isDisabled: disabled,
     'data-test-subj': dataTestSubj,
     ...(basePath && {

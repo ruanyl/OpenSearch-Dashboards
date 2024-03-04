@@ -4,15 +4,15 @@
  */
 
 import { WorkspaceAttribute } from 'src/core/types';
-import { omit } from 'lodash';
 import * as osdTestServer from '../../../../core/test_helpers/osd_server';
-import { WorkspaceRoutePermissionItem } from '../types';
-import { WorkspacePermissionMode } from '../../../../core/server';
 import { WORKSPACE_TYPE } from '../../../../core/server';
 
-const testWorkspace: WorkspaceAttribute & {
-  permissions: WorkspaceRoutePermissionItem;
-} = {
+const omitId = <T extends { id?: string }>(object: T): Omit<T, 'id'> => {
+  const { id, ...others } = object;
+  return others;
+};
+
+const testWorkspace: WorkspaceAttribute = {
   id: 'fake_id',
   name: 'test_workspace',
   description: 'test_workspace_description',
@@ -21,6 +21,7 @@ const testWorkspace: WorkspaceAttribute & {
 describe('workspace service', () => {
   let root: ReturnType<typeof osdTestServer.createRoot>;
   let opensearchServer: osdTestServer.TestOpenSearchUtils;
+  let osd: osdTestServer.TestOpenSearchDashboardsUtils;
   beforeAll(async () => {
     const { startOpenSearch, startOpenSearchDashboards } = osdTestServer.createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
@@ -37,14 +38,14 @@ describe('workspace service', () => {
       },
     });
     opensearchServer = await startOpenSearch();
-    const startOSDResp = await startOpenSearchDashboards();
-    root = startOSDResp.root;
+    osd = await startOpenSearchDashboards();
+    root = osd.root;
   }, 30000);
   afterAll(async () => {
     await root.shutdown();
     await opensearchServer.stop();
   });
-  describe('Workspace CRUD apis', () => {
+  describe('Workspace CRUD APIs', () => {
     afterEach(async () => {
       const listResult = await osdTestServer.request
         .post(root, `/api/workspaces/_list`)
@@ -52,15 +53,17 @@ describe('workspace service', () => {
           page: 1,
         })
         .expect(200);
-      await Promise.all(
-        listResult.body.result.workspaces.map((item: WorkspaceAttribute) =>
-          // workspace delete API will not able to delete reserved workspace
-          // to clean up the test data, change it saved objects delete API
-          osdTestServer.request
-            .delete(root, `/api/saved_objects/${WORKSPACE_TYPE}/${item.id}`)
-            .expect(200)
+      const savedObjectsRepository = osd.coreStart.savedObjects.createInternalRepository([
+        WORKSPACE_TYPE,
+      ]);
+      await expect(
+        Promise.all(
+          listResult.body.result.workspaces.map((item: WorkspaceAttribute) =>
+            // this will delete reserved workspace
+            savedObjectsRepository.delete(WORKSPACE_TYPE, item.id)
+          )
         )
-      );
+      ).resolves.toBeInstanceOf(Array);
     });
     it('create', async () => {
       await osdTestServer.request
@@ -73,7 +76,7 @@ describe('workspace service', () => {
       const result: any = await osdTestServer.request
         .post(root, `/api/workspaces`)
         .send({
-          attributes: omit(testWorkspace, 'id'),
+          attributes: omitId(testWorkspace),
         })
         .expect(200);
 
@@ -84,7 +87,7 @@ describe('workspace service', () => {
       const result = await osdTestServer.request
         .post(root, `/api/workspaces`)
         .send({
-          attributes: omit(testWorkspace, 'id'),
+          attributes: omitId(testWorkspace),
         })
         .expect(200);
 
@@ -98,7 +101,7 @@ describe('workspace service', () => {
       const result: any = await osdTestServer.request
         .post(root, `/api/workspaces`)
         .send({
-          attributes: omit(testWorkspace, 'id'),
+          attributes: omitId(testWorkspace),
         })
         .expect(200);
 
@@ -106,7 +109,7 @@ describe('workspace service', () => {
         .put(root, `/api/workspaces/${result.body.result.id}`)
         .send({
           attributes: {
-            ...omit(testWorkspace, 'id'),
+            ...omitId(testWorkspace),
             name: 'updated',
           },
         })
@@ -120,11 +123,44 @@ describe('workspace service', () => {
       expect(getResult.body.success).toEqual(true);
       expect(getResult.body.result.name).toEqual('updated');
     });
+    it('update with permission', async () => {
+      const permission = {
+        userId: 'foo',
+        type: 'user',
+        modes: ['read', 'library_read'],
+      };
+      const result: any = await osdTestServer.request
+        .post(root, `/api/workspaces`)
+        .send({
+          attributes: omitId(testWorkspace),
+        })
+        .expect(200);
+
+      await osdTestServer.request
+        .put(root, `/api/workspaces/${result.body.result.id}`)
+        .send({
+          attributes: {
+            ...omitId(testWorkspace),
+            name: 'updated',
+          },
+          permissions: permission,
+        })
+        .expect(200);
+
+      const getResult = await osdTestServer.request.get(
+        root,
+        `/api/workspaces/${result.body.result.id}`
+      );
+
+      expect(getResult.body.success).toEqual(true);
+      expect(getResult.body.result.name).toEqual('updated');
+      expect(getResult.body.result.permissions[0]).toEqual(permission);
+    });
     it('delete', async () => {
       const result: any = await osdTestServer.request
         .post(root, `/api/workspaces`)
         .send({
-          attributes: omit(testWorkspace, 'id'),
+          attributes: omitId(testWorkspace),
         })
         .expect(200);
 
@@ -159,7 +195,7 @@ describe('workspace service', () => {
       const result: any = await osdTestServer.request
         .post(root, `/api/workspaces`)
         .send({
-          attributes: omit(reservedWorkspace, 'id'),
+          attributes: omitId(reservedWorkspace),
         })
         .expect(200);
 
@@ -176,7 +212,17 @@ describe('workspace service', () => {
       await osdTestServer.request
         .post(root, `/api/workspaces`)
         .send({
-          attributes: omit(testWorkspace, 'id'),
+          attributes: omitId(testWorkspace),
+        })
+        .expect(200);
+
+      await osdTestServer.request
+        .post(root, `/api/workspaces`)
+        .send({
+          attributes: {
+            ...omitId(testWorkspace),
+            name: 'another test workspace',
+          },
         })
         .expect(200);
 
@@ -186,6 +232,70 @@ describe('workspace service', () => {
           page: 1,
         })
         .expect(200);
+      // Global and Management workspace will be created by default after workspace list API called.
+      expect(listResult.body.result.total).toEqual(4);
+    });
+    it('unable to perform operations on workspace by calling saved objects APIs', async () => {
+      const result = await osdTestServer.request
+        .post(root, `/api/workspaces`)
+        .send({
+          attributes: omitId(testWorkspace),
+        })
+        .expect(200);
+
+      /**
+       * Can not create workspace by saved objects API
+       */
+      await osdTestServer.request
+        .post(root, `/api/saved_objects/workspace`)
+        .send({
+          attributes: {
+            ...omitId(testWorkspace),
+            name: 'another test workspace',
+          },
+        })
+        .expect(400);
+
+      /**
+       * Can not get workspace by saved objects API
+       */
+      await osdTestServer.request
+        .get(root, `/api/saved_objects/workspace/${result.body.result.id}`)
+        .expect(404);
+
+      /**
+       * Can not update workspace by saved objects API
+       */
+      await osdTestServer.request
+        .put(root, `/api/saved_objects/workspace/${result.body.result.id}`)
+        .send({
+          attributes: {
+            name: 'another test workspace',
+          },
+        })
+        .expect(404);
+
+      /**
+       * Can not delete workspace by saved objects API
+       */
+      await osdTestServer.request
+        .delete(root, `/api/saved_objects/workspace/${result.body.result.id}`)
+        .expect(404);
+
+      /**
+       * Can not find workspace by saved objects API
+       */
+      const findResult = await osdTestServer.request
+        .get(root, `/api/saved_objects/_find?type=workspace`)
+        .expect(200);
+      const listResult = await osdTestServer.request
+        .post(root, `/api/workspaces/_list`)
+        .send({
+          page: 1,
+        })
+        .expect(200);
+      expect(findResult.body.total).toEqual(0);
+      // Global and Management workspace will be created by default after workspace list API called.
       expect(listResult.body.result.total).toEqual(3);
     });
   });
