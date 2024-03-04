@@ -292,8 +292,8 @@ export class SavedObjectsRepository {
       migrationVersion,
       updated_at: time,
       ...(Array.isArray(references) && { references }),
-      ...(Array.isArray(workspaces) && { workspaces }),
       ...(permissions && { permissions }),
+      ...(Array.isArray(workspaces) && { workspaces }),
     });
 
     const raw = this._serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc);
@@ -476,8 +476,8 @@ export class SavedObjectsRepository {
             updated_at: time,
             references: object.references || [],
             originId: object.originId,
-            ...(savedObjectWorkspaces && { workspaces: savedObjectWorkspaces }),
             ...(object.permissions && { permissions: object.permissions }),
+            ...(savedObjectWorkspaces && { workspaces: savedObjectWorkspaces }),
           }) as SavedObjectSanitizedDoc
         ),
       };

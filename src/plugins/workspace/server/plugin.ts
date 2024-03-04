@@ -16,6 +16,8 @@ import { registerRoutes } from './routes';
 import { WORKSPACE_CONFLICT_CONTROL_SAVED_OBJECTS_CLIENT_WRAPPER_ID } from '../common/constants';
 import { WorkspaceConflictSavedObjectsClientWrapper } from './saved_objects/saved_objects_wrapper_for_check_workspace_conflict';
 import { cleanWorkspaceId, getWorkspaceIdFromUrl } from '../../../core/server/utils';
+import { WORKSPACE_CONFLICT_CONTROL_SAVED_OBJECTS_CLIENT_WRAPPER_ID } from '../common/constants';
+import { WorkspaceConflictSavedObjectsClientWrapper } from './saved_objects/saved_objects_wrapper_for_check_workspace_conflict';
 
 export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePluginStart> {
   private readonly logger: Logger;
@@ -57,6 +59,13 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
       this.workspaceConflictControl.wrapperFactory
     );
     this.proxyWorkspaceTrafficToRealHandler(core);
+    this.workspaceConflictControl = new WorkspaceConflictSavedObjectsClientWrapper();
+
+    core.savedObjects.addClientWrapper(
+      -1,
+      WORKSPACE_CONFLICT_CONTROL_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
+      this.workspaceConflictControl.wrapperFactory
+    );
 
     registerRoutes({
       http: core.http,
