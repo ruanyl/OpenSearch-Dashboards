@@ -90,12 +90,13 @@ async function callResolveImportErrorsApi(
   file: File,
   retries: any,
   createNewCopies: boolean,
+  workspaces?: string[],
   selectedDataSourceId?: string
 ): Promise<SavedObjectsImportResponse> {
   const formData = new FormData();
   formData.append('file', file);
   formData.append('retries', JSON.stringify(retries));
-  const query = createNewCopies ? { createNewCopies } : {};
+  const query = createNewCopies ? { createNewCopies, workspaces } : { workspaces };
   if (selectedDataSourceId) {
     query.dataSourceId = selectedDataSourceId;
   }
@@ -171,6 +172,7 @@ export async function resolveImportErrors({
   http,
   getConflictResolutions,
   state,
+  workspaces,
   selectedDataSourceId,
 }: {
   http: HttpStart;
@@ -185,6 +187,7 @@ export async function resolveImportErrors({
     file?: File;
     importMode: { createNewCopies: boolean; overwrite: boolean };
   };
+  workspaces?: string[];
   selectedDataSourceId: string;
 }) {
   const retryDecisionCache = new Map<string, RetryDecision>();
@@ -275,6 +278,7 @@ export async function resolveImportErrors({
       file!,
       retries,
       createNewCopies,
+      workspaces,
       selectedDataSourceId
     );
     importCount = response.successCount; // reset the success count since we retry all successful results each time

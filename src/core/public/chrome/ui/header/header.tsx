@@ -52,7 +52,7 @@ import {
   ChromeNavLink,
   ChromeRecentlyAccessedHistoryItem,
 } from '../..';
-import { InternalApplicationStart } from '../../../application/types';
+import { InternalApplicationStart } from '../../../application';
 import { HttpStart } from '../../../http';
 import { ChromeHelpExtension, ChromeBranding } from '../../chrome_service';
 import { OnIsLockedUpdate } from './';
@@ -256,6 +256,7 @@ export function Header({
           isNavOpen={isNavOpen}
           homeHref={homeHref}
           basePath={basePath}
+          getUrlForApp={application.getUrlForApp}
           navigateToApp={application.navigateToApp}
           navigateToUrl={application.navigateToUrl}
           onIsLockedUpdate={onIsLockedUpdate}

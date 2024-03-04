@@ -54,7 +54,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import { OverlayStart, HttpStart } from 'src/core/public';
+import {
+  OverlayStart,
+  HttpStart,
+  NotificationsStart,
+  SavedObjectsClientContract,
+} from 'src/core/public';
 import { ClusterSelector } from '../../../../../data_source_management/public';
 import {
   IndexPatternsContract,
@@ -93,6 +98,7 @@ export interface FlyoutProps {
   overlays: OverlayStart;
   http: HttpStart;
   search: DataPublicPluginStart['search'];
+  workspaces?: string[];
   dataSourceEnabled: boolean;
   hideLocalCluster: boolean;
   savedObjects: SavedObjectsClientContract;
@@ -189,13 +195,21 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
    * Does the initial import of a file, resolveImportErrors then handles errors and retries
    */
   import = async () => {
-    const { http } = this.props;
+    const { http, workspaces } = this.props;
     const { file, importMode, selectedDataSourceId } = this.state;
     this.setState({ status: 'loading', error: undefined });
 
     // Import the file
     try {
-      const response = await importFile(http, file!, importMode, selectedDataSourceId);
+      const response = await importFile(
+        http,
+        file!,
+        {
+          ...importMode,
+          workspaces,
+        },
+        selectedDataSourceId
+      );
       this.setState(processImportResponse(response), () => {
         // Resolve import errors right away if there's no index patterns to match
         // This will ask about overwriting each object, etc
@@ -251,12 +265,14 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       status: 'loading',
       loadingMessage: undefined,
     });
+    const { workspaces } = this.props;
 
     try {
       const updatedState = await resolveImportErrors({
         http: this.props.http,
         state: this.state,
         getConflictResolutions: this.getConflictResolutions,
+        workspaces,
         selectedDataSourceId: this.state.selectedDataSourceId,
       });
       this.setState(updatedState);

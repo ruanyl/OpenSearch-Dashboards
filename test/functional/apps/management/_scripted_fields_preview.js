@@ -38,8 +38,8 @@ export default function ({ getService, getPageObjects }) {
   describe('scripted fields preview', () => {
     before(async function () {
       await browser.setWindowSize(1200, 800);
-      await PageObjects.settings.navigateTo();
       await PageObjects.settings.createIndexPattern();
+
       await PageObjects.settings.clickOpenSearchDashboardsIndexPatterns();
       await PageObjects.settings.clickIndexPatternLogstash();
       await PageObjects.settings.clickScriptedFieldsTab();
@@ -48,7 +48,6 @@ export default function ({ getService, getPageObjects }) {
     });
 
     after(async function afterAll() {
-      await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickOpenSearchDashboardsIndexPatterns();
       await PageObjects.settings.removeLogstashIndexPatternIfExist();
     });

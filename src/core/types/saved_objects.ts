@@ -9,6 +9,7 @@
  * GitHub history for details.
  */
 
+import { Permissions } from '../server/saved_objects/permission_control/acl';
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
@@ -115,6 +116,7 @@ export interface SavedObject<T = unknown> {
   originId?: string;
   /** Workspace(s) that this saved object exists in. */
   workspaces?: string[];
+  permissions?: Permissions;
 }
 
 export interface SavedObjectError {

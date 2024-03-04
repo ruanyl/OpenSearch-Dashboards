@@ -167,7 +167,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
                 "data-test-subj": "savedObjectsTableAction-relationships",
                 "description": "View the relationships this saved object has to other saved objects",
                 "icon": "kqlSelector",
-                "name": "Relationships",
+                "name": "View object relationships",
                 "onClick": [Function],
                 "type": "icon",
               },
@@ -184,10 +184,10 @@ exports[`Table prevents saved objects from being deleted 1`] = `
             "attributes": Object {},
             "id": "1",
             "meta": Object {
-              "editUrl": "#/management/opensearch-dashboards/indexPatterns/patterns/1",
+              "editUrl": "#/indexPatterns/patterns/1",
               "icon": "indexPatternApp",
               "inAppUrl": Object {
-                "path": "/management/opensearch-dashboards/indexPatterns/patterns/1",
+                "path": "/indexPatterns/patterns/1",
                 "uiCapabilitiesPath": "management.opensearchDashboards.indexPatterns",
               },
               "title": "MyIndexPattern*",
@@ -392,7 +392,7 @@ exports[`Table should render normally 1`] = `
                 "data-test-subj": "savedObjectsTableAction-relationships",
                 "description": "View the relationships this saved object has to other saved objects",
                 "icon": "kqlSelector",
-                "name": "Relationships",
+                "name": "View object relationships",
                 "onClick": [Function],
                 "type": "icon",
               },
@@ -409,10 +409,10 @@ exports[`Table should render normally 1`] = `
             "attributes": Object {},
             "id": "1",
             "meta": Object {
-              "editUrl": "#/management/opensearch-dashboards/indexPatterns/patterns/1",
+              "editUrl": "#/indexPatterns/patterns/1",
               "icon": "indexPatternApp",
               "inAppUrl": Object {
-                "path": "/management/opensearch-dashboards/indexPatterns/patterns/1",
+                "path": "/indexPatterns/patterns/1",
                 "uiCapabilitiesPath": "management.opensearchDashboards.indexPatterns",
               },
               "title": "MyIndexPattern*",

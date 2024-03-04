@@ -10,12 +10,119 @@ import type {
   CoreSetup,
   WorkspaceAttribute,
   SavedObjectsServiceStart,
+  Logger,
+  Permissions,
+  OpenSearchDashboardsRequest,
 } from '../../../core/server';
-import { WORKSPACE_TYPE } from '../../../core/server';
-import { IWorkspaceClientImpl, WorkspaceFindOptions, IResponse, IRequestDetail } from './types';
+import {
+  ACL,
+  DEFAULT_APP_CATEGORIES,
+  MANAGEMENT_WORKSPACE_ID,
+  PUBLIC_WORKSPACE_ID,
+  WORKSPACE_TYPE,
+  WorkspacePermissionMode,
+  PERSONAL_WORKSPACE_ID_PREFIX,
+} from '../../../core/server';
+import {
+  IWorkspaceClientImpl,
+  WorkspaceFindOptions,
+  IResponse,
+  IRequestDetail,
+  WorkspaceAttributeWithPermission,
+  WorkspacePermissionItem,
+} from './types';
 import { workspace } from './saved_objects';
-import { generateRandomId } from './utils';
-import { WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID } from '../common/constants';
+import { generateRandomId, getPrincipalsFromRequest } from './utils';
+import {
+  WORKSPACE_OVERVIEW_APP_ID,
+  WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
+  WORKSPACE_UPDATE_APP_ID,
+} from '../common/constants';
+
+const validatePermissionModesCombinations = [
+  [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.Read], // Read
+  [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Read], // Write
+  [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write], // Admin
+];
+
+const isValidPermissionModesCombination = (permissionModes: string[]) =>
+  validatePermissionModesCombinations.some(
+    (combination) =>
+      combination.length === permissionModes.length &&
+      combination.every((mode) => permissionModes.includes(mode))
+  );
+const validatePermissions = (permissions: WorkspacePermissionItem[]) => {
+  const existsUsersOrGroups: { [key: string]: boolean } = {};
+  for (const permission of permissions) {
+    const key = `${permission.type}${permission.type === 'user' ? `-${permission.userId}` : ''}${
+      permission.type === 'group' ? `-${permission.group}` : ''
+    }`;
+    if (existsUsersOrGroups[key]) {
+      throw new Error(DUPLICATE_PERMISSION_SETTING);
+    }
+    existsUsersOrGroups[key] = true;
+    if (!isValidPermissionModesCombination(permission.modes)) {
+      throw new Error(INVALID_PERMISSION_MODES_COMBINATION);
+    }
+  }
+};
+
+const convertToACL = (
+  workspacePermissions: WorkspacePermissionItem | WorkspacePermissionItem[]
+) => {
+  workspacePermissions = Array.isArray(workspacePermissions)
+    ? workspacePermissions
+    : [workspacePermissions];
+
+  const acl = new ACL();
+
+  workspacePermissions.forEach((permission) => {
+    switch (permission.type) {
+      case 'user':
+        acl.addPermission(permission.modes, { users: [permission.userId] });
+        return;
+      case 'group':
+        acl.addPermission(permission.modes, { groups: [permission.group] });
+        return;
+    }
+  });
+
+  return acl.getPermissions() || {};
+};
+
+const isValidWorkspacePermissionMode = (mode: string): mode is WorkspacePermissionMode =>
+  Object.values(WorkspacePermissionMode).some((modeValue) => modeValue === mode);
+
+const isWorkspacePermissionItem = (
+  test: WorkspacePermissionItem | null
+): test is WorkspacePermissionItem => test !== null;
+
+const convertFromACL = (permissions: Permissions) => {
+  const acl = new ACL(permissions);
+
+  return acl
+    .toFlatList()
+    .map(({ name, permissions: modes, type }) => {
+      const validModes = modes.filter(isValidWorkspacePermissionMode);
+      switch (type) {
+        case 'users':
+          return {
+            type: 'user',
+            modes: validModes,
+            userId: name,
+          } as const;
+        case 'groups':
+          return {
+            type: 'group',
+            modes: validModes,
+            group: name,
+          } as const;
+        default:
+          return null;
+      }
+    })
+    .filter(isWorkspacePermissionItem);
+};
 
 const WORKSPACE_ID_SIZE = 6;
 
@@ -23,12 +130,27 @@ const DUPLICATE_WORKSPACE_NAME_ERROR = i18n.translate('workspace.duplicate.name.
   defaultMessage: 'workspace name has already been used, try with a different name',
 });
 
-export class WorkspaceClient implements IWorkspaceClientImpl {
+const RESERVED_WORKSPACE_NAME_ERROR = i18n.translate('workspace.reserved.name.error', {
+  defaultMessage: 'reserved workspace name cannot be changed',
+});
+
+const DUPLICATE_PERMISSION_SETTING = i18n.translate('workspace.invalid.permission.error', {
+  defaultMessage: 'Duplicate permission setting',
+});
+
+const INVALID_PERMISSION_MODES_COMBINATION = i18n.translate('workspace.invalid.permission.error', {
+  defaultMessage: 'Invalid workspace permission mode combination',
+});
+
+export class WorkspaceClientWithSavedObject implements IWorkspaceClientImpl {
   private setupDep: CoreSetup;
+  private logger: Logger;
+
   private savedObjects?: SavedObjectsServiceStart;
 
-  constructor(core: CoreSetup) {
+  constructor(core: CoreSetup, logger: Logger) {
     this.setupDep = core;
+    this.logger = logger;
   }
 
   private getScopedClientWithoutPermission(
@@ -49,14 +171,112 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
   }
   private getFlattenedResultWithSavedObject(
     savedObject: SavedObject<WorkspaceAttribute>
-  ): WorkspaceAttribute {
+  ): WorkspaceAttributeWithPermission {
     return {
       ...savedObject.attributes,
+      permissions: savedObject.permissions ? convertFromACL(savedObject.permissions) : undefined,
       id: savedObject.id,
     };
   }
   private formatError(error: Error | any): string {
     return error.message || error.error || 'Error';
+  }
+  private async checkAndCreateWorkspace(
+    savedObjectClient: SavedObjectsClientContract | undefined,
+    workspaceId: string,
+    workspaceAttribute: Omit<WorkspaceAttribute, 'id' | 'permissions'>,
+    permissions?: Permissions
+  ) {
+    try {
+      await savedObjectClient?.get(WORKSPACE_TYPE, workspaceId);
+    } catch (error) {
+      this.logger.debug(error?.toString() || '');
+      this.logger.info(`Workspace ${workspaceId} is not found, create it by using internal user`);
+      try {
+        const createResult = await savedObjectClient?.create(WORKSPACE_TYPE, workspaceAttribute, {
+          id: workspaceId,
+          permissions,
+        });
+        if (createResult?.id) {
+          this.logger.info(`Created workspace ${createResult.id}.`);
+        }
+      } catch (e) {
+        this.logger.error(`Create ${workspaceId} workspace error: ${e?.toString() || ''}`);
+      }
+    }
+  }
+  private async setupPublicWorkspace(savedObjectClient?: SavedObjectsClientContract) {
+    const publicWorkspaceACL = new ACL().addPermission(
+      [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
+      {
+        users: ['*'],
+      }
+    );
+    return this.checkAndCreateWorkspace(
+      savedObjectClient,
+      PUBLIC_WORKSPACE_ID,
+      {
+        name: i18n.translate('workspaces.public.workspace.default.name', {
+          defaultMessage: 'Global workspace',
+        }),
+        features: ['*', `!@${DEFAULT_APP_CATEGORIES.management.id}`],
+        reserved: true,
+      },
+      publicWorkspaceACL.getPermissions()
+    );
+  }
+  private async setupManagementWorkspace(savedObjectClient?: SavedObjectsClientContract) {
+    const managementWorkspaceACL = new ACL().addPermission(
+      [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
+      {
+        users: ['*'],
+      }
+    );
+    const DSM_APP_ID = 'dataSources';
+    const DEV_TOOLS_APP_ID = 'dev_tools';
+
+    return this.checkAndCreateWorkspace(
+      savedObjectClient,
+      MANAGEMENT_WORKSPACE_ID,
+      {
+        name: i18n.translate('workspaces.management.workspace.default.name', {
+          defaultMessage: 'Management',
+        }),
+        features: [
+          `@${DEFAULT_APP_CATEGORIES.management.id}`,
+          WORKSPACE_OVERVIEW_APP_ID,
+          WORKSPACE_UPDATE_APP_ID,
+          DSM_APP_ID,
+          DEV_TOOLS_APP_ID,
+        ],
+        reserved: true,
+      },
+      managementWorkspaceACL.getPermissions()
+    );
+  }
+  private async setupPersonalWorkspace(
+    request: OpenSearchDashboardsRequest,
+    savedObjectClient?: SavedObjectsClientContract
+  ) {
+    const principals = getPrincipalsFromRequest(request);
+    const personalWorkspaceACL = new ACL().addPermission(
+      [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
+      {
+        users: principals.users,
+      }
+    );
+    return this.checkAndCreateWorkspace(
+      savedObjectClient,
+      `${PERSONAL_WORKSPACE_ID_PREFIX}-${principals.users?.[0] || ''}`,
+      {
+        name: i18n.translate('workspaces.personal.workspace.default.name', {
+          defaultMessage: 'Personal workspace',
+        }),
+        features: ['*', `!@${DEFAULT_APP_CATEGORIES.management.id}`],
+        reserved: true,
+      },
+      personalWorkspaceACL.getPermissions()
+    );
   }
   public async setup(core: CoreSetup): Promise<IResponse<boolean>> {
     this.setupDep.savedObjects.registerType(workspace);
@@ -67,10 +287,10 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
   }
   public async create(
     requestDetail: IRequestDetail,
-    payload: Omit<WorkspaceAttribute, 'id'>
+    payload: Omit<WorkspaceAttributeWithPermission, 'id'>
   ): ReturnType<IWorkspaceClientImpl['create']> {
     try {
-      const attributes = payload;
+      const { permissions, ...attributes } = payload;
       const id = generateRandomId(WORKSPACE_ID_SIZE);
       const client = this.getSavedObjectClientsFromRequestDetail(requestDetail);
       const existingWorkspaceRes = await this.getScopedClientWithoutPermission(requestDetail)?.find(
@@ -78,16 +298,23 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
           type: WORKSPACE_TYPE,
           search: attributes.name,
           searchFields: ['name'],
+          flags: 'NONE', // disable all operators, treat workspace as literal string
         }
       );
       if (existingWorkspaceRes && existingWorkspaceRes.total > 0) {
         throw new Error(DUPLICATE_WORKSPACE_NAME_ERROR);
       }
+
+      if (permissions) {
+        validatePermissions(permissions);
+      }
+
       const result = await client.create<Omit<WorkspaceAttribute, 'id'>>(
         WORKSPACE_TYPE,
         attributes,
         {
           id,
+          permissions: permissions ? convertToACL(permissions) : undefined,
         }
       );
       return {
@@ -108,15 +335,76 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
     options: WorkspaceFindOptions
   ): ReturnType<IWorkspaceClientImpl['list']> {
     try {
-      const {
-        saved_objects: savedObjects,
-        ...others
-      } = await this.getSavedObjectClientsFromRequestDetail(requestDetail).find<WorkspaceAttribute>(
-        {
-          ...options,
-          type: WORKSPACE_TYPE,
-        }
+      const { permissionModes, ...restOptions } = options;
+      const resultResp = await this.getSavedObjectClientsFromRequestDetail(requestDetail).find<
+        WorkspaceAttribute
+      >({
+        ...restOptions,
+        type: WORKSPACE_TYPE,
+        ...(permissionModes ? { ACLSearchParams: { permissionModes } } : {}),
+      });
+      const { saved_objects: resultSavedObjects, ...resultOthers } = resultResp;
+      let savedObjects = resultSavedObjects;
+      let others = resultOthers;
+      const scopedClientWithoutPermissionCheck = this.getScopedClientWithoutPermission(
+        requestDetail
       );
+      const tasks: Array<Promise<unknown>> = [];
+
+      /**
+       * Setup public workspace if public workspace can not be found
+       */
+      const hasPublicWorkspace = savedObjects.some((item) => item.id === PUBLIC_WORKSPACE_ID);
+
+      if (!hasPublicWorkspace) {
+        tasks.push(this.setupPublicWorkspace(scopedClientWithoutPermissionCheck));
+      }
+
+      /**
+       * Setup management workspace if management workspace can not be found
+       */
+      const hasManagementWorkspace = savedObjects.some(
+        (item) => item.id === MANAGEMENT_WORKSPACE_ID
+      );
+      if (!hasManagementWorkspace) {
+        tasks.push(this.setupManagementWorkspace(scopedClientWithoutPermissionCheck));
+      }
+
+      /**
+       * Setup personal workspace
+       */
+      const principals = getPrincipalsFromRequest(requestDetail.request);
+      /**
+       * Only when authentication is enabled will personal workspace be created.
+       * and the personal workspace id will be like "personal-{userId}"
+       */
+      if (principals.users && principals.users?.[0]) {
+        const hasPersonalWorkspace = savedObjects.find(
+          (item) => `${PERSONAL_WORKSPACE_ID_PREFIX}-${principals.users?.[0] || ''}` === item.id
+        );
+        if (!hasPersonalWorkspace) {
+          tasks.push(
+            this.setupPersonalWorkspace(requestDetail.request, scopedClientWithoutPermissionCheck)
+          );
+        }
+      }
+      try {
+        await Promise.all(tasks);
+        if (tasks.length) {
+          const retryFindResp = await this.getSavedObjectClientsFromRequestDetail(
+            requestDetail
+          ).find<WorkspaceAttribute>({
+            ...restOptions,
+            type: WORKSPACE_TYPE,
+            ...(permissionModes ? { ACLSearchParams: { permissionModes } } : {}),
+          });
+          const { saved_objects: retrySavedObjects, ...retryOthers } = retryFindResp;
+          savedObjects = retryFindResp.saved_objects;
+          others = retryOthers;
+        }
+      } catch (e) {
+        this.logger.error(`Some error happened when initializing reserved workspace: ${e}`);
+      }
       return {
         success: true,
         result: {
@@ -134,7 +422,7 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
   public async get(
     requestDetail: IRequestDetail,
     id: string
-  ): Promise<IResponse<WorkspaceAttribute>> {
+  ): Promise<IResponse<WorkspaceAttributeWithPermission>> {
     try {
       const result = await this.getSavedObjectClientsFromRequestDetail(requestDetail).get<
         WorkspaceAttribute
@@ -153,13 +441,16 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
   public async update(
     requestDetail: IRequestDetail,
     id: string,
-    payload: Omit<WorkspaceAttribute, 'id'>
+    payload: Omit<WorkspaceAttributeWithPermission, 'id'>
   ): Promise<IResponse<boolean>> {
-    const attributes = payload;
+    const { permissions, ...attributes } = payload;
     try {
       const client = this.getSavedObjectClientsFromRequestDetail(requestDetail);
       const workspaceInDB: SavedObject<WorkspaceAttribute> = await client.get(WORKSPACE_TYPE, id);
       if (workspaceInDB.attributes.name !== attributes.name) {
+        if (workspaceInDB.attributes.reserved) {
+          throw new Error(RESERVED_WORKSPACE_NAME_ERROR);
+        }
         const existingWorkspaceRes = await this.getScopedClientWithoutPermission(
           requestDetail
         )?.find({
@@ -167,12 +458,24 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
           search: attributes.name,
           searchFields: ['name'],
           fields: ['_id'],
+          flags: 'NONE', // disable all operators, treat workspace as literal string
         });
         if (existingWorkspaceRes && existingWorkspaceRes.total > 0) {
           throw new Error(DUPLICATE_WORKSPACE_NAME_ERROR);
         }
       }
-      await client.update<Omit<WorkspaceAttribute, 'id'>>(WORKSPACE_TYPE, id, attributes, {});
+
+      if (permissions) {
+        validatePermissions(permissions);
+      }
+
+      await client.create<Omit<WorkspaceAttribute, 'id'>>(WORKSPACE_TYPE, attributes, {
+        id,
+        permissions: permissions ? convertToACL(permissions) : undefined,
+        overwrite: true,
+        version: workspaceInDB.version,
+      });
+
       return {
         success: true,
         result: true,
@@ -186,7 +489,23 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
   }
   public async delete(requestDetail: IRequestDetail, id: string): Promise<IResponse<boolean>> {
     try {
-      await this.getSavedObjectClientsFromRequestDetail(requestDetail).delete(WORKSPACE_TYPE, id);
+      const savedObjectClient = this.getSavedObjectClientsFromRequestDetail(requestDetail);
+      const workspaceInDB: SavedObject<WorkspaceAttribute> = await savedObjectClient.get(
+        WORKSPACE_TYPE,
+        id
+      );
+      if (workspaceInDB.attributes.reserved) {
+        return {
+          success: false,
+          error: i18n.translate('workspace.deleteReservedWorkspace.errorMessage', {
+            defaultMessage: 'Reserved workspace {id} is not allowed to delete.',
+            values: { id: workspaceInDB.id },
+          }),
+        };
+      }
+      await savedObjectClient.deleteByWorkspace(id);
+      // delete workspace itself at last, deleteByWorkspace depends on the workspace to do permission check
+      await savedObjectClient.delete(WORKSPACE_TYPE, id);
       return {
         success: true,
         result: true,

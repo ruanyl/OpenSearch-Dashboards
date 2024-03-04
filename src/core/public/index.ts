@@ -104,6 +104,7 @@ export {
   StringValidation,
   StringValidationRegex,
   StringValidationRegexString,
+  WorkspaceObject,
   WorkspaceAttribute,
 } from '../types';
 
@@ -351,4 +352,12 @@ export {
 
 export { __osdBootstrap__ } from './osd_bootstrap';
 
-export { WorkspacesStart, WorkspacesSetup } from './workspace';
+export { WorkspacesStart, WorkspacesSetup, WorkspacesService } from './workspace';
+
+export {
+  WorkspacePermissionMode,
+  PUBLIC_WORKSPACE_ID,
+  MANAGEMENT_WORKSPACE_ID,
+  WORKSPACE_TYPE,
+  cleanWorkspaceId,
+} from '../utils';

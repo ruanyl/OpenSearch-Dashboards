@@ -9,9 +9,14 @@ import {
   RequestHandlerContext,
   SavedObjectsFindResponse,
   CoreSetup,
+  WorkspacePermissionMode,
   WorkspaceAttribute,
   SavedObjectsServiceStart,
 } from '../../../core/server';
+
+export interface WorkspaceAttributeWithPermission extends WorkspaceAttribute {
+  permissions?: WorkspacePermissionItem[];
+}
 
 export interface WorkspaceFindOptions {
   page?: number;
@@ -20,6 +25,7 @@ export interface WorkspaceFindOptions {
   searchFields?: string[];
   sortField?: string;
   sortOrder?: string;
+  permissionModes?: WorkspacePermissionMode[];
 }
 
 export interface IRequestDetail {
@@ -46,14 +52,14 @@ export interface IWorkspaceClientImpl {
   /**
    * Create a workspace
    * @param requestDetail {@link IRequestDetail}
-   * @param payload {@link WorkspaceAttribute}
+   * @param payload {@link WorkspaceAttributeWithPermission}
    * @returns a Promise with a new-created id for the workspace
    * @public
    */
   create(
     requestDetail: IRequestDetail,
-    payload: Omit<WorkspaceAttribute, 'id'>
-  ): Promise<IResponse<{ id: WorkspaceAttribute['id'] }>>;
+    payload: Omit<WorkspaceAttributeWithPermission, 'id'>
+  ): Promise<IResponse<{ id: WorkspaceAttributeWithPermission['id'] }>>;
   /**
    * List workspaces
    * @param requestDetail {@link IRequestDetail}
@@ -67,7 +73,7 @@ export interface IWorkspaceClientImpl {
   ): Promise<
     IResponse<
       {
-        workspaces: WorkspaceAttribute[];
+        workspaces: WorkspaceAttributeWithPermission[];
       } & Pick<SavedObjectsFindResponse, 'page' | 'per_page' | 'total'>
     >
   >;
@@ -75,22 +81,25 @@ export interface IWorkspaceClientImpl {
    * Get the detail of a given workspace id
    * @param requestDetail {@link IRequestDetail}
    * @param id workspace id
-   * @returns a Promise with the detail of {@link WorkspaceAttribute}
+   * @returns a Promise with the detail of {@link WorkspaceAttributeWithPermission}
    * @public
    */
-  get(requestDetail: IRequestDetail, id: string): Promise<IResponse<WorkspaceAttribute>>;
+  get(
+    requestDetail: IRequestDetail,
+    id: string
+  ): Promise<IResponse<WorkspaceAttributeWithPermission>>;
   /**
    * Update the detail of a given workspace
    * @param requestDetail {@link IRequestDetail}
    * @param id workspace id
-   * @param payload {@link WorkspaceAttribute}
+   * @param payload {@link WorkspaceAttributeWithPermission}
    * @returns a Promise with a boolean result indicating if the update operation successed.
    * @public
    */
   update(
     requestDetail: IRequestDetail,
     id: string,
-    payload: Omit<WorkspaceAttribute, 'id'>
+    payload: Omit<WorkspaceAttributeWithPermission, 'id'>
   ): Promise<IResponse<boolean>>;
   /**
    * Delete a given workspace
@@ -117,3 +126,17 @@ export type IResponse<T> =
       success: false;
       error?: string;
     };
+
+export type WorkspacePermissionItem = {
+  modes: Array<
+    | WorkspacePermissionMode.LibraryRead
+    | WorkspacePermissionMode.LibraryWrite
+    | WorkspacePermissionMode.Read
+    | WorkspacePermissionMode.Write
+  >;
+} & ({ type: 'user'; userId: string } | { type: 'group'; group: string });
+
+export interface AuthInfo {
+  backend_roles?: string[];
+  user_name?: string;
+}

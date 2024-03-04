@@ -58,6 +58,9 @@ export const registerResolveImportErrorsRoute = (router: IRouter, config: SavedO
       validate: {
         query: schema.object({
           createNewCopies: schema.boolean({ defaultValue: false }),
+          workspaces: schema.maybe(
+            schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
+          ),
           dataSourceId: schema.maybe(schema.string({ defaultValue: '' })),
           workspaces: schema.maybe(
             schema.oneOf([schema.string(), schema.arrayOf(schema.string())])

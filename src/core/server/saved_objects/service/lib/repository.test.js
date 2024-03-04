@@ -168,7 +168,7 @@ describe('SavedObjectsRepository', () => {
   });
 
   const getMockGetResponse = (
-    { type, id, references, namespace: objectNamespace, originId },
+    { type, id, references, namespace: objectNamespace, originId, workspaces },
     namespace
   ) => {
     const namespaceId = objectNamespace === 'default' ? undefined : objectNamespace ?? namespace;
@@ -182,6 +182,7 @@ describe('SavedObjectsRepository', () => {
       _source: {
         ...(registry.isSingleNamespace(type) && { namespace: namespaceId }),
         ...(registry.isMultiNamespace(type) && { namespaces: [namespaceId ?? 'default'] }),
+        workspaces,
         ...(originId && { originId }),
         type,
         [type]: { title: 'Testing' },
@@ -425,6 +426,190 @@ describe('SavedObjectsRepository', () => {
       it(`succeeds when adding existing namespaces`, async () => {
         const result = await addToNamespacesSuccess(type, id, [currentNs1]);
         expect(result).toEqual({ namespaces: [currentNs1, currentNs2] });
+      });
+    });
+  });
+
+  describe('#addToWorkspaces', () => {
+    const id = 'some-id';
+    const type = 'dashboard';
+    const currentWs1 = 'public';
+    const newWs1 = 'new-workspace-1';
+    const newWs2 = 'new-workspace-2';
+
+    const sharedObjects = [
+      {
+        type,
+        id,
+        workspaces: [currentWs1],
+      },
+    ];
+
+    const getMockBulkUpdateResponse = (objects, newWorkspaces, errors = false) => ({
+      errors,
+      items: objects.map(({ type, id, workspaces }) => ({
+        update: {
+          _id: `${type}:${id}`,
+          ...mockVersionProps,
+          status: errors ? 404 : 200,
+          error: errors && {
+            type: 'document_missing_exception',
+            reason: `${type}:${id}: document missing`,
+          },
+          get: {
+            _source: {
+              type,
+              id,
+              workspaces: [...new Set(workspaces.concat(newWorkspaces))],
+            },
+          },
+          result: 'updated',
+        },
+      })),
+    });
+
+    const mockBulkGetResponse = (objects, _found = true) => {
+      objects.forEach((obj) => {
+        obj.found = _found;
+      });
+      const mockResponse = getMockMgetResponse(objects);
+      client.mget.mockResolvedValueOnce(
+        opensearchClientMock.createSuccessTransportRequestPromise(mockResponse)
+      );
+    };
+
+    const addToWorkspacesSuccess = async (objects, workspaces, options) => {
+      mockBulkGetResponse(objects);
+      client.bulk.mockResolvedValueOnce(
+        opensearchClientMock.createSuccessTransportRequestPromise(
+          getMockBulkUpdateResponse(objects, workspaces)
+        )
+      );
+      const result = await savedObjectsRepository.addToWorkspaces(objects, workspaces, options);
+      expect(client.mget).toHaveBeenCalledTimes(1);
+      expect(client.bulk).toHaveBeenCalledTimes(1);
+      return result;
+    };
+
+    describe('client calls', () => {
+      it(`should use OpenSearch get action then bulk update action`, async () => {
+        await addToWorkspacesSuccess(sharedObjects, [newWs1, newWs2]);
+      });
+
+      it(`_source_includes should have workspaces`, async () => {
+        await addToWorkspacesSuccess(sharedObjects, [newWs1, newWs2]);
+        expect(client.bulk).toHaveBeenCalledWith(
+          expect.objectContaining({ _source_includes: ['workspaces'] }),
+          expect.anything()
+        );
+      });
+
+      it(`defaults to a refresh setting of wait_for`, async () => {
+        await addToWorkspacesSuccess(sharedObjects, [newWs1, newWs2]);
+        expect(client.bulk).toHaveBeenCalledWith(
+          expect.objectContaining({ refresh: 'wait_for' }),
+          expect.anything()
+        );
+      });
+    });
+
+    describe('errors', () => {
+      const expectNotFoundError = async (savedObjects, workspaces, options) => {
+        await expect(
+          savedObjectsRepository.addToWorkspaces(savedObjects, workspaces, options)
+        ).rejects.toThrowError(createGenericNotFoundError(savedObjects[0].type, id));
+      };
+      const expectBadRequestError = async (savedObjects, workspaces, message) => {
+        await expect(
+          savedObjectsRepository.addToWorkspaces(savedObjects, workspaces)
+        ).rejects.toThrowError(createBadRequestError(message));
+      };
+
+      it(`throws when shared saved objects is empty`, async () => {
+        await expectBadRequestError([], [newWs1], 'shared savedObjects must not be an empty array');
+        expect(client.mget).not.toHaveBeenCalled();
+      });
+
+      it(`throws when type is invalid`, async () => {
+        const objects = [
+          {
+            type: 'unknownType',
+            id: id,
+            workspace: [currentWs1],
+          },
+        ];
+        await expectNotFoundError(objects, [newWs1]);
+        expect(client.mget).not.toHaveBeenCalled();
+        expect(client.bulk).not.toHaveBeenCalled();
+      });
+
+      it(`throws when type is hidden`, async () => {
+        const objects = [
+          {
+            type: HIDDEN_TYPE,
+            id: id,
+            workspace: [currentWs1],
+          },
+        ];
+        await expectNotFoundError(objects, [newWs1]);
+        expect(client.mget).not.toHaveBeenCalled();
+        expect(client.bulk).not.toHaveBeenCalled();
+      });
+
+      it(`throws when workspaces is an empty array`, async () => {
+        const test = async (workspaces) => {
+          const message = 'workspaces must be a non-empty array of strings';
+          await expectBadRequestError(sharedObjects, workspaces, message);
+          expect(client.mget).not.toHaveBeenCalled();
+        };
+        await test([]);
+      });
+
+      it(`throws when OpenSearch is unable to find the document during mget`, async () => {
+        mockBulkGetResponse(sharedObjects, false);
+        await expectNotFoundError(sharedObjects, [newWs1, newWs2]);
+        expect(client.mget).toHaveBeenCalledTimes(1);
+      });
+
+      it(`throws when the document exists, but not in this workspace`, async () => {
+        mockBulkGetResponse(sharedObjects);
+        await expectNotFoundError(sharedObjects, [newWs1, newWs1], {
+          workspaces: 'some-other-workspace',
+        });
+        expect(client.mget).toHaveBeenCalledTimes(1);
+      });
+
+      it(`throws when OpenSearch is unable to find the document during bulk update`, async () => {
+        const newWorkspaces = [newWs1, newWs2];
+        mockBulkGetResponse(sharedObjects);
+        client.bulk.mockResolvedValue(
+          opensearchClientMock.createSuccessTransportRequestPromise(
+            getMockBulkUpdateResponse(sharedObjects, newWorkspaces, true)
+          )
+        );
+        await expectBadRequestError(
+          sharedObjects,
+          newWorkspaces,
+          `Add to workspace failed with: ${type}:${id}: document missing`
+        );
+        expect(client.mget).toHaveBeenCalledTimes(1);
+        expect(client.bulk).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe('returns', () => {
+      it(`returns all existing and new workspaces on success`, async () => {
+        const result = await addToWorkspacesSuccess(sharedObjects, [newWs1, newWs2]);
+        result.forEach((ret) => {
+          expect(ret.workspaces).toEqual([currentWs1, newWs1, newWs2]);
+        });
+      });
+
+      it(`succeeds when adding existing workspaces`, async () => {
+        const result = await addToWorkspacesSuccess(sharedObjects, [currentWs1]);
+        result.forEach((ret) => {
+          expect(ret.workspaces).toEqual([currentWs1]);
+        });
       });
     });
   });
@@ -684,6 +869,7 @@ describe('SavedObjectsRepository', () => {
             expect.anything()
           );
           client.bulk.mockClear();
+          client.mget.mockClear();
         };
         await test(undefined);
         await test(namespace);
@@ -848,7 +1034,9 @@ describe('SavedObjectsRepository', () => {
         expect(client.bulk).toHaveBeenCalled();
         expect(client.mget).toHaveBeenCalled();
 
-        const body1 = { docs: [expect.objectContaining({ _id: `${obj.type}:${obj.id}` })] };
+        const body1 = {
+          docs: [expect.objectContaining({ _id: `${obj.type}:${obj.id}` })],
+        };
         expect(client.mget).toHaveBeenCalledWith(
           expect.objectContaining({ body: body1 }),
           expect.anything()
@@ -2197,13 +2385,18 @@ describe('SavedObjectsRepository', () => {
     const type = 'index-pattern';
     const id = 'logstash-*';
     const namespace = 'foo-namespace';
+    const workspaces = ['bar-workspace'];
+
+    const mockGet = async (type, id, options) => {
+      const mockGetResponse = getMockGetResponse({ type, id }, options?.namespace, workspaces);
+      client.get.mockResolvedValueOnce(
+        opensearchClientMock.createSuccessTransportRequestPromise(mockGetResponse)
+      );
+    };
 
     const deleteSuccess = async (type, id, options) => {
       if (registry.isMultiNamespace(type)) {
-        const mockGetResponse = getMockGetResponse({ type, id }, options?.namespace);
-        client.get.mockResolvedValueOnce(
-          opensearchClientMock.createSuccessTransportRequestPromise(mockGetResponse)
-        );
+        mockGet(type, id, options);
       }
       client.delete.mockResolvedValueOnce(
         opensearchClientMock.createSuccessTransportRequestPromise({ result: 'deleted' })
@@ -2475,6 +2668,418 @@ describe('SavedObjectsRepository', () => {
           namespaces: [namespace],
           type: allTypes.filter((type) => !registry.isNamespaceAgnostic(type)),
         });
+      });
+    });
+  });
+
+  describe('#deleteByWorkspace', () => {
+    const workspace = 'bar-workspace';
+    const mockUpdateResults = {
+      took: 15,
+      timed_out: false,
+      total: 3,
+      updated: 2,
+      deleted: 1,
+      batches: 1,
+      version_conflicts: 0,
+      noops: 0,
+      retries: { bulk: 0, search: 0 },
+      throttled_millis: 0,
+      requests_per_second: -1.0,
+      throttled_until_millis: 0,
+      failures: [],
+    };
+
+    const deleteByWorkspaceSuccess = async (workspace, options) => {
+      client.updateByQuery.mockResolvedValueOnce(
+        opensearchClientMock.createSuccessTransportRequestPromise(mockUpdateResults)
+      );
+      const result = await savedObjectsRepository.deleteByWorkspace(workspace, options);
+      expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledTimes(1);
+      expect(client.updateByQuery).toHaveBeenCalledTimes(1);
+      return result;
+    };
+
+    describe('client calls', () => {
+      it(`should use the OpenSearch updateByQuery action`, async () => {
+        await deleteByWorkspaceSuccess(workspace);
+        expect(client.updateByQuery).toHaveBeenCalledTimes(1);
+      });
+
+      it(`should use all indices for all types`, async () => {
+        await deleteByWorkspaceSuccess(workspace);
+        expect(client.updateByQuery).toHaveBeenCalledWith(
+          expect.objectContaining({ index: ['.opensearch_dashboards_test', 'custom'] }),
+          expect.anything()
+        );
+      });
+    });
+
+    describe('errors', () => {
+      it(`throws when workspace is not a string or is '*'`, async () => {
+        const test = async (workspace) => {
+          await expect(savedObjectsRepository.deleteByWorkspace(workspace)).rejects.toThrowError(
+            `workspace is required, and must be a string that is not equal to '*'`
+          );
+          expect(client.updateByQuery).not.toHaveBeenCalled();
+        };
+        await test(undefined);
+        await test(null);
+        await test(['foo-workspace']);
+        await test(123);
+        await test(true);
+        await test(ALL_NAMESPACES_STRING);
+      });
+    });
+
+    describe('returns', () => {
+      it(`returns the query results on success`, async () => {
+        const result = await deleteByWorkspaceSuccess(workspace);
+        expect(result).toEqual(mockUpdateResults);
+      });
+    });
+
+    describe('search dsl', () => {
+      it(`constructs a query that have workspace as search critieria`, async () => {
+        await deleteByWorkspaceSuccess(workspace);
+        const allTypes = registry.getAllTypes().map((type) => type.name);
+        expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, registry, {
+          workspaces: [workspace],
+          type: allTypes,
+        });
+      });
+    });
+  });
+
+  describe('#deleteFromWorkspace', () => {
+    const id = 'fake-id';
+    const type = 'dashboard';
+
+    const mockGetResponse = (type, id, workspaces) => {
+      // mock a document that exists in two namespaces
+      const mockResponse = getMockGetResponse({ type, id, workspaces });
+      client.get.mockResolvedValueOnce(
+        opensearchClientMock.createSuccessTransportRequestPromise(mockResponse)
+      );
+    };
+
+    const deleteFromWorkspacesSuccess = async (
+      type,
+      id,
+      workspaces,
+      currentWorkspaces,
+      options
+    ) => {
+      mockGetResponse(type, id, currentWorkspaces);
+      client.delete.mockResolvedValueOnce(
+        opensearchClientMock.createSuccessTransportRequestPromise({
+          _id: `${type}:${id}`,
+          ...mockVersionProps,
+          result: 'deleted',
+        })
+      );
+      client.update.mockResolvedValueOnce(
+        opensearchClientMock.createSuccessTransportRequestPromise({
+          _id: `${type}:${id}`,
+          ...mockVersionProps,
+          result: 'updated',
+        })
+      );
+
+      return await savedObjectsRepository.deleteFromWorkspaces(type, id, workspaces, options);
+    };
+
+    describe('client calls', () => {
+      describe('delete action', () => {
+        const deleteFromWorkspacesSuccessDelete = async (expectFn, options, _type = type) => {
+          const test = async (workspaces) => {
+            await deleteFromWorkspacesSuccess(_type, id, workspaces, workspaces, options);
+            expectFn();
+            client.delete.mockClear();
+            client.get.mockClear();
+          };
+          await test(['foo-workspace']);
+          await test(['foo-workspace', 'bar-workspace']);
+        };
+
+        it(`should use OpenSearch get action then delete action if the object has no workspaces remaining`, async () => {
+          const expectFn = () => {
+            expect(client.delete).toHaveBeenCalledTimes(1);
+            expect(client.get).toHaveBeenCalledTimes(1);
+          };
+          await deleteFromWorkspacesSuccessDelete(expectFn);
+        });
+
+        it(`formats the OpenSearch requests`, async () => {
+          const expectFn = () => {
+            expect(client.delete).toHaveBeenCalledWith(
+              expect.objectContaining({
+                id: `${type}:${id}`,
+              }),
+              expect.anything()
+            );
+
+            const versionProperties = {
+              if_seq_no: mockVersionProps._seq_no,
+              if_primary_term: mockVersionProps._primary_term,
+            };
+            expect(client.delete).toHaveBeenCalledWith(
+              expect.objectContaining({
+                id: `${type}:${id}`,
+                ...versionProperties,
+              }),
+              expect.anything()
+            );
+          };
+          await deleteFromWorkspacesSuccessDelete(expectFn);
+        });
+
+        it(`defaults to a refresh setting of wait_for`, async () => {
+          await deleteFromWorkspacesSuccessDelete(() =>
+            expect(client.delete).toHaveBeenCalledWith(
+              expect.objectContaining({
+                refresh: 'wait_for',
+              }),
+              expect.anything()
+            )
+          );
+        });
+
+        it(`should use default index`, async () => {
+          const expectFn = () =>
+            expect(client.delete).toHaveBeenCalledWith(
+              expect.objectContaining({ index: '.opensearch_dashboards_test' }),
+              expect.anything()
+            );
+          await deleteFromWorkspacesSuccessDelete(expectFn);
+        });
+
+        it(`should use custom index`, async () => {
+          const expectFn = () =>
+            expect(client.delete).toHaveBeenCalledWith(
+              expect.objectContaining({ index: 'custom' }),
+              expect.anything()
+            );
+          await deleteFromWorkspacesSuccessDelete(expectFn, {}, CUSTOM_INDEX_TYPE);
+        });
+      });
+
+      describe('update action', () => {
+        const deleteFromWorkspacesSuccessUpdate = async (expectFn, options, _type = type) => {
+          const test = async (remaining) => {
+            const deleteWorkspace = 'deleted-workspace';
+            const currentWorkspaces = [deleteWorkspace].concat(remaining);
+            await deleteFromWorkspacesSuccess(
+              _type,
+              id,
+              [deleteWorkspace],
+              currentWorkspaces,
+              options
+            );
+            expectFn();
+            client.get.mockClear();
+            client.update.mockClear();
+          };
+          await test(['foo-workspace']);
+          await test(['foo-workspace', 'bar-workspace']);
+        };
+
+        it(`should use OpenSearch get action then update action if the object has one or more workspace remaining`, async () => {
+          const expectFn = () => {
+            expect(client.update).toHaveBeenCalledTimes(1);
+            expect(client.get).toHaveBeenCalledTimes(1);
+          };
+          await deleteFromWorkspacesSuccessUpdate(expectFn);
+        });
+
+        it(`formats the OpenSearch requests`, async () => {
+          let ctr = 0;
+          const expectFn = () => {
+            expect(client.update).toHaveBeenCalledWith(
+              expect.objectContaining({
+                id: `${type}:${id}`,
+              }),
+              expect.anything()
+            );
+            const workspaces = ctr++ === 0 ? ['foo-workspace'] : ['foo-workspace', 'bar-workspace'];
+            const versionProperties = {
+              if_seq_no: mockVersionProps._seq_no,
+              if_primary_term: mockVersionProps._primary_term,
+            };
+            expect(client.update).toHaveBeenCalledWith(
+              expect.objectContaining({
+                id: `${type}:${id}`,
+                ...versionProperties,
+                body: { doc: { ...mockTimestampFields, workspaces: workspaces } },
+              }),
+              expect.anything()
+            );
+          };
+          await deleteFromWorkspacesSuccessUpdate(expectFn);
+        });
+
+        it(`defaults to a refresh setting of wait_for`, async () => {
+          const expectFn = () =>
+            expect(client.update).toHaveBeenCalledWith(
+              expect.objectContaining({
+                refresh: 'wait_for',
+              }),
+              expect.anything()
+            );
+          await deleteFromWorkspacesSuccessUpdate(expectFn);
+        });
+
+        it(`should use default index`, async () => {
+          const expectFn = () =>
+            expect(client.update).toHaveBeenCalledWith(
+              expect.objectContaining({ index: '.opensearch_dashboards_test' }),
+              expect.anything()
+            );
+          await deleteFromWorkspacesSuccessUpdate(expectFn);
+        });
+
+        it(`should use custom index`, async () => {
+          const expectFn = () =>
+            expect(client.update).toHaveBeenCalledWith(
+              expect.objectContaining({ index: 'custom' }),
+              expect.anything()
+            );
+          await deleteFromWorkspacesSuccessUpdate(expectFn, {}, CUSTOM_INDEX_TYPE);
+        });
+      });
+    });
+
+    describe('errors', () => {
+      const expectNotFoundError = async (type, id, workspaces, options) => {
+        await expect(
+          savedObjectsRepository.deleteFromWorkspaces(type, id, workspaces, options)
+        ).rejects.toThrowError(createGenericNotFoundError(type, id));
+      };
+      const expectBadRequestError = async (type, id, workspaces, message) => {
+        await expect(
+          savedObjectsRepository.deleteFromWorkspaces(type, id, workspaces)
+        ).rejects.toThrowError(createBadRequestError(message));
+      };
+
+      it(`throws when type is invalid`, async () => {
+        await expectNotFoundError('unknownType', id, ['foo', 'bar']);
+        expect(client.delete).not.toHaveBeenCalled();
+        expect(client.update).not.toHaveBeenCalled();
+      });
+
+      it(`throws when workspaces is an empty array`, async () => {
+        const test = async (workspaces) => {
+          const message = 'workspaces must be a non-empty array of strings';
+          await expectBadRequestError(type, id, workspaces, message);
+          expect(client.delete).not.toHaveBeenCalled();
+          expect(client.update).not.toHaveBeenCalled();
+        };
+        await test([]);
+      });
+
+      it(`throws when OpenSearch is unable to find the document during get`, async () => {
+        client.get.mockResolvedValueOnce(
+          opensearchClientMock.createSuccessTransportRequestPromise({ found: false })
+        );
+        await expectNotFoundError(type, id, ['foo', 'bar']);
+        expect(client.get).toHaveBeenCalledTimes(1);
+        expect(client.delete).not.toHaveBeenCalled();
+        expect(client.update).not.toHaveBeenCalled();
+      });
+
+      it(`throws when OpenSearch is unable to find the index during get`, async () => {
+        client.get.mockResolvedValueOnce(
+          opensearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
+        );
+        await expectNotFoundError(type, id, ['foo', 'bar']);
+        expect(client.get).toHaveBeenCalledTimes(1);
+      });
+
+      it(`throws when OpenSearch is unable to find the document during delete`, async () => {
+        mockGetResponse(type, id, ['foo']);
+        client.delete.mockResolvedValueOnce(
+          opensearchClientMock.createSuccessTransportRequestPromise({ result: 'not_found' })
+        );
+        await expectNotFoundError(type, id, ['foo']);
+        expect(client.get).toHaveBeenCalledTimes(1);
+        expect(client.delete).toHaveBeenCalledTimes(1);
+      });
+
+      it(`throws when OpenSearch is unable to find the index during delete`, async () => {
+        mockGetResponse(type, id, ['foo']);
+        client.delete.mockResolvedValueOnce(
+          opensearchClientMock.createSuccessTransportRequestPromise({
+            error: { type: 'index_not_found_exception' },
+          })
+        );
+        await expectNotFoundError(type, id, ['foo']);
+        expect(client.get).toHaveBeenCalledTimes(1);
+        expect(client.delete).toHaveBeenCalledTimes(1);
+      });
+
+      it(`throws when OpenSearch returns an unexpected response`, async () => {
+        mockGetResponse(type, id, ['foo']);
+        client.delete.mockResolvedValueOnce(
+          opensearchClientMock.createSuccessTransportRequestPromise({
+            result: 'something unexpected',
+          })
+        );
+        await expect(
+          savedObjectsRepository.deleteFromWorkspaces(type, id, ['foo'])
+        ).rejects.toThrowError('Unexpected OpenSearch DELETE response');
+        expect(client.get).toHaveBeenCalledTimes(1);
+        expect(client.delete).toHaveBeenCalledTimes(1);
+      });
+
+      it(`throws when OpenSearch is unable to find the document during update`, async () => {
+        mockGetResponse(type, id, ['foo', 'bar']);
+        client.update.mockResolvedValueOnce(
+          opensearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
+        );
+        await expectNotFoundError(type, id, ['foo']);
+        expect(client.get).toHaveBeenCalledTimes(1);
+        expect(client.update).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe('returns', () => {
+      it(`returns an empty workspaces array on success (delete)`, async () => {
+        const test = async (workspaces) => {
+          const result = await deleteFromWorkspacesSuccess(type, id, workspaces, workspaces);
+          expect(result).toEqual({ workspaces: [] });
+          client.delete.mockClear();
+        };
+        await test(['foo']);
+        await test(['foo', 'bar']);
+      });
+
+      it(`returns remaining workspaces on success (update)`, async () => {
+        const test = async (remaining) => {
+          const deletedWorkspace = 'delete-workspace';
+          const currentNamespaces = [deletedWorkspace].concat(remaining);
+          const result = await deleteFromWorkspacesSuccess(
+            type,
+            id,
+            [deletedWorkspace],
+            currentNamespaces
+          );
+          expect(result).toEqual({ workspaces: remaining });
+          client.delete.mockClear();
+        };
+        await test(['foo']);
+        await test(['foo', 'bar']);
+      });
+
+      it(`succeeds when the document doesn't exist in all of the targeted workspaces`, async () => {
+        const workspaceToRemove = ['foo'];
+        const currentWorkspaces = ['bar'];
+        const result = await deleteFromWorkspacesSuccess(
+          type,
+          id,
+          workspaceToRemove,
+          currentWorkspaces
+        );
+        expect(result).toEqual({ workspaces: currentWorkspaces });
       });
     });
   });

@@ -27,13 +27,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 // @ts-expect-error no ts
 import { opensearchKuery } from '../../../opensearch_query';
 type KueryNode = any;
 
 import { ISavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
 import { ALL_NAMESPACES_STRING, DEFAULT_NAMESPACE_STRING } from '../utils';
+import { SavedObjectsFindOptions } from '../../../types';
+import { ACL } from '../../../permission_control/acl';
 
 /**
  * Gets the types based on the type. Uses mappings to support
@@ -166,6 +167,8 @@ interface QueryParams {
   hasReference?: HasReferenceQueryParams;
   kueryNode?: KueryNode;
   workspaces?: string[];
+  ACLSearchParams?: SavedObjectsFindOptions['ACLSearchParams'];
+  flags?: string;
 }
 
 export function getClauseForReference(reference: HasReferenceQueryParams) {
@@ -223,6 +226,8 @@ export function getQueryParams({
   hasReference,
   kueryNode,
   workspaces,
+  ACLSearchParams,
+  flags,
 }: QueryParams) {
   const types = getTypes(
     registry,
@@ -266,6 +271,7 @@ export function getQueryParams({
       searchFields,
       rootSearchFields,
       defaultSearchOperator,
+      flags,
     });
 
     if (useMatchPhrasePrefix) {
@@ -279,7 +285,47 @@ export function getQueryParams({
     }
   }
 
-  return { query: { bool } };
+  const result = { query: { bool } };
+
+  if (ACLSearchParams) {
+    const shouldClause: any = [];
+    if (ACLSearchParams.permissionModes && ACLSearchParams.principals) {
+      const permissionDSL = ACL.generateGetPermittedSavedObjectsQueryDSL(
+        ACLSearchParams.permissionModes,
+        ACLSearchParams.principals
+      );
+      shouldClause.push(permissionDSL.query);
+    }
+
+    if (ACLSearchParams.workspaces) {
+      shouldClause.push({
+        terms: {
+          workspaces: ACLSearchParams.workspaces,
+        },
+      });
+    }
+
+    if (shouldClause.length) {
+      bool.filter.push({
+        bool: {
+          should: [
+            /**
+             * TODO remove this clause once advanced settings has attached with permission
+             */
+            {
+              term: {
+                type: 'config',
+              },
+            },
+            ...shouldClause,
+          ],
+        },
+      });
+    }
+
+    return result;
+  }
+  return result;
 }
 
 // we only want to add match_phrase_prefix clauses
@@ -374,18 +420,21 @@ const getSimpleQueryStringClause = ({
   searchFields,
   rootSearchFields,
   defaultSearchOperator,
+  flags,
 }: {
   search: string;
   types: string[];
   searchFields?: string[];
   rootSearchFields?: string[];
   defaultSearchOperator?: string;
+  flags?: string;
 }) => {
   return {
     simple_query_string: {
       query: search,
       ...getSimpleQueryStringTypeFields(types, searchFields, rootSearchFields),
       ...(defaultSearchOperator ? { default_operator: defaultSearchOperator } : {}),
+      ...(flags ? { flags } : {}),
     },
   };
 };

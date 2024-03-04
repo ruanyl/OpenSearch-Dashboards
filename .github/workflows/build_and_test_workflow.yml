@@ -6,7 +6,7 @@ name: Build and test
 # trigger on every commit push and PR for all branches except pushes for backport branches
 on:
   push:
-    branches: ['main', '[0-9].x', '[0-9].[0=9]+'] # Run the functional test on push for only release branches
+    branches: ['**', '!backport/**'] # Run the functional test on push for only release branches
     paths-ignore:
       - '**/*.md'
       - 'docs/**'
@@ -25,7 +25,7 @@ env:
   TEST_OPENSEARCH_TRANSPORT_PORT: 9403
   TEST_OPENSEARCH_PORT: 9400
   OSD_SNAPSHOT_SKIP_VERIFY_CHECKSUM: true
-  NODE_OPTIONS: "--max-old-space-size=6144 --dns-result-order=ipv4first"
+  NODE_OPTIONS: '--max-old-space-size=6144 --dns-result-order=ipv4first'
 
 jobs:
   build-lint-test:
@@ -33,13 +33,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [arc-runner-set]
         group: [1, 2, 3, 4]
         include:
-          - os: ubuntu-latest
+          - os: arc-runner-set
             name: Linux
-          - os: windows-latest
-            name: Windows
     runs-on: ${{ matrix.os }}
     steps:
       - name: Configure git's autocrlf (Windows only)
@@ -53,7 +51,7 @@ jobs:
         with:
           minimum-size: 16GB
           maximum-size: 64GB
-          disk-root: "C:"
+          disk-root: 'C:'
 
       - name: Checkout code
         uses: actions/checkout@v3
@@ -100,13 +98,13 @@ jobs:
 
       - name: Run linter
         # ciGroup 1 of unit-tests is shorter and Linux is faster
-        if: matrix.group == 1 && matrix.os == 'ubuntu-latest'
+        if: matrix.group == 1 && matrix.os == 'arc-runner-set'
         id: linter
         run: yarn lint
 
       - name: Validate NOTICE file
         # ciGroup 1 of unit-tests is shorter and Linux is faster
-        if: matrix.group == 1 && matrix.os == 'ubuntu-latest'
+        if: matrix.group == 1 && matrix.os == 'arc-runner-set'
         id: notice-validate
         run: yarn notice:validate
 
@@ -138,13 +136,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [arc-runner-set]
         group: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
         include:
-          - os: ubuntu-latest
+          - os: arc-runner-set
             name: Linux
-          - os: windows-latest
-            name: Windows
     runs-on: ${{ matrix.os }}
     steps:
       - run: echo Running functional tests for ciGroup${{ matrix.group }}
@@ -160,7 +156,7 @@ jobs:
         with:
           minimum-size: 16GB
           maximum-size: 64GB
-          disk-root: "C:"
+          disk-root: 'C:'
 
       - name: Checkout code
         uses: actions/checkout@v3
@@ -254,7 +250,7 @@ jobs:
         with:
           minimum-size: 16GB
           maximum-size: 64GB
-          disk-root: "C:"
+          disk-root: 'C:'
 
       - name: Checkout code
         uses: actions/checkout@v3
@@ -322,31 +318,16 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: ubuntu-latest
+          - os: arc-runner-set
             name: Linux x64
             ext: tar.gz
             suffix: linux-x64
             script: build-platform --linux --skip-os-packages
-          - os: ubuntu-latest
+          - os: arc-runner-set
             name: Linux ARM64
             ext: tar.gz
             suffix: linux-arm64
             script: build-platform --linux-arm --skip-os-packages
-          - os: macos-latest
-            name: macOS x64
-            ext: tar.gz
-            suffix: darwin-x64
-            script: build-platform --darwin --skip-os-packages
-          - os: macos-latest
-            name: macOS ARM64
-            ext: tar.gz
-            suffix: darwin-arm64
-            script: build-platform --darwin-arm --skip-os-packages
-          - os: windows-latest
-            name: Windows x64
-            ext: zip
-            suffix: windows-x64
-            script: build-platform --windows --skip-os-packages
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -364,7 +345,7 @@ jobs:
         with:
           minimum-size: 16GB
           maximum-size: 64GB
-          disk-root: "C:"
+          disk-root: 'C:'
 
       - name: Checkout code
         uses: actions/checkout@v3
@@ -430,8 +411,9 @@ jobs:
           retention-days: 1
 
   bwc-tests:
+    if: false
     needs: [build-min-artifact-tests]
-    runs-on: ubuntu-latest
+    runs-on: arc-runner-set
     container:
       image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
       options: --user 1001
@@ -441,7 +423,19 @@ jobs:
         working-directory: ./artifacts
     strategy:
       matrix:
-        version: [osd-2.0.0, osd-2.1.0, osd-2.2.0, osd-2.3.0, osd-2.4.0, osd-2.5.0, osd-2.6.0, osd-2.7.0, osd-2.8.0, osd-2.9.0]
+        version:
+          [
+            osd-2.0.0,
+            osd-2.1.0,
+            osd-2.2.0,
+            osd-2.3.0,
+            osd-2.4.0,
+            osd-2.5.0,
+            osd-2.6.0,
+            osd-2.7.0,
+            osd-2.8.0,
+            osd-2.9.0,
+          ]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3

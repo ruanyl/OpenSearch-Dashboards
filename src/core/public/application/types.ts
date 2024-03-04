@@ -245,6 +245,16 @@ export interface App<HistoryLocationState = unknown> {
    * ```
    */
   exactRoute?: boolean;
+
+  /**
+   * The dependencies of one application, required feature will be automatic select and can't
+   * be unselect in the workspace configuration.
+   */
+  dependencies?: {
+    [key: string]: {
+      type: 'required' | 'optional';
+    };
+  };
 }
 
 /**

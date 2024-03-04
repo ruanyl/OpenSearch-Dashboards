@@ -45,6 +45,7 @@ export {
 } from './import/types';
 
 import { SavedObject } from '../../types';
+import { Principals } from './permission_control/acl';
 
 type KueryNode = any;
 
@@ -91,6 +92,8 @@ export interface SavedObjectsFindOptions {
   search?: string;
   /** The fields to perform the parsed query against. See OpenSearch Simple Query String `fields` argument for more information */
   searchFields?: string[];
+  /** The enabled operators for OpenSearch Simple Query String. See OpenSearch Simple Query String `flags` argument for more information */
+  flags?: string;
   /**
    * The fields to perform the parsed query against. Unlike the `searchFields` argument, these are expected to be root fields and will not
    * be modified. If used in conjunction with `searchFields`, both are concatenated together.
@@ -112,6 +115,14 @@ export interface SavedObjectsFindOptions {
   preference?: string;
   /** If specified, will only retrieve objects that are in the workspaces */
   workspaces?: string[];
+  /**
+   * The params here will be combined with bool clause and is used for filtering with ACL structure.
+   */
+  ACLSearchParams?: {
+    workspaces?: string[];
+    principals?: Principals;
+    permissionModes?: string[];
+  };
 }
 
 /**

@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import { Permissions } from '../permission_control/acl';
 import { ISavedObjectsRepository } from './lib';
 import {
   SavedObject,
@@ -68,6 +69,8 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
    * Note: this can only be used for multi-namespace object types.
    */
   initialNamespaces?: string[];
+  /** permission control describe by ACL object */
+  permissions?: Permissions;
   /**
    * workspaces the new created objects belong to
    */
@@ -177,6 +180,8 @@ export interface SavedObjectsCheckConflictsResponse {
   }>;
 }
 
+export type SavedObjectsShareObjects = Pick<SavedObject, 'type' | 'id'>;
+
 /**
  *
  * @public
@@ -188,6 +193,8 @@ export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions {
   references?: SavedObjectReference[];
   /** The OpenSearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
+  /** permission control describe by ACL object */
+  permissions?: Permissions;
 }
 
 /**
@@ -201,6 +208,11 @@ export interface SavedObjectsAddToNamespacesOptions extends SavedObjectsBaseOpti
   refresh?: MutatingOperationRefreshSetting;
 }
 
+export interface SavedObjectsAddToWorkspacesOptions extends SavedObjectsBaseOptions {
+  /** The OpenSearch Refresh setting for this operation */
+  refresh?: MutatingOperationRefreshSetting;
+}
+
 /**
  *
  * @public
@@ -208,6 +220,11 @@ export interface SavedObjectsAddToNamespacesOptions extends SavedObjectsBaseOpti
 export interface SavedObjectsAddToNamespacesResponse {
   /** The namespaces the object exists in after this operation is complete. */
   namespaces: string[];
+}
+
+export interface SavedObjectsAddToWorkspacesResponse extends Pick<SavedObject, 'type' | 'id'> {
+  /** The workspaces the object exists in after this operation is complete. */
+  workspaces: string[];
 }
 
 /**
@@ -219,6 +236,16 @@ export interface SavedObjectsDeleteFromNamespacesOptions extends SavedObjectsBas
   refresh?: MutatingOperationRefreshSetting;
 }
 
+export interface SavedObjectsDeleteFromWorkspacesOptions extends SavedObjectsBaseOptions {
+  /** The OpenSearch Refresh setting for this operation */
+  refresh?: MutatingOperationRefreshSetting;
+}
+
+export interface SavedObjectsDeleteByWorkspaceOptions extends SavedObjectsBaseOptions {
+  /** The OpenSearch supports only boolean flag for this operation */
+  refresh?: boolean;
+}
+
 /**
  *
  * @public
@@ -226,6 +253,11 @@ export interface SavedObjectsDeleteFromNamespacesOptions extends SavedObjectsBas
 export interface SavedObjectsDeleteFromNamespacesResponse {
   /** The namespaces the object exists in after this operation is complete. An empty array indicates the object was deleted. */
   namespaces: string[];
+}
+
+export interface SavedObjectsDeleteFromWorkspacesResponse {
+  /** The workspaces the object exists in after this operation is complete. An empty array indicates the object was deleted. */
+  workspaces: string[];
 }
 
 /**
@@ -440,6 +472,33 @@ export class SavedObjectsClient {
   ): Promise<SavedObjectsDeleteFromNamespacesResponse> {
     return await this._repository.deleteFromNamespaces(type, id, namespaces, options);
   }
+
+  /**
+   * Adds workspace to SavedObjects
+   *
+   * @param savedObjects
+   * @param workspaces
+   * @param options
+   */
+  addToWorkspaces = async (
+    savedObjects: SavedObjectsShareObjects[],
+    workspaces: string[],
+    options: SavedObjectsAddToWorkspacesOptions = {}
+  ): Promise<SavedObjectsAddToWorkspacesResponse[]> => {
+    return await this._repository.addToWorkspaces(savedObjects, workspaces, options);
+  };
+
+  /**
+   * delete saved objects by workspace id
+   * @param workspace
+   * @param options
+   */
+  deleteByWorkspace = async (
+    workspace: string,
+    options: SavedObjectsDeleteByWorkspaceOptions = {}
+  ): Promise<any> => {
+    return await this._repository.deleteByWorkspace(workspace, options);
+  };
 
   /**
    * Bulk Updates multiple SavedObject at once

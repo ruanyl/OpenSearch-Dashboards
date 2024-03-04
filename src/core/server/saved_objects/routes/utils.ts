@@ -27,7 +27,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import { Readable } from 'stream';
 import { SavedObject, SavedObjectsExportResultDetails } from 'src/core/server';
 import {
@@ -73,4 +72,11 @@ export function validateObjects(
       .map((obj) => `${obj.type}:${obj.id}`)
       .join(', ')}`;
   }
+}
+
+export function filterInvalidObjects(
+  objects: Array<{ id: string; type: string }>,
+  supportedTypes: string[]
+): Array<{ id: string; type: string }> {
+  return objects.filter((obj) => !supportedTypes.includes(obj.type));
 }

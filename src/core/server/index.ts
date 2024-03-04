@@ -220,6 +220,7 @@ export {
   SessionStorageFactory,
   DestructiveRouteMethod,
   SafeRouteMethod,
+  ensureRawRequest,
 } from './http';
 
 export {
@@ -321,6 +322,17 @@ export {
   exportSavedObjectsToStream,
   importSavedObjectsFromStream,
   resolveSavedObjectsImportErrors,
+  SavedObjectsShareObjects,
+  SavedObjectsAddToWorkspacesOptions,
+  SavedObjectsAddToWorkspacesResponse,
+  SavedObjectsDeleteByWorkspaceOptions,
+  SavedObjectsDeleteFromWorkspacesOptions,
+  SavedObjectsDeleteFromWorkspacesResponse,
+  Permissions,
+  ACL,
+  Principals,
+  TransformedPermission,
+  PrincipalType,
 } from './saved_objects';
 
 export {
@@ -348,7 +360,14 @@ export {
 } from './metrics';
 
 export { AppCategory, WorkspaceAttribute } from '../types';
-export { DEFAULT_APP_CATEGORIES, WORKSPACE_TYPE } from '../utils';
+export {
+  DEFAULT_APP_CATEGORIES,
+  WorkspacePermissionMode,
+  PUBLIC_WORKSPACE_ID,
+  MANAGEMENT_WORKSPACE_ID,
+  WORKSPACE_TYPE,
+  PERSONAL_WORKSPACE_ID_PREFIX,
+} from '../utils';
 
 export {
   SavedObject,

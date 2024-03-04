@@ -41,12 +41,13 @@ export const registerScrollForCountRoute = (router: IRouter) => {
           typesToInclude: schema.arrayOf(schema.string()),
           namespacesToInclude: schema.maybe(schema.arrayOf(schema.string())),
           searchString: schema.maybe(schema.string()),
+          workspaces: schema.maybe(schema.arrayOf(schema.string())),
         }),
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const { client } = context.core.savedObjects;
-      const counts = {
+      const counts: Record<string, Record<string, number>> = {
         type: {},
       };
 
@@ -58,9 +59,16 @@ export const registerScrollForCountRoute = (router: IRouter) => {
       const requestHasNamespaces =
         Array.isArray(req.body.namespacesToInclude) && req.body.namespacesToInclude.length;
 
+      const requestHasWorkspaces = Array.isArray(req.body.workspaces) && req.body.workspaces.length;
+
       if (requestHasNamespaces) {
         counts.namespaces = {};
         findOptions.namespaces = req.body.namespacesToInclude;
+      }
+
+      if (requestHasWorkspaces) {
+        counts.workspaces = {};
+        findOptions.workspaces = req.body.workspaces;
       }
 
       if (req.body.searchString) {
@@ -82,6 +90,13 @@ export const registerScrollForCountRoute = (router: IRouter) => {
             counts.namespaces[ns]++;
           });
         }
+        if (requestHasWorkspaces) {
+          const resultWorkspaces = result.workspaces || ['public'];
+          resultWorkspaces.forEach((ws) => {
+            counts.workspaces[ws] = counts.workspaces[ws] || 0;
+            counts.workspaces[ws]++;
+          });
+        }
         counts.type[type] = counts.type[type] || 0;
         counts.type[type]++;
       });
@@ -96,6 +111,13 @@ export const registerScrollForCountRoute = (router: IRouter) => {
       for (const ns of namespacesToInclude) {
         if (!counts.namespaces[ns]) {
           counts.namespaces[ns] = 0;
+        }
+      }
+
+      const workspacesToInclude = req.body.workspaces || [];
+      for (const ws of workspacesToInclude) {
+        if (!counts.workspaces[ws]) {
+          counts.workspaces[ws] = 0;
         }
       }
 

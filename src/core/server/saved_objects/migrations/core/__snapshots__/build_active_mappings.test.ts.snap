@@ -10,9 +10,11 @@ Object {
       "namespace": "2f4316de49999235636386fe51dc06c1",
       "namespaces": "2f4316de49999235636386fe51dc06c1",
       "originId": "2f4316de49999235636386fe51dc06c1",
+      "permissions": "07c04cdd060494956fdddaa7ef86e8ac",
       "references": "7997cf5a56cc02bdc9c93361bde732b0",
       "type": "2f4316de49999235636386fe51dc06c1",
       "updated_at": "00da57df13e94e9d98437d13ace4bfe0",
+      "workspaces": "2f4316de49999235636386fe51dc06c1",
     },
   },
   "dynamic": "strict",
@@ -36,6 +38,60 @@ Object {
     "originId": Object {
       "type": "keyword",
     },
+    "permissions": Object {
+      "properties": Object {
+        "library_read": Object {
+          "properties": Object {
+            "groups": Object {
+              "type": "keyword",
+            },
+            "users": Object {
+              "type": "keyword",
+            },
+          },
+        },
+        "library_write": Object {
+          "properties": Object {
+            "groups": Object {
+              "type": "keyword",
+            },
+            "users": Object {
+              "type": "keyword",
+            },
+          },
+        },
+        "management": Object {
+          "properties": Object {
+            "groups": Object {
+              "type": "keyword",
+            },
+            "users": Object {
+              "type": "keyword",
+            },
+          },
+        },
+        "read": Object {
+          "properties": Object {
+            "groups": Object {
+              "type": "keyword",
+            },
+            "users": Object {
+              "type": "keyword",
+            },
+          },
+        },
+        "write": Object {
+          "properties": Object {
+            "groups": Object {
+              "type": "keyword",
+            },
+            "users": Object {
+              "type": "keyword",
+            },
+          },
+        },
+      },
+    },
     "references": Object {
       "properties": Object {
         "id": Object {
@@ -56,6 +112,9 @@ Object {
     "updated_at": Object {
       "type": "date",
     },
+    "workspaces": Object {
+      "type": "keyword",
+    },
   },
 }
 `;
@@ -69,11 +128,13 @@ Object {
       "namespace": "2f4316de49999235636386fe51dc06c1",
       "namespaces": "2f4316de49999235636386fe51dc06c1",
       "originId": "2f4316de49999235636386fe51dc06c1",
+      "permissions": "07c04cdd060494956fdddaa7ef86e8ac",
       "references": "7997cf5a56cc02bdc9c93361bde732b0",
       "secondType": "72d57924f415fbadb3ee293b67d233ab",
       "thirdType": "510f1f0adb69830cf8a1c5ce2923ed82",
       "type": "2f4316de49999235636386fe51dc06c1",
       "updated_at": "00da57df13e94e9d98437d13ace4bfe0",
+      "workspaces": "2f4316de49999235636386fe51dc06c1",
     },
   },
   "dynamic": "strict",
@@ -98,6 +159,60 @@ Object {
     },
     "originId": Object {
       "type": "keyword",
+    },
+    "permissions": Object {
+      "properties": Object {
+        "library_read": Object {
+          "properties": Object {
+            "groups": Object {
+              "type": "keyword",
+            },
+            "users": Object {
+              "type": "keyword",
+            },
+          },
+        },
+        "library_write": Object {
+          "properties": Object {
+            "groups": Object {
+              "type": "keyword",
+            },
+            "users": Object {
+              "type": "keyword",
+            },
+          },
+        },
+        "management": Object {
+          "properties": Object {
+            "groups": Object {
+              "type": "keyword",
+            },
+            "users": Object {
+              "type": "keyword",
+            },
+          },
+        },
+        "read": Object {
+          "properties": Object {
+            "groups": Object {
+              "type": "keyword",
+            },
+            "users": Object {
+              "type": "keyword",
+            },
+          },
+        },
+        "write": Object {
+          "properties": Object {
+            "groups": Object {
+              "type": "keyword",
+            },
+            "users": Object {
+              "type": "keyword",
+            },
+          },
+        },
+      },
     },
     "references": Object {
       "properties": Object {
@@ -133,6 +248,9 @@ Object {
     },
     "updated_at": Object {
       "type": "date",
+    },
+    "workspaces": Object {
+      "type": "keyword",
     },
   },
 }

@@ -534,8 +534,10 @@ export class SavedObjectsService
 
     this.started = true;
 
+    const getScopedClient = clientProvider.getClient.bind(clientProvider);
+
     return {
-      getScopedClient: clientProvider.getClient.bind(clientProvider),
+      getScopedClient,
       createScopedRepository: repositoryFactory.createScopedRepository,
       createInternalRepository: repositoryFactory.createInternalRepository,
       createSerializer: () => new SavedObjectsSerializer(this.typeRegistry),

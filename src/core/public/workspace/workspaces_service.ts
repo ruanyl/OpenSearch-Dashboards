@@ -5,12 +5,9 @@
 
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { isEqual } from 'lodash';
+import { CoreService, WorkspaceObject } from '../../types';
 
-import { CoreService, WorkspaceAttribute } from '../../types';
-
-type WorkspaceObject = WorkspaceAttribute & { readonly?: boolean };
-
-interface WorkspaceObservables {
+export interface WorkspaceObservables {
   /**
    * Indicates the current activated workspace id, the value should be changed every time
    * when switching to a different workspace

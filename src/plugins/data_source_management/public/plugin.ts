@@ -4,13 +4,21 @@
  */
 
 import { DataSourcePluginSetup } from 'src/plugins/data_source/public';
-import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
+import {
+  AppMountParameters,
+  CoreSetup,
+  CoreStart,
+  DEFAULT_APP_CATEGORIES,
+  Plugin,
+  StartServicesAccessor,
+} from '../../../core/public';
 
 import { PLUGIN_NAME } from '../common';
 
 import { ManagementSetup } from '../../management/public';
 import { IndexPatternManagementSetup } from '../../index_pattern_management/public';
 import { DataSourceColumn } from './components/data_source_column/data_source_column';
+import { DataSourceManagementStartDependencies } from './types';
 import {
   AuthenticationMethod,
   IAuthenticationMethodRegistery,
@@ -48,12 +56,6 @@ export class DataSourceManagementPlugin
     core: CoreSetup<DataSourceManagementPluginStart>,
     { management, indexPatternManagement, dataSource }: DataSourceManagementSetupDependencies
   ) {
-    const opensearchDashboardsSection = management.sections.section.opensearchDashboards;
-
-    if (!opensearchDashboardsSection) {
-      throw new Error('`opensearchDashboards` management section not found.');
-    }
-
     const savedObjectPromise = core
       .getStartServices()
       .then(([coreStart]) => coreStart.savedObjects);
@@ -61,14 +63,19 @@ export class DataSourceManagementPlugin
     const column = new DataSourceColumn(savedObjectPromise, httpPromise);
     indexPatternManagement.columns.register(column);
 
-    opensearchDashboardsSection.registerApp({
+    core.application.register({
       id: DSM_APP_ID,
       title: PLUGIN_NAME,
       order: 1,
-      mount: async (params) => {
-        const { mountManagementSection } = await import('./management_app');
+      category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
+      mount: async (params: AppMountParameters) => {
+        const { mountDataSourcesManagementSection } = await import('./management_app');
 
-        return mountManagementSection(core.getStartServices, params, this.authMethodsRegistry);
+        return mountDataSourcesManagementSection(
+          core.getStartServices as StartServicesAccessor<DataSourceManagementStartDependencies>,
+          params,
+          this.authMethodsRegistry
+        );
       },
     });
 

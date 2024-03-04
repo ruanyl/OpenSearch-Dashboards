@@ -5,6 +5,7 @@
 
 import { WorkspaceAttribute } from 'src/core/types';
 import * as osdTestServer from '../../../../core/test_helpers/osd_server';
+import { WORKSPACE_TYPE } from '../../../../core/server';
 
 const omitId = <T extends { id?: string }>(object: T): Omit<T, 'id'> => {
   const { id, ...others } = object;
@@ -20,6 +21,7 @@ const testWorkspace: WorkspaceAttribute = {
 describe('workspace service', () => {
   let root: ReturnType<typeof osdTestServer.createRoot>;
   let opensearchServer: osdTestServer.TestOpenSearchUtils;
+  let osd: osdTestServer.TestOpenSearchDashboardsUtils;
   beforeAll(async () => {
     const { startOpenSearch, startOpenSearchDashboards } = osdTestServer.createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
@@ -27,14 +29,18 @@ describe('workspace service', () => {
         osd: {
           workspace: {
             enabled: true,
+            permission: {
+              enabled: false,
+            },
           },
+          migrations: { skip: false },
         },
       },
     });
     opensearchServer = await startOpenSearch();
-    const startOSDResp = await startOpenSearchDashboards();
-    root = startOSDResp.root;
-  });
+    osd = await startOpenSearchDashboards();
+    root = osd.root;
+  }, 30000);
   afterAll(async () => {
     await root.shutdown();
     await opensearchServer.stop();
@@ -47,11 +53,17 @@ describe('workspace service', () => {
           page: 1,
         })
         .expect(200);
-      await Promise.all(
-        listResult.body.result.workspaces.map((item: WorkspaceAttribute) =>
-          osdTestServer.request.delete(root, `/api/workspaces/${item.id}`).expect(200)
+      const savedObjectsRepository = osd.coreStart.savedObjects.createInternalRepository([
+        WORKSPACE_TYPE,
+      ]);
+      await expect(
+        Promise.all(
+          listResult.body.result.workspaces.map((item: WorkspaceAttribute) =>
+            // this will delete reserved workspace
+            savedObjectsRepository.delete(WORKSPACE_TYPE, item.id)
+          )
         )
-      );
+      ).resolves.toBeInstanceOf(Array);
     });
     it('create', async () => {
       await osdTestServer.request
@@ -111,11 +123,54 @@ describe('workspace service', () => {
       expect(getResult.body.success).toEqual(true);
       expect(getResult.body.result.name).toEqual('updated');
     });
+    it('update with permission', async () => {
+      const permission = {
+        userId: 'foo',
+        type: 'user',
+        modes: ['read', 'library_read'],
+      };
+      const result: any = await osdTestServer.request
+        .post(root, `/api/workspaces`)
+        .send({
+          attributes: omitId(testWorkspace),
+        })
+        .expect(200);
+
+      await osdTestServer.request
+        .put(root, `/api/workspaces/${result.body.result.id}`)
+        .send({
+          attributes: {
+            ...omitId(testWorkspace),
+            name: 'updated',
+          },
+          permissions: permission,
+        })
+        .expect(200);
+
+      const getResult = await osdTestServer.request.get(
+        root,
+        `/api/workspaces/${result.body.result.id}`
+      );
+
+      expect(getResult.body.success).toEqual(true);
+      expect(getResult.body.result.name).toEqual('updated');
+      expect(getResult.body.result.permissions[0]).toEqual(permission);
+    });
     it('delete', async () => {
       const result: any = await osdTestServer.request
         .post(root, `/api/workspaces`)
         .send({
           attributes: omitId(testWorkspace),
+        })
+        .expect(200);
+
+      await osdTestServer.request
+        .post(root, `/api/saved_objects/index-pattern/logstash-*`)
+        .send({
+          attributes: {
+            title: 'logstash-*',
+          },
+          workspaces: [result.body.result.id],
         })
         .expect(200);
 
@@ -129,6 +184,29 @@ describe('workspace service', () => {
       );
 
       expect(getResult.body.success).toEqual(false);
+
+      // saved objects been deleted
+      await osdTestServer.request
+        .get(root, `/api/saved_objects/index-pattern/logstash-*`)
+        .expect(404);
+    });
+    it('delete reserved workspace', async () => {
+      const reservedWorkspace: WorkspaceAttribute = { ...testWorkspace, reserved: true };
+      const result: any = await osdTestServer.request
+        .post(root, `/api/workspaces`)
+        .send({
+          attributes: omitId(reservedWorkspace),
+        })
+        .expect(200);
+
+      const deleteResult = await osdTestServer.request
+        .delete(root, `/api/workspaces/${result.body.result.id}`)
+        .expect(200);
+
+      expect(deleteResult.body.success).toEqual(false);
+      expect(deleteResult.body.error).toEqual(
+        `Reserved workspace ${result.body.result.id} is not allowed to delete.`
+      );
     });
     it('list', async () => {
       await osdTestServer.request
@@ -154,7 +232,8 @@ describe('workspace service', () => {
           page: 1,
         })
         .expect(200);
-      expect(listResult.body.result.total).toEqual(2);
+      // Global and Management workspace will be created by default after workspace list API called.
+      expect(listResult.body.result.total).toEqual(4);
     });
     it('unable to perform operations on workspace by calling saved objects APIs', async () => {
       const result = await osdTestServer.request
@@ -216,7 +295,8 @@ describe('workspace service', () => {
         })
         .expect(200);
       expect(findResult.body.total).toEqual(0);
-      expect(listResult.body.result.total).toEqual(1);
+      // Global and Management workspace will be created by default after workspace list API called.
+      expect(listResult.body.result.total).toEqual(3);
     });
   });
 });

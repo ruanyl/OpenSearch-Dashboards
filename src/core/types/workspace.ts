@@ -10,5 +10,10 @@ export interface WorkspaceAttribute {
   features?: string[];
   color?: string;
   icon?: string;
+  defaultVISTheme?: string;
   reserved?: boolean;
+}
+
+export interface WorkspaceObject extends WorkspaceAttribute {
+  readonly?: boolean;
 }

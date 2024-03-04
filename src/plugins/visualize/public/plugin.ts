@@ -41,7 +41,6 @@ import {
   PluginInitializerContext,
   ScopedHistory,
 } from 'opensearch-dashboards/public';
-
 import {
   Storage,
   createOsdUrlTracker,

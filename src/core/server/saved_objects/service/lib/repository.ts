@@ -28,11 +28,12 @@
  * under the License.
  */
 
-import { omit } from 'lodash';
+import { omit, intersection } from 'lodash';
 import type { opensearchtypes } from '@opensearch-project/opensearch';
 import uuid from 'uuid';
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
-import { OpenSearchClient, DeleteDocumentResponse } from '../../../opensearch/';
+import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import { DeleteDocumentResponse, OpenSearchClient } from '../../../opensearch/';
 import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
 import {
   createRepositoryOpenSearchClient,
@@ -40,43 +41,48 @@ import {
 } from './repository_opensearch_client';
 import { getSearchDsl } from './search_dsl';
 import { includedFields } from './included_fields';
-import { SavedObjectsErrorHelpers, DecoratedError } from './errors';
-import { decodeRequestVersion, encodeVersion, encodeHitVersion } from '../../version';
+import { DecoratedError, SavedObjectsErrorHelpers } from './errors';
+import { decodeRequestVersion, encodeHitVersion, encodeVersion } from '../../version';
 import { IOpenSearchDashboardsMigrator } from '../../migrations';
 import {
-  SavedObjectsSerializer,
   SavedObjectSanitizedDoc,
   SavedObjectsRawDoc,
   SavedObjectsRawDocSource,
+  SavedObjectsSerializer,
 } from '../../serialization';
 import {
+  SavedObjectsAddToNamespacesOptions,
+  SavedObjectsAddToNamespacesResponse,
+  SavedObjectsAddToWorkspacesOptions,
+  SavedObjectsAddToWorkspacesResponse,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
   SavedObjectsBulkResponse,
+  SavedObjectsBulkUpdateObject,
+  SavedObjectsBulkUpdateOptions,
   SavedObjectsBulkUpdateResponse,
   SavedObjectsCheckConflictsObject,
   SavedObjectsCheckConflictsResponse,
   SavedObjectsCreateOptions,
-  SavedObjectsFindResponse,
-  SavedObjectsFindResult,
-  SavedObjectsUpdateOptions,
-  SavedObjectsUpdateResponse,
-  SavedObjectsBulkUpdateObject,
-  SavedObjectsBulkUpdateOptions,
-  SavedObjectsDeleteOptions,
-  SavedObjectsAddToNamespacesOptions,
-  SavedObjectsAddToNamespacesResponse,
+  SavedObjectsDeleteByWorkspaceOptions,
   SavedObjectsDeleteFromNamespacesOptions,
   SavedObjectsDeleteFromNamespacesResponse,
+  SavedObjectsDeleteFromWorkspacesOptions,
+  SavedObjectsDeleteFromWorkspacesResponse,
+  SavedObjectsDeleteOptions,
+  SavedObjectsFindResponse,
+  SavedObjectsFindResult,
+  SavedObjectsShareObjects,
+  SavedObjectsUpdateOptions,
+  SavedObjectsUpdateResponse,
 } from '../saved_objects_client';
 import {
+  MutatingOperationRefreshSetting,
   SavedObject,
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,
   SavedObjectsMigrationVersion,
-  MutatingOperationRefreshSetting,
 } from '../../types';
-import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { validateConvertFilterToKueryNode } from './filter_utils';
 import {
   ALL_NAMESPACES_STRING,
@@ -84,7 +90,6 @@ import {
   FIND_DEFAULT_PER_PAGE,
   SavedObjectsUtils,
 } from './utils';
-
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
 
@@ -119,7 +124,8 @@ export interface SavedObjectsIncrementCounterOptions extends SavedObjectsBaseOpt
  *
  * @public
  */
-export interface SavedObjectsDeleteByNamespaceOptions extends SavedObjectsBaseOptions {
+export interface SavedObjectsDeleteByNamespaceOptions
+  extends Omit<SavedObjectsBaseOptions, 'workspaces'> {
   /** The OpenSearch supports only boolean flag for this operation */
   refresh?: boolean;
 }
@@ -244,6 +250,7 @@ export class SavedObjectsRepository {
       initialNamespaces,
       version,
       workspaces,
+      permissions,
     } = options;
     const namespace = normalizeNamespace(options.namespace);
 
@@ -291,6 +298,7 @@ export class SavedObjectsRepository {
       updated_at: time,
       ...(Array.isArray(references) && { references }),
       ...(Array.isArray(workspaces) && { workspaces }),
+      ...(permissions && { permissions }),
     });
 
     const raw = this._serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc);
@@ -407,9 +415,10 @@ export class SavedObjectsRepository {
       if (opensearchRequestIndex !== undefined) {
         const indexFound = bulkGetResponse?.statusCode !== 404;
         const actualResult = indexFound
-          ? bulkGetResponse?.body.docs[opensearchRequestIndex]
+          ? bulkGetResponse?.body.docs?.[opensearchRequestIndex]
           : undefined;
         const docFound = indexFound && actualResult?.found === true;
+        let hasSetNamespace = false;
         // @ts-expect-error MultiGetHit._source is optional
         if (docFound && !this.rawDocExistsInNamespace(actualResult!, namespace)) {
           const { id, type } = object;
@@ -424,11 +433,20 @@ export class SavedObjectsRepository {
               },
             },
           };
+        } else {
+          hasSetNamespace = true;
+          if (this._registry.isSingleNamespace(object.type)) {
+            savedObjectNamespace = initialNamespaces ? initialNamespaces[0] : namespace;
+          } else if (this._registry.isMultiNamespace(object.type)) {
+            savedObjectNamespaces = initialNamespaces || getSavedObjectNamespaces(namespace);
+          }
         }
-        savedObjectNamespaces =
-          initialNamespaces ||
-          // @ts-expect-error MultiGetHit._source is optional
-          getSavedObjectNamespaces(namespace, docFound ? actualResult : undefined);
+        if (!hasSetNamespace) {
+          savedObjectNamespaces =
+            initialNamespaces ||
+            // @ts-expect-error MultiGetHit._source is optional
+            getSavedObjectNamespaces(namespace, docFound ? actualResult : undefined);
+        }
         // @ts-expect-error MultiGetHit._source is optional
         versionProperties = getExpectedVersionProperties(version, actualResult);
       } else {
@@ -712,6 +730,55 @@ export class SavedObjectsRepository {
   }
 
   /**
+   * Deletes all objects from the provided workspace. It used when deleting a workspace.
+   *
+   * @param {string} workspace
+   * @param options SavedObjectsDeleteByWorkspaceOptions
+   * @returns {promise} - { took, timed_out, total, deleted, batches, version_conflicts, noops, retries, failures }
+   */
+  async deleteByWorkspace(
+    workspace: string,
+    options: SavedObjectsDeleteByWorkspaceOptions = {}
+  ): Promise<any> {
+    if (!workspace || typeof workspace !== 'string' || workspace === '*') {
+      throw new TypeError(`workspace is required, and must be a string that is not equal to '*'`);
+    }
+
+    const allTypes = Object.keys(getRootPropertiesObjects(this._mappings));
+
+    const { body } = await this.client.updateByQuery(
+      {
+        index: this.getIndicesForTypes(allTypes),
+        refresh: options.refresh,
+        body: {
+          script: {
+            source: `
+              if (!ctx._source.containsKey('workspaces')) {
+                ctx.op = "delete";
+              } else {
+                ctx._source['workspaces'].removeAll(Collections.singleton(params['workspace']));
+                if (ctx._source['workspaces'].empty) {
+                  ctx.op = "delete";
+                }
+              }
+            `,
+            lang: 'painless',
+            params: { workspace },
+          },
+          conflicts: 'proceed',
+          ...getSearchDsl(this._mappings, this._registry, {
+            workspaces: [workspace],
+            type: allTypes,
+          }),
+        },
+      },
+      { ignore: [404] }
+    );
+
+    return body;
+  }
+
+  /**
    * @param {object} [options={}]
    * @property {(string|Array<string>)} [options.type]
    * @property {string} [options.search]
@@ -746,6 +813,8 @@ export class SavedObjectsRepository {
       filter,
       preference,
       workspaces,
+      ACLSearchParams,
+      flags,
     } = options;
 
     if (!type && !typeToNamespacesMap) {
@@ -820,6 +889,8 @@ export class SavedObjectsRepository {
           hasReference,
           kueryNode,
           workspaces,
+          ACLSearchParams,
+          flags,
         }),
       },
     };
@@ -873,7 +944,7 @@ export class SavedObjectsRepository {
    */
   async bulkGet<T = unknown>(
     objects: SavedObjectsBulkGetObject[] = [],
-    options: SavedObjectsBaseOptions = {}
+    options: Omit<SavedObjectsBaseOptions, 'workspaces'> = {}
   ): Promise<SavedObjectsBulkResponse<T>> {
     const namespace = normalizeNamespace(options.namespace);
 
@@ -961,7 +1032,7 @@ export class SavedObjectsRepository {
   async get<T = unknown>(
     type: string,
     id: string,
-    options: SavedObjectsBaseOptions = {}
+    options: Omit<SavedObjectsBaseOptions, 'workspaces'> = {}
   ): Promise<SavedObject<T>> {
     if (!this._allowedTypes.includes(type)) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
@@ -987,7 +1058,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    const { originId, updated_at: updatedAt } = body._source;
+    const { originId, updated_at: updatedAt, workspaces, permissions } = body._source;
 
     let namespaces: string[] = [];
     if (!this._registry.isNamespaceAgnostic(type)) {
@@ -1002,6 +1073,8 @@ export class SavedObjectsRepository {
       namespaces,
       ...(originId && { originId }),
       ...(updatedAt && { updated_at: updatedAt }),
+      ...(workspaces && { workspaces }),
+      ...(permissions && { permissions }),
       version: encodeHitVersion(body),
       attributes: body._source[type],
       references: body._source.references || [],
@@ -1030,7 +1103,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    const { version, references, refresh = DEFAULT_REFRESH_SETTING } = options;
+    const { version, references, refresh = DEFAULT_REFRESH_SETTING, permissions } = options;
     const namespace = normalizeNamespace(options.namespace);
 
     let preflightResult: SavedObjectsRawDoc | undefined;
@@ -1044,6 +1117,7 @@ export class SavedObjectsRepository {
       [type]: attributes,
       updated_at: time,
       ...(Array.isArray(references) && { references }),
+      ...(permissions && { permissions }),
     };
 
     const { body, statusCode } = await this.client.update<SavedObjectsRawDocSource>(
@@ -1066,7 +1140,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    const { originId } = body.get?._source ?? {};
+    const { originId, workspaces } = body.get?._source ?? {};
     let namespaces: string[] = [];
     if (!this._registry.isNamespaceAgnostic(type)) {
       namespaces = body.get?._source.namespaces ?? [
@@ -1081,6 +1155,7 @@ export class SavedObjectsRepository {
       version: encodeHitVersion(body),
       namespaces,
       ...(originId && { originId }),
+      ...(workspaces && { workspaces }),
       references,
       attributes,
     };
@@ -1232,6 +1307,215 @@ export class SavedObjectsRepository {
       const deleted = body.result === 'deleted';
       if (deleted) {
         return { namespaces: [] };
+      }
+
+      const deleteDocNotFound = body.result === 'not_found';
+      const deleteIndexNotFound = body.error && body.error.type === 'index_not_found_exception';
+      if (deleteDocNotFound || deleteIndexNotFound) {
+        // see "404s from missing index" above
+        throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+      }
+
+      throw new Error(
+        `Unexpected OpenSearch DELETE response: ${JSON.stringify({
+          type,
+          id,
+          response: { body, statusCode },
+        })}`
+      );
+    }
+  }
+
+  /**
+   * Adds one or more workspaces to a given saved objects. This method and
+   * [`deleteFromWorkspaces`]{@link SavedObjectsRepository.deleteFromWorkspaces} are the only ways to change which workspace
+   * saved object is shared to.
+   * @param savedObjects saved objects that will shared to new workspaces
+   * @param workspaces new workspaces
+   */
+  async addToWorkspaces(
+    savedObjects: SavedObjectsShareObjects[],
+    workspaces: string[],
+    options: SavedObjectsAddToWorkspacesOptions = {}
+  ): Promise<SavedObjectsAddToWorkspacesResponse[]> {
+    if (!savedObjects.length) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        'shared savedObjects must not be an empty array'
+      );
+    }
+
+    savedObjects.forEach(({ type, id }) => {
+      if (!this._allowedTypes.includes(type)) {
+        throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+      }
+    });
+
+    if (!workspaces.length) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        'workspaces must be a non-empty array of strings'
+      );
+    }
+
+    const { refresh = DEFAULT_REFRESH_SETTING } = options;
+    const savedObjectsBulkResponse = await this.bulkGet(savedObjects);
+
+    const errorObjects = savedObjectsBulkResponse.saved_objects.filter((obj) => !!obj.error);
+    if (errorObjects && errorObjects.length) {
+      const errors = errorObjects.map((errorObject) => errorObject.error?.message).join(',');
+      throw SavedObjectsErrorHelpers.decorateBadRequestError(new Error(errors));
+    }
+
+    // saved objects must exist in specified workspace
+    if (options.workspaces) {
+      const invalidObjects = savedObjectsBulkResponse.saved_objects.filter((obj) => {
+        if (obj.workspaces && obj.workspaces.length > 0) {
+          return intersection(obj.workspaces, options.workspaces).length === 0;
+        }
+        return true;
+      });
+      if (invalidObjects && invalidObjects.length > 0) {
+        const [savedObj] = invalidObjects;
+        throw SavedObjectsErrorHelpers.createGenericNotFoundError(savedObj.type, savedObj.id);
+      }
+    }
+
+    const docs = savedObjectsBulkResponse.saved_objects.map((obj) => {
+      const { type, id } = obj;
+      const rawId = this._serializer.generateRawId(undefined, type, id);
+      const time = this._getCurrentTime();
+
+      return [
+        {
+          update: {
+            _id: rawId,
+            _index: this.getIndexForType(type),
+          },
+        },
+        {
+          script: {
+            source: `
+              if (params.workspaces != null && ctx._source.workspaces != null) {
+                ctx._source.workspaces.addAll(params.workspaces);
+                HashSet workspacesSet = new HashSet(ctx._source.workspaces);
+                ctx._source.workspaces = new ArrayList(workspacesSet);
+              }
+              ctx._source.updated_at = params.time;
+            `,
+            lang: 'painless',
+            params: {
+              time,
+              workspaces,
+            },
+          },
+        },
+      ];
+    });
+
+    const bulkUpdateResponse = await this.client.bulk({
+      refresh,
+      body: docs.flat(),
+      _source_includes: ['workspaces'],
+    });
+
+    if (bulkUpdateResponse.body.errors) {
+      const failures = bulkUpdateResponse.body.items
+        .map((item) => item.update?.error?.reason)
+        .join(',');
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        'Add to workspace failed with: ' + failures
+      );
+    }
+
+    const savedObjectIdWorkspaceMap = bulkUpdateResponse.body.items.reduce((map, item) => {
+      return map.set(item.update?._id!, item.update?.get?._source.workspaces);
+    }, new Map<string, string[]>());
+
+    return savedObjects.map((obj) => {
+      const rawId = this._serializer.generateRawId(undefined, obj.type, obj.id);
+      return {
+        type: obj.type,
+        id: obj.id,
+        workspaces: savedObjectIdWorkspaceMap.get(rawId),
+      } as SavedObjectsAddToWorkspacesResponse;
+    });
+  }
+
+  /**
+   * Removes one or more workspace from a given saved object. If no workspace remain, the saved object is deleted
+   * entirely. This method and [`addToWorkspaces`]{@link SavedObjectsRepository.addToWorkspaces} are the only ways to change which workspace a
+   * saved object is shared to.
+   */
+  async deleteFromWorkspaces(
+    type: string,
+    id: string,
+    workspaces: string[],
+    options: SavedObjectsDeleteFromWorkspacesOptions = {}
+  ): Promise<SavedObjectsDeleteFromWorkspacesResponse> {
+    if (!this._allowedTypes.includes(type)) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+    }
+
+    if (!workspaces.length) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        'workspaces must be a non-empty array of strings'
+      );
+    }
+
+    const { refresh = DEFAULT_REFRESH_SETTING } = options;
+
+    const rawId = this._serializer.generateRawId(undefined, type, id);
+    const savedObject = await this.get(type, id);
+    const existingWorkspaces = savedObject.workspaces;
+    // if there are somehow no existing workspaces, allow the operation to proceed and delete this saved object
+    const remainingWorkspaces = existingWorkspaces?.filter((x) => !workspaces.includes(x));
+
+    if (remainingWorkspaces?.length) {
+      // if there is 1 or more workspace remaining, update the saved object
+      const time = this._getCurrentTime();
+
+      const doc = {
+        updated_at: time,
+        workspaces: remainingWorkspaces,
+      };
+
+      const { statusCode } = await this.client.update(
+        {
+          id: rawId,
+          index: this.getIndexForType(type),
+          ...decodeRequestVersion(savedObject.version),
+          refresh,
+
+          body: {
+            doc,
+          },
+        },
+        {
+          ignore: [404],
+        }
+      );
+
+      if (statusCode === 404) {
+        // see "404s from missing index" above
+        throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+      }
+      return { workspaces: doc.workspaces };
+    } else {
+      // if there are no namespaces remaining, delete the saved object
+      const { body, statusCode } = await this.client.delete<DeleteDocumentResponse>(
+        {
+          id: rawId,
+          index: this.getIndexForType(type),
+          refresh,
+          ...decodeRequestVersion(savedObject.version),
+        },
+        {
+          ignore: [404],
+        }
+      );
+
+      const deleted = body.result === 'deleted';
+      if (deleted) {
+        return { workspaces: [] };
       }
 
       const deleteDocNotFound = body.result === 'not_found';
@@ -1463,12 +1747,13 @@ export class SavedObjectsRepository {
           };
         }
 
-        const { originId } = get._source;
+        const { originId, workspaces } = get._source;
         return {
           id,
           type,
           ...(namespaces && { namespaces }),
           ...(originId && { originId }),
+          ...(workspaces && { workspaces }),
           updated_at,
           version: encodeVersion(seqNo, primaryTerm),
           attributes,
@@ -1765,7 +2050,7 @@ function getSavedObjectFromSource<T>(
   id: string,
   doc: { _seq_no?: number; _primary_term?: number; _source: SavedObjectsRawDocSource }
 ): SavedObject<T> {
-  const { originId, updated_at: updatedAt, workspaces } = doc._source;
+  const { originId, updated_at: updatedAt, workspaces, permissions } = doc._source;
 
   let namespaces: string[] = [];
   if (!registry.isNamespaceAgnostic(type)) {
@@ -1785,6 +2070,7 @@ function getSavedObjectFromSource<T>(
     attributes: doc._source[type],
     references: doc._source.references || [],
     migrationVersion: doc._source.migrationVersion,
+    permissions,
   };
 }
 

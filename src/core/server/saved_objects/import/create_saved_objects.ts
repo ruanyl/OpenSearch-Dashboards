@@ -39,6 +39,7 @@ interface CreateSavedObjectsParams<T> {
   importIdMap: Map<string, { id?: string; omitOriginId?: boolean }>;
   namespace?: string;
   overwrite?: boolean;
+  workspaces?: string[];
   dataSourceId?: string;
   dataSourceTitle?: string;
   workspaces?: string[];
@@ -59,6 +60,7 @@ export const createSavedObjects = async <T>({
   importIdMap,
   namespace,
   overwrite,
+  workspaces,
   dataSourceId,
   dataSourceTitle,
   workspaces,
@@ -179,7 +181,7 @@ export const createSavedObjects = async <T>({
   // remap results to reflect the object IDs that were submitted for import
   // this ensures that consumers understand the results
   const remappedResults = expectedResults.map<CreatedObject<T>>((result) => {
-    const { id } = objectIdMap.get(`${result.type}:${result.id}`)!;
+    const { id } = objectIdMap.get(`${result.type}:${result.id}`) || ({} as SavedObject<T>);
     // also, include a `destinationId` field if the object create attempt was made with a different ID
     return { ...result, id, ...(id !== result.id && { destinationId: result.id }) };
   });

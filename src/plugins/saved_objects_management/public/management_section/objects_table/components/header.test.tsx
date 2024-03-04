@@ -38,12 +38,60 @@ describe('Header', () => {
       onExportAll: () => {},
       onImport: () => {},
       onRefresh: () => {},
-      totalCount: 4,
+      onCopy: () => {},
+      onDuplicate: () => {},
+      title: 'Saved Objects',
+      selectedCount: 0,
+      objectCount: 4,
       filteredCount: 2,
+      showDuplicateAll: false,
+      hideImport: false,
     };
 
     const component = shallow(<Header {...props} />);
 
     expect(component).toMatchSnapshot();
+  });
+});
+
+describe('Header - workspace enabled', () => {
+  it('should render `Duplicate All` button when workspace enabled', () => {
+    const props = {
+      onExportAll: () => {},
+      onImport: () => {},
+      onRefresh: () => {},
+      onCopy: () => {},
+      onDuplicate: () => {},
+      title: 'Saved Objects',
+      selectedCount: 0,
+      objectCount: 4,
+      filteredCount: 2,
+      showDuplicateAll: true,
+      hideImport: false,
+    };
+
+    const component = shallow(<Header {...props} />);
+
+    expect(component.find('EuiButtonEmpty[data-test-subj="duplicateObjects"]').exists()).toBe(true);
+  });
+
+  it('should hide `Import` button for application home state', () => {
+    const props = {
+      onExportAll: () => {},
+      onImport: () => {},
+      onRefresh: () => {},
+      onCopy: () => {},
+      onDuplicate: () => {},
+      title: 'Saved Objects',
+      selectedCount: 0,
+      objectCount: 4,
+      filteredCount: 2,
+      showDuplicateAll: true,
+      hideImport: true,
+    };
+
+    const component = shallow(<Header {...props} />);
+
+    expect(component.find('EuiButtonEmpty[data-test-subj="importObjects"]').exists()).toBe(false);
   });
 });
