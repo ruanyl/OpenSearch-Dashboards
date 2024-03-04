@@ -39,7 +39,6 @@ interface CreateSavedObjectsParams<T> {
   importIdMap: Map<string, { id?: string; omitOriginId?: boolean }>;
   namespace?: string;
   overwrite?: boolean;
-  workspaces?: string[];
   dataSourceId?: string;
   dataSourceTitle?: string;
   workspaces?: string[];
@@ -60,7 +59,6 @@ export const createSavedObjects = async <T>({
   importIdMap,
   namespace,
   overwrite,
-  workspaces,
   dataSourceId,
   dataSourceTitle,
   workspaces,
