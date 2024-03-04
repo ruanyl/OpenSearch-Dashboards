@@ -132,6 +132,7 @@ export const registerResolveImportErrorsRoute = (router: IRouter, config: SavedO
         retries: req.body.retries,
         objectLimit: maxImportExportSize,
         createNewCopies: req.query.createNewCopies,
+        workspaces,
         dataSourceId,
         dataSourceTitle,
         workspaces,
