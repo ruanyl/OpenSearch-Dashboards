@@ -163,7 +163,6 @@ export async function resolveSavedObjectsImportErrors({
       importIdMap,
       namespace,
       overwrite,
-      workspaces,
       dataSourceId,
       dataSourceTitle,
       workspaces,

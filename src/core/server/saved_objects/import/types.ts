@@ -187,8 +187,6 @@ export interface SavedObjectsImportOptions {
   namespace?: string;
   /** If true, will create new copies of import objects, each with a random `id` and undefined `originId`. */
   createNewCopies: boolean;
-  /** if specified, will import in given workspaces */
-  workspaces?: string[];
   dataSourceId?: string;
   dataSourceTitle?: string;
   /** if specified, will import in given workspaces */
@@ -214,8 +212,6 @@ export interface SavedObjectsResolveImportErrorsOptions {
   namespace?: string;
   /** If true, will create new copies of import objects, each with a random `id` and undefined `originId`. */
   createNewCopies: boolean;
-  /** if specified, will import in given workspaces */
-  workspaces?: string[];
   dataSourceId?: string;
   dataSourceTitle?: string;
   /** if specified, will import in given workspaces */
