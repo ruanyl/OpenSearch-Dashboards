@@ -87,6 +87,7 @@ describe('IndexMigrator', () => {
               type: '2f4316de49999235636386fe51dc06c1',
               updated_at: '00da57df13e94e9d98437d13ace4bfe0',
               workspaces: '2f4316de49999235636386fe51dc06c1',
+              permissions: '07c04cdd060494956fdddaa7ef86e8ac',
             },
           },
           properties: {
@@ -106,6 +107,40 @@ describe('IndexMigrator', () => {
               },
             },
             workspaces: { type: 'keyword' },
+            permissions: {
+              properties: {
+                library_read: {
+                  properties: {
+                    users: { type: 'keyword' },
+                    groups: { type: 'keyword' },
+                  },
+                },
+                library_write: {
+                  properties: {
+                    users: { type: 'keyword' },
+                    groups: { type: 'keyword' },
+                  },
+                },
+                management: {
+                  properties: {
+                    users: { type: 'keyword' },
+                    groups: { type: 'keyword' },
+                  },
+                },
+                read: {
+                  properties: {
+                    users: { type: 'keyword' },
+                    groups: { type: 'keyword' },
+                  },
+                },
+                write: {
+                  properties: {
+                    users: { type: 'keyword' },
+                    groups: { type: 'keyword' },
+                  },
+                },
+              },
+            },
           },
         },
         settings: { number_of_shards: 1, auto_expand_replicas: '0-1' },
@@ -138,7 +173,6 @@ describe('IndexMigrator', () => {
               references: '7997cf5a56cc02bdc9c93361bde732b0',
               type: '2f4316de49999235636386fe51dc06c1',
               updated_at: '00da57df13e94e9d98437d13ace4bfe0',
-              workspaces: '2f4316de49999235636386fe51dc06c1',
             },
           },
           properties: {
@@ -149,9 +183,6 @@ describe('IndexMigrator', () => {
             originId: { type: 'keyword' },
             type: { type: 'keyword' },
             updated_at: { type: 'date' },
-            workspaces: {
-              type: 'keyword',
-            },
             permissions: {
               properties: {
                 library_read: {
@@ -294,7 +325,6 @@ describe('IndexMigrator', () => {
               references: '7997cf5a56cc02bdc9c93361bde732b0',
               type: '2f4316de49999235636386fe51dc06c1',
               updated_at: '00da57df13e94e9d98437d13ace4bfe0',
-              workspaces: '2f4316de49999235636386fe51dc06c1',
             },
           },
           properties: {
@@ -306,9 +336,6 @@ describe('IndexMigrator', () => {
             originId: { type: 'keyword' },
             type: { type: 'keyword' },
             updated_at: { type: 'date' },
-            workspaces: {
-              type: 'keyword',
-            },
             permissions: {
               properties: {
                 library_read: {
@@ -394,7 +421,6 @@ describe('IndexMigrator', () => {
               references: '7997cf5a56cc02bdc9c93361bde732b0',
               type: '2f4316de49999235636386fe51dc06c1',
               updated_at: '00da57df13e94e9d98437d13ace4bfe0',
-              workspaces: '2f4316de49999235636386fe51dc06c1',
             },
           },
           properties: {
@@ -406,9 +432,6 @@ describe('IndexMigrator', () => {
             originId: { type: 'keyword' },
             type: { type: 'keyword' },
             updated_at: { type: 'date' },
-            workspaces: {
-              type: 'keyword',
-            },
             permissions: {
               properties: {
                 library_read: {
