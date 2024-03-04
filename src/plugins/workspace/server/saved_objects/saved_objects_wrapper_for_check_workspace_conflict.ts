@@ -12,7 +12,6 @@ import {
   SavedObjectsClientWrapperFactory,
   SavedObjectsCreateOptions,
   SavedObjectsErrorHelpers,
-  SavedObjectsUtils,
   SavedObjectsSerializer,
   SavedObjectsCheckConflictsObject,
   SavedObjectsCheckConflictsResponse,
@@ -53,8 +52,14 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
         let currentItem;
         try {
           currentItem = await wrapperOptions.client.get(type, id);
-        } catch (e) {
-          // If item can not be found, supress the error and create the object
+        } catch (e: unknown) {
+          const error = e as Boom.Boom;
+          if (error?.output?.statusCode === 404) {
+            // If item can not be found, supress the error and create the object
+          } else {
+            // Throw other error
+            throw e;
+          }
         }
         if (currentItem) {
           if (
@@ -105,6 +110,15 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
         const bulkGetResult = await wrapperOptions.client.bulkGet(bulkGetDocs);
 
         bulkGetResult.saved_objects.forEach((object) => {
+          const { id, type } = object;
+
+          /**
+           * If the object can not be found, create object by using options.workspaces
+           */
+          if (object.error && object.error.statusCode === 404) {
+            objectsMapWorkspaces[this.getRawId({ namespace, type, id })] = options.workspaces;
+          }
+
           /**
            * Skip the items with error, wrapperOptions.client will handle the error
            */
@@ -118,7 +132,6 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
               options.workspaces,
               object.workspaces
             );
-            const { id, type } = object;
             if (filteredWorkspaces.length) {
               /**
                * options.workspaces is not a subset of object.workspaces,

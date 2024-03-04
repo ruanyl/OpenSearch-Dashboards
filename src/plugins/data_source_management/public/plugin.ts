@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { DataSourcePluginSetup } from 'src/plugins/data_source/public';
 import {
   AppMountParameters,
   CoreSetup,
@@ -23,10 +24,12 @@ import {
   IAuthenticationMethodRegistery,
   AuthenticationMethodRegistery,
 } from './auth_registry';
+import { noAuthCredentialAuthMethod, sigV4AuthMethod, usernamePasswordAuthMethod } from './types';
 
 export interface DataSourceManagementSetupDependencies {
   management: ManagementSetup;
   indexPatternManagement: IndexPatternManagementSetup;
+  dataSource: DataSourcePluginSetup;
 }
 
 export interface DataSourceManagementPluginSetup {
@@ -51,7 +54,7 @@ export class DataSourceManagementPlugin
 
   public setup(
     core: CoreSetup<DataSourceManagementPluginStart>,
-    { indexPatternManagement }: DataSourceManagementSetupDependencies
+    { management, indexPatternManagement, dataSource }: DataSourceManagementSetupDependencies
   ) {
     const savedObjectPromise = core
       .getStartServices()
@@ -70,7 +73,8 @@ export class DataSourceManagementPlugin
 
         return mountDataSourcesManagementSection(
           core.getStartServices as StartServicesAccessor<DataSourceManagementStartDependencies>,
-          params
+          params,
+          this.authMethodsRegistry
         );
       },
     });
@@ -83,6 +87,16 @@ export class DataSourceManagementPlugin
       }
       this.authMethodsRegistry.registerAuthenticationMethod(authMethod);
     };
+
+    if (dataSource.noAuthenticationTypeEnabled) {
+      registerAuthenticationMethod(noAuthCredentialAuthMethod);
+    }
+    if (dataSource.usernamePasswordAuthEnabled) {
+      registerAuthenticationMethod(usernamePasswordAuthMethod);
+    }
+    if (dataSource.awsSigV4AuthEnabled) {
+      registerAuthenticationMethod(sigV4AuthMethod);
+    }
 
     return { registerAuthenticationMethod };
   }

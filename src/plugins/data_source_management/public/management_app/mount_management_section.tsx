@@ -21,10 +21,12 @@ import { DataSourceManagementContext, DataSourceManagementStartDependencies } fr
 import { EditDataSourceWithRouter } from '../components/edit_data_source';
 import { PageWrapper } from '../components/page_wrapper';
 import { reactRouterNavigate } from '../../../opensearch_dashboards_react/public';
+import { AuthenticationMethodRegistery } from '../auth_registry';
 
 export async function mountDataSourcesManagementSection(
   getStartServices: StartServicesAccessor<DataSourceManagementStartDependencies>,
-  params: AppMountParameters
+  params: AppMountParameters,
+  authMethodsRegistry: AuthenticationMethodRegistery
 ) {
   const [
     { chrome, application, savedObjects, uiSettings, notifications, overlays, http, docLinks },
@@ -49,6 +51,7 @@ export async function mountDataSourcesManagementSection(
     http,
     docLinks,
     setBreadcrumbs: setBreadcrumbsScoped,
+    authenticationMethodRegistery: authMethodsRegistry,
   };
 
   ReactDOM.render(
