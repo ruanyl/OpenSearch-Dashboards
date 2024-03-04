@@ -191,6 +191,8 @@ export interface SavedObjectsImportOptions {
   workspaces?: string[];
   dataSourceId?: string;
   dataSourceTitle?: string;
+  /** if specified, will import in given workspaces */
+  workspaces?: string[];
 }
 
 /**
@@ -216,6 +218,8 @@ export interface SavedObjectsResolveImportErrorsOptions {
   workspaces?: string[];
   dataSourceId?: string;
   dataSourceTitle?: string;
+  /** if specified, will import in given workspaces */
+  workspaces?: string[];
 }
 
 export type CreatedObject<T> = SavedObject<T> & { destinationId?: string };
