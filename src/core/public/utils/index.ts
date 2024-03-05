@@ -30,6 +30,7 @@
 
 export { shareWeakReplay } from './share_weak_replay';
 export { Sha256 } from './crypto';
+export { debounce } from './debounce';
 export { MountWrapper, mountReactNode } from './mount';
 export {
   WORKSPACE_PATH_PREFIX,

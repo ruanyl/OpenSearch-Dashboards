@@ -24,12 +24,12 @@ import { WorkspaceClient } from '../../workspace_client';
 interface DeleteWorkspaceModalProps {
   onClose: () => void;
   selectedWorkspace?: WorkspaceAttribute | null;
-  ifNavigate: boolean;
+  shouldNavigate: boolean;
 }
 
 export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
   const [value, setValue] = useState('');
-  const { onClose, selectedWorkspace, ifNavigate } = props;
+  const { onClose, selectedWorkspace, shouldNavigate } = props;
   const {
     services: { application, notifications, http, workspaceClient },
   } = useOpenSearchDashboards<{ workspaceClient: WorkspaceClient }>();
@@ -55,7 +55,7 @@ export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
           }),
         });
         onClose();
-        if (http && application && ifNavigate) {
+        if (http && application && shouldNavigate) {
           const homeUrl = application.getUrlForApp('home', {
             path: '/',
             absolute: false,

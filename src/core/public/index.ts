@@ -361,3 +361,5 @@ export {
   WORKSPACE_TYPE,
   cleanWorkspaceId,
 } from '../utils';
+
+export { debounce } from './utils';

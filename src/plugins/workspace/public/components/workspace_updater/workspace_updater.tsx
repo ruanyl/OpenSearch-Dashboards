@@ -145,7 +145,7 @@ export const WorkspaceUpdater = () => {
               <DeleteWorkspaceModal
                 selectedWorkspace={currentWorkspace}
                 onClose={() => setDeleteWorkspaceModalVisible(false)}
-                ifNavigate={true}
+                shouldNavigate={true}
               />
             </EuiPanel>
           )}

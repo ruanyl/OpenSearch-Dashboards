@@ -17,9 +17,8 @@ import {
 import useObservable from 'react-use/lib/useObservable';
 import { of } from 'rxjs';
 import { i18n } from '@osd/i18n';
-import { debounce } from 'lodash';
+import { debounce } from '../../../../../core/public';
 import { WorkspaceAttribute } from '../../../../../core/public';
-
 import { useOpenSearchDashboards } from '../../../../../plugins/opensearch_dashboards_react/public';
 import { switchWorkspace, updateWorkspace } from '../utils/workspace';
 
@@ -212,7 +211,7 @@ export const WorkspaceList = () => {
         <DeleteWorkspaceModal
           selectedWorkspace={delectedWorkspace}
           onClose={() => setDelectedWorkspace(null)}
-          ifNavigate={false}
+          shouldNavigate={false}
         />
       )}
     </EuiPage>
