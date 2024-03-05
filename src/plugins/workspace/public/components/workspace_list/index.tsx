@@ -46,7 +46,7 @@ export const WorkspaceList = () => {
     pageSize: 5,
     pageSizeOptions: [5, 10, 20],
   });
-  const [delectedWorkspace, setDelectedWorkspace] = useState<WorkspaceAttribute | null>(null);
+  const [deletedWorkspace, setDeletedWorkspace] = useState<WorkspaceAttribute | null>(null);
 
   const handleSwitchWorkspace = useCallback(
     (id: string) => {
@@ -123,7 +123,7 @@ export const WorkspaceList = () => {
           icon: 'trash',
           type: 'icon',
           description: 'Delete workspace',
-          onClick: (item: WorkspaceAttribute) => setDelectedWorkspace(item),
+          onClick: (item: WorkspaceAttribute) => setDeletedWorkspace(item),
         },
       ],
     },
@@ -207,10 +207,10 @@ export const WorkspaceList = () => {
           />
         </EuiPageContent>
       </EuiPageBody>
-      {delectedWorkspace && (
+      {deletedWorkspace && (
         <DeleteWorkspaceModal
-          selectedWorkspace={delectedWorkspace}
-          onClose={() => setDelectedWorkspace(null)}
+          selectedWorkspace={deletedWorkspace}
+          onClose={() => setDeletedWorkspace(null)}
           shouldNavigate={false}
         />
       )}
