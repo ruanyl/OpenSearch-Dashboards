@@ -211,7 +211,7 @@ export const WorkspaceList = () => {
         <DeleteWorkspaceModal
           selectedWorkspace={deletedWorkspace}
           onClose={() => setDeletedWorkspace(null)}
-          shouldNavigate={false}
+          returnToHome={false}
         />
       )}
     </EuiPage>

@@ -51,7 +51,7 @@ export const WorkspaceActionsMenu = ({ workspace }: Props) => {
         <DeleteWorkspaceModal
           selectedWorkspace={workspace}
           onClose={() => setDeleteWorkspaceModalVisible(false)}
-          shouldNavigate={false}
+          returnToHome={false}
         />
       )}
       <EuiPopover
