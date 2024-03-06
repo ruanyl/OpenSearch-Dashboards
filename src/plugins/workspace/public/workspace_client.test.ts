@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { WorkspacePermissionMode } from '../common/constants';
 import { httpServiceMock, workspacesServiceMock } from '../../../core/public/mocks';
 import { WorkspaceClient } from './workspace_client';
 
@@ -94,6 +95,40 @@ describe('#WorkspaceClient', () => {
         attributes: {
           name: 'foo',
         },
+      }),
+    });
+    expect(httpSetupMock.fetch).toBeCalledWith('/api/workspaces/_list', {
+      method: 'POST',
+      body: JSON.stringify({
+        perPage: 999,
+      }),
+    });
+  });
+
+  it('#create with permissions', async () => {
+    const { workspaceClient, httpSetupMock } = getWorkspaceClient();
+    httpSetupMock.fetch.mockResolvedValue({
+      success: true,
+      result: {
+        name: 'foo',
+        workspaces: [],
+      },
+    });
+    await workspaceClient.create(
+      {
+        name: 'foo',
+      },
+      [{ type: 'user', userId: 'foo', modes: [WorkspacePermissionMode.LibraryWrite] }]
+    );
+    expect(httpSetupMock.fetch).toBeCalledWith('/api/workspaces', {
+      method: 'POST',
+      body: JSON.stringify({
+        attributes: {
+          name: 'foo',
+        },
+        permissions: [
+          { type: 'user', userId: 'foo', modes: [WorkspacePermissionMode.LibraryWrite] },
+        ],
       }),
     });
     expect(httpSetupMock.fetch).toBeCalledWith('/api/workspaces/_list', {
@@ -208,5 +243,39 @@ describe('#WorkspaceClient', () => {
       name: 'foo',
     });
     expect(workspaceMock.workspaceList$.getValue()).toEqual([]);
+  });
+  
+  it('#update with permissions', async () => {
+    const { workspaceClient, httpSetupMock } = getWorkspaceClient();
+    httpSetupMock.fetch.mockResolvedValue({
+      success: true,
+      result: {
+        workspaces: [],
+      },
+    });
+    await workspaceClient.update(
+      'foo',
+      {
+        name: 'foo',
+      },
+      [{ type: 'user', userId: 'foo', modes: [WorkspacePermissionMode.LibraryWrite] }]
+    );
+    expect(httpSetupMock.fetch).toBeCalledWith('/api/workspaces/foo', {
+      method: 'PUT',
+      body: JSON.stringify({
+        attributes: {
+          name: 'foo',
+        },
+        permissions: [
+          { type: 'user', userId: 'foo', modes: [WorkspacePermissionMode.LibraryWrite] },
+        ],
+      }),
+    });
+    expect(httpSetupMock.fetch).toBeCalledWith('/api/workspaces/_list', {
+      method: 'POST',
+      body: JSON.stringify({
+        perPage: 999,
+      }),
+    });
   });
 });

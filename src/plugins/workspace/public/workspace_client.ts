@@ -11,6 +11,7 @@ import {
   WorkspaceAttribute,
   WorkspacesSetup,
 } from '../../../core/public';
+import { WorkspacePermissionMode } from '../common/constants';
 
 const WORKSPACES_API_BASE_URL = '/api/workspaces';
 
@@ -29,6 +30,15 @@ type IResponse<T> =
       success: false;
       error?: string;
     };
+
+type WorkspacePermissionItem = {
+  modes: Array<
+    | WorkspacePermissionMode.LibraryRead
+    | WorkspacePermissionMode.LibraryWrite
+    | WorkspacePermissionMode.Read
+    | WorkspacePermissionMode.Write
+  >;
+} & ({ type: 'user'; userId: string } | { type: 'group'; group: string });
 
 interface WorkspaceFindOptions {
   page?: number;
@@ -183,14 +193,16 @@ export class WorkspaceClient {
    * @returns {Promise<IResponse<Pick<WorkspaceAttribute, 'id'>>>} id of the new created workspace
    */
   public async create(
-    attributes: Omit<WorkspaceAttribute, 'id'>
-  ): Promise<IResponse<Pick<WorkspaceAttribute, 'id'>>> {
+    attributes: Omit<WorkspaceAttribute, 'id'>,
+    permissions?: WorkspacePermissionItem[]
+  ): Promise<IResponse<WorkspaceAttribute>> {
     const path = this.getPath();
 
     const result = await this.safeFetch<WorkspaceAttribute>(path, {
       method: 'POST',
       body: JSON.stringify({
         attributes,
+        permissions,
       }),
     });
 
@@ -268,11 +280,13 @@ export class WorkspaceClient {
    */
   public async update(
     id: string,
-    attributes: Partial<WorkspaceAttribute>
+    attributes: Partial<WorkspaceAttribute>,
+    permissions?: WorkspacePermissionItem[]
   ): Promise<IResponse<boolean>> {
     const path = this.getPath(id);
     const body = {
       attributes,
+      permissions,
     };
 
     const result = await this.safeFetch(path, {
