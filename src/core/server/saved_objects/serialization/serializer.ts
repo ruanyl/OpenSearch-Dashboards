@@ -86,7 +86,6 @@ export class SavedObjectsSerializer {
       ...(namespace && this.registry.isSingleNamespace(type) && { namespace }),
       ...(namespaces && this.registry.isMultiNamespace(type) && { namespaces }),
       ...(originId && { originId }),
-      ...(permissions && { permissions }),
       attributes: _source[type],
       references: _source.references || [],
       ...(_source.migrationVersion && { migrationVersion: _source.migrationVersion }),
