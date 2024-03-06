@@ -29,8 +29,10 @@ describe('workspace service', () => {
         osd: {
           workspace: {
             enabled: true,
+          },
+          savedObjects: {
             permission: {
-              enabled: false,
+              enabled: true,
             },
           },
           migrations: { skip: false },
