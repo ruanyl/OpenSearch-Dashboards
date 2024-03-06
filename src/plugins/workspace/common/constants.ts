@@ -18,3 +18,7 @@ export enum WorkspacePermissionMode {
   LibraryRead = 'library_read',
   LibraryWrite = 'library_write',
 }
+
+export const PATHS = {
+  list: '/list',
+};
