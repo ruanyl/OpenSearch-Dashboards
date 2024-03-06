@@ -70,7 +70,7 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
           savedObjects: {
             permission: {
               enabled: true,
-            }
+            },
           },
           migrations: { skip: false },
         },
