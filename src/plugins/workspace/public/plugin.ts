@@ -25,6 +25,7 @@ type WorkspaceAppType = (params: AppMountParameters, services: Services) => () =
 
 export class WorkspacePlugin implements Plugin<{}, {}> {
   private coreStart?: CoreStart;
+  private currentWorkspaceIdSubscription?: Subscription;
   private currentWorkspaceSubscription?: Subscription;
   private getWorkspaceIdFromURL(): string | null {
     return getWorkspaceIdFromUrl(window.location.href);
@@ -36,11 +37,16 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
     return allNavLinks.filter(featureMatchesConfig(features));
   }
 
+  /**
+   * Filter nav links by currentWorkspace$, once the current workspace change, the nav links(left nav bar)
+   * should also be updated according to the configured features of the current workspace
+   */
   private filterNavLinks(core: CoreStart) {
     const currentWorkspace$ = core.workspaces.currentWorkspace$;
     let filterLinksByWorkspace: LinksUpdater;
 
-    currentWorkspace$.subscribe((currentWorkspace) => {
+    this.currentWorkspaceSubscription?.unsubscribe();
+    this.currentWorkspaceSubscription = currentWorkspace$.subscribe((currentWorkspace) => {
       const linkUpdaters$ = core.chrome.navLinks.getLinkUpdaters$();
       let linkUpdaters = linkUpdaters$.value;
 
@@ -158,7 +164,7 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
   public start(core: CoreStart) {
     this.coreStart = core;
 
-    this.currentWorkspaceSubscription = this._changeSavedObjectCurrentWorkspace();
+    this.currentWorkspaceIdSubscription = this._changeSavedObjectCurrentWorkspace();
     if (core) {
       this.filterNavLinks(core);
     }
@@ -166,6 +172,7 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
   }
 
   public stop() {
+    this.currentWorkspaceIdSubscription?.unsubscribe();
     this.currentWorkspaceSubscription?.unsubscribe();
   }
 }
