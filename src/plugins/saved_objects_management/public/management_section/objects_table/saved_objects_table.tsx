@@ -120,7 +120,6 @@ export interface SavedObjectsTableProps {
   goInspectObject: (obj: SavedObjectWithMetadata) => void;
   canGoInApp: (obj: SavedObjectWithMetadata) => boolean;
   dateFormat: string;
-  title: string;
   dataSourceEnabled: boolean;
   hideLocalCluster: boolean;
 }
@@ -647,7 +646,9 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       return null;
     }
     const { applications } = this.props;
-    const newIndexPatternUrl = applications.getUrlForApp('indexPatterns');
+    const newIndexPatternUrl = applications.getUrlForApp('management', {
+      path: 'opensearch-dashboards/indexPatterns',
+    });
 
     return (
       <Flyout
@@ -1101,7 +1102,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
           }
           onRefresh={this.refreshObjects}
           filteredCount={filteredItemCount}
-          title={this.props.title}
           objectCount={savedObjects.length}
         />
         <EuiSpacer size="xs" />

@@ -30,13 +30,13 @@
 
 import React, { useEffect } from 'react';
 import { get } from 'lodash';
+import { i18n } from '@osd/i18n';
 import { CoreStart, ChromeBreadcrumb } from 'src/core/public';
 import { DataPublicPluginStart } from '../../../data/public';
 import {
   ISavedObjectsManagementServiceRegistry,
   SavedObjectsManagementActionServiceStart,
   SavedObjectsManagementColumnServiceStart,
-  SavedObjectsManagementNamespaceServiceStart,
 } from '../services';
 import { SavedObjectsTable } from './objects_table';
 
@@ -72,11 +72,13 @@ const SavedObjectsTablePage = ({
   useEffect(() => {
     setBreadcrumbs([
       {
-        text: title,
-        href: undefined,
+        text: i18n.translate('savedObjectsManagement.breadcrumb.index', {
+          defaultMessage: 'Saved objects',
+        }),
+        href: '/',
       },
     ]);
-  }, [setBreadcrumbs, title]);
+  }, [setBreadcrumbs]);
 
   return (
     <SavedObjectsTable

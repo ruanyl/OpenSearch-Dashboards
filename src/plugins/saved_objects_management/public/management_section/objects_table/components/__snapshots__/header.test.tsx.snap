@@ -11,7 +11,11 @@ exports[`Header should render normally 1`] = `
     >
       <EuiTitle>
         <h1>
-          Saved Objects
+          <FormattedMessage
+            defaultMessage="Saved Objects"
+            id="savedObjectsManagement.objectsTable.header.savedObjectsTitle"
+            values={Object {}}
+          />
         </h1>
       </EuiTitle>
     </EuiFlexItem>

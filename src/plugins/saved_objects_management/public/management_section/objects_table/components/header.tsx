@@ -46,7 +46,6 @@ export const Header = ({
   onDuplicate,
   onRefresh,
   filteredCount,
-  title,
   objectCount,
   hideImport = false,
   showDuplicateAll = false,
@@ -56,7 +55,6 @@ export const Header = ({
   onDuplicate: () => void;
   onRefresh: () => void;
   filteredCount: number;
-  title: string;
   objectCount: number;
   hideImport: boolean;
   showDuplicateAll: boolean;
@@ -65,7 +63,12 @@ export const Header = ({
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
       <EuiFlexItem grow={false}>
         <EuiTitle>
-          <h1>{title}</h1>
+          <h1>
+            <FormattedMessage
+              id="savedObjectsManagement.objectsTable.header.savedObjectsTitle"
+              defaultMessage="Saved Objects"
+            />
+          </h1>
         </EuiTitle>
       </EuiFlexItem>
 

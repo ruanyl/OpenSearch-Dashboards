@@ -29,15 +29,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  AppMountParameters,
-  ChromeBreadcrumb,
-  ScopedHistory,
-} from 'src/core/public';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { DataSourcePluginSetup, DataSourcePluginStart } from 'src/plugins/data_source/public';
 import { UrlForwardingSetup } from '../../url_forwarding/public';
@@ -47,11 +39,10 @@ import {
   IndexPatternManagementServiceStart,
 } from './service';
 
-import { ManagementAppMountParams } from '../../management/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
-import { reactRouterNavigate } from '../../opensearch_dashboards_react/public';
+import { ManagementSetup } from '../../management/public';
 
 export interface IndexPatternManagementSetupDependencies {
+  management: ManagementSetup;
   urlForwarding: UrlForwardingSetup;
   dataSource?: DataSourcePluginSetup;
 }
@@ -87,9 +78,15 @@ export class IndexPatternManagementPlugin
     core: CoreSetup<IndexPatternManagementStartDependencies, IndexPatternManagementStart>,
     dependencies: IndexPatternManagementSetupDependencies
   ) {
-    const newAppPath = IPM_APP_ID;
-    const { urlForwarding, dataSource } = dependencies;
+    const { urlForwarding, management, dataSource } = dependencies;
 
+    const opensearchDashboardsSection = management.sections.section.opensearchDashboards;
+
+    if (!opensearchDashboardsSection) {
+      throw new Error('`opensearchDashboards` management section not found.');
+    }
+
+    const newAppPath = `management/opensearch-dashboards/${IPM_APP_ID}`;
     const legacyPatternsPath = 'management/opensearch-dashboards/index_patterns';
 
     urlForwarding.forwardApp(
@@ -102,41 +99,16 @@ export class IndexPatternManagementPlugin
       return pathInApp && `/patterns${pathInApp}`;
     });
 
-    // register it under Library
-    core.application.register({
+    opensearchDashboardsSection.registerApp({
       id: IPM_APP_ID,
       title: sectionsHeader,
-      order: 8100,
-      category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
-      mount: async (params: AppMountParameters) => {
+      order: 0,
+      mount: async (params) => {
         const { mountManagementSection } = await import('./management_app');
-
-        const [coreStart] = await core.getStartServices();
-
-        const setBreadcrumbsScope = (
-          crumbs: ChromeBreadcrumb[] = [],
-          appHistory?: ScopedHistory
-        ) => {
-          const wrapBreadcrumb = (item: ChromeBreadcrumb, scopedHistory: ScopedHistory) => ({
-            ...item,
-            ...(item.href ? reactRouterNavigate(scopedHistory, item.href) : {}),
-          });
-
-          coreStart.chrome.setBreadcrumbs([
-            ...crumbs.map((item) => wrapBreadcrumb(item, appHistory || params.history)),
-          ]);
-        };
-
-        const managementParams: ManagementAppMountParams = {
-          element: params.element,
-          history: params.history,
-          setBreadcrumbs: setBreadcrumbsScope,
-          basePath: params.appBasePath,
-        };
 
         return mountManagementSection(
           core.getStartServices,
-          managementParams,
+          params,
           () => this.indexPatternManagementService.environmentService.getEnvironment().ml(),
           dataSource
         );
