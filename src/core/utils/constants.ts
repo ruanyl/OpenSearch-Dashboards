@@ -15,5 +15,3 @@ export enum WorkspacePermissionMode {
 }
 
 export const PUBLIC_WORKSPACE_ID = 'public';
-
-export const MANAGEMENT_WORKSPACE_ID = 'management';

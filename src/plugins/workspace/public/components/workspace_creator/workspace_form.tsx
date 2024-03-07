@@ -34,7 +34,6 @@ import {
   AppNavLinkStatus,
   ApplicationStart,
   DEFAULT_APP_CATEGORIES,
-  MANAGEMENT_WORKSPACE_ID,
 } from '../../../../../core/public';
 import { useApplications } from '../../hooks';
 import { DEFAULT_CHECKED_FEATURES_IDS } from '../../../common/constants';
@@ -172,17 +171,8 @@ export const WorkspaceForm = ({
   const [color, setColor] = useState(defaultValues?.color);
   const [icon, setIcon] = useState(defaultValues?.icon);
   const [defaultVISTheme, setDefaultVISTheme] = useState(defaultValues?.defaultVISTheme);
-  const isEditingManagementWorkspace = defaultValues?.id === MANAGEMENT_WORKSPACE_ID;
 
-  // feature visibility section will be hidden in management workspace
-  // permission section will be hidden when permission is not enabled
-  const [selectedTab, setSelectedTab] = useState(
-    !isEditingManagementWorkspace
-      ? WorkspaceFormTabs.FeatureVisibility
-      : permissionEnabled
-      ? WorkspaceFormTabs.UsersAndPermissions
-      : WorkspaceFormTabs.NotSelected
-  );
+  const [selectedTab, setSelectedTab] = useState(WorkspaceFormTabs.FeatureVisibility);
   const [numberOfErrors, setNumberOfErrors] = useState(0);
   // The matched feature id list based on original feature config,
   // the feature category will be expanded to list of feature ids
@@ -602,14 +592,12 @@ export const WorkspaceForm = ({
       <EuiSpacer />
 
       <EuiTabs>
-        {!isEditingManagementWorkspace && (
-          <EuiTab
-            onClick={handleTabFeatureClick}
-            isSelected={selectedTab === WorkspaceFormTabs.FeatureVisibility}
-          >
-            <EuiText>{featureVisibilityTitle}</EuiText>
-          </EuiTab>
-        )}
+        <EuiTab
+          onClick={handleTabFeatureClick}
+          isSelected={selectedTab === WorkspaceFormTabs.FeatureVisibility}
+        >
+          <EuiText>{featureVisibilityTitle}</EuiText>
+        </EuiTab>
         {permissionEnabled && (
           <EuiTab
             onClick={handleTabPermissionClick}

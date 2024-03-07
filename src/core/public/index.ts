@@ -357,7 +357,6 @@ export { WorkspacesStart, WorkspacesSetup, WorkspacesService } from './workspace
 export {
   WorkspacePermissionMode,
   PUBLIC_WORKSPACE_ID,
-  MANAGEMENT_WORKSPACE_ID,
   WORKSPACE_TYPE,
   cleanWorkspaceId,
 } from '../utils';

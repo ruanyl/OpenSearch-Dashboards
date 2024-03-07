@@ -20,7 +20,6 @@ import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import {
   ApplicationStart,
   HttpSetup,
-  MANAGEMENT_WORKSPACE_ID,
   WorkspaceAttribute,
   WorkspacesStart,
 } from '../../../../../core/public';
@@ -46,10 +45,7 @@ function getFilteredWorkspaceList(
   // list top5 workspaces except management workspace, place current workspace at the top
   return [
     ...(currentWorkspace ? [currentWorkspace] : []),
-    ...workspaceList.filter(
-      (workspace) =>
-        workspace.id !== MANAGEMENT_WORKSPACE_ID && workspace.id !== currentWorkspace?.id
-    ),
+    ...workspaceList.filter((workspace) => workspace.id !== currentWorkspace?.id),
   ].slice(0, 5);
 }
 
@@ -64,12 +60,7 @@ export const WorkspaceMenu = ({ basePath, getUrlForApp, workspaces, navigateToUr
       defaultMessage: 'OpenSearch Dashboards',
     }
   );
-  const managementWorkspaceName = i18n.translate(
-    'core.ui.primaryNav.workspacePickerMenu.managementWorkspaceName',
-    {
-      defaultMessage: 'Management',
-    }
-  );
+
   const filteredWorkspaceList = getFilteredWorkspaceList(workspaceList, currentWorkspace);
   const currentWorkspaceName = currentWorkspace?.name ?? defaultHeaderName;
 
@@ -198,17 +189,6 @@ export const WorkspaceMenu = ({ basePath, getUrlForApp, workspaces, navigateToUr
           ),
           icon: 'folderClosed',
           panel: 1,
-        },
-        {
-          name: managementWorkspaceName,
-          icon: 'managementApp',
-          href: formatUrlWithWorkspaceId(
-            getUrlForApp(WORKSPACE_OVERVIEW_APP_ID, {
-              absolute: false,
-            }),
-            MANAGEMENT_WORKSPACE_ID,
-            basePath
-          ),
         },
       ],
     },

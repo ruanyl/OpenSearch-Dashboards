@@ -41,7 +41,6 @@ export {
   WORKSPACE_PATH_PREFIX,
   WorkspacePermissionMode,
   PUBLIC_WORKSPACE_ID,
-  MANAGEMENT_WORKSPACE_ID,
   WORKSPACE_TYPE,
 } from './constants';
 export { getWorkspaceIdFromUrl, formatUrlWithWorkspaceId, cleanWorkspaceId } from './workspace';

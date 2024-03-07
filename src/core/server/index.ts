@@ -364,7 +364,6 @@ export {
   DEFAULT_APP_CATEGORIES,
   WorkspacePermissionMode,
   PUBLIC_WORKSPACE_ID,
-  MANAGEMENT_WORKSPACE_ID,
   WORKSPACE_TYPE,
 } from '../utils';
 
