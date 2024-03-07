@@ -25,16 +25,16 @@ import {
   WORKSPACE_OVERVIEW_APP_ID,
 } from '../../../common/constants';
 import { cleanWorkspaceId, formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
-import { CoreStart, WorkspaceAttribute } from '../../../../../core/public';
+import { CoreStart, WorkspaceObject } from '../../../../../core/public';
 
 interface Props {
   coreStart: CoreStart;
 }
 
 function getFilteredWorkspaceList(
-  workspaceList: WorkspaceAttribute[],
-  currentWorkspace: WorkspaceAttribute | null
-): WorkspaceAttribute[] {
+  workspaceList: WorkspaceObject[],
+  currentWorkspace: WorkspaceObject | null
+): WorkspaceObject[] {
   // list top5 workspaces and place the current workspace at the top
   return [
     ...(currentWorkspace ? [currentWorkspace] : []),
@@ -56,7 +56,7 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
   const filteredWorkspaceList = getFilteredWorkspaceList(workspaceList, currentWorkspace);
   const currentWorkspaceName = currentWorkspace?.name ?? defaultHeaderName;
 
-  const onButtonClick = () => {
+  const openPopover = () => {
     setPopover(!isPopoverOpen);
   };
 
@@ -64,7 +64,7 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
     setPopover(false);
   };
 
-  const workspaceToItem = (workspace: WorkspaceAttribute, index: number) => {
+  const workspaceToItem = (workspace: WorkspaceObject) => {
     const workspaceURL = formatUrlWithWorkspaceId(
       coreStart.application.getUrlForApp(WORKSPACE_OVERVIEW_APP_ID, {
         absolute: false,
@@ -73,7 +73,7 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
       coreStart.http.basePath
     );
     const name =
-      currentWorkspace !== null && index === 0 ? (
+      currentWorkspace?.name === workspace.name ? (
         <EuiText>
           <strong>{workspace.name}</strong>
         </EuiText>
@@ -92,7 +92,7 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
 
   const getWorkspaceListItems = () => {
     const workspaceListItems: EuiContextMenuPanelItemDescriptor[] = filteredWorkspaceList.map(
-      (workspace, index) => workspaceToItem(workspace, index)
+      workspaceToItem
     );
     workspaceListItems.push({
       icon: <EuiIcon type="plus" />,
@@ -135,10 +135,10 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
         <EuiListGroupItem
           iconType="spacesApp"
           label={currentWorkspaceName}
-          onClick={onButtonClick}
+          onClick={openPopover}
           extraAction={{
             color: 'subdued',
-            onClick: onButtonClick,
+            onClick: openPopover,
             iconType: isPopoverOpen ? 'arrowDown' : 'arrowRight',
             iconSize: 's',
             'aria-label': 'Show workspace dropdown selector',
@@ -175,6 +175,7 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
   return (
     <EuiPopover
       id="contextMenuExample"
+      display="block"
       button={currentWorkspaceButton}
       isOpen={isPopoverOpen}
       closePopover={closePopover}
