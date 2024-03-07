@@ -20,8 +20,9 @@ import {
 } from '../../../core/public';
 import { WORKSPACE_FATAL_ERROR_APP_ID, WORKSPACE_OVERVIEW_APP_ID } from '../common/constants';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
-import { WorkspaceClient } from './workspace_client';
+import { renderWorkspaceMenu } from './render_workspace_menu';
 import { Services } from './types';
+import { WorkspaceClient } from './workspace_client';
 
 type WorkspaceAppType = (params: AppMountParameters, services: Services) => () => void;
 
@@ -148,6 +149,16 @@ export class WorkspacePlugin implements Plugin<{}, {}, {}> {
         const { renderFatalErrorApp } = await import('./application');
         return mountWorkspaceApp(params, renderFatalErrorApp);
       },
+    });
+
+    /**
+     * Register workspace dropdown selector on the top of left navigation menu
+     */
+    core.chrome.registerCollapsibleNavHeader(() => {
+      if (!this.coreStart) {
+        return null;
+      }
+      return renderWorkspaceMenu(this.coreStart);
     });
 
     return {};
