@@ -19,14 +19,13 @@ import {
 } from '@elastic/eui';
 import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 
-import { WorkspaceAttribute } from '../../../../../core/public';
 import {
   WORKSPACE_CREATE_APP_ID,
   WORKSPACE_LIST_APP_ID,
   WORKSPACE_OVERVIEW_APP_ID,
 } from '../../../common/constants';
-import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
-import { CoreStart } from '../../../../../core/public';
+import { cleanWorkspaceId, formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
+import { CoreStart, WorkspaceAttribute } from '../../../../../core/public';
 
 interface Props {
   coreStart: CoreStart;
@@ -36,7 +35,7 @@ function getFilteredWorkspaceList(
   workspaceList: WorkspaceAttribute[],
   currentWorkspace: WorkspaceAttribute | null
 ): WorkspaceAttribute[] {
-  // list top5 workspaces except management workspace, place current workspace at the top
+  // list top5 workspaces and place the current workspace at the top
   return [
     ...(currentWorkspace ? [currentWorkspace] : []),
     ...workspaceList.filter((workspace) => workspace.id !== currentWorkspace?.id),
@@ -83,7 +82,7 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
       );
     return {
       name,
-      key: index.toString(),
+      key: workspace.id,
       icon: <EuiIcon type="stopFilled" color={workspace.color ?? 'primary'} />,
       onClick: () => {
         window.location.assign(workspaceURL);
@@ -95,18 +94,19 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
     const workspaceListItems: EuiContextMenuPanelItemDescriptor[] = filteredWorkspaceList.map(
       (workspace, index) => workspaceToItem(workspace, index)
     );
-    const length = workspaceListItems.length;
     workspaceListItems.push({
       icon: <EuiIcon type="plus" />,
       name: i18n.translate('core.ui.primaryNav.workspaceContextMenu.createWorkspace', {
         defaultMessage: 'Create workspace',
       }),
-      key: length.toString(),
+      key: WORKSPACE_CREATE_APP_ID,
       onClick: () => {
         window.location.assign(
-          coreStart.application.getUrlForApp(WORKSPACE_CREATE_APP_ID, {
-            absolute: false,
-          })
+          cleanWorkspaceId(
+            coreStart.application.getUrlForApp(WORKSPACE_CREATE_APP_ID, {
+              absolute: false,
+            })
+          )
         );
       },
     });
@@ -115,12 +115,14 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
       name: i18n.translate('core.ui.primaryNav.workspaceContextMenu.allWorkspace', {
         defaultMessage: 'All workspaces',
       }),
-      key: (length + 1).toString(),
+      key: WORKSPACE_LIST_APP_ID,
       onClick: () => {
         window.location.assign(
-          coreStart.application.getUrlForApp(WORKSPACE_LIST_APP_ID, {
-            absolute: false,
-          })
+          cleanWorkspaceId(
+            coreStart.application.getUrlForApp(WORKSPACE_LIST_APP_ID, {
+              absolute: false,
+            })
+          )
         );
       },
     });
