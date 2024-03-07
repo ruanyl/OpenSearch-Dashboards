@@ -40,29 +40,10 @@ describe('Header', () => {
       onRefresh: () => {},
       totalCount: 4,
       filteredCount: 2,
-      title: '',
     };
 
     const component = shallow(<Header {...props} />);
 
     expect(component).toMatchSnapshot();
-  });
-});
-
-describe('Header - workspace enabled', () => {
-  it('should hide `Import` button for application home state', () => {
-    const props = {
-      onExportAll: () => {},
-      onImport: () => {},
-      onRefresh: () => {},
-      totalCount: 4,
-      filteredCount: 2,
-      hideImport: true,
-      title: 'Saved Objectes',
-    };
-
-    const component = shallow(<Header {...props} />);
-
-    expect(component.find('EuiButtonEmpty[data-test-subj="importObjects"]').exists()).toBe(false);
   });
 });

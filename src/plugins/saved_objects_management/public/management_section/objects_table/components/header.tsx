@@ -45,15 +45,11 @@ export const Header = ({
   onImport,
   onRefresh,
   filteredCount,
-  hideImport,
-  title,
 }: {
   onExportAll: () => void;
   onImport: () => void;
   onRefresh: () => void;
   filteredCount: number;
-  hideImport?: boolean;
-  title: string;
 }) => (
   <Fragment>
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
@@ -86,21 +82,19 @@ export const Header = ({
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
-          {!hideImport && (
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="s"
-                iconType="importAction"
-                data-test-subj="importObjects"
-                onClick={onImport}
-              >
-                <FormattedMessage
-                  id="savedObjectsManagement.objectsTable.header.importButtonLabel"
-                  defaultMessage="Import"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="s"
+              iconType="importAction"
+              data-test-subj="importObjects"
+              onClick={onImport}
+            >
+              <FormattedMessage
+                id="savedObjectsManagement.objectsTable.header.importButtonLabel"
+                defaultMessage="Import"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty size="s" iconType="refresh" onClick={onRefresh}>
               <FormattedMessage

@@ -69,6 +69,7 @@ import {
   WorkspaceAttribute,
 } from 'src/core/public';
 import { Subscription } from 'rxjs';
+import { DEFAULT_WORKSPACE_ID } from '../../../../../core/public';
 import { RedirectAppLinks } from '../../../../opensearch_dashboards_react/public';
 import { IndexPatternsContract } from '../../../../data/public';
 import {
@@ -192,7 +193,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     } else {
       // application home
       if (!currentWorkspaceId) {
-        return availableWorkspaces?.map((ws) => ws.id);
+        return availableWorkspaces?.map((ws) => ws.id).concat(DEFAULT_WORKSPACE_ID);
       } else {
         return [currentWorkspaceId];
       }
@@ -201,10 +202,13 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
   private get wsNameIdLookup() {
     const { availableWorkspaces } = this.state;
+    const workspaceNameIdMap = new Map<string, string>();
+    workspaceNameIdMap.set(DEFAULT_WORKSPACE_ID, DEFAULT_WORKSPACE_ID);
     // Assumption: workspace name is unique across the system
-    return availableWorkspaces?.reduce((map, ws) => {
+    availableWorkspaces?.reduce((map, ws) => {
       return map.set(ws.name, ws.id);
-    }, new Map<string, string>());
+    }, workspaceNameIdMap);
+    return workspaceNameIdMap;
   }
 
   private formatWorkspaceIdParams<T extends { workspaces?: string[] }>(
@@ -350,6 +354,13 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         (wsName) => this.wsNameIdLookup?.get(wsName) || ''
       );
       findOptions.workspaces = workspaceIds;
+    }
+
+    if (findOptions.workspaces) {
+      if (findOptions.workspaces.indexOf(DEFAULT_WORKSPACE_ID) !== -1) {
+        // search both saved objects with workspace and without workspace
+        findOptions.workspacesSearchOperator = 'OR';
+      }
     }
 
     if (findOptions.type.length > 1) {
@@ -962,6 +973,14 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
           };
         });
 
+      if (!currentWorkspaceId) {
+        wsFilterOptions.push({
+          name: DEFAULT_WORKSPACE_ID,
+          value: DEFAULT_WORKSPACE_ID,
+          view: `Default (${wsCounts[DEFAULT_WORKSPACE_ID] || 0})`,
+        });
+      }
+
       filters.push({
         type: 'field_value_selection',
         field: 'workspaces',
@@ -972,9 +991,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         options: wsFilterOptions,
       });
     }
-
-    // workspace enable and no workspace is selected
-    const hideImport = workspaceEnabled && !currentWorkspaceId;
 
     return (
       <EuiPageContent horizontalPosition="center">
@@ -987,8 +1003,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
           onImport={this.showImportFlyout}
           onRefresh={this.refreshObjects}
           filteredCount={filteredItemCount}
-          hideImport={hideImport}
-          title={this.props.title}
         />
         <EuiSpacer size="xs" />
         <RedirectAppLinks application={applications}>

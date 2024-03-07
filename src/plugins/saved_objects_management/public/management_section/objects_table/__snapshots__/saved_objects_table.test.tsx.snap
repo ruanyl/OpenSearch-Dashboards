@@ -203,7 +203,6 @@ exports[`SavedObjectsTable should render normally 1`] = `
 >
   <Header
     filteredCount={4}
-    hideImport={false}
     onExportAll={[Function]}
     onImport={[Function]}
     onRefresh={[Function]}

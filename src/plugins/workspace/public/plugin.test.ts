@@ -133,7 +133,9 @@ describe('Workspace plugin', () => {
   it('#setup register workspace dropdown menu when setup', async () => {
     const setupMock = coreMock.createSetup();
     const workspacePlugin = new WorkspacePlugin();
-    await workspacePlugin.setup(setupMock);
+    await workspacePlugin.setup(setupMock, {
+      savedObjectsManagement: savedObjectsManagementPluginMock.createSetupContract(),
+    });
     expect(setupMock.chrome.registerCollapsibleNavHeader).toBeCalledTimes(1);
   });
 });

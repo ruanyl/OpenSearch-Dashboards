@@ -63,6 +63,7 @@ import {
 import { Flyout, Relationships } from './components';
 import { SavedObjectWithMetadata } from '../../types';
 import { WorkspaceObject } from 'opensearch-dashboards/public';
+import { DEFAULT_WORKSPACE_ID } from '../../../../../core/public';
 import { TableProps } from './components/table';
 import { waitFor } from '@testing-library/dom';
 
@@ -647,7 +648,9 @@ describe('SavedObjectsTable', () => {
       );
       expect(component.state('selectedSavedObjects').length).toBe(0);
     });
+  });
 
+  describe('workspace filter', () => {
     it('show workspace filter when workspace turn on and not in any workspace', async () => {
       const applications = applicationServiceMock.createStartContract();
       applications.capabilities = {
@@ -690,9 +693,10 @@ describe('SavedObjectsTable', () => {
       expect(filters.length).toBe(2);
       expect(filters[0].field).toBe('type');
       expect(filters[1].field).toBe('workspaces');
-      expect(filters[1].options.length).toBe(2);
+      expect(filters[1].options.length).toBe(3);
       expect(filters[1].options[0].value).toBe('foo');
       expect(filters[1].options[1].value).toBe('bar');
+      expect(filters[1].options[2].value).toBe(DEFAULT_WORKSPACE_ID);
     });
 
     it('show workspace filter when workspace turn on and enter a workspace', async () => {
@@ -740,7 +744,8 @@ describe('SavedObjectsTable', () => {
       expect(wsFilter[0].options[0].value).toBe('foo');
     });
 
-    it('workspace exists in query options when workspace on', async () => {
+    it('workspace exists in find options when workspace on', async () => {
+      findObjectsMock.mockClear();
       const applications = applicationServiceMock.createStartContract();
       applications.capabilities = {
         navLinks: {},
@@ -777,17 +782,61 @@ describe('SavedObjectsTable', () => {
       // Ensure the state changes are reflected
       component.update();
 
-      waitFor(
-        () => {
-          expect(http.get).toHaveBeenCalledWith(
-            expect.stringMatching('/api/opensearch-dashboards/management/saved_objects/_find'),
-            expect.objectContaining({
-              workspaces: expect.arrayContaining(['workspace1']),
-            })
-          );
+      await waitFor(() => {
+        expect(findObjectsMock).toBeCalledWith(
+          http,
+          expect.objectContaining({
+            workspaces: expect.arrayContaining(['workspace1']),
+          })
+        );
+      });
+    });
+
+    it('workspace exists in find options when workspace on and not in any workspace', async () => {
+      findObjectsMock.mockClear();
+      const applications = applicationServiceMock.createStartContract();
+      applications.capabilities = {
+        navLinks: {},
+        management: {},
+        catalogue: {},
+        savedObjectsManagement: {
+          read: true,
+          edit: false,
+          delete: false,
         },
-        { timeout: 1000 }
-      );
+        workspaces: {
+          enabled: true,
+        },
+      };
+
+      const workspaceList: WorkspaceObject[] = [
+        {
+          id: 'workspace1',
+          name: 'foo',
+        },
+        {
+          id: 'workspace2',
+          name: 'bar',
+        },
+      ];
+      workspaces.workspaceList$.next(workspaceList);
+
+      const component = shallowRender({ applications, workspaces });
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      await waitFor(() => {
+        expect(findObjectsMock).toBeCalledWith(
+          http,
+          expect.objectContaining({
+            workspaces: expect.arrayContaining(['workspace1', 'default']),
+            workspacesSearchOperator: expect.stringMatching('OR'),
+          })
+        );
+      });
     });
   });
 });
