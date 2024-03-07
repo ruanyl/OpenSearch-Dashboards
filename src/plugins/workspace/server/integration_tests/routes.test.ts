@@ -35,7 +35,7 @@ describe('workspace service', () => {
           },
           savedObjects: {
             permission: {
-              enabled: false,
+              enabled: true,
             },
           },
           migrations: { skip: false },
