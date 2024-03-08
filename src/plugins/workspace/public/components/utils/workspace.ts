@@ -18,7 +18,7 @@ export const switchWorkspace = ({ application, http }: Core, id: string) => {
     http.basePath
   );
   if (newUrl) {
-    window.location.href = newUrl;
+    application.navigateToUrl(newUrl);
   }
 };
 
@@ -31,6 +31,6 @@ export const updateWorkspace = ({ application, http }: Core, id: string) => {
     http.basePath
   );
   if (newUrl) {
-    window.location.href = newUrl;
+    application.navigateToUrl(newUrl);
   }
 };

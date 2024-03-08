@@ -16,7 +16,7 @@ import { OpenSearchDashboardsContextProvider } from '../../../../../plugins/open
 
 jest.mock('../utils/workspace');
 
-function WrapWorkspaceListInContext(
+function getWrapWorkspaceListInContext(
   workspaceList = [
     { id: 'id1', name: 'name1' },
     { id: 'id2', name: 'name2' },
@@ -48,12 +48,12 @@ describe('WorkspaceList', () => {
     expect(container).toMatchSnapshot();
   });
   it('should render data in table based on workspace list data', async () => {
-    const { getByText } = render(WrapWorkspaceListInContext());
+    const { getByText } = render(getWrapWorkspaceListInContext());
     expect(getByText('name1')).toBeInTheDocument();
     expect(getByText('name2')).toBeInTheDocument();
   });
   it('should be able to search after input', async () => {
-    const { getByText, getByRole } = render(WrapWorkspaceListInContext());
+    const { getByText, getByRole } = render(getWrapWorkspaceListInContext());
     expect(getByText('name1')).toBeInTheDocument();
     expect(getByText('name2')).toBeInTheDocument();
     const nameInput = getByRole('searchbox');
@@ -69,21 +69,21 @@ describe('WorkspaceList', () => {
   });
 
   it('should be able to switch workspace after clicking name', async () => {
-    const { getByText } = render(WrapWorkspaceListInContext());
+    const { getByText } = render(getWrapWorkspaceListInContext());
     const nameLink = getByText('name1');
     fireEvent.click(nameLink);
     expect(switchWorkspace).toBeCalled();
   });
 
   it('should be able to update workspace after clicking name', async () => {
-    const { getAllByTestId } = render(WrapWorkspaceListInContext());
+    const { getAllByTestId } = render(getWrapWorkspaceListInContext());
     const editIcon = getAllByTestId('workspace-list-edit-icon')[0];
     fireEvent.click(editIcon);
     expect(updateWorkspace).toBeCalled();
   });
 
   it('should be able to call delete modal after clicking delete button', async () => {
-    const { getAllByTestId } = render(WrapWorkspaceListInContext());
+    const { getAllByTestId } = render(getWrapWorkspaceListInContext());
     const deleteIcon = getAllByTestId('workspace-list-delete-icon')[0];
     fireEvent.click(deleteIcon);
     expect(screen.getByTestId('delete-workspace-modal-header')).toBeInTheDocument();
@@ -101,7 +101,7 @@ describe('WorkspaceList', () => {
       { id: 'id5', name: 'name5' },
       { id: 'id6', name: 'name6' },
     ];
-    const { getByTestId, getByText, queryByText } = render(WrapWorkspaceListInContext(list));
+    const { getByTestId, getByText, queryByText } = render(getWrapWorkspaceListInContext(list));
     expect(getByText('name1')).toBeInTheDocument();
     expect(queryByText('name6')).not.toBeInTheDocument();
     const paginationButton = getByTestId('pagination-button-next');

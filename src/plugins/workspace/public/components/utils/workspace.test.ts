@@ -10,11 +10,16 @@ jest.mock('../../../../../core/public/utils');
 import { coreMock } from '../../../../../core/public/mocks';
 
 const coreStartMock = coreMock.createStart();
+let mockNavigateToUrl = jest.fn();
 
-window = Object.create(window);
 const defaultUrl = 'localhost://';
 
 describe('workspace utils', () => {
+  beforeEach(() => {
+    mockNavigateToUrl = jest.fn();
+    coreStartMock.application.navigateToUrl = mockNavigateToUrl;
+  });
+
   describe('switchWorkspace', () => {
     it('should redirect if newUrl is returned', () => {
       Object.defineProperty(window, 'location', {
@@ -26,7 +31,7 @@ describe('workspace utils', () => {
       // @ts-ignore
       formatUrlWithWorkspaceId.mockImplementation(() => 'new_url');
       switchWorkspace({ application: coreStartMock.application, http: coreStartMock.http }, '');
-      expect(window.location.href).toEqual('new_url');
+      expect(mockNavigateToUrl).toHaveBeenCalledWith('new_url');
     });
 
     it('should not redirect if newUrl is not returned', () => {
@@ -39,7 +44,7 @@ describe('workspace utils', () => {
       // @ts-ignore
       formatUrlWithWorkspaceId.mockImplementation(() => '');
       switchWorkspace({ application: coreStartMock.application, http: coreStartMock.http }, '');
-      expect(window.location.href).toEqual(defaultUrl);
+      expect(mockNavigateToUrl).not.toBeCalled();
     });
   });
 
@@ -54,7 +59,7 @@ describe('workspace utils', () => {
       // @ts-ignore
       formatUrlWithWorkspaceId.mockImplementation(() => 'new_url');
       updateWorkspace({ application: coreStartMock.application, http: coreStartMock.http }, '');
-      expect(window.location.href).toEqual('new_url');
+      expect(mockNavigateToUrl).toHaveBeenCalledWith('new_url');
     });
 
     it('should not redirect if newUrl is not returned', () => {
@@ -67,7 +72,7 @@ describe('workspace utils', () => {
       // @ts-ignore
       formatUrlWithWorkspaceId.mockImplementation(() => '');
       updateWorkspace({ application: coreStartMock.application, http: coreStartMock.http }, '');
-      expect(window.location.href).toEqual(defaultUrl);
+      expect(mockNavigateToUrl).not.toBeCalled();
     });
   });
 });

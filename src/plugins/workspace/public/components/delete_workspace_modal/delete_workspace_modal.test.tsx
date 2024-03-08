@@ -6,7 +6,7 @@
 import React from 'react';
 import { DeleteWorkspaceModal, DeleteWorkspaceModalProps } from './delete_workspace_modal';
 import { coreMock } from '../../../../../core/public/mocks';
-import { render, fireEvent, waitFor, cleanup } from '@testing-library/react';
+import { render, fireEvent, waitFor } from '@testing-library/react';
 import { workspaceClientMock } from '../../../public/workspace_client.mock';
 import { OpenSearchDashboardsContextProvider } from '../../../../../plugins/opensearch_dashboards_react/public';
 
@@ -18,7 +18,7 @@ const defaultProps: DeleteWorkspaceModalProps = {
 
 const coreStartMock = coreMock.createStart();
 
-function WrapWorkspaceDeleteModalInContext(
+function getWrapWorkspaceDeleteModalInContext(
   props: DeleteWorkspaceModalProps,
   services = { ...coreStartMock }
 ) {
@@ -28,21 +28,15 @@ function WrapWorkspaceDeleteModalInContext(
     </OpenSearchDashboardsContextProvider>
   );
 }
-beforeEach(() => {
-  jest.clearAllMocks();
-});
-afterEach(() => {
-  cleanup();
-  jest.clearAllMocks();
-});
+
 describe('DeleteWorkspaceModal', () => {
-  beforeEach(() => {
+  afterEach(() => {
     jest.clearAllMocks();
   });
 
   it('should render normally', () => {
     const { getByText, baseElement, getByTestId } = render(
-      WrapWorkspaceDeleteModalInContext(defaultProps)
+      getWrapWorkspaceDeleteModalInContext(defaultProps)
     );
 
     expect(getByText('Delete workspace')).toBeInTheDocument();
@@ -57,7 +51,7 @@ describe('DeleteWorkspaceModal', () => {
       ...defaultProps,
       onClose,
     };
-    const { getByTestId } = render(WrapWorkspaceDeleteModalInContext(newProps));
+    const { getByTestId } = render(getWrapWorkspaceDeleteModalInContext(newProps));
     expect(onClose).not.toHaveBeenCalled();
     const cancelButton = getByTestId('delete-workspace-modal-cancel-button');
     fireEvent.click(cancelButton);
@@ -85,7 +79,7 @@ describe('DeleteWorkspaceModal', () => {
       },
     };
     const { getByTestId, findByTestId } = render(
-      WrapWorkspaceDeleteModalInContext(newProps, newServices)
+      getWrapWorkspaceDeleteModalInContext(newProps, newServices)
     );
     await findByTestId('delete-workspace-modal-input');
     const input = getByTestId('delete-workspace-modal-input');
@@ -123,7 +117,7 @@ describe('DeleteWorkspaceModal', () => {
       },
     };
     const { getByTestId, findByTestId } = render(
-      WrapWorkspaceDeleteModalInContext(newProps, newServices)
+      getWrapWorkspaceDeleteModalInContext(newProps, newServices)
     );
     await findByTestId('delete-workspace-modal-input');
     const input = getByTestId('delete-workspace-modal-input');
@@ -155,7 +149,7 @@ describe('DeleteWorkspaceModal', () => {
       },
     };
     const { getByTestId, findByTestId } = render(
-      WrapWorkspaceDeleteModalInContext(newProps, newServices)
+      getWrapWorkspaceDeleteModalInContext(newProps, newServices)
     );
     await findByTestId('delete-workspace-modal-input');
     const input = getByTestId('delete-workspace-modal-input');
@@ -186,7 +180,7 @@ describe('DeleteWorkspaceModal', () => {
       },
     };
     const { getByTestId, findByTestId } = render(
-      WrapWorkspaceDeleteModalInContext(newProps, newServices)
+      getWrapWorkspaceDeleteModalInContext(newProps, newServices)
     );
     await findByTestId('delete-workspace-modal-input');
     const input = getByTestId('delete-workspace-modal-input');
@@ -221,7 +215,7 @@ describe('DeleteWorkspaceModal', () => {
       },
     };
     const { getByTestId, findByTestId } = render(
-      WrapWorkspaceDeleteModalInContext(newProps, newServices)
+      getWrapWorkspaceDeleteModalInContext(newProps, newServices)
     );
     await findByTestId('delete-workspace-modal-input');
     const input = getByTestId('delete-workspace-modal-input');
@@ -253,7 +247,7 @@ describe('DeleteWorkspaceModal', () => {
       },
     };
     const { getByTestId, findByTestId } = render(
-      WrapWorkspaceDeleteModalInContext(newProps, newServices)
+      getWrapWorkspaceDeleteModalInContext(newProps, newServices)
     );
     await findByTestId('delete-workspace-modal-input');
     const input = getByTestId('delete-workspace-modal-input');
