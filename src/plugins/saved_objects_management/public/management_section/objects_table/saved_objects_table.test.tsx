@@ -40,6 +40,7 @@ import {
 
 import React from 'react';
 import { Query } from '@elastic/eui';
+import { waitFor } from '@testing-library/dom';
 import { ShallowWrapper } from 'enzyme';
 import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 import {
@@ -65,7 +66,6 @@ import { SavedObjectWithMetadata } from '../../types';
 import { WorkspaceObject } from 'opensearch-dashboards/public';
 import { DEFAULT_WORKSPACE_ID } from '../../../../../core/public';
 import { TableProps } from './components/table';
-import { waitFor } from '@testing-library/dom';
 
 const allowedTypes = ['index-pattern', 'visualization', 'dashboard', 'search'];
 

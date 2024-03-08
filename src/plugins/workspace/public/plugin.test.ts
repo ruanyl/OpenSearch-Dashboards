@@ -9,7 +9,7 @@ import { applicationServiceMock, chromeServiceMock, coreMock } from '../../../co
 import { WorkspacePlugin } from './plugin';
 import { WORKSPACE_FATAL_ERROR_APP_ID, WORKSPACE_OVERVIEW_APP_ID } from '../common/constants';
 import { Observable, Subscriber } from 'rxjs';
-import { savedObjectsManagementPluginMock } from 'src/plugins/saved_objects_management/public/mocks';
+import { savedObjectsManagementPluginMock } from '../../saved_objects_management/public/mocks';
 
 describe('Workspace plugin', () => {
   beforeEach(() => {
