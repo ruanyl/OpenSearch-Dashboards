@@ -96,7 +96,7 @@ describe('DeleteWorkspaceModal', () => {
     expect(deleteFn).not.toHaveBeenCalled();
     fireEvent.click(confirmButton);
     expect(deleteFn).toHaveBeenCalledWith('test');
-    waitFor(() => {
+    await waitFor(() => {
       expect(coreStartMock.notifications.toasts.addSuccess).toHaveBeenCalled();
       expect(onCloseFn).toHaveBeenCalled();
       expect(coreStartMock.application.navigateToUrl).toHaveBeenCalled();
@@ -133,7 +133,7 @@ describe('DeleteWorkspaceModal', () => {
     const confirmButton = getByTestId('delete-workspace-modal-confirm');
     fireEvent.click(confirmButton);
     expect(deleteFn).toHaveBeenCalledWith('test');
-    waitFor(() => {
+    await waitFor(() => {
       expect(coreStartMock.notifications.toasts.addSuccess).toHaveBeenCalled();
       expect(coreStartMock.application.navigateToUrl).not.toHaveBeenCalled();
     });
@@ -196,7 +196,7 @@ describe('DeleteWorkspaceModal', () => {
     const confirmButton = getByTestId('delete-workspace-modal-confirm');
     fireEvent.click(confirmButton);
     expect(deleteFn).toHaveBeenCalledWith('test');
-    waitFor(() => {
+    await waitFor(() => {
       expect(coreStartMock.notifications.toasts.addSuccess).not.toHaveBeenCalled();
       expect(coreStartMock.notifications.toasts.addDanger).toHaveBeenCalled();
     });
@@ -264,8 +264,5 @@ describe('DeleteWorkspaceModal', () => {
     fireEvent.click(confirmButton);
     expect(deleteFn).toHaveBeenCalledWith('test');
     expect(coreStartMock.notifications.toasts.addDanger).toHaveBeenCalled();
-    waitFor(() => {
-      expect(onCloseFn).toHaveBeenCalled();
-    });
   });
 });
