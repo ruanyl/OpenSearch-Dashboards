@@ -31,14 +31,18 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
     return getWorkspaceIdFromUrl(window.location.href);
   }
 
-  private filterByWorkspace(workspace: WorkspaceObject | null, allNavLinks: NavLinkWrapper[]) {
-    if (!workspace) return allNavLinks;
-    const features = workspace.features ?? ['*'];
-    return allNavLinks.filter(featureMatchesConfig(features));
+  /**
+   * Filter the nav links based on the feature configuration of workspace
+   */
+  private filterByWorkspace(allNavLinks: NavLinkWrapper[], workspace: WorkspaceObject | null) {
+    if (!workspace || !workspace.features) return allNavLinks;
+
+    const featureFilter = featureMatchesConfig(workspace.features);
+    return allNavLinks.filter((linkWrapper) => featureFilter(linkWrapper.properties));
   }
 
   /**
-   * Filter nav links by currentWorkspace$, once the current workspace change, the nav links(left nav bar)
+   * Filter nav links by the current workspace, once the current workspace change, the nav links(left nav bar)
    * should also be updated according to the configured features of the current workspace
    */
   private filterNavLinks(core: CoreStart) {
@@ -57,13 +61,12 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
       linkUpdaters = linkUpdaters.filter((updater) => updater !== filterLinksByWorkspace);
 
       /**
-       * Whenever workspace changed, this function: `linkFilter` will filter out those links that should not
+       * Whenever workspace changed, this function will filter out those links that should not
        * be displayed. For example, some workspace may not have Observability features configured, in such case,
-       * the nav links to Observability features should not be displayed in left nav bar
-       *
+       * the nav links of Observability features should not be displayed in left nav bar
        */
       filterLinksByWorkspace = (navLinks) => {
-        const filteredNavLinks = this.filterByWorkspace(currentWorkspace, [...navLinks.values()]);
+        const filteredNavLinks = this.filterByWorkspace([...navLinks.values()], currentWorkspace);
         const newNavLinks = new Map<string, NavLinkWrapper>();
         filteredNavLinks.forEach((chromeNavLink) => {
           newNavLinks.set(chromeNavLink.id, chromeNavLink);
@@ -165,9 +168,9 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
     this.coreStart = core;
 
     this.currentWorkspaceIdSubscription = this._changeSavedObjectCurrentWorkspace();
-    if (core) {
-      this.filterNavLinks(core);
-    }
+
+    // When starts, filter the nav links based on the current workspace
+    this.filterNavLinks(core);
     return {};
   }
 
