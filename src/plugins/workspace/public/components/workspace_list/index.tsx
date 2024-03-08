@@ -117,6 +117,7 @@ export const WorkspaceList = () => {
           type: 'icon',
           description: 'Edit workspace',
           onClick: ({ id }: WorkspaceAttribute) => handleUpdateWorkspace(id),
+          'data-test-subj': 'workspace-list-edit-icon',
         },
         {
           name: 'Delete',
@@ -124,6 +125,7 @@ export const WorkspaceList = () => {
           type: 'icon',
           description: 'Delete workspace',
           onClick: (item: WorkspaceAttribute) => setDeletedWorkspace(item),
+          'data-test-subj': 'workspace-list-delete-icon',
         },
       ],
     },
