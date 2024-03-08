@@ -231,4 +231,41 @@ describe('DeleteWorkspaceModal', () => {
     const confirmButton = getByTestId('delete-workspace-modal-confirm');
     expect(confirmButton.hasAttribute('disabled'));
   });
+
+  it('should catch error and add danger', async () => {
+    const onCloseFn = jest.fn();
+    const newProps = {
+      ...defaultProps,
+      selectedWorkspace: {
+        id: 'test',
+        name: 'test',
+      },
+      onclose: onCloseFn,
+    };
+    const deleteFn = jest.fn().mockImplementation(() => {
+      throw new Error('error');
+    });
+    const newServices = {
+      ...coreStartMock,
+      workspaceClient: {
+        ...workspaceClientMock,
+        delete: deleteFn,
+      },
+    };
+    const { getByTestId, findByTestId } = render(
+      WrapWorkspaceDeleteModalInContext(newProps, newServices)
+    );
+    await findByTestId('delete-workspace-modal-input');
+    const input = getByTestId('delete-workspace-modal-input');
+    fireEvent.input(input, {
+      target: { value: 'delete' },
+    });
+    const confirmButton = getByTestId('delete-workspace-modal-confirm');
+    fireEvent.click(confirmButton);
+    expect(deleteFn).toHaveBeenCalledWith('test');
+    expect(coreStartMock.notifications.toasts.addDanger).toHaveBeenCalled();
+    waitFor(() => {
+      expect(onCloseFn).toHaveBeenCalled();
+    });
+  });
 });
