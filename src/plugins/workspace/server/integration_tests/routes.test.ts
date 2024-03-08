@@ -134,15 +134,16 @@ describe('workspace service', () => {
         type: 'user',
         modes: ['read', 'library_read'],
       };
-      const result: any = await osdTestServer.request
+      const createResult: any = await osdTestServer.request
         .post(root, `/api/workspaces`)
         .send({
           attributes: omitId(testWorkspace),
         })
         .expect(200);
+      expect(createResult.body.success).toEqual(true);
 
-      await osdTestServer.request
-        .put(root, `/api/workspaces/${result.body.result.id}`)
+      const updateReslut: any = await osdTestServer.request
+        .put(root, `/api/workspaces/${createResult.body.result.id}`)
         .send({
           attributes: {
             ...omitId(testWorkspace),
@@ -151,10 +152,11 @@ describe('workspace service', () => {
           permissions: permission,
         })
         .expect(200);
+      expect(updateReslut.body.success).toEqual(true);
 
       const getResult = await osdTestServer.request.get(
         root,
-        `/api/workspaces/${result.body.result.id}`
+        `/api/workspaces/${createResult.body.result.id}`
       );
 
       expect(getResult.body.success).toEqual(true);
