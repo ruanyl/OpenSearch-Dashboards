@@ -21,7 +21,7 @@ import { i18n } from '@osd/i18n';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { WorkspaceClient } from '../../workspace_client';
 
-interface DeleteWorkspaceModalProps {
+export interface DeleteWorkspaceModalProps {
   onClose: () => void;
   selectedWorkspace?: WorkspaceAttribute | null;
   returnToHome: boolean;
@@ -77,12 +77,12 @@ export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
   };
 
   return (
-    <EuiModal onClose={onClose}>
-      <EuiModalHeader>
+    <EuiModal onClose={onClose} className="delete-workspace-modal" aria-label="modal">
+      <EuiModalHeader data-test-subj="delete-workspace-modal-header">
         <EuiModalHeaderTitle>Delete workspace</EuiModalHeaderTitle>
       </EuiModalHeader>
 
-      <EuiModalBody>
+      <EuiModalBody data-test-subj="delete-workspace-modal-body">
         <div style={{ lineHeight: 1.5 }}>
           <p>The following workspace will be permanently deleted. This action cannot be undone.</p>
           <ul style={{ listStyleType: 'disc', listStylePosition: 'inside' }}>
@@ -96,15 +96,18 @@ export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
             placeholder="delete"
             fullWidth
             value={value}
+            data-test-subj="delete-workspace-modal-input"
             onChange={(e) => setValue(e.target.value)}
           />
         </div>
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onClose}>Cancel</EuiButtonEmpty>
+        <EuiButtonEmpty onClick={onClose} data-test-subj="delete-workspace-modal-cancel-button">
+          Cancel
+        </EuiButtonEmpty>
         <EuiButton
-          data-test-subj="Delete Confirm button"
+          data-test-subj="delete-workspace-modal-confirm"
           onClick={deleteWorkspace}
           fill
           color="danger"
