@@ -69,12 +69,12 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
    * Note: this can only be used for multi-namespace object types.
    */
   initialNamespaces?: string[];
-  /** permission control describe by ACL object */
-  permissions?: Permissions;
   /**
    * workspaces the new created objects belong to
    */
   workspaces?: string[];
+  /** permission control describe by ACL object */
+  permissions?: Permissions;
 }
 
 /**
