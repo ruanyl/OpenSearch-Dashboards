@@ -158,4 +158,12 @@ describe('Workspace plugin', () => {
     workspacePlugin.start(coreStart);
     expect(navLinksService.setNavLinks).toHaveBeenCalledWith(filteredNavLinksMap);
   });
+
+  it('#call savedObjectsClient.setCurrentWorkspace when current workspace id changed', () => {
+    const workspacePlugin = new WorkspacePlugin();
+    const coreStart = coreMock.createStart();
+    workspacePlugin.start(coreStart);
+    coreStart.workspaces.currentWorkspaceId$.next('foo');
+    expect(coreStart.savedObjects.client.setCurrentWorkspace).toHaveBeenCalledWith('foo');
+  });
 });

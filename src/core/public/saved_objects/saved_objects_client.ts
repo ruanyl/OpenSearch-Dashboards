@@ -45,7 +45,7 @@ import { HttpFetchOptions, HttpSetup } from '../http';
 
 type SavedObjectsFindOptions = Omit<
   SavedObjectFindOptionsServer,
-  'sortOrder' | 'rootSearchFields' | 'typeToNamespacesMap'
+  'sortOrder' | 'rootSearchFields' | 'typeToNamespacesMap' | 'ACLSearchParams'
 >;
 
 type PromiseType<T extends Promise<any>> = T extends Promise<infer U> ? U : never;
@@ -79,6 +79,7 @@ export interface SavedObjectsBulkCreateObject<T = unknown> extends SavedObjectsC
 export interface SavedObjectsBulkCreateOptions {
   /** If a document with the given `id` already exists, overwrite it's contents (default=false). */
   overwrite?: boolean;
+  workspaces?: string[];
 }
 
 /** @public */
@@ -185,10 +186,34 @@ export class SavedObjectsClient {
   private http: HttpSetup;
   private batchQueue: BatchQueueEntry[];
   /**
-   * if currentWorkspaceId is undefined, it means
-   * we should not carry out workspace info when doing any operation.
+   * The currentWorkspaceId may be undefined when workspace plugin is not enabled.
    */
   private currentWorkspaceId: string | undefined;
+
+  /**
+   * Check if workspaces field present in given options, if so, overwrite the current workspace id.
+   * @param options
+   * @returns
+   */
+  private formatWorkspacesParams(options: {
+    workspaces?: SavedObjectsCreateOptions['workspaces'];
+  }): { workspaces: string[] } | {} {
+    const currentWorkspaceId = this.currentWorkspaceId;
+    let finalWorkspaces;
+    if (options.hasOwnProperty('workspaces')) {
+      finalWorkspaces = options.workspaces;
+    } else if (typeof currentWorkspaceId === 'string') {
+      finalWorkspaces = [currentWorkspaceId];
+    }
+
+    if (finalWorkspaces) {
+      return {
+        workspaces: finalWorkspaces,
+      };
+    }
+
+    return {};
+  }
 
   /**
    * Throttled processing of get requests into bulk requests at 100ms interval
@@ -233,13 +258,8 @@ export class SavedObjectsClient {
     this.batchQueue = [];
   }
 
-  private _getCurrentWorkspace(): string | undefined {
-    return this.currentWorkspaceId;
-  }
-
-  public setCurrentWorkspace(workspaceId: string): boolean {
+  public setCurrentWorkspace(workspaceId: string) {
     this.currentWorkspaceId = workspaceId;
-    return true;
   }
 
   /**
@@ -263,13 +283,6 @@ export class SavedObjectsClient {
     const query = {
       overwrite: options.overwrite,
     };
-    const currentWorkspaceId = this._getCurrentWorkspace();
-    let finalWorkspaces;
-    if (options.hasOwnProperty('workspaces')) {
-      finalWorkspaces = options.workspaces;
-    } else if (typeof currentWorkspaceId === 'string') {
-      finalWorkspaces = [currentWorkspaceId];
-    }
 
     const createRequest: Promise<SavedObject<T>> = this.savedObjectsFetch(path, {
       method: 'POST',
@@ -278,11 +291,7 @@ export class SavedObjectsClient {
         attributes,
         migrationVersion: options.migrationVersion,
         references: options.references,
-        ...(finalWorkspaces
-          ? {
-              workspaces: finalWorkspaces,
-            }
-          : {}),
+        ...this.formatWorkspacesParams(options),
       }),
     });
 
@@ -302,11 +311,14 @@ export class SavedObjectsClient {
     options: SavedObjectsBulkCreateOptions = { overwrite: false }
   ) => {
     const path = this.getPath(['_bulk_create']);
-    const query = { overwrite: options.overwrite };
+    const query: HttpFetchOptions['query'] = { overwrite: options.overwrite };
 
     const request: ReturnType<SavedObjectsApi['bulkCreate']> = this.savedObjectsFetch(path, {
       method: 'POST',
-      query,
+      query: {
+        ...query,
+        ...this.formatWorkspacesParams(options),
+      },
       body: JSON.stringify(objects),
     });
     return request.then((resp) => {
@@ -376,25 +388,10 @@ export class SavedObjectsClient {
       flags: 'flags',
     };
 
-    const currentWorkspaceId = this._getCurrentWorkspace();
-    let finalWorkspaces;
-    if (options.hasOwnProperty('workspaces')) {
-      finalWorkspaces = options.workspaces;
-    } else if (typeof currentWorkspaceId === 'string') {
-      finalWorkspaces = Array.from(new Set([currentWorkspaceId]));
-    }
-
-    const renamedQuery = renameKeys<Omit<SavedObjectsFindOptions, 'ACLSearchParams'>, any>(
-      renameMap,
-      {
-        ...options,
-        ...(finalWorkspaces
-          ? {
-              workspaces: finalWorkspaces,
-            }
-          : {}),
-      }
-    );
+    const renamedQuery = renameKeys<SavedObjectsFindOptions, any>(renameMap, {
+      ...options,
+      ...this.formatWorkspacesParams(options),
+    });
     const query = pick.apply(null, [renamedQuery, ...Object.values<string>(renameMap)]) as Partial<
       Record<string, any>
     >;
