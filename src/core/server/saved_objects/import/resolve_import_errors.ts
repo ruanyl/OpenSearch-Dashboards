@@ -130,7 +130,6 @@ export async function resolveSavedObjectsImportErrors({
     namespace,
     retries,
     createNewCopies,
-    workspaces,
     dataSourceId,
     workspaces,
   };
