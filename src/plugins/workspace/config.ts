@@ -10,6 +10,18 @@ export const configSchema = schema.object({
   permission: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
+  dashboardAdmin: schema.object(
+    {
+      backendRoles: schema.arrayOf(schema.string(), {
+        defaultValue: ['dashboard_admin'],
+      }),
+    },
+    {
+      defaultValue: {
+        backendRoles: ['dashboard_admin'],
+      },
+    }
+  ),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;
