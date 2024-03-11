@@ -162,6 +162,9 @@ describe('Workspace plugin', () => {
   it('#call savedObjectsClient.setCurrentWorkspace when current workspace id changed', () => {
     const workspacePlugin = new WorkspacePlugin();
     const coreStart = coreMock.createStart();
+    const navLinksService = coreStart.chrome.navLinks;
+    const allNavLinks = of([] as ChromeNavLink[]);
+    navLinksService.getAllNavLinks$.mockReturnValue(allNavLinks);
     workspacePlugin.start(coreStart);
     coreStart.workspaces.currentWorkspaceId$.next('foo');
     expect(coreStart.savedObjects.client.setCurrentWorkspace).toHaveBeenCalledWith('foo');
