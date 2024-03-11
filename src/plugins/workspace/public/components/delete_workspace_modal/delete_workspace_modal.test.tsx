@@ -83,7 +83,7 @@ describe('DeleteWorkspaceModal', () => {
     );
     await findByTestId('delete-workspace-modal-input');
     const input = getByTestId('delete-workspace-modal-input');
-    fireEvent.input(input, {
+    fireEvent.change(input, {
       target: { value: 'delete' },
     });
     const confirmButton = getByTestId('delete-workspace-modal-confirm');
@@ -121,7 +121,7 @@ describe('DeleteWorkspaceModal', () => {
     );
     await findByTestId('delete-workspace-modal-input');
     const input = getByTestId('delete-workspace-modal-input');
-    fireEvent.input(input, {
+    fireEvent.change(input, {
       target: { value: 'delete' },
     });
     const confirmButton = getByTestId('delete-workspace-modal-confirm');
@@ -153,7 +153,7 @@ describe('DeleteWorkspaceModal', () => {
     );
     await findByTestId('delete-workspace-modal-input');
     const input = getByTestId('delete-workspace-modal-input');
-    fireEvent.input(input, {
+    fireEvent.change(input, {
       target: { value: 'delete' },
     });
     const confirmButton = getByTestId('delete-workspace-modal-confirm');
@@ -184,7 +184,7 @@ describe('DeleteWorkspaceModal', () => {
     );
     await findByTestId('delete-workspace-modal-input');
     const input = getByTestId('delete-workspace-modal-input');
-    fireEvent.input(input, {
+    fireEvent.change(input, {
       target: { value: 'delete' },
     });
     const confirmButton = getByTestId('delete-workspace-modal-confirm');
@@ -219,7 +219,7 @@ describe('DeleteWorkspaceModal', () => {
     );
     await findByTestId('delete-workspace-modal-input');
     const input = getByTestId('delete-workspace-modal-input');
-    fireEvent.input(input, {
+    fireEvent.change(input, {
       target: { value: 'delet' },
     });
     const confirmButton = getByTestId('delete-workspace-modal-confirm');
@@ -251,7 +251,7 @@ describe('DeleteWorkspaceModal', () => {
     );
     await findByTestId('delete-workspace-modal-input');
     const input = getByTestId('delete-workspace-modal-input');
-    fireEvent.input(input, {
+    fireEvent.change(input, {
       target: { value: 'delete' },
     });
     const confirmButton = getByTestId('delete-workspace-modal-confirm');

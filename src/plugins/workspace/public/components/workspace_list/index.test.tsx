@@ -6,7 +6,7 @@
 import React from 'react';
 import { WorkspaceList } from './index';
 import { coreMock } from '../../../../../core/public/mocks';
-import { render, fireEvent, waitFor, screen } from '@testing-library/react';
+import { render, fireEvent, screen } from '@testing-library/react';
 import { I18nProvider } from '@osd/i18n/react';
 import { switchWorkspace, updateWorkspace } from '../utils/workspace';
 
@@ -52,20 +52,26 @@ describe('WorkspaceList', () => {
     expect(getByText('name1')).toBeInTheDocument();
     expect(getByText('name2')).toBeInTheDocument();
   });
-  it('should be able to search after input', async () => {
-    const { getByText, getByRole } = render(getWrapWorkspaceListInContext());
+  it('should be able to apply debounce search after input', async () => {
+    const list = [
+      { id: 'id1', name: 'name1' },
+      { id: 'id2', name: 'name2' },
+      { id: 'id3', name: 'name3' },
+      { id: 'id4', name: 'name4' },
+      { id: 'id5', name: 'name5' },
+      { id: 'id6', name: 'name6' },
+    ];
+    const { getByText, getByRole, queryByText } = render(getWrapWorkspaceListInContext(list));
     expect(getByText('name1')).toBeInTheDocument();
-    expect(getByText('name2')).toBeInTheDocument();
-    const nameInput = getByRole('searchbox');
-    fireEvent.input(nameInput, {
-      target: { value: 'name1' },
+    expect(queryByText('name6')).not.toBeInTheDocument();
+    const input = getByRole('searchbox');
+    fireEvent.change(input, {
+      target: { value: 'nam' },
     });
-    await (() => {
-      waitFor(() => {
-        expect(getByText('name1')).toBeInTheDocument();
-        expect(getByText('name2')).not.toBeInTheDocument();
-      });
+    fireEvent.change(input, {
+      target: { value: 'name6' },
     });
+    expect(queryByText('name6')).not.toBeInTheDocument();
   });
 
   it('should be able to switch workspace after clicking name', async () => {
@@ -86,6 +92,7 @@ describe('WorkspaceList', () => {
     const { getAllByTestId } = render(getWrapWorkspaceListInContext());
     const deleteIcon = getAllByTestId('workspace-list-delete-icon')[0];
     fireEvent.click(deleteIcon);
+    await screen.findByTestId('delete-workspace-modal-header');
     expect(screen.getByTestId('delete-workspace-modal-header')).toBeInTheDocument();
     const cancelButton = screen.getByTestId('delete-workspace-modal-cancel-button');
     fireEvent.click(cancelButton);
