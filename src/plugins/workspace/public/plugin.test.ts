@@ -9,6 +9,7 @@ import { applicationServiceMock, chromeServiceMock, coreMock } from '../../../co
 import { WorkspacePlugin } from './plugin';
 import { WORKSPACE_FATAL_ERROR_APP_ID, WORKSPACE_OVERVIEW_APP_ID } from '../common/constants';
 import { Observable, Subscriber } from 'rxjs';
+import { savedObjectsManagementPluginMock } from '../../saved_objects_management/public/mocks';
 
 describe('Workspace plugin', () => {
   beforeEach(() => {
@@ -17,11 +18,15 @@ describe('Workspace plugin', () => {
   });
   it('#setup', async () => {
     const setupMock = coreMock.createSetup();
+    const savedObjectManagementSetupMock = savedObjectsManagementPluginMock.createSetupContract();
     const workspacePlugin = new WorkspacePlugin();
-    await workspacePlugin.setup(setupMock);
+    await workspacePlugin.setup(setupMock, {
+      savedObjectsManagement: savedObjectManagementSetupMock,
+    });
     expect(setupMock.application.register).toBeCalledTimes(1);
     expect(WorkspaceClientMock).toBeCalledTimes(1);
     expect(workspaceClientMock.enterWorkspace).toBeCalledTimes(0);
+    expect(savedObjectManagementSetupMock.columns.register).toBeCalledTimes(1);
   });
 
   it('#call savedObjectsClient.setCurrentWorkspace when current workspace id changed', () => {
@@ -62,7 +67,9 @@ describe('Workspace plugin', () => {
     });
 
     const workspacePlugin = new WorkspacePlugin();
-    await workspacePlugin.setup(setupMock);
+    await workspacePlugin.setup(setupMock, {
+      savedObjectsManagement: savedObjectsManagementPluginMock.createSetupContract(),
+    });
     expect(setupMock.application.register).toBeCalledTimes(1);
     expect(WorkspaceClientMock).toBeCalledTimes(1);
     expect(workspaceClientMock.enterWorkspace).toBeCalledWith('workspaceId');
@@ -116,7 +123,9 @@ describe('Workspace plugin', () => {
     });
 
     const workspacePlugin = new WorkspacePlugin();
-    await workspacePlugin.setup(setupMock);
+    await workspacePlugin.setup(setupMock, {
+      savedObjectsManagement: savedObjectsManagementPluginMock.createSetupContract(),
+    });
     currentAppIdSubscriber?.next(WORKSPACE_FATAL_ERROR_APP_ID);
     expect(applicationStartMock.navigateToApp).toBeCalledWith(WORKSPACE_OVERVIEW_APP_ID);
     windowSpy.mockRestore();
@@ -133,7 +142,9 @@ describe('Workspace plugin', () => {
   it('#setup register workspace dropdown menu when setup', async () => {
     const setupMock = coreMock.createSetup();
     const workspacePlugin = new WorkspacePlugin();
-    await workspacePlugin.setup(setupMock);
+    await workspacePlugin.setup(setupMock, {
+      savedObjectsManagement: savedObjectsManagementPluginMock.createSetupContract(),
+    });
     expect(setupMock.chrome.registerCollapsibleNavHeader).toBeCalledTimes(1);
   });
 });
