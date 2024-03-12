@@ -285,6 +285,27 @@ export class WorkspaceClient {
     return result;
   }
 
+  /**
+   * Move all saved objects to a target workspace
+   *
+   * @param {string} sourceWorkspaceId
+   * @param {string} targetWorkspaceId
+   * @returns
+   */
+  public async moveAllObjects(sourceWorkspaceId: string, targetWorkspaceId: string): Promise<any> {
+    const path = this.getPath('_move_objects');
+    const body = {
+      sourceWorkspaceId,
+      targetWorkspaceId,
+    };
+    const result = await this.safeFetch(path, {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+
+    return result;
+  }
+
   public stop() {
     this.workspaces.workspaceList$.unsubscribe();
     this.workspaces.currentWorkspaceId$.unsubscribe();

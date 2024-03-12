@@ -4,7 +4,13 @@
  */
 
 import { schema } from '@osd/config-schema';
-import { ensureRawRequest } from '../../../../core/server';
+import {
+  SavedObjectsAddToWorkspacesOptions,
+  SavedObjectsAddToWorkspacesResponse,
+  SavedObjectsFindOptions,
+  SavedObjectsShareObjects,
+  ensureRawRequest,
+} from '../../../../core/server';
 
 import { CoreSetup, Logger, WorkspacePermissionMode } from '../../../../core/server';
 import { IWorkspaceClientImpl, WorkspacePermissionItem } from '../types';
@@ -216,6 +222,60 @@ export function registerRoutes({
         id
       );
       return res.ok({ body: result });
+    })
+  );
+  router.post(
+    {
+      path: `${WORKSPACES_API_BASE_URL}/_move_objects`,
+      validate: {
+        body: schema.object({
+          sourceWorkspaceId: schema.string(),
+          targetWorkspaceId: schema.string(),
+        }),
+      },
+    },
+    router.handleLegacyErrors(async (context, req, res) => {
+      const MAX_OBJECTS_AMOUNT: number = 200;
+      const { sourceWorkspaceId, targetWorkspaceId } = req.body;
+      const savedObjectsClient = context.core.savedObjects.client;
+      const allowedTypes = context.core.savedObjects.typeRegistry
+        .getImportableAndExportableTypes()
+        .map((type) => type.name);
+
+      const shareOptions: SavedObjectsAddToWorkspacesOptions = {
+        workspaces: [sourceWorkspaceId],
+        refresh: false,
+      };
+      let results: SavedObjectsAddToWorkspacesResponse[] = [];
+      let page: number = 1;
+      while (true) {
+        const findOptions: SavedObjectsFindOptions = {
+          workspaces: [sourceWorkspaceId],
+          type: allowedTypes,
+          sortField: 'updated_at',
+          sortOrder: 'desc',
+          perPage: MAX_OBJECTS_AMOUNT,
+          page: page++,
+        };
+        const response = await savedObjectsClient.find(findOptions);
+        if (!response) break;
+        const objects: SavedObjectsShareObjects[] = response.saved_objects
+          .filter((obj) => !obj.workspaces?.includes(targetWorkspaceId))
+          .map((obj) => ({
+            id: obj.id,
+            type: obj.type,
+          }));
+        if (objects.length > 0) {
+          const result = await savedObjectsClient.addToWorkspaces(
+            objects,
+            [targetWorkspaceId],
+            shareOptions
+          );
+          results = results.concat(result);
+        }
+        if (response.saved_objects.length < MAX_OBJECTS_AMOUNT) break;
+      }
+      return res.ok({ body: results });
     })
   );
 }
