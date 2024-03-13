@@ -31,7 +31,7 @@ import { WorkspacePluginConfigType } from '../config';
 import { workspaceIdInUrlSymbol } from './constant';
 import { WorkspaceIdConsumerWrapper } from './saved_objects/workspace_id_consumer_wrapper';
 // eslint-disable-next-line @osd/eslint/no-restricted-paths
-import { ensureRawRequest } from '../../../core/server/http/router'; // will be an issue as the ensureRawRequest is an internal implementation
+import { ensureRawRequest } from '../../../core/server/http/router'; // TODO: move the ensureRawRequest to a core module or the import will be an issue as the ensureRawRequest can only be import from core module
 
 export class WorkspacePlugin implements Plugin<{}, {}> {
   private readonly logger: Logger;
@@ -101,7 +101,7 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
       );
     }
 
-    // TOO many client wrapper inside a single workspace plugin
+    // TODO: TOO many client wrapper inside a single workspace plugin
     // Try to combine conflict wrapper and this consumer wrapper.
     core.savedObjects.addClientWrapper(
       -2,
