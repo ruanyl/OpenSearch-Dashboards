@@ -3,7 +3,9 @@
   "version": "opensearchDashboards",
   "server": true,
   "ui": true,
-  "requiredPlugins": [],
+  "requiredPlugins": [
+    "savedObjects"
+  ],
   "optionalPlugins": ["savedObjectsManagement"],
   "requiredBundles": ["opensearchDashboardsReact"]
 }
