@@ -101,6 +101,8 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
       );
     }
 
+    // TOO many client wrapper inside a single workspace plugin
+    // Try to combine conflict wrapper and this consumer wrapper.
     core.savedObjects.addClientWrapper(
       -2,
       WORKSPACE_ID_CONSUMER_WRAPPER_ID,
