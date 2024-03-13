@@ -15,6 +15,7 @@ import {
 import {
   WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
   WORKSPACE_CONFLICT_CONTROL_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
+  WORKSPACE_ID_CONSUMER_WRAPPER_ID,
 } from '../common/constants';
 import { IWorkspaceClientImpl } from './types';
 import { WorkspaceClient } from './workspace_client';
@@ -27,6 +28,10 @@ import {
   SavedObjectsPermissionControlContract,
 } from './permission_control/client';
 import { WorkspacePluginConfigType } from '../config';
+import { workspaceIdInUrlSymbol } from './constant';
+import { WorkspaceIdConsumerWrapper } from './saved_objects/workspace_id_consumer_wrapper';
+// eslint-disable-next-line @osd/eslint/no-restricted-paths
+import { ensureRawRequest } from '../../../core/server/http/router'; // will be an issue as the ensureRawRequest is an internal implementation
 
 export class WorkspacePlugin implements Plugin<{}, {}> {
   private readonly logger: Logger;
@@ -47,6 +52,8 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
       );
 
       if (workspaceId) {
+        const rawRequest = ensureRawRequest(request);
+        rawRequest.headers[workspaceIdInUrlSymbol.toString()] = workspaceId;
         const requestUrl = new URL(request.url.toString());
         requestUrl.pathname = cleanWorkspaceId(requestUrl.pathname);
         return toolkit.rewriteUrl(requestUrl.toString());
@@ -93,6 +100,12 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
         this.workspaceSavedObjectsClientWrapper.wrapperFactory
       );
     }
+
+    core.savedObjects.addClientWrapper(
+      -2,
+      WORKSPACE_ID_CONSUMER_WRAPPER_ID,
+      new WorkspaceIdConsumerWrapper().wrapperFactory
+    );
 
     registerRoutes({
       http: core.http,

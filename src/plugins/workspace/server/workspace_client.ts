@@ -21,6 +21,7 @@ import { IWorkspaceClientImpl, WorkspaceFindOptions, IResponse, IRequestDetail }
 import { workspace } from './saved_objects';
 import { generateRandomId } from './utils';
 import {
+  WORKSPACE_ID_CONSUMER_WRAPPER_ID,
   WORKSPACE_OVERVIEW_APP_ID,
   WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
   WORKSPACE_UPDATE_APP_ID,
