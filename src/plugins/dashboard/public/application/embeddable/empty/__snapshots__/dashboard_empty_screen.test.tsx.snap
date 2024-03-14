@@ -17,7 +17,7 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
         "prepend": [Function],
         "remove": [Function],
         "serverBasePath": "",
-        "workspaceBasePath": "",
+        
       },
       "delete": [MockFunction],
       "fetch": [MockFunction],
@@ -387,7 +387,7 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
         "prepend": [Function],
         "remove": [Function],
         "serverBasePath": "",
-        "workspaceBasePath": "",
+        
       },
       "delete": [MockFunction],
       "fetch": [MockFunction],
@@ -767,7 +767,7 @@ exports[`DashboardEmptyScreen renders correctly without visualize paragraph 1`] 
         "prepend": [Function],
         "remove": [Function],
         "serverBasePath": "",
-        "workspaceBasePath": "",
+        
       },
       "delete": [MockFunction],
       "fetch": [MockFunction],

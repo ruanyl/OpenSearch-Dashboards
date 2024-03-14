@@ -60,7 +60,6 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
       "prepend": [Function],
       "remove": [Function],
       "serverBasePath": "/test",
-      "workspaceBasePath": "",
     }
   }
   branding={Object {}}
@@ -2014,7 +2013,7 @@ exports[`CollapsibleNav renders the default nav 1`] = `
       "prepend": [Function],
       "remove": [Function],
       "serverBasePath": "/test",
-      "workspaceBasePath": "",
+      
     }
   }
   branding={Object {}}
@@ -2319,7 +2318,7 @@ exports[`CollapsibleNav renders the default nav 2`] = `
       "prepend": [Function],
       "remove": [Function],
       "serverBasePath": "/test",
-      "workspaceBasePath": "",
+      
     }
   }
   branding={Object {}}
@@ -2625,7 +2624,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
       "prepend": [Function],
       "remove": [Function],
       "serverBasePath": "/test",
-      "workspaceBasePath": "",
+      
     }
   }
   branding={Object {}}
@@ -3222,7 +3221,7 @@ exports[`CollapsibleNav with custom branding renders the nav bar in dark mode 1`
       "prepend": [Function],
       "remove": [Function],
       "serverBasePath": "/test",
-      "workspaceBasePath": "",
+      
     }
   }
   branding={
@@ -4340,7 +4339,7 @@ exports[`CollapsibleNav with custom branding renders the nav bar in default mode
       "prepend": [Function],
       "remove": [Function],
       "serverBasePath": "/test",
-      "workspaceBasePath": "",
+      
     }
   }
   branding={
@@ -5457,7 +5456,7 @@ exports[`CollapsibleNav without custom branding renders the nav bar in dark mode
       "prepend": [Function],
       "remove": [Function],
       "serverBasePath": "/test",
-      "workspaceBasePath": "",
+      
     }
   }
   branding={
@@ -6567,7 +6566,7 @@ exports[`CollapsibleNav without custom branding renders the nav bar in default m
       "prepend": [Function],
       "remove": [Function],
       "serverBasePath": "/test",
-      "workspaceBasePath": "",
+      
     }
   }
   branding={Object {}}

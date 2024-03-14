@@ -270,7 +270,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
           "prepend": [Function],
           "remove": [Function],
           "serverBasePath": "",
-          "workspaceBasePath": "",
+          
         }
       }
       canDelete={false}
