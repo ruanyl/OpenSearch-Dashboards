@@ -75,7 +75,6 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
       WORKSPACE_CONFLICT_CONTROL_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
       this.workspaceConflictControl.wrapperFactory
     );
-    this.proxyWorkspaceTrafficToRealHandler(core);
 
     this.logger.info('Workspace permission control enabled:' + isPermissionControlEnabled);
     if (isPermissionControlEnabled) {
