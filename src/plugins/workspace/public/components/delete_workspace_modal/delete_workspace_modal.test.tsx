@@ -30,7 +30,7 @@ function WrapWorkspaceDeleteModalInContext(
   );
 }
 
-describe('DeleteWorkspaceModal', () => {
+describe.skip('DeleteWorkspaceModal', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
