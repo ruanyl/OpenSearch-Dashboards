@@ -248,7 +248,6 @@ exports[`Header handles visibility and lock changes 1`] = `
       "prepend": [Function],
       "remove": [Function],
       "serverBasePath": "/test",
-      
     }
   }
   branding={Object {}}
@@ -5882,7 +5881,6 @@ exports[`Header handles visibility and lock changes 1`] = `
           "prepend": [Function],
           "remove": [Function],
           "serverBasePath": "/test",
-          
         }
       }
       closeNav={[Function]}
@@ -6946,7 +6944,6 @@ exports[`Header renders condensed header 1`] = `
       "prepend": [Function],
       "remove": [Function],
       "serverBasePath": "/test",
-      
     }
   }
   branding={
@@ -11361,7 +11358,6 @@ exports[`Header renders condensed header 1`] = `
           "prepend": [Function],
           "remove": [Function],
           "serverBasePath": "/test",
-          
         }
       }
       closeNav={[Function]}
