@@ -187,7 +187,6 @@ describe('SavedObjectsRepository', () => {
       _source: {
         ...(registry.isSingleNamespace(type) && { namespace: namespaceId }),
         ...(registry.isMultiNamespace(type) && { namespaces: [namespaceId ?? 'default'] }),
-        workspaces,
         ...(originId && { originId }),
         ...(permissions && { permissions }),
         type,
@@ -460,14 +459,6 @@ describe('SavedObjectsRepository', () => {
       },
     };
     const workspace = 'foo-workspace';
-    const permissions = {
-      read: {
-        users: ['user1'],
-      },
-      write: {
-        groups: ['groups1'],
-      },
-    };
 
     const getMockBulkCreateResponse = (objects, namespace) => {
       return {
@@ -759,18 +750,6 @@ describe('SavedObjectsRepository', () => {
         ];
         await bulkCreateSuccess(objects, { namespace });
         expectClientCallArgsAction(objects, { method: 'create', getId });
-      });
-
-      it(`accepts permissions property when providing permissions info`, async () => {
-        const objects = [obj1, obj2].map((obj) => ({ ...obj, permissions: permissions }));
-        await bulkCreateSuccess(objects);
-        const expected = expect.objectContaining({ permissions });
-        const body = [expect.any(Object), expected, expect.any(Object), expected];
-        expect(client.bulk).toHaveBeenCalledWith(
-          expect.objectContaining({ body }),
-          expect.anything()
-        );
-        client.bulk.mockClear();
       });
 
       it(`adds workspaces to request body for any types`, async () => {
@@ -1965,9 +1944,6 @@ describe('SavedObjectsRepository', () => {
               ...omitWorkspace(obj9),
               error: {
                 ...createConflictError(obj9.type, obj9.id),
-                metadata: {
-                  isNotOverwritable: true,
-                },
               },
             },
           ],

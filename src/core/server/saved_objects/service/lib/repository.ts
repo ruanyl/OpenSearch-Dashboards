@@ -598,24 +598,13 @@ export class SavedObjectsRepository {
       const { type, id, opensearchRequestIndex } = expectedResult.value;
       const doc = bulkGetResponse?.body.docs[opensearchRequestIndex];
       if (doc?.found) {
-        let workspaceConflict = false;
-        if (options.workspaces) {
-          const transformedObject = this._serializer.rawToSavedObject(doc as SavedObjectsRawDoc);
-          const filteredWorkspaces = SavedObjectsUtils.filterWorkspacesAccordingToBaseWorkspaces(
-            options.workspaces,
-            transformedObject.workspaces
-          );
-          if (filteredWorkspaces.length) {
-            workspaceConflict = true;
-          }
-        }
         errors.push({
           id,
           type,
           error: {
             ...errorContent(SavedObjectsErrorHelpers.createConflictError(type, id)),
             // @ts-expect-error MultiGetHit._source is optional
-            ...((!this.rawDocExistsInNamespace(doc!, namespace) || workspaceConflict) && {
+            ...(!this.rawDocExistsInNamespace(doc!, namespace) && {
               metadata: { isNotOverwritable: true },
             }),
           },
