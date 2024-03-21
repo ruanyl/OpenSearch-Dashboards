@@ -191,4 +191,21 @@ describe('WorkspaceUpdater', () => {
     });
     expect(notificationToastsAddSuccess).not.toHaveBeenCalled();
   });
+
+  it('should show danger toasts after update workspace threw error', async () => {
+    workspaceClientUpdate.mockImplementation(() => {
+      throw new Error('update workspace failed');
+    });
+    const { getByTestId } = render(<WorkspaceUpdater />);
+    const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
+    fireEvent.input(nameInput, {
+      target: { value: 'test workspace name' },
+    });
+    fireEvent.click(getByTestId('workspaceForm-bottomBar-updateButton'));
+    expect(workspaceClientUpdate).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(notificationToastsAddDanger).toHaveBeenCalled();
+    });
+    expect(notificationToastsAddSuccess).not.toHaveBeenCalled();
+  });
 });
