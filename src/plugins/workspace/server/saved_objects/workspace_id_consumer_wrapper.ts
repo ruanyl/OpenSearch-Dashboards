@@ -12,7 +12,6 @@ import {
   SavedObjectsCheckConflictsObject,
   OpenSearchDashboardsRequest,
   SavedObjectsFindOptions,
-  WORKSPACE_TYPE,
 } from '../../../../core/server';
 
 type WorkspaceOptions =
@@ -22,26 +21,16 @@ type WorkspaceOptions =
   | undefined;
 
 export class WorkspaceIdConsumerWrapper {
-  private typeRelatedToWorkspace(type: string | string[]): boolean {
-    if (Array.isArray(type)) {
-      return type.some((item) => item === WORKSPACE_TYPE);
-    }
-
-    return type === WORKSPACE_TYPE;
-  }
   private formatWorkspaceIdParams<T extends WorkspaceOptions>(
     request: OpenSearchDashboardsRequest,
-    options: T
+    options?: T
   ): T {
-    if (!options) {
-      return options;
-    }
-    const { workspaces, ...others } = options;
+    const { workspaces, ...others } = options || {};
     const workspaceState = getWorkspaceState(request);
     const workspaceIdParsedFromRequest = workspaceState?.id;
-    const workspaceIdsInUserOptions = options.workspaces;
+    const workspaceIdsInUserOptions = options?.workspaces;
     let finalWorkspaces: string[] = [];
-    if (options.hasOwnProperty('workspaces')) {
+    if (options?.hasOwnProperty('workspaces')) {
       finalWorkspaces = workspaceIdsInUserOptions || [];
     } else if (workspaceIdParsedFromRequest) {
       finalWorkspaces = [workspaceIdParsedFromRequest];
@@ -79,11 +68,7 @@ export class WorkspaceIdConsumerWrapper {
         ),
       delete: wrapperOptions.client.delete,
       find: (options: SavedObjectsFindOptions) =>
-        wrapperOptions.client.find(
-          this.typeRelatedToWorkspace(options.type)
-            ? options
-            : this.formatWorkspaceIdParams(wrapperOptions.request, options)
-        ),
+        wrapperOptions.client.find(this.formatWorkspaceIdParams(wrapperOptions.request, options)),
       bulkGet: wrapperOptions.client.bulkGet,
       get: wrapperOptions.client.get,
       update: wrapperOptions.client.update,

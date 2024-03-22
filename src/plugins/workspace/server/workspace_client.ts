@@ -20,7 +20,10 @@ import {
 import { IWorkspaceClientImpl, WorkspaceFindOptions, IResponse, IRequestDetail } from './types';
 import { workspace } from './saved_objects';
 import { generateRandomId } from './utils';
-import { WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID } from '../common/constants';
+import {
+  WORKSPACE_ID_CONSUMER_WRAPPER_ID,
+  WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
+} from '../common/constants';
 
 const WORKSPACE_ID_SIZE = 6;
 
@@ -56,6 +59,13 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
     requestDetail: IRequestDetail
   ): SavedObjectsClientContract {
     return this.savedObjects?.getScopedClient(requestDetail.request, {
+      /**
+       * workspace object does not have workspaces field
+       * so need to bypass the consumer wrapper
+       * or it will append workspaces into the options.workspaces
+       * when list all the workspaces inside a workspace
+       */
+      excludedWrappers: [WORKSPACE_ID_CONSUMER_WRAPPER_ID],
       includedHiddenTypes: [WORKSPACE_TYPE],
     }) as SavedObjectsClientContract;
   }
