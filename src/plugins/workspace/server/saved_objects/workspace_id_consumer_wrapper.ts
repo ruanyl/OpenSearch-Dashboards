@@ -30,8 +30,8 @@ export class WorkspaceIdConsumerWrapper {
     const workspaceIdParsedFromRequest = workspaceState?.id;
     const workspaceIdsInUserOptions = options?.workspaces;
     let finalWorkspaces: string[] = [];
-    if (options?.hasOwnProperty('workspaces')) {
-      finalWorkspaces = workspaceIdsInUserOptions || [];
+    if (workspaceIdsInUserOptions) {
+      finalWorkspaces = workspaceIdsInUserOptions;
     } else if (workspaceIdParsedFromRequest) {
       finalWorkspaces = [workspaceIdParsedFromRequest];
     }

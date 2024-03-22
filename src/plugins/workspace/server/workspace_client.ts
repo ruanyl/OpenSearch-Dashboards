@@ -50,7 +50,15 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
     requestDetail: IRequestDetail
   ): SavedObjectsClientContract | undefined {
     return this.savedObjects?.getScopedClient(requestDetail.request, {
-      excludedWrappers: [WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID],
+      excludedWrappers: [
+        WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
+        /**
+         * workspace object does not have workspaces field
+         * so need to bypass workspace id consumer wrapper
+         * for any kind of operation to saved objects client.
+         */
+        WORKSPACE_ID_CONSUMER_WRAPPER_ID,
+      ],
       includedHiddenTypes: [WORKSPACE_TYPE],
     });
   }
@@ -59,12 +67,6 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
     requestDetail: IRequestDetail
   ): SavedObjectsClientContract {
     return this.savedObjects?.getScopedClient(requestDetail.request, {
-      /**
-       * workspace object does not have workspaces field
-       * so need to bypass the consumer wrapper
-       * or it will append workspaces into the options.workspaces
-       * when list all the workspaces inside a workspace
-       */
       excludedWrappers: [WORKSPACE_ID_CONSUMER_WRAPPER_ID],
       includedHiddenTypes: [WORKSPACE_TYPE],
     }) as SavedObjectsClientContract;
