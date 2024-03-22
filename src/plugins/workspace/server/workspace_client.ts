@@ -20,12 +20,7 @@ import {
 import { IWorkspaceClientImpl, WorkspaceFindOptions, IResponse, IRequestDetail } from './types';
 import { workspace } from './saved_objects';
 import { generateRandomId } from './utils';
-import {
-  WORKSPACE_ID_CONSUMER_WRAPPER_ID,
-  WORKSPACE_OVERVIEW_APP_ID,
-  WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
-  WORKSPACE_UPDATE_APP_ID,
-} from '../common/constants';
+import { WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID } from '../common/constants';
 
 const WORKSPACE_ID_SIZE = 6;
 

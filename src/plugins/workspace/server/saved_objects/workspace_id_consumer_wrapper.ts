@@ -12,9 +12,6 @@ import {
   SavedObjectsCheckConflictsObject,
   OpenSearchDashboardsRequest,
   SavedObjectsFindOptions,
-  SavedObjectsUpdateOptions,
-  SavedObjectsBulkUpdateOptions,
-  SavedObjectsBulkUpdateObject,
   WORKSPACE_TYPE,
 } from '../../../../core/server';
 
@@ -89,26 +86,8 @@ export class WorkspaceIdConsumerWrapper {
         ),
       bulkGet: wrapperOptions.client.bulkGet,
       get: wrapperOptions.client.get,
-      update: <T = unknown>(
-        type: string,
-        id: string,
-        attributes: Partial<T>,
-        options: SavedObjectsUpdateOptions = {}
-      ) =>
-        wrapperOptions.client.update(
-          type,
-          id,
-          attributes,
-          this.formatWorkspaceIdParams(wrapperOptions.request, options)
-        ),
-      bulkUpdate: <T = unknown>(
-        objects: Array<SavedObjectsBulkUpdateObject<T>>,
-        options?: SavedObjectsBulkUpdateOptions
-      ) =>
-        wrapperOptions.client.bulkUpdate(
-          objects,
-          this.formatWorkspaceIdParams(wrapperOptions.request, options)
-        ),
+      update: wrapperOptions.client.update,
+      bulkUpdate: wrapperOptions.client.bulkUpdate,
       addToNamespaces: wrapperOptions.client.addToNamespaces,
       deleteFromNamespaces: wrapperOptions.client.deleteFromNamespaces,
     };

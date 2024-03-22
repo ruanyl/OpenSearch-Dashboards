@@ -88,6 +88,12 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
       this.workspaceConflictControl.wrapperFactory
     );
 
+    core.savedObjects.addClientWrapper(
+      -2,
+      WORKSPACE_ID_CONSUMER_WRAPPER_ID,
+      new WorkspaceIdConsumerWrapper().wrapperFactory
+    );
+
     this.logger.info('Workspace permission control enabled:' + isPermissionControlEnabled);
     if (isPermissionControlEnabled) {
       this.permissionControl = new SavedObjectsPermissionControl(this.logger);
@@ -102,14 +108,6 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
         this.workspaceSavedObjectsClientWrapper.wrapperFactory
       );
     }
-
-    // TODO: TOO many client wrapper inside a single workspace plugin
-    // Try to combine conflict wrapper and this consumer wrapper.
-    core.savedObjects.addClientWrapper(
-      -2,
-      WORKSPACE_ID_CONSUMER_WRAPPER_ID,
-      new WorkspaceIdConsumerWrapper().wrapperFactory
-    );
 
     registerRoutes({
       http: core.http,
