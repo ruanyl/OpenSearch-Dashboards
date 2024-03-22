@@ -21,17 +21,18 @@ import { IWorkspaceClientImpl } from './types';
 import { WorkspaceClient } from './workspace_client';
 import { registerRoutes } from './routes';
 import { WorkspaceSavedObjectsClientWrapper } from './saved_objects';
-import { cleanWorkspaceId, getWorkspaceIdFromUrl } from '../../../core/server/utils';
+import {
+  cleanWorkspaceId,
+  getWorkspaceIdFromUrl,
+  updateWorkspaceState,
+} from '../../../core/server/utils';
 import { WorkspaceConflictSavedObjectsClientWrapper } from './saved_objects/saved_objects_wrapper_for_check_workspace_conflict';
 import {
   SavedObjectsPermissionControl,
   SavedObjectsPermissionControlContract,
 } from './permission_control/client';
 import { WorkspacePluginConfigType } from '../config';
-import { workspaceIdInUrlSymbol } from './constant';
 import { WorkspaceIdConsumerWrapper } from './saved_objects/workspace_id_consumer_wrapper';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
-import { ensureRawRequest } from '../../../core/server/http/router'; // TODO: move the ensureRawRequest to a core module or the import will be an issue as the ensureRawRequest can only be import from core module
 
 export class WorkspacePlugin implements Plugin<{}, {}> {
   private readonly logger: Logger;
@@ -52,8 +53,9 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
       );
 
       if (workspaceId) {
-        const rawRequest = ensureRawRequest(request);
-        rawRequest.headers[workspaceIdInUrlSymbol.toString()] = workspaceId;
+        updateWorkspaceState(request, {
+          id: workspaceId,
+        });
         const requestUrl = new URL(request.url.toString());
         requestUrl.pathname = cleanWorkspaceId(requestUrl.pathname);
         return toolkit.rewriteUrl(requestUrl.toString());

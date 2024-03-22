@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { getWorkspaceState } from '../../../../core/server/utils';
 import {
   SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
@@ -16,7 +17,6 @@ import {
   SavedObjectsBulkUpdateObject,
   WORKSPACE_TYPE,
 } from '../../../../core/server';
-import { workspaceIdInUrlSymbol } from '../constant';
 
 type WorkspaceOptions =
   | {
@@ -40,13 +40,14 @@ export class WorkspaceIdConsumerWrapper {
       return options;
     }
     const { workspaces, ...others } = options;
-    const workspaceIdParsedFromUrl = request.headers[workspaceIdInUrlSymbol.toString()] as string;
-    const workspaceIdInUserOptions = options.workspaces;
+    const workspaceState = getWorkspaceState(request);
+    const workspaceIdParsedFromRequest = workspaceState?.id;
+    const workspaceIdsInUserOptions = options.workspaces;
     let finalWorkspaces: string[] = [];
-    if (workspaceIdInUserOptions?.length) {
-      finalWorkspaces = workspaceIdInUserOptions;
-    } else if (workspaceIdParsedFromUrl) {
-      finalWorkspaces = [workspaceIdParsedFromUrl];
+    if (options.hasOwnProperty('workspaces')) {
+      finalWorkspaces = workspaceIdsInUserOptions || [];
+    } else if (workspaceIdParsedFromRequest) {
+      finalWorkspaces = [workspaceIdParsedFromRequest];
     }
 
     return {
