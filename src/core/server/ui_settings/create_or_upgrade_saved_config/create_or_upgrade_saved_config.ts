@@ -66,8 +66,8 @@ export async function createOrUpgradeSavedConfig(
     await savedObjectsClient.create('config', attributes, {
       id: version,
       // config is a global object that should not belong to any of the workspaces
-      // declare it as empty array to prevent it being created as a workspace object
-      workspaces: [],
+      // declare it as null to prevent it being created as a workspace object
+      workspaces: null,
     });
   } catch (error) {
     if (handleWriteErrors) {

@@ -50,7 +50,7 @@ describe('WorkspaceIdConsumerWrapper', () => {
       );
     });
 
-    it(`Should use options.workspaces there is workspaces inside options`, async () => {
+    it(`Should use options.workspaces when there is no workspaces inside options`, async () => {
       await wrapperClient.create(
         'dashboard',
         {
@@ -59,7 +59,7 @@ describe('WorkspaceIdConsumerWrapper', () => {
         {
           id: 'dashboard:foo',
           overwrite: true,
-          workspaces: undefined,
+          workspaces: null,
         }
       );
 

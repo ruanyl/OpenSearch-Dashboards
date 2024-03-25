@@ -132,7 +132,7 @@ export interface SavedObjectsBaseOptions {
   /** Specify the namespace for this operation */
   namespace?: string;
   /** Specify the workspaces for this operation */
-  workspaces?: string[];
+  workspaces?: string[] | null;
 }
 
 /**

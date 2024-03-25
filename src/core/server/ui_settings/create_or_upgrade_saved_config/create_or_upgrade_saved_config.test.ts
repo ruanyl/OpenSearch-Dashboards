@@ -98,6 +98,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
         },
         {
           id: version,
+          workspaces: null,
         }
       );
     });
@@ -133,6 +134,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
         },
         {
           id: version,
+          workspaces: null,
         }
       );
     });

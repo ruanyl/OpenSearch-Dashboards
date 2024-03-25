@@ -79,7 +79,7 @@ export async function checkConflicts({
   });
   const checkConflictsResult = await savedObjectsClient.checkConflicts(objectsToCheck, {
     namespace,
-    workspaces,
+    ...(workspaces ? { workspaces } : {}),
   });
   const errorMap = checkConflictsResult.errors.reduce(
     (acc, { type, id, error }) => acc.set(`${type}:${id}`, error),

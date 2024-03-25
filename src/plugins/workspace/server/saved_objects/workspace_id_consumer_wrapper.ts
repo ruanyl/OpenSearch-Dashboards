@@ -14,11 +14,7 @@ import {
   SavedObjectsFindOptions,
 } from '../../../../core/server';
 
-type WorkspaceOptions =
-  | {
-      workspaces?: string[];
-    }
-  | undefined;
+type WorkspaceOptions = Pick<SavedObjectsBaseOptions, 'workspaces'> | undefined;
 
 export class WorkspaceIdConsumerWrapper {
   private formatWorkspaceIdParams<T extends WorkspaceOptions>(
@@ -30,8 +26,8 @@ export class WorkspaceIdConsumerWrapper {
     const workspaceIdParsedFromRequest = workspaceState?.id;
     const workspaceIdsInUserOptions = options?.workspaces;
     let finalWorkspaces: string[] = [];
-    if (workspaceIdsInUserOptions) {
-      finalWorkspaces = workspaceIdsInUserOptions;
+    if (options?.hasOwnProperty('workspaces')) {
+      finalWorkspaces = workspaceIdsInUserOptions || [];
     } else if (workspaceIdParsedFromRequest) {
       finalWorkspaces = [workspaceIdParsedFromRequest];
     }
