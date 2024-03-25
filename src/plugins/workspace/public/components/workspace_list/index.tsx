@@ -26,6 +26,8 @@ import { WORKSPACE_CREATE_APP_ID } from '../../../common/constants';
 
 import { cleanWorkspaceId } from '../../../../../core/public';
 import { DeleteWorkspaceModal } from '../delete_workspace_modal';
+import { useAllWorkspaceFeatures, useApplications } from '././../../hooks';
+import { convertApplicationsToFeaturesOrGroups } from '../workspace_form/utils';
 
 const WORKSPACE_LIST_PAGE_DESCRIPTIOIN = i18n.translate('workspace.list.description', {
   defaultMessage:
@@ -47,6 +49,10 @@ export const WorkspaceList = () => {
     pageSizeOptions: [5, 10, 20],
   });
   const [deletedWorkspace, setDeletedWorkspace] = useState<WorkspaceAttribute | null>(null);
+  const workspaceFeaturesOrGroups = convertApplicationsToFeaturesOrGroups(
+    useApplications(application)
+  );
+  const allFeatureIds = useAllWorkspaceFeatures(workspaceFeaturesOrGroups);
 
   const handleSwitchWorkspace = useCallback(
     (id: string) => {
@@ -106,6 +112,10 @@ export const WorkspaceList = () => {
       name: 'Features',
       isExpander: true,
       hasActions: true,
+      render: (features: string[]) => {
+        const quantity = allFeatureIds.filter((id) => features.indexOf(id) > -1).length;
+        return `${quantity}/${allFeatureIds.length}`;
+      },
     },
     {
       name: 'Actions',
