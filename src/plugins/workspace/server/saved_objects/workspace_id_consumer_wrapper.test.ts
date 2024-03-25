@@ -93,7 +93,7 @@ describe('WorkspaceIdConsumerWrapper', () => {
     });
 
     it(`Should add workspaces parameters when checkConflict`, async () => {
-      await wrapperClient.checkConflicts([]);
+      await wrapperClient.checkConflicts();
       expect(mockedClient.checkConflicts).toBeCalledWith([], {
         workspaces: ['foo'],
       });
