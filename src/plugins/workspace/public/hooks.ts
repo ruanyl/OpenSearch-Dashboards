@@ -5,11 +5,11 @@
 
 import { useObservable } from 'react-use';
 import { useMemo } from 'react';
+import { of } from 'rxjs';
 import { WorkspaceFeature, WorkspaceFeatureGroup } from './components/workspace_form/types';
 import { ApplicationStart, PublicAppInfo } from '../../../core/public';
 import { isWorkspaceFeatureGroup } from './components/workspace_form/utils';
 import { DEFAULT_SELECTED_FEATURES_IDS } from '../common/constants';
-import { of } from 'rxjs';
 
 export function useApplications(application?: ApplicationStart) {
   const applications = useObservable(application?.applications$ ?? of(new Map()), new Map());
