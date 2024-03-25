@@ -88,6 +88,42 @@ describe('workspace service api integration test', () => {
       expect(result.body.success).toEqual(true);
       expect(typeof result.body.result.id).toBe('string');
     });
+    it('create workspace failed when name duplicate', async () => {
+      let result: any = await osdTestServer.request
+        .post(root, `/api/workspaces`)
+        .send({
+          attributes: omitId(testWorkspace),
+        })
+        .expect(200);
+
+      expect(result.body.success).toEqual(true);
+
+      await opensearchServer.opensearch.getClient().indices.refresh({ index: '.kibana' });
+
+      // same name
+      result = await osdTestServer.request
+        .post(root, `/api/workspaces`)
+        .send({
+          attributes: omitId(testWorkspace),
+        })
+        .expect(200);
+
+      expect(result.body.success).toEqual(false);
+      expect(result.body.error).toEqual(
+        'workspace name has already been used, try with a different name'
+      );
+
+      // verify simple query string flags is NONE
+      result = await osdTestServer.request
+        .post(root, `/api/workspaces`)
+        .send({
+          attributes: { ...omitId(testWorkspace), name: 'test test_workspace' },
+        })
+        .expect(200);
+
+      expect(result.body.success).toEqual(true);
+    });
+
     it('get', async () => {
       const result = await osdTestServer.request
         .post(root, `/api/workspaces`)
