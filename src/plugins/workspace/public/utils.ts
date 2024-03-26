@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AppCategory } from '../../../core/public';
+import { AppCategory, PublicAppInfo, AppNavLinkStatus } from '../../../core/public';
 
 /**
  * Checks if a given feature matches the provided feature configuration.
@@ -54,4 +54,19 @@ export const featureMatchesConfig = (featureConfigs: string[]) => ({
   }
 
   return matched;
+};
+
+export const getSelectedFeatureQuantities = (
+  featuresConfig: string[],
+  applications: PublicAppInfo[]
+) => {
+  const visibleApplications = applications.filter(
+    ({ navLinkStatus, chromeless }) => navLinkStatus !== AppNavLinkStatus.hidden && !chromeless
+  );
+  const featureFilter = featureMatchesConfig(featuresConfig);
+  const selectedApplications = visibleApplications.filter((app) => featureFilter(app));
+  return {
+    total: visibleApplications.length,
+    selected: selectedApplications.length,
+  };
 };
