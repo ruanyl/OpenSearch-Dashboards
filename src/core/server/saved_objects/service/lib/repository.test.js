@@ -53,12 +53,6 @@ const createGenericNotFoundError = (...args) =>
 const createUnsupportedTypeError = (...args) =>
   SavedObjectsErrorHelpers.createUnsupportedTypeError(...args).output.payload;
 
-const omitWorkspace = (object) => {
-  const newObject = JSON.parse(JSON.stringify(object));
-  delete newObject.workspaces;
-  return newObject;
-};
-
 describe('SavedObjectsRepository', () => {
   let client;
   let savedObjectsRepository;
@@ -499,9 +493,7 @@ describe('SavedObjectsRepository', () => {
         opensearchClientMock.createSuccessTransportRequestPromise(response)
       );
       const result = await savedObjectsRepository.bulkCreate(objects, options);
-      expect(client.mget).toHaveBeenCalledTimes(
-        multiNamespaceObjects?.length || options?.workspaces ? 1 : 0
-      );
+      expect(client.mget).toHaveBeenCalledTimes(multiNamespaceObjects?.length ? 1 : 0);
       return result;
     };
 
@@ -1801,7 +1793,6 @@ describe('SavedObjectsRepository', () => {
     const obj6 = { type: NAMESPACE_AGNOSTIC_TYPE, id: 'six' };
     const obj7 = { type: NAMESPACE_AGNOSTIC_TYPE, id: 'seven' };
     const obj8 = { type: 'dashboard', id: 'eight', workspaces: ['foo'] };
-    const obj9 = { type: 'dashboard', id: 'nine', workspaces: ['bar'] };
     const namespace = 'foo-namespace';
 
     const checkConflicts = async (objects, options) =>
@@ -1920,36 +1911,6 @@ describe('SavedObjectsRepository', () => {
             // obj5 was not found so it does not result in a conflict error
             { ...obj6, error: createConflictError(obj6.type, obj6.id) },
             // obj7 was not found so it does not result in a conflict error
-          ],
-        });
-      });
-
-      it(`expected results with workspaces`, async () => {
-        const objects = [obj8, obj9];
-        const response = {
-          status: 200,
-          docs: [getMockGetResponse(obj8), getMockGetResponse(obj9)],
-        };
-        client.mget.mockResolvedValue(
-          opensearchClientMock.createSuccessTransportRequestPromise(response)
-        );
-
-        const result = await checkConflicts(objects, {
-          workspaces: ['foo'],
-        });
-        expect(client.mget).toHaveBeenCalledTimes(1);
-        expect(result).toEqual({
-          errors: [
-            { ...omitWorkspace(obj8), error: createConflictError(obj8.type, obj8.id) },
-            {
-              ...omitWorkspace(obj9),
-              error: {
-                ...createConflictError(obj9.type, obj9.id),
-                metadata: {
-                  isNotOverwritable: true,
-                },
-              },
-            },
           ],
         });
       });
