@@ -12,7 +12,7 @@ export function useApplications(application?: ApplicationStart) {
   const applications = useObservable(application?.applications$ ?? of(new Map()), new Map());
   return useMemo(() => {
     const apps: PublicAppInfo[] = [];
-    applications?.forEach((app) => {
+    applications.forEach((app) => {
       apps.push(app);
     });
     return apps;
