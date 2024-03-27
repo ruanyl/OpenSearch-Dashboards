@@ -61,7 +61,7 @@ export interface SavedObjectsExportOptions {
   /** optional namespace to override the namespace used by the savedObjectsClient. */
   namespace?: string;
   /** optional workspaces to override the workspaces used by the savedObjectsClient. */
-  workspaces?: string[];
+  workspaces?: SavedObject['workspaces'];
 }
 
 /**
@@ -97,7 +97,7 @@ async function fetchObjectsToExport({
   exportSizeLimit: number;
   savedObjectsClient: SavedObjectsClientContract;
   namespace?: string;
-  workspaces?: string[];
+  workspaces?: SavedObjectsExportOptions['workspaces'];
 }) {
   if ((types?.length ?? 0) > 0 && (objects?.length ?? 0) > 0) {
     throw Boom.badRequest(`Can't specify both "types" and "objects" properties when exporting`);

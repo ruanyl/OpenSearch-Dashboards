@@ -97,7 +97,7 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
   /**
    * workspaces the objects belong to, will only be used when overwrite is enabled.
    */
-  workspaces?: string[];
+  workspaces?: SavedObject['workspaces'];
 }
 
 /**

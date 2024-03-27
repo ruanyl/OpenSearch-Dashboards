@@ -65,7 +65,7 @@ export interface SavedObjectsCreateOptions {
   /** {@inheritDoc SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
   references?: SavedObjectReference[];
-  workspaces?: string[];
+  workspaces?: SavedObject['workspaces'];
 }
 
 /**
@@ -83,7 +83,7 @@ export interface SavedObjectsBulkCreateObject<T = unknown> extends SavedObjectsC
 export interface SavedObjectsBulkCreateOptions {
   /** If a document with the given `id` already exists, overwrite it's contents (default=false). */
   overwrite?: boolean;
-  workspaces?: string[];
+  workspaces?: SavedObjectsCreateOptions['workspaces'];
 }
 
 /** @public */

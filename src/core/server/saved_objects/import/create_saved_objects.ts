@@ -41,7 +41,7 @@ interface CreateSavedObjectsParams<T> {
   overwrite?: boolean;
   dataSourceId?: string;
   dataSourceTitle?: string;
-  workspaces?: string[];
+  workspaces?: SavedObject['workspaces'];
 }
 interface CreateSavedObjectsResult<T> {
   createdObjects: Array<CreatedObject<T>>;

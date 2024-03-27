@@ -147,7 +147,7 @@ export class SavedObjectsPermissionControl {
     const principals = this.getPrincipalsFromRequest(request);
     const deniedObjects: Array<
       Pick<SavedObjectsBulkGetObject, 'id' | 'type'> & {
-        workspaces?: string[];
+        workspaces?: SavedObject['workspaces'];
         permissions?: Permissions;
       }
     > = [];

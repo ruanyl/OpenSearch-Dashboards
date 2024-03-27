@@ -44,7 +44,7 @@ interface CheckConflictsParams {
   ignoreRegularConflicts?: boolean;
   retries?: SavedObjectsImportRetry[];
   createNewCopies?: boolean;
-  workspaces?: string[];
+  workspaces?: SavedObject['workspaces'];
 }
 
 const isUnresolvableConflict = (error: SavedObjectError) =>
