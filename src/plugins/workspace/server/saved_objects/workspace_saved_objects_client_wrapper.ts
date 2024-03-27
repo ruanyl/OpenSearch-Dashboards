@@ -468,9 +468,9 @@ export class WorkspaceSavedObjectsClientWrapper {
                 [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.LibraryWrite]
               ),
             },
-            // By declaring workspaces as empty array,
+            // By declaring workspaces as null,
             // workspaces won't be appended automatically into the options.
-            workspaces: [],
+            workspaces: null,
           })
         ).saved_objects.map((item) => item.id);
 
