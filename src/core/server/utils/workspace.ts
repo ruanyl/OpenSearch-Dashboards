@@ -20,7 +20,7 @@ import { OpenSearchDashboardsRequest, ensureRawRequest } from '../http/router';
  */
 export const updateWorkspaceState = (
   request: OpenSearchDashboardsRequest,
-  payload: PluginsStates['workspace']
+  payload: Partial<PluginsStates['workspace']>
 ) => {
   const rawRequest = ensureRawRequest(request);
 
