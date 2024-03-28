@@ -470,6 +470,7 @@ export class WorkspaceSavedObjectsClientWrapper {
             },
             // By declaring workspaces as null,
             // workspaces won't be appended automatically into the options.
+            // or workspaces can not be found because workspace object do not have `workspaces` field.
             workspaces: null,
           })
         ).saved_objects.map((item) => item.id);
