@@ -16,14 +16,11 @@ import {
 import { i18n } from '@osd/i18n';
 import { groupBy } from 'lodash';
 
-import {
-  AppNavLinkStatus,
-  DEFAULT_APP_CATEGORIES,
-  PublicAppInfo,
-} from '../../../../../core/public';
+import { DEFAULT_APP_CATEGORIES, PublicAppInfo } from '../../../../../core/public';
 
 import { WorkspaceFeature, WorkspaceFeatureGroup } from './types';
 import { isDefaultCheckedFeatureId, isWorkspaceFeatureGroup } from './utils';
+import { getAllExcludingManagementApps } from '../../utils';
 
 const libraryCategoryLabel = i18n.translate('core.ui.libraryNavList.label', {
   defaultMessage: 'Library',
@@ -58,17 +55,10 @@ export const WorkspaceFeatureSelector = ({
       Array<WorkspaceFeature | WorkspaceFeatureGroup>
     >((previousValue, currentKey) => {
       const apps = category2Applications[currentKey];
-      const features = apps
-        .filter(
-          ({ navLinkStatus, chromeless, category }) =>
-            navLinkStatus !== AppNavLinkStatus.hidden &&
-            !chromeless &&
-            category?.id !== DEFAULT_APP_CATEGORIES.management.id
-        )
-        .map(({ id, title }) => ({
-          id,
-          name: title,
-        }));
+      const features = getAllExcludingManagementApps(apps).map(({ id, title }) => ({
+        id,
+        name: title,
+      }));
       if (features.length === 0) {
         return previousValue;
       }
