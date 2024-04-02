@@ -71,6 +71,7 @@ export class WorkspaceIdConsumerWrapper {
       bulkUpdate: wrapperOptions.client.bulkUpdate,
       addToNamespaces: wrapperOptions.client.addToNamespaces,
       deleteFromNamespaces: wrapperOptions.client.deleteFromNamespaces,
+      deleteByWorkspace: wrapperOptions.client.deleteByWorkspace,
     };
   };
 
