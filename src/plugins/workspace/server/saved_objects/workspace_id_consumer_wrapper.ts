@@ -23,7 +23,7 @@ export class WorkspaceIdConsumerWrapper {
   ): T {
     const { workspaces, ...others } = options || {};
     const workspaceState = getWorkspaceState(request);
-    const workspaceIdParsedFromRequest = workspaceState?.id;
+    const workspaceIdParsedFromRequest = workspaceState?.requestWorkspaceId;
     const workspaceIdsInUserOptions = options?.workspaces;
     let finalWorkspaces: string[] = [];
     if (options?.hasOwnProperty('workspaces')) {

@@ -54,7 +54,7 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
 
       if (workspaceId) {
         updateWorkspaceState(request, {
-          id: workspaceId,
+          requestWorkspaceId: workspaceId,
         });
         const requestUrl = new URL(request.url.toString());
         requestUrl.pathname = cleanWorkspaceId(requestUrl.pathname);
