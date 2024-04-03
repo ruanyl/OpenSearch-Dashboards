@@ -7,6 +7,7 @@ import { updateWorkspaceState } from '../../../../core/server/utils';
 import { SavedObject } from '../../../../core/public';
 import { httpServerMock, savedObjectsClientMock, coreMock } from '../../../../core/server/mocks';
 import { WorkspaceIdConsumerWrapper } from './workspace_id_consumer_wrapper';
+import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../../../plugins/data_source/common';
 
 describe('WorkspaceIdConsumerWrapper', () => {
   const requestHandlerContext = coreMock.createRequestHandlerContext();
@@ -14,7 +15,7 @@ describe('WorkspaceIdConsumerWrapper', () => {
   const mockedClient = savedObjectsClientMock.create();
   const workspaceEnabledMockRequest = httpServerMock.createOpenSearchDashboardsRequest();
   updateWorkspaceState(workspaceEnabledMockRequest, {
-    id: 'foo',
+    requestWorkspaceId: 'foo',
   });
   const wrapperClient = wrapperInstance.wrapperFactory({
     client: mockedClient,
@@ -112,6 +113,15 @@ describe('WorkspaceIdConsumerWrapper', () => {
       expect(mockedClient.find).toBeCalledWith({
         type: 'dashboard',
         workspaces: ['foo'],
+      });
+    });
+
+    it(`workspaces parameters should be removed when finding data sources`, async () => {
+      await wrapperClient.find({
+        type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+      });
+      expect(mockedClient.find).toBeCalledWith({
+        type: DATA_SOURCE_SAVED_OBJECT_TYPE,
       });
     });
   });

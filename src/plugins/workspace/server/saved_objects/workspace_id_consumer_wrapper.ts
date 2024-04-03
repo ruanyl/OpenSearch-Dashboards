@@ -13,6 +13,7 @@ import {
   OpenSearchDashboardsRequest,
   SavedObjectsFindOptions,
 } from '../../../../core/server';
+import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../../../plugins/data_source/common';
 
 type WorkspaceOptions = Pick<SavedObjectsBaseOptions, 'workspaces'> | undefined;
 
@@ -36,6 +37,17 @@ export class WorkspaceIdConsumerWrapper {
       ...(others as T),
       ...(finalWorkspaces.length ? { workspaces: finalWorkspaces } : {}),
     };
+  }
+  private isDataSourceType(type: SavedObjectsFindOptions['type']): boolean {
+    if (Array.isArray(type)) {
+      return type.every((item) => item === DATA_SOURCE_SAVED_OBJECT_TYPE);
+    }
+
+    return type === DATA_SOURCE_SAVED_OBJECT_TYPE;
+  }
+  private formatFindParams(options: SavedObjectsFindOptions): SavedObjectsFindOptions {
+    const isListingDataSource = this.isDataSourceType(options.type);
+    return isListingDataSource ? { ...options, workspaces: null } : options;
   }
   public wrapperFactory: SavedObjectsClientWrapperFactory = (wrapperOptions) => {
     return {
@@ -64,7 +76,14 @@ export class WorkspaceIdConsumerWrapper {
         ),
       delete: wrapperOptions.client.delete,
       find: (options: SavedObjectsFindOptions) =>
-        wrapperOptions.client.find(this.formatWorkspaceIdParams(wrapperOptions.request, options)),
+        wrapperOptions.client.find(
+          this.formatWorkspaceIdParams(
+            wrapperOptions.request,
+            // The `formatFindParams` is a workaroud for 2.14 to always list global data sources,
+            // should remove this workaround in 2.15 once readonly share is available
+            this.formatFindParams(options)
+          )
+        ),
       bulkGet: wrapperOptions.client.bulkGet,
       get: wrapperOptions.client.get,
       update: wrapperOptions.client.update,
