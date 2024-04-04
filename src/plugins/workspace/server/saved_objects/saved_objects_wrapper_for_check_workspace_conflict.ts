@@ -49,6 +49,9 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
       options: SavedObjectsCreateOptions = {}
     ) => {
       const { workspaces, id, overwrite } = options;
+      if (!id || !overwrite) {
+        return await wrapperOptions.client.create(type, attributes, options);
+      }
       let savedObjectWorkspaces = options?.workspaces;
 
       /**
@@ -90,6 +93,9 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
       options: SavedObjectsCreateOptions = {}
     ): Promise<SavedObjectsBulkResponse<T>> => {
       const { overwrite, namespace } = options;
+      if (!overwrite) {
+        return await wrapperOptions.client.bulkCreate(objects, options);
+      }
       /**
        * When overwrite, filter out all the objects that have ids
        */

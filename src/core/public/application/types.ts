@@ -91,6 +91,27 @@ export enum AppNavLinkStatus {
 }
 
 /**
+ * Visibilities of the application
+ *
+ * @public
+ */
+export enum AppVisibility {
+  /**
+   * The application visibility will be `both` if the application's {@link AppVisibility} is set to `default` or not set
+   * which means the application is visible within / out of workspace.
+   */
+  default = 0,
+  /**
+   * The application is only visible when user is inside a workspace.
+   */
+  workspaceOnly = 1,
+  /**
+   * The application is only visible when user is not in any workspace.
+   */
+  homeOnly = 2,
+}
+
+/**
  * Defines the list of fields that can be updated via an {@link AppUpdater}.
  * @public
  */
@@ -245,6 +266,13 @@ export interface App<HistoryLocationState = unknown> {
    * ```
    */
   exactRoute?: boolean;
+
+  /**
+   * The visibility of the application based on workspace.
+   * Defaulting to `both`
+   * See {@link AppVisibility}
+   */
+  visibility: AppVisibility;
 }
 
 /**

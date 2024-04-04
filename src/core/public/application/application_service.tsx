@@ -50,6 +50,7 @@ import {
   AppStatus,
   AppUpdatableFields,
   AppUpdater,
+  AppVisibility,
   InternalApplicationSetup,
   InternalApplicationStart,
   Mounter,
@@ -57,6 +58,7 @@ import {
 } from './types';
 import { getLeaveAction, isConfirmAction } from './application_leave';
 import { appendAppPath, parseAppUrl, relativeToAbsolute, getAppInfo } from './utils';
+import { WorkspacesStart } from '../workspace';
 
 interface SetupDeps {
   context: ContextSetup;
@@ -69,6 +71,7 @@ interface SetupDeps {
 interface StartDeps {
   http: HttpStart;
   overlays: OverlayStart;
+  workspaces: WorkspacesStart;
 }
 
 // Mount functions with two arguments are assumed to expect deprecated `context` object.
@@ -213,7 +216,7 @@ export class ApplicationService {
     };
   }
 
-  public async start({ http, overlays }: StartDeps): Promise<InternalApplicationStart> {
+  public async start({ http, overlays, workspaces }: StartDeps): Promise<InternalApplicationStart> {
     if (!this.mountContext) {
       throw new Error('ApplicationService#setup() must be invoked before start.');
     }
@@ -257,6 +260,13 @@ export class ApplicationService {
       const currentAppId = this.currentAppId$.value;
       const navigatingToSameApp = currentAppId === appId;
       const shouldNavigate = navigatingToSameApp ? true : await this.shouldNavigate(overlays);
+      const targetApp = applications$.value.get(appId);
+      if (
+        workspaces.currentWorkspaceId$.value &&
+        targetApp?.visibility === AppVisibility.homeOnly
+      ) {
+        window.location.assign(getAppUrl(availableMounters, appId, path));
+      }
 
       if (shouldNavigate) {
         if (path === undefined) {
