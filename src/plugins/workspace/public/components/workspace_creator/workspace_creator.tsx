@@ -11,6 +11,7 @@ import { WorkspaceForm, WorkspaceFormSubmitData, WorkspaceOperationType } from '
 import { WORKSPACE_OVERVIEW_APP_ID } from '../../../common/constants';
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { WorkspaceClient } from '../../workspace_client';
+import { convertPermissionSettingsToPermissions } from '../workspace_form/utils';
 
 export const WorkspaceCreator = () => {
   const {
@@ -22,8 +23,11 @@ export const WorkspaceCreator = () => {
     async (data: WorkspaceFormSubmitData) => {
       let result;
       try {
-        const { permissions, ...attributes } = data;
-        result = await workspaceClient.create(attributes, permissions);
+        const { permissionSettings, ...attributes } = data;
+        result = await workspaceClient.create(
+          attributes,
+          convertPermissionSettingsToPermissions(permissionSettings)
+        );
       } catch (error) {
         notifications?.toasts.addDanger({
           title: i18n.translate('workspace.create.failed', {

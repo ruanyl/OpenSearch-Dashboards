@@ -12,6 +12,7 @@ import { WorkspaceFatalError } from './components/workspace_fatal_error';
 import { WorkspaceCreatorApp } from './components/workspace_creator_app';
 import { WorkspaceUpdaterApp } from './components/workspace_updater_app';
 import { Services } from './types';
+import { WorkspaceOverviewApp } from './components/workspace_overview_app';
 
 export const renderCreatorApp = ({ element }: AppMountParameters, services: Services) => {
   ReactDOM.render(
@@ -58,6 +59,19 @@ export const renderListApp = ({ element }: AppMountParameters, services: Service
   ReactDOM.render(
     <OpenSearchDashboardsContextProvider services={services}>
       <WorkspaceListApp />
+    </OpenSearchDashboardsContextProvider>,
+    element
+  );
+
+  return () => {
+    ReactDOM.unmountComponentAtNode(element);
+  };
+};
+
+export const renderOverviewApp = ({ element }: AppMountParameters, services: Services) => {
+  ReactDOM.render(
+    <OpenSearchDashboardsContextProvider services={services}>
+      <WorkspaceOverviewApp />
     </OpenSearchDashboardsContextProvider>,
     element
   );

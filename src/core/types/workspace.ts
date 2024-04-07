@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { Permissions } from '../server/saved_objects';
+
 export interface WorkspaceAttribute {
   id: string;
   name: string;
@@ -14,6 +16,10 @@ export interface WorkspaceAttribute {
   defaultVISTheme?: string;
 }
 
-export interface WorkspaceObject extends WorkspaceAttribute {
+export interface WorkspaceAttributeWithPermission extends WorkspaceAttribute {
+  permissions?: Permissions;
+}
+
+export interface WorkspaceObject extends WorkspaceAttributeWithPermission {
   readonly?: boolean;
 }

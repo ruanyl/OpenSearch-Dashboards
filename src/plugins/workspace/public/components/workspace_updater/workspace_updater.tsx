@@ -6,27 +6,30 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiPage, EuiPageBody, EuiPageHeader, EuiPageContent } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { WorkspaceAttribute } from 'opensearch-dashboards/public';
 import { useObservable } from 'react-use';
 import { of } from 'rxjs';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { WorkspaceForm, WorkspaceFormSubmitData, WorkspaceOperationType } from '../workspace_form';
 import { WORKSPACE_OVERVIEW_APP_ID } from '../../../common/constants';
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
+import { WorkspaceAttributeWithPermission } from '../../../../../core/types';
 import { WorkspaceClient } from '../../workspace_client';
-import { WorkspaceFormData, WorkspacePermissionSetting } from '../workspace_form/types';
-
-interface WorkspaceWithPermission extends WorkspaceAttribute {
-  permissions?: WorkspacePermissionSetting[];
-}
+import {
+  convertPermissionSettingsToPermissions,
+  convertPermissionsToPermissionSettings,
+} from '../workspace_form/utils';
 
 function getFormDataFromWorkspace(
-  currentWorkspace: WorkspaceAttribute | null | undefined
-): WorkspaceFormData {
-  const currentWorkspaceWithPermission = (currentWorkspace || {}) as WorkspaceWithPermission;
+  currentWorkspace: WorkspaceAttributeWithPermission | null | undefined
+) {
+  if (!currentWorkspace) {
+    return null;
+  }
   return {
-    ...currentWorkspaceWithPermission,
-    permissions: currentWorkspaceWithPermission.permissions || [],
+    ...currentWorkspace,
+    permissionSettings: currentWorkspace.permissions
+      ? convertPermissionsToPermissionSettings(currentWorkspace.permissions)
+      : currentWorkspace.permissions,
   };
 }
 
@@ -38,7 +41,7 @@ export const WorkspaceUpdater = () => {
   const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
 
   const currentWorkspace = useObservable(workspaces ? workspaces.currentWorkspace$ : of(null));
-  const [currentWorkspaceFormData, setCurrentWorkspaceFormData] = useState<WorkspaceFormData>(
+  const [currentWorkspaceFormData, setCurrentWorkspaceFormData] = useState(
     getFormDataFromWorkspace(currentWorkspace)
   );
 
@@ -59,8 +62,12 @@ export const WorkspaceUpdater = () => {
       }
 
       try {
-        const { permissions, ...attributes } = data;
-        result = await workspaceClient.update(currentWorkspace.id, attributes, permissions);
+        const { permissionSettings, ...attributes } = data;
+        result = await workspaceClient.update(
+          currentWorkspace.id,
+          attributes,
+          convertPermissionSettingsToPermissions(permissionSettings)
+        );
       } catch (error) {
         notifications?.toasts.addDanger({
           title: i18n.translate('workspace.update.failed', {
@@ -100,7 +107,7 @@ export const WorkspaceUpdater = () => {
     [notifications?.toasts, currentWorkspace, http, application, workspaceClient]
   );
 
-  if (!currentWorkspaceFormData.name) {
+  if (!currentWorkspaceFormData) {
     return null;
   }
 

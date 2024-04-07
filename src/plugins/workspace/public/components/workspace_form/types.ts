@@ -5,7 +5,7 @@
 
 import type { WorkspacePermissionItemType, WorkspaceOperationType } from './constants';
 import type { WorkspacePermissionMode } from '../../../common/constants';
-import type { App, ApplicationStart } from '../../../../../core/public';
+import type { ApplicationStart } from '../../../../../core/public';
 
 export type WorkspacePermissionSetting =
   | { type: WorkspacePermissionItemType.User; userId: string; modes: WorkspacePermissionMode[] }
@@ -18,7 +18,7 @@ export interface WorkspaceFormSubmitData {
   color?: string;
   icon?: string;
   defaultVISTheme?: string;
-  permissions: WorkspacePermissionSetting[];
+  permissionSettings?: WorkspacePermissionSetting[];
 }
 
 export interface WorkspaceFormData extends WorkspaceFormSubmitData {

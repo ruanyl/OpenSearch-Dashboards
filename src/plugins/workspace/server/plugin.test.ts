@@ -14,9 +14,6 @@ describe('Workspace server plugin', () => {
     const setupMock = coreMock.createSetup();
     const initializerContextConfigMock = coreMock.createPluginInitializerContext({
       enabled: true,
-      permission: {
-        enabled: true,
-      },
     });
     setupMock.capabilities.registerProvider.mockImplementationOnce((fn) => (value = fn()));
     const workspacePlugin = new WorkspacePlugin(initializerContextConfigMock);

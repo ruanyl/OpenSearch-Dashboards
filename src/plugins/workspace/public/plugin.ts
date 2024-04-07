@@ -190,6 +190,19 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
       },
     });
 
+    // overview
+    core.application.register({
+      id: WORKSPACE_OVERVIEW_APP_ID,
+      title: i18n.translate('workspace.settings.workspaceOverview', {
+        defaultMessage: 'Workspace Overview',
+      }),
+      navLinkStatus: AppNavLinkStatus.hidden,
+      async mount(params: AppMountParameters) {
+        const { renderOverviewApp } = await import('./application');
+        return mountWorkspaceApp(params, renderOverviewApp);
+      },
+    });
+
     // workspace fatal error
     core.application.register({
       id: WORKSPACE_FATAL_ERROR_APP_ID,

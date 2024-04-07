@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { featureMatchesConfig } from './utils';
+import { featureMatchesConfig, getSelectedFeatureQuantities } from './utils';
+import { PublicAppInfo } from '../../../core/public';
 
 describe('workspace utils: featureMatchesConfig', () => {
   it('feature configured with `*` should match any features', () => {
@@ -89,5 +90,50 @@ describe('workspace utils: featureMatchesConfig', () => {
     expect(match({ id: 'integrations', category: { id: 'management', label: 'Management' } })).toBe(
       true
     );
+  });
+});
+
+describe('workspace utils: getSelectedFeatureQuantities', () => {
+  const defaultApplications = [
+    {
+      appRoute: '/app/dashboards',
+      id: 'dashboards',
+      title: 'Dashboards',
+      category: {
+        id: 'opensearchDashboards',
+        label: 'OpenSearch Dashboards',
+        euiIconType: 'inputOutput',
+        order: 1000,
+      },
+      status: 0,
+      navLinkStatus: 1,
+    },
+    {
+      appRoute: '/app/dev_tools',
+      id: 'dev_tools',
+      title: 'Dev Tools',
+      category: {
+        id: 'management',
+        label: 'Management',
+        order: 5000,
+        euiIconType: 'managementApp',
+      },
+      status: 0,
+      navLinkStatus: 1,
+    },
+  ] as PublicAppInfo[];
+  it('should support * rules and exclude management category', () => {
+    const { total, selected } = getSelectedFeatureQuantities(['*'], defaultApplications);
+    expect(total).toBe(1);
+    expect(selected).toBe(1);
+  });
+
+  it('should get quantity normally and exclude management category', () => {
+    const { total, selected } = getSelectedFeatureQuantities(
+      ['dev_tools', '!@management'],
+      defaultApplications
+    );
+    expect(total).toBe(1);
+    expect(selected).toBe(0);
   });
 });

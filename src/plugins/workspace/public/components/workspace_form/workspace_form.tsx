@@ -170,7 +170,7 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
           <WorkspacePermissionSettingPanel
             errors={formErrors.permissions}
             onChange={setPermissionSettings}
-            permissionSettings={formData.permissions}
+            permissionSettings={formData.permissionSettings}
             lastAdminItemDeletable={!!permissionLastAdminItemDeletable}
             data-test-subj={`workspaceForm-permissionSettingPanel`}
           />

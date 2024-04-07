@@ -3,15 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ApplicationStart, PublicAppInfo } from 'opensearch-dashboards/public';
 import { useObservable } from 'react-use';
 import { useMemo } from 'react';
+import { of } from 'rxjs';
+import { ApplicationStart, PublicAppInfo } from '../../../core/public';
 
-export function useApplications(application: ApplicationStart) {
-  const applications = useObservable(application.applications$);
+const emptyMap = new Map();
+
+export function useApplications(application?: ApplicationStart) {
+  const applications = useObservable(application?.applications$ ?? of(emptyMap), emptyMap);
   return useMemo(() => {
     const apps: PublicAppInfo[] = [];
-    applications?.forEach((app) => {
+    applications.forEach((app) => {
       apps.push(app);
     });
     return apps;

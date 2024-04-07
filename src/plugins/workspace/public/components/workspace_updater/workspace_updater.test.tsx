@@ -169,7 +169,14 @@ describe('WorkspaceUpdater', () => {
         description: 'test workspace description',
         features: expect.arrayContaining(['app1', 'app2', 'app3']),
       }),
-      expect.arrayContaining([expect.objectContaining({ type: 'user', userId: 'test user id' })])
+      {
+        read: {
+          users: ['test user id'],
+        },
+        library_read: {
+          users: ['test user id'],
+        },
+      }
     );
     await waitFor(() => {
       expect(notificationToastsAddSuccess).toHaveBeenCalled();
