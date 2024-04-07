@@ -46,6 +46,7 @@ import { MockLifecycle } from './test_types';
 import { ApplicationService } from './application_service';
 import { App, PublicAppInfo, AppNavLinkStatus, AppStatus, AppUpdater } from './types';
 import { act } from 'react-dom/test-utils';
+import { workspacesServiceMock } from '../mocks';
 
 const createApp = (props: Partial<App>): App => {
   return {
@@ -68,7 +69,11 @@ describe('#setup()', () => {
       context: contextServiceMock.createSetupContract(),
       redirectTo: jest.fn(),
     };
-    startDeps = { http, overlays: overlayServiceMock.createStartContract() };
+    startDeps = {
+      http,
+      overlays: overlayServiceMock.createStartContract(),
+      workspaces: workspacesServiceMock.createStartContract(),
+    };
     service = new ApplicationService();
   });
 
@@ -398,7 +403,11 @@ describe('#start()', () => {
       context: contextServiceMock.createSetupContract(),
       redirectTo: jest.fn(),
     };
-    startDeps = { http, overlays: overlayServiceMock.createStartContract() };
+    startDeps = {
+      http,
+      overlays: overlayServiceMock.createStartContract(),
+      workspaces: workspacesServiceMock.createStartContract(),
+    };
     service = new ApplicationService();
   });
 
@@ -869,7 +878,11 @@ describe('#stop()', () => {
       http,
       context: contextServiceMock.createSetupContract(),
     };
-    startDeps = { http, overlays: overlayServiceMock.createStartContract() };
+    startDeps = {
+      http,
+      overlays: overlayServiceMock.createStartContract(),
+      workspaces: workspacesServiceMock.createStartContract(),
+    };
     service = new ApplicationService();
   });
 
