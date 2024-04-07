@@ -265,7 +265,10 @@ export class ApplicationService {
         workspaces.currentWorkspaceId$.value &&
         targetApp?.visibility === AppVisibility.homeOnly
       ) {
+        // If user is inside a workspace and the target app is homeOnly
+        // refresh the page by doing a hard navigation
         window.location.assign(getAppUrl(availableMounters, appId, path));
+        return;
       }
 
       if (shouldNavigate) {

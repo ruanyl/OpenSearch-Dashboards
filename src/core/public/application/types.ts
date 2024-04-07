@@ -272,7 +272,7 @@ export interface App<HistoryLocationState = unknown> {
    * Defaulting to `both`
    * See {@link AppVisibility}
    */
-  visibility: AppVisibility;
+  visibility?: AppVisibility;
 }
 
 /**
