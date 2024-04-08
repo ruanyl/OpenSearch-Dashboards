@@ -28,7 +28,12 @@
  * under the License.
  */
 
-import { SavedObject, SavedObjectsClientContract, SavedObjectsImportError } from '../types';
+import {
+  SavedObject,
+  SavedObjectsBaseOptions,
+  SavedObjectsClientContract,
+  SavedObjectsImportError,
+} from '../types';
 import { extractErrors } from './extract_errors';
 import { CreatedObject } from './types';
 
@@ -41,7 +46,7 @@ interface CreateSavedObjectsParams<T> {
   overwrite?: boolean;
   dataSourceId?: string;
   dataSourceTitle?: string;
-  workspaces?: SavedObject['workspaces'];
+  workspaces?: SavedObjectsBaseOptions['workspaces'];
 }
 interface CreateSavedObjectsResult<T> {
   createdObjects: Array<CreatedObject<T>>;

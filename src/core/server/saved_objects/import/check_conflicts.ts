@@ -35,6 +35,7 @@ import {
   SavedObjectsImportError,
   SavedObjectError,
   SavedObjectsImportRetry,
+  SavedObjectsBaseOptions,
 } from '../types';
 
 interface CheckConflictsParams {
@@ -44,7 +45,7 @@ interface CheckConflictsParams {
   ignoreRegularConflicts?: boolean;
   retries?: SavedObjectsImportRetry[];
   createNewCopies?: boolean;
-  workspaces?: SavedObject['workspaces'];
+  workspaces?: SavedObjectsBaseOptions['workspaces'];
 }
 
 const isUnresolvableConflict = (error: SavedObjectError) =>
