@@ -51,7 +51,6 @@ export {
   AppLeaveConfirmAction,
   NavigateToAppOptions,
   PublicAppInfo,
-  AppVisibility,
   // Internal types
   InternalApplicationSetup,
   InternalApplicationStart,

@@ -50,7 +50,6 @@ import {
   AppStatus,
   AppUpdatableFields,
   AppUpdater,
-  AppVisibility,
   InternalApplicationSetup,
   InternalApplicationStart,
   Mounter,

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { PublicAppInfo, AppNavLinkStatus, AppStatus, AppVisibility } from '../../application';
+import { PublicAppInfo, AppNavLinkStatus, AppStatus } from '../../application';
 import { IBasePath } from '../../http';
 import { NavLinkWrapper } from './nav_link';
 import { appendAppPath } from '../../application/utils';
