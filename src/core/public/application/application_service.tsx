@@ -263,14 +263,12 @@ export class ApplicationService {
 
       if (shouldNavigate) {
         const targetApp = applications$.value.get(appId);
-        if (
-          workspaces.currentWorkspaceId$.value &&
-          targetApp?.visibility === AppVisibility.homeOnly
-        ) {
-          // If user is inside a workspace and the target app is homeOnly
+        if (workspaces.currentWorkspaceId$.value && targetApp?.workspaceless) {
+          // If user is inside a workspace and the target app is workspaceless
           // refresh the page by doing a hard navigation
           window.location.assign(
             http.basePath.prepend(getAppUrl(availableMounters, appId, path), {
+              // Set withoutClientBasePath to true remove the workspace path prefix
               withoutClientBasePath: true,
             })
           );

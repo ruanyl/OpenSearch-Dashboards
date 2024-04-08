@@ -36,7 +36,7 @@ import { appendAppPath } from '../../application/utils';
 export function toNavLink(app: PublicAppInfo, basePath: IBasePath): NavLinkWrapper {
   const useAppStatus = app.navLinkStatus === AppNavLinkStatus.default;
   let relativeBaseUrl = basePath.prepend(app.appRoute!);
-  if (app.visibility === AppVisibility.homeOnly) {
+  if (app.workspaceless) {
     relativeBaseUrl = basePath.prepend(app.appRoute!, { withoutClientBasePath: true });
   }
   const url = relativeToAbsolute(appendAppPath(relativeBaseUrl, app.defaultPath));

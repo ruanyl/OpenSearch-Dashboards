@@ -130,7 +130,7 @@ export class HomePublicPlugin
         const { renderApp } = await import('./application');
         return await renderApp(params.element, coreStart, params.history);
       },
-      visibility: AppVisibility.homeOnly,
+      workspaceless: true,
     });
     urlForwarding.forwardApp('home', 'home');
 
