@@ -53,7 +53,7 @@ describe('Workspace server plugin', () => {
     expect(toolKitMock.rewriteUrl).toBeCalledWith('http://localhost/app');
     expect(toolKitMock.next).toBeCalledTimes(0);
     expect(getWorkspaceState(requestWithWorkspaceInUrl)).toEqual({
-      id: 'foo',
+      requestWorkspaceId: 'foo',
     });
 
     const requestWithoutWorkspaceInUrl = httpServerMock.createOpenSearchDashboardsRequest({

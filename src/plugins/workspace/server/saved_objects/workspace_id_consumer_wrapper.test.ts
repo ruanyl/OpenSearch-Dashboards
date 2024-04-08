@@ -14,7 +14,7 @@ describe('WorkspaceIdConsumerWrapper', () => {
   const mockedClient = savedObjectsClientMock.create();
   const workspaceEnabledMockRequest = httpServerMock.createOpenSearchDashboardsRequest();
   updateWorkspaceState(workspaceEnabledMockRequest, {
-    id: 'foo',
+    requestWorkspaceId: 'foo',
   });
   const wrapperClient = wrapperInstance.wrapperFactory({
     client: mockedClient,
