@@ -308,7 +308,10 @@ export class ApplicationService {
         appId,
         { path, absolute = false }: { path?: string; absolute?: boolean } = {}
       ) => {
-        const relUrl = http.basePath.prepend(getAppUrl(availableMounters, appId, path));
+        const targetApp = applications$.value.get(appId);
+        const relUrl = http.basePath.prepend(getAppUrl(availableMounters, appId, path), {
+          withoutClientBasePath: targetApp?.workspaceless,
+        });
         return absolute ? relativeToAbsolute(relUrl) : relUrl;
       },
       navigateToApp,
