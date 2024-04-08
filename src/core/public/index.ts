@@ -130,7 +130,6 @@ export {
   AppUpdater,
   ScopedHistory,
   NavigateToAppOptions,
-  AppVisibility,
 } from './application';
 
 export {
