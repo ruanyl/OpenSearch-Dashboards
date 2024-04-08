@@ -140,6 +140,7 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
         const { renderListApp } = await import('./application');
         return mountWorkspaceApp(params, renderListApp);
       },
+      workspaceless: true,
     });
 
     // create
@@ -153,6 +154,7 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
         const { renderCreatorApp } = await import('./application');
         return mountWorkspaceApp(params, renderCreatorApp);
       },
+      workspaceless: true,
     });
 
     // update
