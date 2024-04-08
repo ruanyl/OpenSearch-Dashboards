@@ -260,18 +260,23 @@ export class ApplicationService {
       const currentAppId = this.currentAppId$.value;
       const navigatingToSameApp = currentAppId === appId;
       const shouldNavigate = navigatingToSameApp ? true : await this.shouldNavigate(overlays);
-      const targetApp = applications$.value.get(appId);
-      if (
-        workspaces.currentWorkspaceId$.value &&
-        targetApp?.visibility === AppVisibility.homeOnly
-      ) {
-        // If user is inside a workspace and the target app is homeOnly
-        // refresh the page by doing a hard navigation
-        window.location.assign(getAppUrl(availableMounters, appId, path));
-        return;
-      }
 
       if (shouldNavigate) {
+        const targetApp = applications$.value.get(appId);
+        if (
+          workspaces.currentWorkspaceId$.value &&
+          targetApp?.visibility === AppVisibility.homeOnly
+        ) {
+          // If user is inside a workspace and the target app is homeOnly
+          // refresh the page by doing a hard navigation
+          window.location.assign(
+            http.basePath.prepend(getAppUrl(availableMounters, appId, path), {
+              withoutClientBasePath: true,
+            })
+          );
+          return;
+        }
+
         if (path === undefined) {
           path = applications$.value.get(appId)?.defaultPath;
         }
