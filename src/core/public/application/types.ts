@@ -263,7 +263,8 @@ export interface App<HistoryLocationState = unknown> {
   exactRoute?: boolean;
 
   /**
-   * Prevent the page to be accessible when inside a workspace. Defaults to `false`.
+   * Declare if page is accessible when inside a workspace.
+   * Defaults to undefined to indicate the application can be accessible within or out of workspace.
    */
   workspaceAccessibility?: WorkspaceAccessibility;
 }
