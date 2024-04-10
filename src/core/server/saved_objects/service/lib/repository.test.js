@@ -167,7 +167,7 @@ describe('SavedObjectsRepository', () => {
   });
 
   const getMockGetResponse = (
-    { type, id, references, namespace: objectNamespace, originId, workspaces, permissions },
+    { type, id, references, namespace: objectNamespace, originId, permissions, workspaces },
     namespace
   ) => {
     const namespaceId = objectNamespace === 'default' ? undefined : objectNamespace ?? namespace;
@@ -181,9 +181,9 @@ describe('SavedObjectsRepository', () => {
       _source: {
         ...(registry.isSingleNamespace(type) && { namespace: namespaceId }),
         ...(registry.isMultiNamespace(type) && { namespaces: [namespaceId ?? 'default'] }),
-        workspaces,
         ...(originId && { originId }),
         ...(permissions && { permissions }),
+        ...(workspaces && { workspaces }),
         type,
         [type]: { title: 'Testing' },
         references,
@@ -3169,7 +3169,7 @@ describe('SavedObjectsRepository', () => {
     const namespace = 'foo-namespace';
     const originId = 'some-origin-id';
 
-    const getSuccess = async (type, id, options, includeOriginId, permissions) => {
+    const getSuccess = async (type, id, options, includeOriginId, permissions, workspaces) => {
       const response = getMockGetResponse(
         {
           type,
@@ -3178,6 +3178,7 @@ describe('SavedObjectsRepository', () => {
           // operation will return it in the result. This flag is just used for test purposes to modify the mock cluster call response.
           ...(includeOriginId && { originId }),
           ...(permissions && { permissions }),
+          ...(workspaces && { workspaces }),
         },
         options?.namespace
       );
@@ -3341,6 +3342,14 @@ describe('SavedObjectsRepository', () => {
         const result = await getSuccess(type, id, { namespace }, undefined, permissions);
         expect(result).toMatchObject({
           permissions: permissions,
+        });
+      });
+
+      it(`includes workspaces property if present`, async () => {
+        const workspaces = ['workspace-1'];
+        const result = await getSuccess(type, id, { namespace }, undefined, undefined, workspaces);
+        expect(result).toMatchObject({
+          workspaces: workspaces,
         });
       });
     });

@@ -38,6 +38,7 @@ import {
   SavedObjectsClientContract as SavedObjectsApi,
   SavedObjectsFindOptions as SavedObjectFindOptionsServer,
   SavedObjectsMigrationVersion,
+  SavedObjectsBaseOptions,
 } from '../../server';
 
 import { SimpleSavedObject } from './simple_saved_object';
@@ -65,7 +66,7 @@ export interface SavedObjectsCreateOptions {
   /** {@inheritDoc SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
   references?: SavedObjectReference[];
-  workspaces?: SavedObject['workspaces'];
+  workspaces?: SavedObjectsBaseOptions['workspaces'];
 }
 
 /**

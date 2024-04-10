@@ -46,8 +46,8 @@ export const useWorkspaceForm = ({ application, defaultValues, onSubmit }: Works
   const [permissionSettings, setPermissionSettings] = useState<
     Array<Partial<WorkspacePermissionSetting>>
   >(
-    defaultValues?.permissions && defaultValues.permissions.length > 0
-      ? defaultValues.permissions
+    defaultValues?.permissionSettings && defaultValues.permissionSettings.length > 0
+      ? defaultValues.permissionSettings
       : []
   );
 
@@ -58,7 +58,7 @@ export const useWorkspaceForm = ({ application, defaultValues, onSubmit }: Works
     description,
     features: selectedFeatureIds,
     color,
-    permissions: permissionSettings,
+    permissionSettings,
   });
   const getFormDataRef = useRef(getFormData);
   getFormDataRef.current = getFormData;
@@ -96,12 +96,15 @@ export const useWorkspaceForm = ({ application, defaultValues, onSubmit }: Works
           }),
         };
       }
-      const permissionErrors: string[] = new Array(formData.permissions.length);
-      for (let i = 0; i < formData.permissions.length; i++) {
-        const permission = formData.permissions[i];
+      const permissionErrors: string[] = new Array(formData.permissionSettings.length);
+      for (let i = 0; i < formData.permissionSettings.length; i++) {
+        const permission = formData.permissionSettings[i];
         if (isValidWorkspacePermissionSetting(permission)) {
           if (
-            isUserOrGroupPermissionSettingDuplicated(formData.permissions.slice(0, i), permission)
+            isUserOrGroupPermissionSettingDuplicated(
+              formData.permissionSettings.slice(0, i),
+              permission
+            )
           ) {
             permissionErrors[i] = i18n.translate('workspace.form.permission.invalidate.group', {
               defaultMessage: 'Duplicate permission setting',
@@ -162,8 +165,11 @@ export const useWorkspaceForm = ({ application, defaultValues, onSubmit }: Works
         formData.features = defaultValues?.features ?? [];
       }
 
-      const permissions = formData.permissions.filter(isValidWorkspacePermissionSetting);
-      onSubmit?.({ ...formData, name: formData.name!, permissions });
+      onSubmit?.({
+        ...formData,
+        name: formData.name!,
+        permissionSettings: formData.permissionSettings.filter(isValidWorkspacePermissionSetting),
+      });
     },
     [defaultFeatures, onSubmit, defaultValues?.features]
   );

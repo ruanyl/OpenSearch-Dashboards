@@ -22,10 +22,10 @@ import {
   SavedObjectsBulkUpdateResponse,
   SavedObjectsBulkUpdateOptions,
   WORKSPACE_TYPE,
-  SavedObjectsDeleteByWorkspaceOptions,
   SavedObjectsErrorHelpers,
   SavedObjectsServiceStart,
   SavedObjectsClientContract,
+  SavedObjectsDeleteByWorkspaceOptions,
 } from '../../../../core/server';
 import { SavedObjectsPermissionControlContract } from '../permission_control/client';
 import {
@@ -68,22 +68,13 @@ const getDefaultValuesForEmpty = <T>(values: T[] | undefined, defaultValues: T[]
 
 export class WorkspaceSavedObjectsClientWrapper {
   private getScopedClient?: SavedObjectsServiceStart['getScopedClient'];
-  private formatWorkspacePermissionModeToStringArray(
-    permission: WorkspacePermissionMode | WorkspacePermissionMode[]
-  ): string[] {
-    if (Array.isArray(permission)) {
-      return permission;
-    }
-
-    return [permission];
-  }
 
   private async validateObjectsPermissions(
     objects: Array<Pick<SavedObject, 'id' | 'type'>>,
     request: OpenSearchDashboardsRequest,
-    permissionMode: WorkspacePermissionMode | WorkspacePermissionMode[]
+    permissionModes: WorkspacePermissionMode[]
   ) {
-    // PermissionMode here is an array which is merged by workspace type required permission and other saved object required permission.
+    // PermissionModes here is an array which is merged by workspace type required permission and other saved object required permission.
     // So we only need to do one permission check no matter its type.
     for (const { id, type } of objects) {
       const validateResult = await this.permissionControl.validate(
@@ -92,7 +83,7 @@ export class WorkspaceSavedObjectsClientWrapper {
           type,
           id,
         },
-        this.formatWorkspacePermissionModeToStringArray(permissionMode)
+        permissionModes
       );
       if (!validateResult?.result) {
         return false;
@@ -105,20 +96,20 @@ export class WorkspaceSavedObjectsClientWrapper {
   private validateMultiWorkspacesPermissions = async (
     workspacesIds: string[],
     request: OpenSearchDashboardsRequest,
-    permissionMode: WorkspacePermissionMode | WorkspacePermissionMode[]
+    permissionModes: WorkspacePermissionMode[]
   ) => {
     // for attributes and options passed in this function, the num of workspaces may be 0.This case should not be passed permission check.
     if (workspacesIds.length === 0) {
       return false;
     }
     const workspaces = workspacesIds.map((id) => ({ id, type: WORKSPACE_TYPE }));
-    return await this.validateObjectsPermissions(workspaces, request, permissionMode);
+    return await this.validateObjectsPermissions(workspaces, request, permissionModes);
   };
 
   private validateAtLeastOnePermittedWorkspaces = async (
     workspaces: string[] | undefined,
     request: OpenSearchDashboardsRequest,
-    permissionMode: WorkspacePermissionMode | WorkspacePermissionMode[]
+    permissionModes: WorkspacePermissionMode[]
   ) => {
     // for attributes and options passed in this function, the num of workspaces attribute may be 0.This case should not be passed permission check.
     if (!workspaces || workspaces.length === 0) {
@@ -131,7 +122,7 @@ export class WorkspaceSavedObjectsClientWrapper {
           type: WORKSPACE_TYPE,
           id: workspaceId,
         },
-        this.formatWorkspacePermissionModeToStringArray(permissionMode)
+        permissionModes
       );
       if (validateResult?.result) {
         return true;
@@ -499,12 +490,9 @@ export class WorkspaceSavedObjectsClientWrapper {
           options.workspaces = permittedWorkspaces;
         } else {
           /**
-           * Select all the docs that
-           * 1. ACL matches read / write / user passed permission OR
-           * 2. workspaces matches library_read or library_write OR
+           * If no workspaces present, find all the docs that
+           * ACL matches read / write / user passed permission
            */
-          options.workspaces = permittedWorkspaceIds;
-          options.workspacesSearchOperator = 'OR';
           options.ACLSearchParams.permissionModes = getDefaultValuesForEmpty(
             options.ACLSearchParams.permissionModes,
             [WorkspacePermissionMode.Read, WorkspacePermissionMode.Write]

@@ -11,7 +11,7 @@ import {
   WorkspaceAttribute,
   WorkspacesSetup,
 } from '../../../core/public';
-import { WorkspacePermissionMode } from '../common/constants';
+import { SavedObjectPermissions, WorkspaceAttributeWithPermission } from '../../../core/types';
 
 const WORKSPACES_API_BASE_URL = '/api/workspaces';
 
@@ -30,15 +30,6 @@ type IResponse<T> =
       success: false;
       error?: string;
     };
-
-type WorkspacePermissionItem = {
-  modes: Array<
-    | WorkspacePermissionMode.LibraryRead
-    | WorkspacePermissionMode.LibraryWrite
-    | WorkspacePermissionMode.Read
-    | WorkspacePermissionMode.Write
-  >;
-} & ({ type: 'user'; userId: string } | { type: 'group'; group: string });
 
 interface WorkspaceFindOptions {
   page?: number;
@@ -195,7 +186,7 @@ export class WorkspaceClient {
    */
   public async create(
     attributes: Omit<WorkspaceAttribute, 'id'>,
-    permissions?: WorkspacePermissionItem[]
+    permissions?: SavedObjectPermissions
   ): Promise<IResponse<Pick<WorkspaceAttribute, 'id'>>> {
     const path = this.getPath();
 
@@ -246,7 +237,7 @@ export class WorkspaceClient {
     options?: WorkspaceFindOptions
   ): Promise<
     IResponse<{
-      workspaces: WorkspaceAttribute[];
+      workspaces: WorkspaceAttributeWithPermission[];
       total: number;
       per_page: number;
       page: number;
@@ -263,9 +254,9 @@ export class WorkspaceClient {
    * Fetches a single workspace by a workspace id
    *
    * @param {string} id
-   * @returns {Promise<IResponse<WorkspaceAttribute>>} The metadata of the workspace for the given id.
+   * @returns {Promise<IResponse<WorkspaceAttributeWithPermission>>} The metadata of the workspace for the given id.
    */
-  public get(id: string): Promise<IResponse<WorkspaceAttribute>> {
+  public get(id: string): Promise<IResponse<WorkspaceAttributeWithPermission>> {
     const path = this.getPath(id);
     return this.safeFetch(path, {
       method: 'GET',
@@ -277,13 +268,13 @@ export class WorkspaceClient {
    *
    * @param {string} id
    * @param {object} attributes
-   * @param {WorkspacePermissionItem[]} permissions
+   * @param {WorkspacePermissionItem[]} permissionItems
    * @returns {Promise<IResponse<boolean>>} result for this operation
    */
   public async update(
     id: string,
     attributes: Partial<WorkspaceAttribute>,
-    permissions?: WorkspacePermissionItem[]
+    permissions?: SavedObjectPermissions
   ): Promise<IResponse<boolean>> {
     const path = this.getPath(id);
     const body = {

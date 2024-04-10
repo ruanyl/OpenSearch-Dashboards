@@ -14,9 +14,6 @@ describe('Workspace server plugin', () => {
     const setupMock = coreMock.createSetup();
     const initializerContextConfigMock = coreMock.createPluginInitializerContext({
       enabled: true,
-      permission: {
-        enabled: true,
-      },
     });
     setupMock.capabilities.registerProvider.mockImplementationOnce((fn) => (value = fn()));
     const workspacePlugin = new WorkspacePlugin(initializerContextConfigMock);
@@ -56,7 +53,7 @@ describe('Workspace server plugin', () => {
     expect(toolKitMock.rewriteUrl).toBeCalledWith('http://localhost/app');
     expect(toolKitMock.next).toBeCalledTimes(0);
     expect(getWorkspaceState(requestWithWorkspaceInUrl)).toEqual({
-      id: 'foo',
+      requestWorkspaceId: 'foo',
     });
 
     const requestWithoutWorkspaceInUrl = httpServerMock.createOpenSearchDashboardsRequest({
