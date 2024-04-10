@@ -8,6 +8,7 @@ import { SavedObject } from '../../../../core/public';
 import { httpServerMock, savedObjectsClientMock, coreMock } from '../../../../core/server/mocks';
 import { WorkspaceIdConsumerWrapper } from './workspace_id_consumer_wrapper';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../../../plugins/data_source/common';
+import { UI_SETTINGS_SAVED_OBJECTS_TYPE } from '../../../../core/server';
 
 describe('WorkspaceIdConsumerWrapper', () => {
   const requestHandlerContext = coreMock.createRequestHandlerContext();
@@ -85,6 +86,30 @@ describe('WorkspaceIdConsumerWrapper', () => {
           workspaces: ['foo'],
         }
       );
+    });
+
+    it(`Should throw error when trying to create unallowed type within a workspace`, async () => {
+      expect(() =>
+        wrapperClient.bulkCreate([
+          getSavedObject({
+            type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+            id: 'foo',
+          }),
+        ])
+      ).toThrow('type: data-source is not allowed to create within a workspace.');
+
+      expect(() =>
+        wrapperClient.bulkCreate([
+          getSavedObject({
+            type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+            id: 'foo',
+          }),
+          getSavedObject({
+            type: UI_SETTINGS_SAVED_OBJECTS_TYPE,
+            id: 'bar',
+          }),
+        ])
+      ).toThrow('type: data-source, type: config are not allowed to create within a workspace.');
     });
   });
 
