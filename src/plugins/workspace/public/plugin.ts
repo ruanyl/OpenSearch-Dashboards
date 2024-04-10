@@ -3,18 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { Subscription } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import { i18n } from '@osd/i18n';
 import { SavedObjectsManagementPluginSetup } from 'src/plugins/saved_objects_management/public';
-import { featureMatchesConfig } from './utils';
 import {
   AppMountParameters,
   AppNavLinkStatus,
   CoreSetup,
   CoreStart,
-  LinksUpdater,
   Plugin,
-  WorkspaceObject,
+  AppUpdater,
+  AppStatus,
 } from '../../../core/public';
 import {
   WORKSPACE_FATAL_ERROR_APP_ID,
@@ -28,7 +27,7 @@ import { renderWorkspaceMenu } from './render_workspace_menu';
 import { Services } from './types';
 import { WorkspaceClient } from './workspace_client';
 import { getWorkspaceColumn } from './components/workspace_column';
-import { NavLinkWrapper } from '../../../core/public/chrome/nav_links/nav_link';
+import { isAppAccessibleInWorkspace } from './utils';
 
 type WorkspaceAppType = (params: AppMountParameters, services: Services) => () => void;
 
@@ -40,54 +39,7 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
   private coreStart?: CoreStart;
   private currentWorkspaceIdSubscription?: Subscription;
   private currentWorkspaceSubscription?: Subscription;
-
-  /**
-   * Filter the nav links based on the feature configuration of workspace
-   */
-  private filterByWorkspace(allNavLinks: NavLinkWrapper[], workspace: WorkspaceObject | null) {
-    if (!workspace || !workspace.features) return allNavLinks;
-
-    const featureFilter = featureMatchesConfig(workspace.features);
-    return allNavLinks.filter((linkWrapper) => featureFilter(linkWrapper.properties));
-  }
-
-  /**
-   * Filter nav links by the current workspace, once the current workspace change, the nav links(left nav bar)
-   * should also be updated according to the configured features of the current workspace
-   */
-  private filterNavLinks(core: CoreStart) {
-    const currentWorkspace$ = core.workspaces.currentWorkspace$;
-    let filterLinksByWorkspace: LinksUpdater;
-
-    this.currentWorkspaceSubscription?.unsubscribe();
-    this.currentWorkspaceSubscription = currentWorkspace$.subscribe((currentWorkspace) => {
-      const linkUpdaters$ = core.chrome.navLinks.getLinkUpdaters$();
-      let linkUpdaters = linkUpdaters$.value;
-
-      /**
-       * It should only have one link filter exist based on the current workspace at a given time
-       * So we need to filter out previous workspace link filter before adding new one after changing workspace
-       */
-      linkUpdaters = linkUpdaters.filter((updater) => updater !== filterLinksByWorkspace);
-
-      /**
-       * Whenever workspace changed, this function will filter out those links that should not
-       * be displayed. For example, some workspace may not have Observability features configured, in such case,
-       * the nav links of Observability features should not be displayed in left nav bar
-       */
-      filterLinksByWorkspace = (navLinks) => {
-        const filteredNavLinks = this.filterByWorkspace([...navLinks.values()], currentWorkspace);
-        const newNavLinks = new Map<string, NavLinkWrapper>();
-        filteredNavLinks.forEach((chromeNavLink) => {
-          newNavLinks.set(chromeNavLink.id, chromeNavLink);
-        });
-        return newNavLinks;
-      };
-
-      linkUpdaters$.next([...linkUpdaters, filterLinksByWorkspace]);
-    });
-  }
-
+  private appUpdater$ = new BehaviorSubject<AppUpdater>(() => undefined);
   private _changeSavedObjectCurrentWorkspace() {
     if (this.coreStart) {
       return this.coreStart.workspaces.currentWorkspaceId$.subscribe((currentWorkspaceId) => {
@@ -98,9 +50,35 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
     }
   }
 
+  /**
+   * Filter nav links by the current workspace, once the current workspace change, the nav links(left nav bar)
+   * should also be updated according to the configured features of the current workspace
+   */
+  private filterNavLinks(core: CoreStart) {
+    const currentWorkspace$ = core.workspaces.currentWorkspace$;
+    this.currentWorkspaceSubscription?.unsubscribe();
+
+    this.currentWorkspaceSubscription = currentWorkspace$.subscribe((currentWorkspace) => {
+      if (currentWorkspace) {
+        this.appUpdater$.next((app) => {
+          if (isAppAccessibleInWorkspace(app, currentWorkspace)) {
+            return;
+          }
+          /**
+           * Change the app to `inaccessible` if it is not configured in the workspace
+           * If trying to access such app, an "Application Not Found" page will be displayed
+           */
+          return { status: AppStatus.inaccessible };
+        });
+      }
+    });
+  }
+
   public async setup(core: CoreSetup, { savedObjectsManagement }: WorkspacePluginSetupDeps) {
     const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
     await workspaceClient.init();
+    core.application.registerAppUpdater(this.appUpdater$);
+
     /**
      * Retrieve workspace id from url
      */
@@ -245,5 +223,6 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
   public stop() {
     this.currentWorkspaceIdSubscription?.unsubscribe();
     this.currentWorkspaceSubscription?.unsubscribe();
+    this.currentWorkspaceIdSubscription?.unsubscribe();
   }
 }
