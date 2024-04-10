@@ -31,8 +31,10 @@
 import { SavedObjectsType } from '../../saved_objects';
 import { migrations } from './migrations';
 
+export const UI_SETTINGS_SAVED_OBJECTS_TYPE = 'config';
+
 export const uiSettingsType: SavedObjectsType = {
-  name: 'config',
+  name: UI_SETTINGS_SAVED_OBJECTS_TYPE,
   hidden: false,
   namespaceType: 'single',
   mappings: {

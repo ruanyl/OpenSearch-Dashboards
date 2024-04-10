@@ -12,6 +12,8 @@ import {
   SavedObjectsCheckConflictsObject,
   OpenSearchDashboardsRequest,
   SavedObjectsFindOptions,
+  UI_SETTINGS_SAVED_OBJECTS_TYPE,
+  SavedObjectsErrorHelpers,
 } from '../../../../core/server';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../../../plugins/data_source/common';
 
@@ -45,6 +47,13 @@ export class WorkspaceIdConsumerWrapper {
 
     return type === DATA_SOURCE_SAVED_OBJECT_TYPE;
   }
+  private isConfigType(type: SavedObjectsFindOptions['type']): boolean {
+    if (Array.isArray(type)) {
+      return type.every((item) => item === UI_SETTINGS_SAVED_OBJECTS_TYPE);
+    }
+
+    return type === UI_SETTINGS_SAVED_OBJECTS_TYPE;
+  }
   private formatFindParams(options: SavedObjectsFindOptions): SavedObjectsFindOptions {
     const isListingDataSource = this.isDataSourceType(options.type);
     return isListingDataSource ? { ...options, workspaces: null } : options;
@@ -61,11 +70,34 @@ export class WorkspaceIdConsumerWrapper {
       bulkCreate: <T = unknown>(
         objects: Array<SavedObjectsBulkCreateObject<T>>,
         options: SavedObjectsCreateOptions = {}
-      ) =>
-        wrapperOptions.client.bulkCreate(
-          objects,
-          this.formatWorkspaceIdParams(wrapperOptions.request, options)
-        ),
+      ) => {
+        const { workspaces } = this.formatWorkspaceIdParams(wrapperOptions.request, options);
+        const disallowedSavedObjects = objects.filter((item) => {
+          // If create out of workspace, allow the operation
+          if (!workspaces?.length && !item.workspaces?.length) {
+            return false;
+          }
+
+          // config and data-sources can not be created inside a workspace
+          return this.isConfigType(item.type) || this.isDataSourceType(item.type);
+        });
+
+        if (!disallowedSavedObjects?.length) {
+          return wrapperOptions.client.bulkCreate(
+            objects,
+            this.formatWorkspaceIdParams(wrapperOptions.request, options)
+          );
+        }
+
+        const disallowedTypes = [...new Set(disallowedSavedObjects.map((item) => item.type))];
+
+        throw SavedObjectsErrorHelpers.decorateBadRequestError(
+          new Error(''),
+          `${disallowedTypes.map((item) => `type: ${item}`).join(', ')} ${
+            disallowedTypes.length > 1 ? 'are' : 'is'
+          } not allowed to create within a workspace.`
+        );
+      },
       checkConflicts: (
         objects: SavedObjectsCheckConflictsObject[] = [],
         options: SavedObjectsBaseOptions = {}
