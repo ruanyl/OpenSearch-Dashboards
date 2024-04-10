@@ -6,9 +6,23 @@
 import { SavedObject } from 'src/core/types';
 import { isEqual } from 'lodash';
 import * as osdTestServer from '../../../../../core/test_helpers/osd_server';
+import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../../../data_source/common';
+import { UI_SETTINGS_SAVED_OBJECTS_TYPE } from '../../../../../core/server';
 
 const dashboard: Omit<SavedObject, 'id'> = {
   type: 'dashboard',
+  attributes: {},
+  references: [],
+};
+
+const dataSource: Omit<SavedObject, 'id'> = {
+  type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+  attributes: {},
+  references: [],
+};
+
+const advancedSettings: Omit<SavedObject, 'id'> = {
+  type: UI_SETTINGS_SAVED_OBJECTS_TYPE,
   attributes: {},
   references: [],
 };
@@ -31,7 +45,14 @@ describe('workspace_id_consumer integration test', () => {
     const { startOpenSearch, startOpenSearchDashboards } = osdTestServer.createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
       settings: {
+        opensearch: {
+          license: 'oss',
+          opensearchFrom: '/Users/suzhou/Downloads/opensearch-3.0.0-SNAPSHOT',
+        },
         osd: {
+          data_source: {
+            enabled: true,
+          },
           workspace: {
             enabled: true,
           },
@@ -138,6 +159,47 @@ describe('workspace_id_consumer integration test', () => {
           })
         )
       );
+    });
+
+    it('bulk create with disallowed types', async () => {
+      await clearFooAndBar();
+
+      // import advanced settings and data sources should throw error
+      const createResultFoo = await osdTestServer.request
+        .post(root, `/w/${createdFooWorkspace.id}/api/saved_objects/_bulk_create`)
+        .send([
+          {
+            ...dataSource,
+            id: 'foo',
+          },
+          {
+            ...advancedSettings,
+            id: 'bar',
+          },
+        ])
+        .expect(400);
+      expect(createResultFoo.body).toEqual({
+        error: 'Bad Request',
+        message: 'type: data-source, type: config are not allowed to create within a workspace.',
+        statusCode: 400,
+      });
+
+      // data source and advanced settings should not be found within the workspace
+      const findDataSourceResult = await osdTestServer.request
+        .get(
+          root,
+          `/w/${createdFooWorkspace.id}/api/saved_objects/_find?type=${DATA_SOURCE_SAVED_OBJECT_TYPE}`
+        )
+        .expect(200);
+      expect(findDataSourceResult.body.total).toEqual(0);
+
+      const findAdvancedSettings = await osdTestServer.request
+        .get(
+          root,
+          `/w/${createdFooWorkspace.id}/api/saved_objects/_find?type=${UI_SETTINGS_SAVED_OBJECTS_TYPE}`
+        )
+        .expect(200);
+      expect(findAdvancedSettings.body.total).toEqual(0);
     });
 
     it('checkConflicts when importing ndjson', async () => {
