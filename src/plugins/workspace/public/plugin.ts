@@ -41,6 +41,7 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
   private coreStart?: CoreStart;
   private currentWorkspaceIdSubscription?: Subscription;
   private currentWorkspaceSubscription?: Subscription;
+  private managementCurrentWorkspaceSubscription?: Subscription;
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => undefined);
   private _changeSavedObjectCurrentWorkspace() {
     if (this.coreStart) {
@@ -74,6 +75,26 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
         });
       }
     });
+  }
+
+  /**
+   * If workspace is enabled and user has entered workspace, hide advance settings and dataSource menu and disable
+   */
+  private disableManagementApps(core: CoreSetup, management: ManagementSetup) {
+    const currentWorkspaceId$ = core.workspaces.currentWorkspaceId$;
+    this.managementCurrentWorkspaceSubscription?.unsubscribe();
+
+    this.managementCurrentWorkspaceSubscription = currentWorkspaceId$.subscribe(
+      (currentWorkspaceId) => {
+        if (currentWorkspaceId) {
+          const managementSectionApps = management.sections.section.opensearchDashboards.getAppsEnabled();
+          const disabledApps = managementSectionApps.filter(
+            (app) => app.id === 'settings' || app.id === 'dataSources'
+          );
+          disabledApps?.forEach((app) => app.disable());
+        }
+      }
+    );
   }
 
   public async setup(
@@ -124,12 +145,8 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
           });
         })();
 
-        // If workspace is enabled and user has entered workspace, hide advance settings and dataSource menu and disable
-        const managementSectionApps = management.sections.section.opensearchDashboards.getAppsEnabled();
-        const disabledApps = managementSectionApps.filter(
-          (app) => app.id === 'settings' || app.id === 'dataSources'
-        );
-        disabledApps?.forEach((app) => app.disable());
+        //  Hide advance settings and dataSource menus and disable in setup
+        this.disableManagementApps(core, management);
       }
     }
 
@@ -235,6 +252,6 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
   public stop() {
     this.currentWorkspaceIdSubscription?.unsubscribe();
     this.currentWorkspaceSubscription?.unsubscribe();
-    this.currentWorkspaceIdSubscription?.unsubscribe();
+    this.managementCurrentWorkspaceSubscription?.unsubscribe();
   }
 }
