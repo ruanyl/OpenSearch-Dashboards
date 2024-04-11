@@ -94,7 +94,7 @@ export const ManagementApp = ({ dependencies, history }: ManagementAppProps) => 
     }
 
     setSections(dependencies.sections.getSectionsEnabled());
-  }, [dependencies.sections, capabilities, workspaces]);
+  }, [dependencies.sections.getSectionsEnabled(), capabilities.workspaces.enabled, workspaces.currentWorkspace$.getValue()]);
 
   if (!sections) {
     return null;
