@@ -6,6 +6,7 @@
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { i18n } from '@osd/i18n';
 import { SavedObjectsManagementPluginSetup } from 'src/plugins/saved_objects_management/public';
+import { ManagementSetup } from 'src/plugins/management/public';
 import {
   AppMountParameters,
   AppNavLinkStatus,
@@ -33,6 +34,7 @@ type WorkspaceAppType = (params: AppMountParameters, services: Services) => () =
 
 interface WorkspacePluginSetupDeps {
   savedObjectsManagement?: SavedObjectsManagementPluginSetup;
+  management: ManagementSetup;
 }
 
 export class WorkspacePlugin implements Plugin<{}, {}> {
@@ -74,7 +76,10 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
     });
   }
 
-  public async setup(core: CoreSetup, { savedObjectsManagement }: WorkspacePluginSetupDeps) {
+  public async setup(
+    core: CoreSetup,
+    { savedObjectsManagement, management }: WorkspacePluginSetupDeps
+  ) {
     const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
     await workspaceClient.init();
     core.application.registerAppUpdater(this.appUpdater$);
@@ -118,6 +123,13 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
             currentAppIdSubscription.unsubscribe();
           });
         })();
+
+        // If workspace is enabled and user has entered workspace, hide advance settings and dataSource menu and disable
+        const managementSectionApps = management.sections.section.opensearchDashboards.getAppsEnabled();
+        const disabledApps = managementSectionApps.filter(
+          (app) => app.id === 'settings' || app.id === 'dataSources'
+        );
+        disabledApps?.forEach((app) => app.disable());
       }
     }
 
