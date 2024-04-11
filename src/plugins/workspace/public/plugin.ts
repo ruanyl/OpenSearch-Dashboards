@@ -41,7 +41,7 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
   private coreStart?: CoreStart;
   private currentWorkspaceIdSubscription?: Subscription;
   private currentWorkspaceSubscription?: Subscription;
-  private managementCurrentWorkspaceSubscription?: Subscription;
+  private managementCurrentWorkspaceIdSubscription?: Subscription;
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => undefined);
   private _changeSavedObjectCurrentWorkspace() {
     if (this.coreStart) {
@@ -82,9 +82,9 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
    */
   private disableManagementApps(core: CoreSetup, management: ManagementSetup) {
     const currentWorkspaceId$ = core.workspaces.currentWorkspaceId$;
-    this.managementCurrentWorkspaceSubscription?.unsubscribe();
+    this.managementCurrentWorkspaceIdSubscription?.unsubscribe();
 
-    this.managementCurrentWorkspaceSubscription = currentWorkspaceId$.subscribe(
+    this.managementCurrentWorkspaceIdSubscription = currentWorkspaceId$.subscribe(
       (currentWorkspaceId) => {
         if (currentWorkspaceId) {
           const managementSectionApps = management.sections.section.opensearchDashboards.getAppsEnabled();
@@ -252,6 +252,6 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
   public stop() {
     this.currentWorkspaceIdSubscription?.unsubscribe();
     this.currentWorkspaceSubscription?.unsubscribe();
-    this.managementCurrentWorkspaceSubscription?.unsubscribe();
+    this.managementCurrentWorkspaceIdSubscription?.unsubscribe();
   }
 }
