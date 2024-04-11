@@ -87,6 +87,8 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
           sections: getSectionsServiceStartPrivate(),
           opensearchDashboardsVersion,
           setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
+          capabilities: coreStart.application.capabilities,
+          workspaces: coreStart.workspaces,
         });
       },
     });

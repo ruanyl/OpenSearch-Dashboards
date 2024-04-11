@@ -37,7 +37,8 @@ import { ManagementSection, MANAGEMENT_BREADCRUMB } from '../../utils';
 import { ManagementRouter } from './management_router';
 import { ManagementSidebarNav } from '../management_sidebar_nav';
 import { reactRouterNavigate } from '../../../../opensearch_dashboards_react/public';
-import { SectionsServiceStart } from '../../types';
+import { SectionsServiceStart, ManagementSectionId } from '../../types';
+import { ApplicationStart, WorkspacesStart } from '../../../../../core/public';
 
 import './management_app.scss';
 
@@ -51,10 +52,12 @@ export interface ManagementAppDependencies {
   sections: SectionsServiceStart;
   opensearchDashboardsVersion: string;
   setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
+  capabilities: ApplicationStart['capabilities'];
+  workspaces: WorkspacesStart;
 }
 
 export const ManagementApp = ({ dependencies, history }: ManagementAppProps) => {
-  const { setBreadcrumbs } = dependencies;
+  const { setBreadcrumbs, capabilities, workspaces } = dependencies;
   const [selectedId, setSelectedId] = useState<string>('');
   const [sections, setSections] = useState<ManagementSection[]>();
 
@@ -79,8 +82,19 @@ export const ManagementApp = ({ dependencies, history }: ManagementAppProps) => 
   );
 
   useEffect(() => {
+    // If workspace is enabled and user has entered workspace, hide advance settings and dataSource menu
+    if (capabilities.workspaces.enabled && workspaces.currentWorkspace$.getValue()) {
+      const opensearchDashboardsSection = dependencies.sections
+        .getSectionsEnabled()
+        .find((section) => section.id === ManagementSectionId.OpenSearchDashboards);
+      const disabledApps = opensearchDashboardsSection?.apps.filter(
+        (app) => app.id === 'settings' || app.id === 'dataSources'
+      );
+      disabledApps?.forEach((app) => app.disable());
+    }
+
     setSections(dependencies.sections.getSectionsEnabled());
-  }, [dependencies.sections]);
+  }, [dependencies.sections, capabilities, workspaces]);
 
   if (!sections) {
     return null;
