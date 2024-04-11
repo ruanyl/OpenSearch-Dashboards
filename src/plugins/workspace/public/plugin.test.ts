@@ -10,6 +10,7 @@ import { WorkspacePlugin } from './plugin';
 import { WORKSPACE_FATAL_ERROR_APP_ID, WORKSPACE_OVERVIEW_APP_ID } from '../common/constants';
 import { Observable, Subscriber } from 'rxjs';
 import { savedObjectsManagementPluginMock } from '../../saved_objects_management/public/mocks';
+import { managementPluginMock } from '../../management/public/mocks';
 
 describe('Workspace plugin', () => {
   beforeEach(() => {
@@ -22,6 +23,7 @@ describe('Workspace plugin', () => {
     const workspacePlugin = new WorkspacePlugin();
     await workspacePlugin.setup(setupMock, {
       savedObjectsManagement: savedObjectManagementSetupMock,
+      management: managementPluginMock.createSetupContract(),
     });
     expect(setupMock.application.register).toBeCalledTimes(5);
     expect(WorkspaceClientMock).toBeCalledTimes(1);
@@ -60,6 +62,7 @@ describe('Workspace plugin', () => {
     const workspacePlugin = new WorkspacePlugin();
     await workspacePlugin.setup(setupMock, {
       savedObjectsManagement: savedObjectsManagementPluginMock.createSetupContract(),
+      management: managementPluginMock.createSetupContract(),
     });
     expect(setupMock.application.register).toBeCalledTimes(5);
     expect(WorkspaceClientMock).toBeCalledTimes(1);
@@ -116,6 +119,7 @@ describe('Workspace plugin', () => {
     const workspacePlugin = new WorkspacePlugin();
     await workspacePlugin.setup(setupMock, {
       savedObjectsManagement: savedObjectsManagementPluginMock.createSetupContract(),
+      management: managementPluginMock.createSetupContract(),
     });
     currentAppIdSubscriber?.next(WORKSPACE_FATAL_ERROR_APP_ID);
     expect(applicationStartMock.navigateToApp).toBeCalledWith(WORKSPACE_OVERVIEW_APP_ID);
@@ -135,6 +139,7 @@ describe('Workspace plugin', () => {
     const workspacePlugin = new WorkspacePlugin();
     await workspacePlugin.setup(setupMock, {
       savedObjectsManagement: savedObjectsManagementPluginMock.createSetupContract(),
+      management: managementPluginMock.createSetupContract(),
     });
     expect(setupMock.chrome.registerCollapsibleNavHeader).toBeCalledTimes(1);
   });
