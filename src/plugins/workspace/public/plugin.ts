@@ -105,6 +105,8 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
     await workspaceClient.init();
     core.application.registerAppUpdater(this.appUpdater$);
 
+    //  Hide advance settings and dataSource menus and disable in setup
+    this.disableManagementApps(core, management);
     /**
      * Retrieve workspace id from url
      */
@@ -144,9 +146,6 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
             currentAppIdSubscription.unsubscribe();
           });
         })();
-
-        //  Hide advance settings and dataSource menus and disable in setup
-        this.disableManagementApps(core, management);
       }
     }
 
