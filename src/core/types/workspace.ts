@@ -22,4 +22,5 @@ export interface WorkspaceAttributeWithPermission extends WorkspaceAttribute {
 
 export interface WorkspaceObject extends WorkspaceAttributeWithPermission {
   readonly?: boolean;
+  uiSettings?: Record<string, any>;
 }
