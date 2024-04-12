@@ -87,11 +87,9 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
     this.managementCurrentWorkspaceIdSubscription = currentWorkspaceId$.subscribe(
       (currentWorkspaceId) => {
         if (currentWorkspaceId) {
-          const managementSectionApps = management.sections.section.opensearchDashboards.getAppsEnabled();
-          const disabledApps = managementSectionApps.filter(
-            (app) => app.id === 'settings' || app.id === 'dataSources'
+          ['settings', 'dataSources'].forEach((appId) =>
+            management.sections.section.opensearchDashboards.getApp(appId)?.disable()
           );
-          disabledApps?.forEach((app) => app.disable());
         }
       }
     );
