@@ -164,6 +164,56 @@ describe('workspace service api integration test', () => {
       expect(getResult.body.success).toEqual(true);
       expect(getResult.body.result.name).toEqual('updated');
     });
+
+    it('update workspace failed when name is duplicate', async () => {
+      const result: any = await osdTestServer.request
+        .post(root, `/api/workspaces`)
+        .send({
+          attributes: { ...omitId(testWorkspace), name: 'foo' },
+        })
+        .expect(200);
+
+      await osdTestServer.request
+        .post(root, `/api/workspaces`)
+        .send({
+          attributes: { ...omitId(testWorkspace), name: 'bar baz' },
+        })
+        .expect(200);
+
+      const updateResult = await osdTestServer.request
+        .put(root, `/api/workspaces/${result.body.result.id}`)
+        .send({
+          attributes: {
+            ...omitId(testWorkspace),
+            name: 'bar baz',
+          },
+        })
+        .expect(200);
+
+      expect(updateResult.body.success).toEqual(false);
+      expect(updateResult.body.error).toEqual(
+        'workspace name has already been used, try with a different name'
+      );
+
+      await osdTestServer.request
+        .put(root, `/api/workspaces/${result.body.result.id}`)
+        .send({
+          attributes: {
+            ...omitId(testWorkspace),
+            name: 'bar',
+          },
+        })
+        .expect(200);
+
+      const getResult = await osdTestServer.request.get(
+        root,
+        `/api/workspaces/${result.body.result.id}`
+      );
+
+      expect(getResult.body.success).toEqual(true);
+      expect(getResult.body.result.name).toEqual('bar');
+    });
+
     it('delete', async () => {
       const result: any = await osdTestServer.request
         .post(root, `/api/workspaces`)
