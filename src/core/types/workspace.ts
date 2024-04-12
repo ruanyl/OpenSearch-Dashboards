@@ -13,6 +13,7 @@ export interface WorkspaceAttribute {
   color?: string;
   icon?: string;
   reserved?: boolean;
+  uiSettings?: Record<string, any>;
   defaultVISTheme?: string;
 }
 
@@ -22,5 +23,4 @@ export interface WorkspaceAttributeWithPermission extends WorkspaceAttribute {
 
 export interface WorkspaceObject extends WorkspaceAttributeWithPermission {
   readonly?: boolean;
-  uiSettings?: Record<string, any>;
 }
