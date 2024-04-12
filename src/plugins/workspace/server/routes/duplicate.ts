@@ -4,17 +4,24 @@
  */
 
 import { schema } from '@osd/config-schema';
-import { IRouter } from '../../http';
-import { SavedObjectConfig } from '../saved_objects_config';
-import { exportSavedObjectsToStream } from '../export';
-import { importSavedObjectsFromStream } from '../import';
+import {
+  IRouter,
+  Logger,
+  exportSavedObjectsToStream,
+  importSavedObjectsFromStream,
+} from '../../../../core/server';
+import { WORKSPACES_API_BASE_URL } from '.';
+import { IWorkspaceClientImpl } from '../types';
 
-export const registerCopyRoute = (router: IRouter, config: SavedObjectConfig) => {
-  const { maxImportExportSize } = config;
-
+export const registerDuplicateRoute = (
+  router: IRouter,
+  logger: Logger,
+  client: IWorkspaceClientImpl,
+  maxImportExportSize: number
+) => {
   router.post(
     {
-      path: '/_copy',
+      path: `${WORKSPACES_API_BASE_URL}/_duplicate_saved_objects`,
       validate: {
         body: schema.object({
           objects: schema.arrayOf(
@@ -23,7 +30,7 @@ export const registerCopyRoute = (router: IRouter, config: SavedObjectConfig) =>
               id: schema.string(),
             })
           ),
-          includeReferencesDeep: schema.boolean({ defaultValue: false }),
+          includeReferencesDeep: schema.boolean({ defaultValue: true }),
           targetWorkspace: schema.string(),
         }),
       },
@@ -41,13 +48,31 @@ export const registerCopyRoute = (router: IRouter, config: SavedObjectConfig) =>
       if (invalidObjects.length) {
         return res.badRequest({
           body: {
-            message: `Trying to copy object(s) with unsupported types: ${invalidObjects
+            message: `Trying to duplicate object(s) with unsupported types: ${invalidObjects
               .map((obj) => `${obj.type}:${obj.id}`)
               .join(', ')}`,
           },
         });
       }
 
+      // check whether the target workspace exists or not
+      const getTargetWorkspaceResult = await client.get(
+        {
+          context,
+          request: req,
+          logger,
+        },
+        targetWorkspace
+      );
+      if (!getTargetWorkspaceResult.success) {
+        return res.badRequest({
+          body: {
+            message: `Get target workspace ${targetWorkspace} error: ${getTargetWorkspaceResult.error}`,
+          },
+        });
+      }
+
+      // fetch all the details of the specified saved objects
       const objectsListStream = await exportSavedObjectsToStream({
         savedObjectsClient,
         objects,
@@ -56,6 +81,7 @@ export const registerCopyRoute = (router: IRouter, config: SavedObjectConfig) =>
         excludeExportDetails: true,
       });
 
+      // import the saved objects into the target workspace
       const result = await importSavedObjectsFromStream({
         savedObjectsClient: context.core.savedObjects.client,
         typeRegistry: context.core.savedObjects.typeRegistry,

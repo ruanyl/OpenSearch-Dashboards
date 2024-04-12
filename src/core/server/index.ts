@@ -356,8 +356,8 @@ export { AppCategory, WorkspaceAttribute } from '../types';
 export {
   DEFAULT_APP_CATEGORIES,
   PUBLIC_WORKSPACE_ID,
+  PUBLIC_WORKSPACE_NAME,
   WORKSPACE_TYPE,
-  DEFAULT_WORKSPACE_ID,
 } from '../utils';
 
 export {

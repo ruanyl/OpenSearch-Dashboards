@@ -130,6 +130,7 @@ export {
   AppUpdater,
   ScopedHistory,
   NavigateToAppOptions,
+  WorkspaceAccessibility,
 } from './application';
 
 export {
@@ -356,6 +357,11 @@ export { __osdBootstrap__ } from './osd_bootstrap';
 
 export { WorkspacesStart, WorkspacesSetup, WorkspacesService } from './workspace';
 
-export { WORKSPACE_TYPE, cleanWorkspaceId, DEFAULT_WORKSPACE_ID } from '../utils';
+export {
+  WORKSPACE_TYPE,
+  cleanWorkspaceId,
+  PUBLIC_WORKSPACE_ID,
+  PUBLIC_WORKSPACE_NAME,
+} from '../utils';
 
 export { debounce } from './utils';

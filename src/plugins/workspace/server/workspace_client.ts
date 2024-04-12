@@ -14,6 +14,7 @@ import {
 import {
   DEFAULT_APP_CATEGORIES,
   PUBLIC_WORKSPACE_ID,
+  PUBLIC_WORKSPACE_NAME,
   WORKSPACE_TYPE,
   Logger,
 } from '../../../core/server';
@@ -108,9 +109,7 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
   }
   private async setupPublicWorkspace(savedObjectClient?: SavedObjectsClientContract) {
     return this.checkAndCreateWorkspace(savedObjectClient, PUBLIC_WORKSPACE_ID, {
-      name: i18n.translate('workspaces.public.workspace.default.name', {
-        defaultMessage: 'Global workspace',
-      }),
+      name: PUBLIC_WORKSPACE_NAME,
       features: ['*', `!@${DEFAULT_APP_CATEGORIES.management.id}`],
       reserved: true,
     });

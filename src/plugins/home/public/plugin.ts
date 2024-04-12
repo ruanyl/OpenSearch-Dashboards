@@ -54,7 +54,7 @@ import { DataPublicPluginStart } from '../../data/public';
 import { TelemetryPluginStart } from '../../telemetry/public';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { UrlForwardingSetup, UrlForwardingStart } from '../../url_forwarding/public';
-import { AppNavLinkStatus } from '../../../core/public';
+import { AppNavLinkStatus, WorkspaceAccessibility } from '../../../core/public';
 import { PLUGIN_ID, HOME_APP_BASE_PATH } from '../common/constants';
 import { DataSourcePluginStart } from '../../data_source/public';
 
@@ -130,6 +130,7 @@ export class HomePublicPlugin
         const { renderApp } = await import('./application');
         return await renderApp(params.element, coreStart, params.history);
       },
+      workspaceAccessibility: WorkspaceAccessibility.NO,
     });
     urlForwarding.forwardApp('home', 'home');
 
