@@ -34,7 +34,7 @@ type WorkspaceAppType = (params: AppMountParameters, services: Services) => () =
 
 interface WorkspacePluginSetupDeps {
   savedObjectsManagement?: SavedObjectsManagementPluginSetup;
-  management: ManagementSetup;
+  management?: ManagementSetup;
 }
 
 export class WorkspacePlugin implements Plugin<{}, {}> {
@@ -106,7 +106,9 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
     core.application.registerAppUpdater(this.appUpdater$);
 
     //  Hide advance settings and dataSource menus and disable in setup
-    this.disableManagementApps(core, management);
+    if (management) {
+      this.disableManagementApps(core, management);
+    }
     /**
      * Retrieve workspace id from url
      */
