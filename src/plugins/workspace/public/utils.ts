@@ -10,6 +10,7 @@ import {
   AppNavLinkStatus,
   DEFAULT_APP_CATEGORIES,
   WorkspaceObject,
+  WorkspaceAccessibility,
 } from '../../../core/public';
 
 /**
@@ -94,6 +95,13 @@ export const getSelectedFeatureQuantities = (
  * Check if an app is accessible in a workspace based on the workspace configured features
  */
 export function isAppAccessibleInWorkspace(app: App, workspace: WorkspaceObject) {
+  /**
+   * App is not accessible within workspace if it explicitly declare itself as workspaceAccessibility.No
+   */
+  if (app.workspaceAccessibility === WorkspaceAccessibility.NO) {
+    return false;
+  }
+
   /**
    * When workspace has no features configured, all apps are considered to be accessible
    */
