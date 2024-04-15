@@ -94,13 +94,21 @@ describe('WorkspaceCreator', () => {
   });
 
   it('cannot create workspace when name empty', async () => {
-    const { getByTestId } = render(<WorkspaceCreator />);
+    const { getByTestId } = render(
+      <WorkspaceCreator
+        workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
+      />
+    );
     fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
     expect(workspaceClientCreate).not.toHaveBeenCalled();
   });
 
   it('cannot create workspace with invalid name', async () => {
-    const { getByTestId } = render(<WorkspaceCreator />);
+    const { getByTestId } = render(
+      <WorkspaceCreator
+        workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
+      />
+    );
     const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
     fireEvent.input(nameInput, {
       target: { value: '~' },
@@ -109,7 +117,11 @@ describe('WorkspaceCreator', () => {
   });
 
   it('cannot create workspace with invalid description', async () => {
-    const { getByTestId } = render(<WorkspaceCreator />);
+    const { getByTestId } = render(
+      <WorkspaceCreator
+        workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
+      />
+    );
     const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
     fireEvent.input(nameInput, {
       target: { value: 'test workspace name' },
@@ -122,7 +134,11 @@ describe('WorkspaceCreator', () => {
   });
 
   it('cancel create workspace', async () => {
-    const { findByText, getByTestId } = render(<WorkspaceCreator />);
+    const { findByText, getByTestId } = render(
+      <WorkspaceCreator
+        workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
+      />
+    );
     fireEvent.click(getByTestId('workspaceForm-bottomBar-cancelButton'));
     await findByText('Discard changes?');
     fireEvent.click(getByTestId('confirmModalConfirmButton'));
@@ -130,7 +146,11 @@ describe('WorkspaceCreator', () => {
   });
 
   it('create workspace with detailed information', async () => {
-    const { getByTestId } = render(<WorkspaceCreator />);
+    const { getByTestId } = render(
+      <WorkspaceCreator
+        workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
+      />
+    );
     const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
     fireEvent.input(nameInput, {
       target: { value: 'test workspace name' },
@@ -161,7 +181,11 @@ describe('WorkspaceCreator', () => {
   });
 
   it('create workspace with customized features', async () => {
-    const { getByTestId } = render(<WorkspaceCreator />);
+    const { getByTestId } = render(
+      <WorkspaceCreator
+        workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
+      />
+    );
     const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
     fireEvent.input(nameInput, {
       target: { value: 'test workspace name' },

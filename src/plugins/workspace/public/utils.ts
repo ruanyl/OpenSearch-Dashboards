@@ -12,6 +12,7 @@ import {
   WorkspaceObject,
   WorkspaceAccessibility,
 } from '../../../core/public';
+import { DEFAULT_CHECKED_FEATURES_IDS } from '../common/constants';
 
 /**
  * Checks if a given feature matches the provided feature configuration.
@@ -136,3 +137,16 @@ export function isAppAccessibleInWorkspace(app: App, workspace: WorkspaceObject)
   }
   return false;
 }
+
+export const filterWorkspaceConfigurableApps = (applications: PublicAppInfo[]) => {
+  const visibleApplications = applications.filter(({ navLinkStatus, chromeless, category, id }) => {
+    return (
+      navLinkStatus !== AppNavLinkStatus.hidden &&
+      !chromeless &&
+      !DEFAULT_CHECKED_FEATURES_IDS.includes(id) &&
+      category?.id !== DEFAULT_APP_CATEGORIES.management.id
+    );
+  });
+
+  return visibleApplications;
+};
