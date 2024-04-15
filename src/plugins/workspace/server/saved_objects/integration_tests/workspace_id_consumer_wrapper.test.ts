@@ -7,7 +7,6 @@ import { SavedObject } from 'src/core/types';
 import { isEqual } from 'lodash';
 import * as osdTestServer from '../../../../../core/test_helpers/osd_server';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../../../data_source/common';
-import { UI_SETTINGS_SAVED_OBJECTS_TYPE } from '../../../../../core/server';
 
 const dashboard: Omit<SavedObject, 'id'> = {
   type: 'dashboard',
@@ -22,7 +21,7 @@ const dataSource: Omit<SavedObject, 'id'> = {
 };
 
 const advancedSettings: Omit<SavedObject, 'id'> = {
-  type: UI_SETTINGS_SAVED_OBJECTS_TYPE,
+  type: 'config',
   attributes: {},
   references: [],
 };
@@ -196,7 +195,7 @@ describe('workspace_id_consumer integration test', () => {
       const findAdvancedSettings = await osdTestServer.request
         .get(
           root,
-          `/w/${createdFooWorkspace.id}/api/saved_objects/_find?type=${UI_SETTINGS_SAVED_OBJECTS_TYPE}`
+          `/w/${createdFooWorkspace.id}/api/saved_objects/_find?type=config`
         )
         .expect(200);
       expect(findAdvancedSettings.body.total).toEqual(0);
