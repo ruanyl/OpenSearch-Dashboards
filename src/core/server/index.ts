@@ -341,7 +341,6 @@ export {
   StringValidation,
   StringValidationRegex,
   StringValidationRegexString,
-  UI_SETTINGS_SAVED_OBJECTS_TYPE,
 } from './ui_settings';
 
 export {

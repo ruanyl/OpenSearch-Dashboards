@@ -49,5 +49,3 @@ export {
   StringValidationRegex,
   StringValidationRegexString,
 } from './types';
-
-export { UI_SETTINGS_SAVED_OBJECTS_TYPE } from './saved_objects/ui_settings';

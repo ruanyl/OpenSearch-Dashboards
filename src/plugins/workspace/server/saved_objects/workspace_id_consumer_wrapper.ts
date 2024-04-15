@@ -12,12 +12,12 @@ import {
   SavedObjectsCheckConflictsObject,
   OpenSearchDashboardsRequest,
   SavedObjectsFindOptions,
-  UI_SETTINGS_SAVED_OBJECTS_TYPE,
-  SavedObjectsErrorHelpers,
 } from '../../../../core/server';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../../../plugins/data_source/common';
 
 type WorkspaceOptions = Pick<SavedObjectsBaseOptions, 'workspaces'> | undefined;
+
+const UI_SETTINGS_SAVED_OBJECTS_TYPE = 'config';
 
 export class WorkspaceIdConsumerWrapper {
   private formatWorkspaceIdParams<T extends WorkspaceOptions>(
@@ -72,30 +72,24 @@ export class WorkspaceIdConsumerWrapper {
         options: SavedObjectsCreateOptions = {}
       ) => {
         const { workspaces } = this.formatWorkspaceIdParams(wrapperOptions.request, options);
-        const disallowedSavedObjects = objects.filter((item) => {
-          // If create out of workspace, allow the operation
-          if (!workspaces?.length && !item.workspaces?.length) {
+        const allowedSavedObjects = objects.filter((item) => {
+          const isImportIntoWorkspace = workspaces?.length || item.workspaces?.length;
+          // config can not be created inside a workspace
+          if (this.isConfigType(item.type) && isImportIntoWorkspace) {
             return false;
           }
 
-          // config and data-sources can not be created inside a workspace
-          return this.isConfigType(item.type) || this.isDataSourceType(item.type);
+          // For 2.14, data source can only be created without workspace info
+          if (this.isDataSourceType(item.type) && isImportIntoWorkspace) {
+            return false;
+          }
+
+          return true;
         });
 
-        if (!disallowedSavedObjects?.length) {
-          return wrapperOptions.client.bulkCreate(
-            objects,
-            this.formatWorkspaceIdParams(wrapperOptions.request, options)
-          );
-        }
-
-        const disallowedTypes = [...new Set(disallowedSavedObjects.map((item) => item.type))];
-
-        throw SavedObjectsErrorHelpers.decorateBadRequestError(
-          new Error(''),
-          `${disallowedTypes.map((item) => `type: ${item}`).join(', ')} ${
-            disallowedTypes.length > 1 ? 'are' : 'is'
-          } not allowed to create within a workspace.`
+        return wrapperOptions.client.bulkCreate(
+          allowedSavedObjects,
+          this.formatWorkspaceIdParams(wrapperOptions.request, options)
         );
       },
       checkConflicts: (

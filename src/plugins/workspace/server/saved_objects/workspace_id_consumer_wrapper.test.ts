@@ -92,11 +92,11 @@ describe('WorkspaceIdConsumerWrapper', () => {
       expect(() =>
         wrapperClient.bulkCreate([
           getSavedObject({
-            type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+            type: 'config',
             id: 'foo',
           }),
         ])
-      ).toThrow('type: data-source is not allowed to create within a workspace.');
+      ).toThrow('type: config is not allowed to create within a workspace.');
 
       expect(() =>
         wrapperClient.bulkCreate([
