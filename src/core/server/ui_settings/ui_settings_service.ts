@@ -48,7 +48,6 @@ import {
 import { uiSettingsType } from './saved_objects';
 import { registerRoutes } from './routes';
 import { getCoreSettings } from './settings';
-import { UI_SETTINGS_SAVED_OBJECTS_TYPE } from './saved_objects/ui_settings';
 
 export interface SetupDeps {
   http: InternalHttpServiceSetup;
@@ -103,7 +102,7 @@ export class UiSettingsService
     const { version, buildNum } = this.coreContext.env.packageInfo;
     return (savedObjectsClient: SavedObjectsClientContract) =>
       new UiSettingsClient({
-        type: UI_SETTINGS_SAVED_OBJECTS_TYPE,
+        type: 'config',
         id: version,
         buildNum,
         savedObjectsClient,
