@@ -88,28 +88,21 @@ describe('WorkspaceIdConsumerWrapper', () => {
       );
     });
 
-    it(`Should throw error when trying to create unallowed type within a workspace`, async () => {
-      expect(() =>
-        wrapperClient.bulkCreate([
-          getSavedObject({
-            type: 'config',
-            id: 'foo',
-          }),
-        ])
-      ).toThrow('type: config is not allowed to create within a workspace.');
+    it(`Should skip the objects when trying to create unallowed type within a workspace`, async () => {
+      await wrapperClient.bulkCreate([
+        getSavedObject({
+          type: 'config',
+          id: 'foo',
+        }),
+        getSavedObject({
+          type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+          id: 'foo',
+        }),
+      ]);
 
-      expect(() =>
-        wrapperClient.bulkCreate([
-          getSavedObject({
-            type: DATA_SOURCE_SAVED_OBJECT_TYPE,
-            id: 'foo',
-          }),
-          getSavedObject({
-            type: UI_SETTINGS_SAVED_OBJECTS_TYPE,
-            id: 'bar',
-          }),
-        ])
-      ).toThrow('type: data-source, type: config are not allowed to create within a workspace.');
+      expect(mockedClient.bulkCreate).toBeCalledWith([], {
+        workspaces: ['foo'],
+      });
     });
   });
 
