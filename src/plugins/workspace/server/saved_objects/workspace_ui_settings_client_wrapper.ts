@@ -115,6 +115,17 @@ export class WorkspaceUiSettingsClientWrapper {
 
     return {
       ...wrapperOptions.client,
+      checkConflicts: wrapperOptions.client.checkConflicts,
+      errors: wrapperOptions.client.errors,
+      addToNamespaces: wrapperOptions.client.addToNamespaces,
+      deleteFromNamespaces: wrapperOptions.client.deleteFromNamespaces,
+      find: wrapperOptions.client.find,
+      bulkGet: wrapperOptions.client.bulkGet,
+      create: wrapperOptions.client.create,
+      bulkCreate: wrapperOptions.client.bulkCreate,
+      delete: wrapperOptions.client.delete,
+      bulkUpdate: wrapperOptions.client.bulkUpdate,
+      deleteByWorkspace: wrapperOptions.client.deleteByWorkspace,
       get: getUiSettingsWithWorkspace,
       update: updateUiSettingsWithWorkspace,
     };
