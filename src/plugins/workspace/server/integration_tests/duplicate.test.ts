@@ -3,30 +3,57 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as exportMock from '../../export';
-import { createListStream } from '../../../utils/streams';
-import { mockUuidv4 } from '../../import/__mocks__';
+import * as exportMock from '../../../../core/server';
 import supertest from 'supertest';
+import { SavedObjectsErrorHelpers } from '../../../../core/server';
 import { UnwrapPromise } from '@osd/utility-types';
-import { registerCopyRoute } from '../copy';
-import { savedObjectsClientMock } from '../../../../../core/server/mocks';
-import { SavedObjectConfig } from '../../saved_objects_config';
-import { setupServer, createExportableType } from '../test_utils';
-import { SavedObjectsErrorHelpers } from '../..';
+import { loggingSystemMock, savedObjectsClientMock } from '../../../../core/server/mocks';
+import { setupServer } from '../../../../core/server/test_utils';
+import { registerDuplicateRoute } from '../routes/duplicate';
+import { createListStream } from '../../../../core/server/utils/streams';
+import Boom from '@hapi/boom';
 
-jest.mock('../../export', () => ({
+jest.mock('../../../../core/server/saved_objects/export', () => ({
   exportSavedObjectsToStream: jest.fn(),
 }));
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
-const { v4: uuidv4 } = jest.requireActual('uuid');
 const allowedTypes = ['index-pattern', 'visualization', 'dashboard'];
-const config = { maxImportPayloadBytes: 26214400, maxImportExportSize: 10000 } as SavedObjectConfig;
-const URL = '/internal/saved_objects/_copy';
+const URL = '/api/workspaces/_duplicate_saved_objects';
 const exportSavedObjectsToStream = exportMock.exportSavedObjectsToStream as jest.Mock;
+const logger = loggingSystemMock.create();
+const clientMock = {
+  init: jest.fn(),
+  enterWorkspace: jest.fn(),
+  getCurrentWorkspaceId: jest.fn(),
+  getCurrentWorkspace: jest.fn(),
+  create: jest.fn(),
+  delete: jest.fn(),
+  list: jest.fn(),
+  get: jest.fn(),
+  update: jest.fn(),
+  stop: jest.fn(),
+  setup: jest.fn(),
+  destroy: jest.fn(),
+  setSavedObjects: jest.fn(),
+};
 
-describe(`POST ${URL}`, () => {
+export const createExportableType = (name: string): exportMock.SavedObjectsType => {
+  return {
+    name,
+    hidden: false,
+    namespaceType: 'single',
+    mappings: {
+      properties: {},
+    },
+    management: {
+      importableAndExportable: true,
+    },
+  };
+};
+
+describe(`duplicate saved objects among workspaces`, () => {
   let server: SetupServerReturn['server'];
   let httpSetup: SetupServerReturn['httpSetup'];
   let handlerContext: SetupServerReturn['handlerContext'];
@@ -59,8 +86,6 @@ describe(`POST ${URL}`, () => {
   };
 
   beforeEach(async () => {
-    mockUuidv4.mockReset();
-    mockUuidv4.mockImplementation(() => uuidv4());
     ({ server, httpSetup, handlerContext } = await setupServer());
     handlerContext.savedObjects.typeRegistry.getImportableAndExportableTypes.mockReturnValue(
       allowedTypes.map(createExportableType)
@@ -75,8 +100,9 @@ describe(`POST ${URL}`, () => {
     savedObjectsClient.find.mockResolvedValue(emptyResponse);
     savedObjectsClient.checkConflicts.mockResolvedValue({ errors: [] });
 
-    const router = httpSetup.createRouter('/internal/saved_objects/');
-    registerCopyRoute(router, config);
+    const router = httpSetup.createRouter('');
+
+    registerDuplicateRoute(router, logger.get(), clientMock, 10000);
 
     await server.start();
   });
@@ -85,8 +111,16 @@ describe(`POST ${URL}`, () => {
     await server.stop();
   });
 
-  it('formats successful response', async () => {
-    exportSavedObjectsToStream.mockResolvedValueOnce(createListStream([]));
+  it('duplicate failed if the requested saved objects are not valid', async () => {
+    const savedObjects = [mockIndexPattern, mockDashboard];
+    clientMock.get.mockResolvedValueOnce({ success: true });
+    exportSavedObjectsToStream.mockImplementation(() => {
+      const err = Boom.badRequest();
+      err.output.payload.attributes = {
+        objects: savedObjects,
+      };
+      throw err;
+    });
 
     const result = await supertest(httpSetup.server.listener)
       .post(URL)
@@ -104,9 +138,9 @@ describe(`POST ${URL}`, () => {
         includeReferencesDeep: true,
         targetWorkspace: 'test_workspace',
       })
-      .expect(200);
+      .expect(400);
 
-    expect(result.body).toEqual({ success: true, successCount: 0 });
+    expect(result.body.error).toEqual('Bad Request');
     expect(savedObjectsClient.bulkCreate).not.toHaveBeenCalled(); // no objects were created
   });
 
@@ -141,7 +175,33 @@ describe(`POST ${URL}`, () => {
     );
   });
 
-  it('copy unsupported objects', async () => {
+  it('target workspace does not exist', async () => {
+    clientMock.get.mockResolvedValueOnce({ success: false });
+    const result = await supertest(httpSetup.server.listener)
+      .post(URL)
+      .send({
+        objects: [
+          {
+            type: 'index-pattern',
+            id: 'my-pattern',
+          },
+          {
+            type: 'dashboard',
+            id: 'my-dashboard',
+          },
+        ],
+        includeReferencesDeep: true,
+        targetWorkspace: 'non-existen-workspace',
+      })
+      .expect(400);
+
+    expect(result.body.message).toMatchInlineSnapshot(
+      `"Get target workspace non-existen-workspace error: undefined"`
+    );
+  });
+
+  it('duplicate unsupported objects', async () => {
+    clientMock.get.mockResolvedValueOnce({ success: true });
     const result = await supertest(httpSetup.server.listener)
       .post(URL)
       .send({
@@ -157,13 +217,14 @@ describe(`POST ${URL}`, () => {
       .expect(400);
 
     expect(result.body.message).toMatchInlineSnapshot(
-      `"Trying to copy object(s) with unsupported types: unknown:my-pattern"`
+      `"Trying to duplicate object(s) with unsupported types: unknown:my-pattern"`
     );
   });
 
-  it('copy index pattern and dashboard into a workspace successfully', async () => {
+  it('duplicate index pattern and dashboard into a workspace successfully', async () => {
     const targetWorkspace = 'target_workspace_id';
     const savedObjects = [mockIndexPattern, mockDashboard];
+    clientMock.get.mockResolvedValueOnce({ success: true });
     exportSavedObjectsToStream.mockResolvedValueOnce(createListStream(savedObjects));
     savedObjectsClient.bulkCreate.mockResolvedValueOnce({
       saved_objects: savedObjects.map((obj) => ({ ...obj, workspaces: [targetWorkspace] })),
@@ -205,7 +266,7 @@ describe(`POST ${URL}`, () => {
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
   });
 
-  it('copy a visualization with missing references', async () => {
+  it('duplicate a saved object failed if its references are missing', async () => {
     const targetWorkspace = 'target_workspace_id';
     const savedObjects = [mockVisualization];
     const exportDetail = {
@@ -213,6 +274,7 @@ describe(`POST ${URL}`, () => {
       missingRefCount: 1,
       missingReferences: [{ type: 'index-pattern', id: 'my-pattern' }],
     };
+    clientMock.get.mockResolvedValueOnce({ success: true });
     exportSavedObjectsToStream.mockResolvedValueOnce(
       createListStream(...savedObjects, exportDetail)
     );

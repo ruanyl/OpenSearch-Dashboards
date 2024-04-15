@@ -3,8 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { featureMatchesConfig, getSelectedFeatureQuantities } from './utils';
-import { PublicAppInfo } from '../../../core/public';
+import {
+  featureMatchesConfig,
+  getSelectedFeatureQuantities,
+  isAppAccessibleInWorkspace,
+} from './utils';
+import { PublicAppInfo, WorkspaceAccessibility } from '../../../core/public';
+import { AppNavLinkStatus } from '../../../core/public';
 
 describe('workspace utils: featureMatchesConfig', () => {
   it('feature configured with `*` should match any features', () => {
@@ -135,5 +140,76 @@ describe('workspace utils: getSelectedFeatureQuantities', () => {
     );
     expect(total).toBe(1);
     expect(selected).toBe(0);
+  });
+});
+
+describe('workspace utils: isAppAccessibleInWorkspace', () => {
+  it('any app is accessible when workspace has no features configured', () => {
+    expect(
+      isAppAccessibleInWorkspace(
+        { id: 'any_app', title: 'Any app', mount: jest.fn() },
+        { id: 'workspace_id', name: 'workspace name' }
+      )
+    ).toBe(true);
+  });
+
+  it('An app is accessible when the workspace has the app configured', () => {
+    expect(
+      isAppAccessibleInWorkspace(
+        { id: 'dev_tools', title: 'Any app', mount: jest.fn() },
+        { id: 'workspace_id', name: 'workspace name', features: ['dev_tools'] }
+      )
+    ).toBe(true);
+  });
+
+  it('An app is not accessible when the workspace does not have the app configured', () => {
+    expect(
+      isAppAccessibleInWorkspace(
+        { id: 'dev_tools', title: 'Any app', mount: jest.fn() },
+        { id: 'workspace_id', name: 'workspace name', features: [] }
+      )
+    ).toBe(false);
+  });
+
+  it('An app is accessible if the nav link is hidden', () => {
+    expect(
+      isAppAccessibleInWorkspace(
+        {
+          id: 'dev_tools',
+          title: 'Any app',
+          mount: jest.fn(),
+          navLinkStatus: AppNavLinkStatus.hidden,
+        },
+        { id: 'workspace_id', name: 'workspace name', features: [] }
+      )
+    ).toBe(true);
+  });
+
+  it('An app is accessible if it is chromeless', () => {
+    expect(
+      isAppAccessibleInWorkspace(
+        {
+          id: 'dev_tools',
+          title: 'Any app',
+          mount: jest.fn(),
+          chromeless: true,
+        },
+        { id: 'workspace_id', name: 'workspace name', features: [] }
+      )
+    ).toBe(true);
+  });
+
+  it('An app is not accessible if its workspaceAccessibility is no', () => {
+    expect(
+      isAppAccessibleInWorkspace(
+        {
+          id: 'home',
+          title: 'Any app',
+          mount: jest.fn(),
+          workspaceAccessibility: WorkspaceAccessibility.NO,
+        },
+        { id: 'workspace_id', name: 'workspace name', features: [] }
+      )
+    ).toBe(false);
   });
 });
