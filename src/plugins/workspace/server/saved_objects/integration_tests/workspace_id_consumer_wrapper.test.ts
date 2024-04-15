@@ -5,6 +5,7 @@
 
 import { SavedObject } from 'src/core/types';
 import { isEqual } from 'lodash';
+import packageInfo from '../../../../../../package.json';
 import * as osdTestServer from '../../../../../core/test_helpers/osd_server';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../../../data_source/common';
 
@@ -16,7 +17,9 @@ const dashboard: Omit<SavedObject, 'id'> = {
 
 const dataSource: Omit<SavedObject, 'id'> = {
   type: DATA_SOURCE_SAVED_OBJECT_TYPE,
-  attributes: {},
+  attributes: {
+    title: 'test data source',
+  },
   references: [],
 };
 
@@ -44,10 +47,6 @@ describe('workspace_id_consumer integration test', () => {
     const { startOpenSearch, startOpenSearchDashboards } = osdTestServer.createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
       settings: {
-        opensearch: {
-          license: 'oss',
-          opensearchFrom: '/Users/suzhou/Downloads/opensearch-3.0.0-SNAPSHOT',
-        },
         osd: {
           data_source: {
             enabled: true,
@@ -160,7 +159,7 @@ describe('workspace_id_consumer integration test', () => {
       );
     });
 
-    it('bulk create with disallowed types', async () => {
+    it('bulk create with disallowed types in workspace', async () => {
       await clearFooAndBar();
 
       // import advanced settings and data sources should throw error
@@ -173,14 +172,12 @@ describe('workspace_id_consumer integration test', () => {
           },
           {
             ...advancedSettings,
-            id: 'bar',
+            id: packageInfo.version,
           },
         ])
-        .expect(400);
+        .expect(200);
       expect(createResultFoo.body).toEqual({
-        error: 'Bad Request',
-        message: 'type: data-source, type: config are not allowed to create within a workspace.',
-        statusCode: 400,
+        saved_objects: [],
       });
 
       // data source and advanced settings should not be found within the workspace
@@ -193,12 +190,36 @@ describe('workspace_id_consumer integration test', () => {
       expect(findDataSourceResult.body.total).toEqual(0);
 
       const findAdvancedSettings = await osdTestServer.request
-        .get(
-          root,
-          `/w/${createdFooWorkspace.id}/api/saved_objects/_find?type=config`
-        )
+        .get(root, `/w/${createdFooWorkspace.id}/api/saved_objects/_find?type=config`)
         .expect(200);
       expect(findAdvancedSettings.body.total).toEqual(0);
+    });
+
+    it('bulk create with disallowed types out of workspace', async () => {
+      await clearFooAndBar();
+
+      // import advanced settings and data sources should throw error
+      const createResultFoo = await osdTestServer.request
+        .post(root, `/api/saved_objects/_bulk_create`)
+        .send([
+          {
+            ...advancedSettings,
+            id: packageInfo.version,
+          },
+        ])
+        .expect(200);
+      expect(createResultFoo.body).toEqual({
+        saved_objects: [
+          expect.objectContaining({
+            type: advancedSettings.type,
+          }),
+        ],
+      });
+
+      const findAdvancedSettings = await osdTestServer.request
+        .get(root, `/api/saved_objects/_find?type=${advancedSettings.type}`)
+        .expect(200);
+      expect(findAdvancedSettings.body.total).toEqual(1);
     });
 
     it('checkConflicts when importing ndjson', async () => {
