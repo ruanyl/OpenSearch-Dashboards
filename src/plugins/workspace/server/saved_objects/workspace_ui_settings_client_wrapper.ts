@@ -106,7 +106,7 @@ export class WorkspaceUiSettingsClientWrapper {
           options
         );
 
-        configObject.attributes = { ...workspaceUpdateResult.attributes.uiSettings };
+        configObject.attributes = workspaceUpdateResult.attributes.uiSettings;
 
         return configObject as SavedObjectsUpdateResponse<T>;
       }
