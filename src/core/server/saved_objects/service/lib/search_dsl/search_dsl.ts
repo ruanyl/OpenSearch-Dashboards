@@ -56,6 +56,7 @@ interface GetSearchDslOptions {
   workspaces?: SavedObjectsFindOptions['workspaces'];
   workspacesSearchOperator?: 'AND' | 'OR';
   ACLSearchParams?: SavedObjectsFindOptions['ACLSearchParams'];
+  enabledOperators?: SavedObjectsFindOptions['enabledOperators'];
 }
 
 export function getSearchDsl(
@@ -78,6 +79,7 @@ export function getSearchDsl(
     workspaces,
     workspacesSearchOperator,
     ACLSearchParams,
+    enabledOperators,
   } = options;
 
   if (!type) {
@@ -103,6 +105,7 @@ export function getSearchDsl(
       workspaces,
       workspacesSearchOperator,
       ACLSearchParams,
+      enabledOperators,
     }),
     ...getSortingParams(mappings, type, sortField, sortOrder),
   };

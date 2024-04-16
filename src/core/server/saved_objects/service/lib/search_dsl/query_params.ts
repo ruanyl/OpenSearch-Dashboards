@@ -170,6 +170,7 @@ interface QueryParams {
   workspaces?: SavedObjectsFindOptions['workspaces'];
   workspacesSearchOperator?: 'AND' | 'OR';
   ACLSearchParams?: SavedObjectsFindOptions['ACLSearchParams'];
+  enabledOperators?: SavedObjectsFindOptions['enabledOperators'];
 }
 
 export function getClauseForReference(reference: HasReferenceQueryParams) {
@@ -229,6 +230,7 @@ export function getQueryParams({
   workspaces,
   workspacesSearchOperator = 'AND',
   ACLSearchParams,
+  enabledOperators,
 }: QueryParams) {
   const types = getTypes(
     registry,
@@ -261,6 +263,7 @@ export function getQueryParams({
       searchFields,
       rootSearchFields,
       defaultSearchOperator,
+      enabledOperators,
     });
 
     if (useMatchPhrasePrefix) {
@@ -432,18 +435,21 @@ const getSimpleQueryStringClause = ({
   searchFields,
   rootSearchFields,
   defaultSearchOperator,
+  enabledOperators,
 }: {
   search: string;
   types: string[];
   searchFields?: string[];
   rootSearchFields?: string[];
   defaultSearchOperator?: string;
+  enabledOperators?: SavedObjectsFindOptions['enabledOperators'];
 }) => {
   return {
     simple_query_string: {
       query: search,
       ...getSimpleQueryStringTypeFields(types, searchFields, rootSearchFields),
       ...(defaultSearchOperator ? { default_operator: defaultSearchOperator } : {}),
+      ...(enabledOperators ? { flags: enabledOperators } : {}),
     },
   };
 };
