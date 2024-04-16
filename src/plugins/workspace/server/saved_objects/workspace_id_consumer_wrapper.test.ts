@@ -8,7 +8,6 @@ import { SavedObject } from '../../../../core/public';
 import { httpServerMock, savedObjectsClientMock, coreMock } from '../../../../core/server/mocks';
 import { WorkspaceIdConsumerWrapper } from './workspace_id_consumer_wrapper';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../../../plugins/data_source/common';
-import { UI_SETTINGS_SAVED_OBJECTS_TYPE } from '../../../../core/server';
 
 describe('WorkspaceIdConsumerWrapper', () => {
   const requestHandlerContext = coreMock.createRequestHandlerContext();
@@ -89,7 +88,8 @@ describe('WorkspaceIdConsumerWrapper', () => {
     });
 
     it(`Should skip the objects when trying to create unallowed type within a workspace`, async () => {
-      await wrapperClient.bulkCreate([
+      mockedClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [] });
+      const result = await wrapperClient.bulkCreate([
         getSavedObject({
           type: 'config',
           id: 'foo',
@@ -103,6 +103,19 @@ describe('WorkspaceIdConsumerWrapper', () => {
       expect(mockedClient.bulkCreate).toBeCalledWith([], {
         workspaces: ['foo'],
       });
+      expect(result.saved_objects[0].error).toEqual(
+        expect.objectContaining({
+          message: "Unsupport type in workspace: 'config' is not allowed to import in workspace.",
+          statusCode: 400,
+        })
+      );
+      expect(result.saved_objects[1].error).toEqual(
+        expect.objectContaining({
+          message:
+            "Unsupport type in workspace: 'data-source' is not allowed to import in workspace.",
+          statusCode: 400,
+        })
+      );
     });
   });
 

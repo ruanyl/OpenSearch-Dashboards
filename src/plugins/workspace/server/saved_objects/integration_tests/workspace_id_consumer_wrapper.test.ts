@@ -176,9 +176,19 @@ describe('workspace_id_consumer integration test', () => {
           },
         ])
         .expect(200);
-      expect(createResultFoo.body).toEqual({
-        saved_objects: [],
-      });
+      expect(createResultFoo.body.saved_objects[0].error).toEqual(
+        expect.objectContaining({
+          message: "Unsupport type in workspace: 'config' is not allowed to import in workspace.",
+          statusCode: 400,
+        })
+      );
+      expect(createResultFoo.body.saved_objects[1].error).toEqual(
+        expect.objectContaining({
+          message:
+            "Unsupport type in workspace: 'data-source' is not allowed to import in workspace.",
+          statusCode: 400,
+        })
+      );
 
       // data source and advanced settings should not be found within the workspace
       const findDataSourceResult = await osdTestServer.request

@@ -12,6 +12,7 @@ import {
   SavedObjectsCheckConflictsObject,
   OpenSearchDashboardsRequest,
   SavedObjectsFindOptions,
+  SavedObjectsErrorHelpers,
 } from '../../../../core/server';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../../../plugins/data_source/common';
 
@@ -67,30 +68,60 @@ export class WorkspaceIdConsumerWrapper {
           attributes,
           this.formatWorkspaceIdParams(wrapperOptions.request, options)
         ),
-      bulkCreate: <T = unknown>(
+      bulkCreate: async <T = unknown>(
         objects: Array<SavedObjectsBulkCreateObject<T>>,
         options: SavedObjectsCreateOptions = {}
       ) => {
         const { workspaces } = this.formatWorkspaceIdParams(wrapperOptions.request, options);
-        const allowedSavedObjects = objects.filter((item) => {
+        const disallowedSavedObjects: Array<SavedObjectsBulkCreateObject<T>> = [];
+        const allowedSavedObjects: Array<SavedObjectsBulkCreateObject<T>> = [];
+        objects.forEach((item) => {
           const isImportIntoWorkspace = workspaces?.length || item.workspaces?.length;
           // config can not be created inside a workspace
           if (this.isConfigType(item.type) && isImportIntoWorkspace) {
-            return false;
+            disallowedSavedObjects.push(item);
+            return;
           }
 
           // For 2.14, data source can only be created without workspace info
           if (this.isDataSourceType(item.type) && isImportIntoWorkspace) {
-            return false;
+            disallowedSavedObjects.push(item);
+            return;
           }
 
-          return true;
+          allowedSavedObjects.push(item);
+          return;
         });
 
-        return wrapperOptions.client.bulkCreate(
+        if (!disallowedSavedObjects.length) {
+          return await wrapperOptions.client.bulkCreate(
+            objects,
+            this.formatWorkspaceIdParams(wrapperOptions.request, options)
+          );
+        }
+
+        const allowedSavedObjectsBulkCreateResult = await wrapperOptions.client.bulkCreate(
           allowedSavedObjects,
           this.formatWorkspaceIdParams(wrapperOptions.request, options)
         );
+
+        return {
+          saved_objects: [
+            ...allowedSavedObjectsBulkCreateResult.saved_objects,
+            ...disallowedSavedObjects.map((item) => ({
+              references: [],
+              id: '',
+              ...item,
+              error: {
+                ...SavedObjectsErrorHelpers.decorateBadRequestError(
+                  new Error(`'${item.type}' is not allowed to import in workspace.`),
+                  'Unsupport type in workspace'
+                ).output.payload,
+                metadata: { isNotOverwritable: true },
+              },
+            })),
+          ],
+        };
       },
       checkConflicts: (
         objects: SavedObjectsCheckConflictsObject[] = [],
