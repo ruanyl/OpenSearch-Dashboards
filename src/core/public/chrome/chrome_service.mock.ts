@@ -44,7 +44,6 @@ const createStartContractMock = () => {
     getHeaderComponent: jest.fn(),
     navLinks: {
       getNavLinks$: jest.fn(),
-      getLinkUpdaters$: jest.fn(),
       has: jest.fn(),
       get: jest.fn(),
       getAll: jest.fn(),
