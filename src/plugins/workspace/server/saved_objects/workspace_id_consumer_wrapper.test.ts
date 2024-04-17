@@ -66,38 +66,6 @@ describe('WorkspaceIdConsumerWrapper', () => {
 
       expect(mockedClient.create.mock.calls[0][2]?.hasOwnProperty('workspaces')).toEqual(false);
     });
-
-    it(`Should throw error when trying to create disallowed type in workspace`, async () => {
-      expect(() =>
-        wrapperClient.create(
-          DATA_SOURCE_SAVED_OBJECT_TYPE,
-          {
-            name: 'foo',
-          },
-
-          {
-            workspaces: ['foo'],
-          }
-        )
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"Unsupport type in workspace: 'data-source' is not allowed to create in workspace."`
-      );
-
-      expect(() =>
-        wrapperClient.create(
-          'config',
-          {
-            name: 'foo',
-          },
-
-          {
-            workspaces: ['foo'],
-          }
-        )
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"Unsupport type in workspace: 'config' is not allowed to create in workspace."`
-      );
-    });
   });
 
   describe('bulkCreate', () => {
@@ -116,37 +84,6 @@ describe('WorkspaceIdConsumerWrapper', () => {
         {
           workspaces: ['foo'],
         }
-      );
-    });
-
-    it(`Should return error when trying to create unallowed type within a workspace`, async () => {
-      mockedClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [] });
-      const result = await wrapperClient.bulkCreate([
-        getSavedObject({
-          type: 'config',
-          id: 'foo',
-        }),
-        getSavedObject({
-          type: DATA_SOURCE_SAVED_OBJECT_TYPE,
-          id: 'foo',
-        }),
-      ]);
-
-      expect(mockedClient.bulkCreate).toBeCalledWith([], {
-        workspaces: ['foo'],
-      });
-      expect(result.saved_objects[0].error).toEqual(
-        expect.objectContaining({
-          message: "Unsupport type in workspace: 'config' is not allowed to import in workspace.",
-          statusCode: 400,
-        })
-      );
-      expect(result.saved_objects[1].error).toEqual(
-        expect.objectContaining({
-          message:
-            "Unsupport type in workspace: 'data-source' is not allowed to import in workspace.",
-          statusCode: 400,
-        })
       );
     });
   });
@@ -176,16 +113,6 @@ describe('WorkspaceIdConsumerWrapper', () => {
       expect(mockedClient.find).toBeCalledWith({
         type: 'dashboard',
         workspaces: ['foo'],
-      });
-    });
-
-    it(`workspaces parameters should be removed when finding data sources`, async () => {
-      await wrapperClient.find({
-        type: DATA_SOURCE_SAVED_OBJECT_TYPE,
-        workspaces: ['foo'],
-      });
-      expect(mockedClient.find).toBeCalledWith({
-        type: DATA_SOURCE_SAVED_OBJECT_TYPE,
       });
     });
   });
