@@ -178,14 +178,14 @@ describe('workspace_id_consumer integration test', () => {
         .expect(200);
       expect(createResultFoo.body.saved_objects[0].error).toEqual(
         expect.objectContaining({
-          message: "Unsupport type in workspace: 'config' is not allowed to import in workspace.",
+          message:
+            "Unsupport type in workspace: 'data-source' is not allowed to import in workspace.",
           statusCode: 400,
         })
       );
       expect(createResultFoo.body.saved_objects[1].error).toEqual(
         expect.objectContaining({
-          message:
-            "Unsupport type in workspace: 'data-source' is not allowed to import in workspace.",
+          message: "Unsupport type in workspace: 'config' is not allowed to import in workspace.",
           statusCode: 400,
         })
       );
