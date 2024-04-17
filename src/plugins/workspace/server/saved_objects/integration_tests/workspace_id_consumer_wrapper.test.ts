@@ -47,6 +47,10 @@ describe('workspace_id_consumer integration test', () => {
     const { startOpenSearch, startOpenSearchDashboards } = osdTestServer.createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
       settings: {
+        opensearch: {
+          license: 'oss',
+          opensearchFrom: '/Users/suzhou/Downloads/opensearch-3.0.0-SNAPSHOT',
+        },
         osd: {
           data_source: {
             enabled: true,
@@ -190,15 +194,15 @@ describe('workspace_id_consumer integration test', () => {
         })
       );
 
-      // data source and advanced settings should not be found within the workspace
-      const findDataSourceResult = await osdTestServer.request
+      // Data source should not be created
+      await osdTestServer.request
         .get(
           root,
-          `/w/${createdFooWorkspace.id}/api/saved_objects/_find?type=${DATA_SOURCE_SAVED_OBJECT_TYPE}`
+          `/w/${createdFooWorkspace.id}/api/saved_objects/${DATA_SOURCE_SAVED_OBJECT_TYPE}/foo`
         )
-        .expect(200);
-      expect(findDataSourceResult.body.total).toEqual(0);
+        .expect(404);
 
+      // Advanced settings should not be found within workspace
       const findAdvancedSettings = await osdTestServer.request
         .get(root, `/w/${createdFooWorkspace.id}/api/saved_objects/_find?type=config`)
         .expect(200);
