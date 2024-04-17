@@ -47,10 +47,6 @@ describe('workspace_id_consumer integration test', () => {
     const { startOpenSearch, startOpenSearchDashboards } = osdTestServer.createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
       settings: {
-        opensearch: {
-          license: 'oss',
-          opensearchFrom: '/Users/suzhou/Downloads/opensearch-3.0.0-SNAPSHOT',
-        },
         osd: {
           data_source: {
             enabled: true,
