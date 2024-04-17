@@ -46,7 +46,7 @@ export class WorkspaceIdConsumerWrapper {
           attributes,
           this.formatWorkspaceIdParams(wrapperOptions.request, options)
         ),
-      bulkCreate: async <T = unknown>(
+      bulkCreate: <T = unknown>(
         objects: Array<SavedObjectsBulkCreateObject<T>>,
         options: SavedObjectsCreateOptions = {}
       ) =>

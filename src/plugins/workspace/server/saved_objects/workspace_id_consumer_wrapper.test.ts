@@ -7,7 +7,6 @@ import { updateWorkspaceState } from '../../../../core/server/utils';
 import { SavedObject } from '../../../../core/public';
 import { httpServerMock, savedObjectsClientMock, coreMock } from '../../../../core/server/mocks';
 import { WorkspaceIdConsumerWrapper } from './workspace_id_consumer_wrapper';
-import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../../../plugins/data_source/common';
 
 describe('WorkspaceIdConsumerWrapper', () => {
   const requestHandlerContext = coreMock.createRequestHandlerContext();
