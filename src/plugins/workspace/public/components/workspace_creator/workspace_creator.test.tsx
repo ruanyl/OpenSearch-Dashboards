@@ -182,15 +182,47 @@ describe('WorkspaceCreator', () => {
     expect(notificationToastsAddDanger).not.toHaveBeenCalled();
   });
 
+  it('should show danger toasts after create workspace failed', async () => {
+    workspaceClientCreate.mockReturnValueOnce({ result: { id: 'failResult' }, success: false });
+    const { getByTestId } = render(<WorkspaceCreator />);
+    const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
+    fireEvent.input(nameInput, {
+      target: { value: 'test workspace name' },
+    });
+    fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
+    expect(workspaceClientCreate).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(notificationToastsAddDanger).toHaveBeenCalled();
+    });
+    expect(notificationToastsAddSuccess).not.toHaveBeenCalled();
+  });
+
+  it('should show danger toasts after call create workspace API failed', async () => {
+    workspaceClientCreate.mockImplementationOnce(async () => {
+      throw new Error();
+    });
+    const { getByTestId } = render(<WorkspaceCreator />);
+    const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
+    fireEvent.input(nameInput, {
+      target: { value: 'test workspace name' },
+    });
+    fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
+    expect(workspaceClientCreate).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(notificationToastsAddDanger).toHaveBeenCalled();
+    });
+    expect(notificationToastsAddSuccess).not.toHaveBeenCalled();
+  });
+
   it('create workspace with customized permissions', async () => {
-    const { getByTestId, getByText } = render(<WorkspaceCreator />);
+    const { getByTestId, getByText, getAllByText } = render(<WorkspaceCreator />);
     const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
     fireEvent.input(nameInput, {
       target: { value: 'test workspace name' },
     });
     fireEvent.click(getByText('Users & Permissions'));
     fireEvent.click(getByTestId('workspaceForm-permissionSettingPanel-user-addNew'));
-    const userIdInput = getByTestId('workspaceForm-permissionSettingPanel-0-userId');
+    const userIdInput = getAllByText('Select')[0];
     fireEvent.click(userIdInput);
     fireEvent.input(getByTestId('comboBoxSearchInput'), {
       target: { value: 'test user id' },
@@ -214,20 +246,5 @@ describe('WorkspaceCreator', () => {
       expect(notificationToastsAddSuccess).toHaveBeenCalled();
     });
     expect(notificationToastsAddDanger).not.toHaveBeenCalled();
-  });
-
-  it('should show danger toasts after create workspace failed', async () => {
-    workspaceClientCreate.mockReturnValue({ result: { id: 'failResult' }, success: false });
-    const { getByTestId } = render(<WorkspaceCreator />);
-    const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
-    fireEvent.input(nameInput, {
-      target: { value: 'test workspace name' },
-    });
-    fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
-    expect(workspaceClientCreate).toHaveBeenCalled();
-    await waitFor(() => {
-      expect(notificationToastsAddDanger).toHaveBeenCalled();
-    });
-    expect(notificationToastsAddSuccess).not.toHaveBeenCalled();
   });
 });

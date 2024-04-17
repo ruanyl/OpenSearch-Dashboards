@@ -5,19 +5,12 @@
 
 import { useCallback, useState, FormEventHandler, useRef, useMemo, useEffect } from 'react';
 import { htmlIdGenerator, EuiFieldTextProps, EuiColorPickerProps } from '@elastic/eui';
-import { i18n } from '@osd/i18n';
 import { useApplications } from '../../hooks';
 import { featureMatchesConfig } from '../../utils';
 
-import { WorkspacePermissionItemType, WorkspaceFormTabs } from './constants';
-import { WorkspacePermissionSetting, WorkspaceFormProps, WorkspaceFormErrors } from './types';
-import {
-  appendDefaultFeatureIds,
-  getNumberOfErrors,
-  isUserOrGroupPermissionSettingDuplicated,
-  isValidNameOrDescription,
-  isValidWorkspacePermissionSetting,
-} from './utils';
+import { WorkspaceFormTabs } from './constants';
+import { WorkspaceFormProps, WorkspaceFormErrors, WorkspacePermissionSetting } from './types';
+import { appendDefaultFeatureIds, getNumberOfErrors, validateWorkspaceForm } from './utils';
 
 const workspaceHtmlIdGenerator = htmlIdGenerator();
 
@@ -28,7 +21,6 @@ export const useWorkspaceForm = ({ application, defaultValues, onSubmit }: Works
   const [color, setColor] = useState(defaultValues?.color);
 
   const [selectedTab, setSelectedTab] = useState(WorkspaceFormTabs.FeatureVisibility);
-  const [numberOfErrors, setNumberOfErrors] = useState(0);
   // The matched feature id list based on original feature config,
   // the feature category will be expanded to list of feature ids
   const defaultFeatures = useMemo(() => {
@@ -44,7 +36,7 @@ export const useWorkspaceForm = ({ application, defaultValues, onSubmit }: Works
     appendDefaultFeatureIds(defaultFeatures)
   );
   const [permissionSettings, setPermissionSettings] = useState<
-    Array<Partial<WorkspacePermissionSetting>>
+    Array<Pick<WorkspacePermissionSetting, 'id'> & Partial<WorkspacePermissionSetting>>
   >(
     defaultValues?.permissionSettings && defaultValues.permissionSettings.length > 0
       ? defaultValues.permissionSettings
@@ -52,6 +44,7 @@ export const useWorkspaceForm = ({ application, defaultValues, onSubmit }: Works
   );
 
   const [formErrors, setFormErrors] = useState<WorkspaceFormErrors>({});
+  const numberOfErrors = useMemo(() => getNumberOfErrors(formErrors), [formErrors]);
   const formIdRef = useRef<string>();
   const getFormData = () => ({
     name,
@@ -70,84 +63,10 @@ export const useWorkspaceForm = ({ application, defaultValues, onSubmit }: Works
   const handleFormSubmit = useCallback<FormEventHandler>(
     (e) => {
       e.preventDefault();
-      let currentFormErrors: WorkspaceFormErrors = {};
       const formData = getFormDataRef.current();
-      if (!formData.name) {
-        currentFormErrors = {
-          ...currentFormErrors,
-          name: i18n.translate('workspace.form.detail.name.empty', {
-            defaultMessage: "Name can't be empty.",
-          }),
-        };
-      }
-      if (!isValidNameOrDescription(formData.name)) {
-        currentFormErrors = {
-          ...currentFormErrors,
-          name: i18n.translate('workspace.form.detail.name.invalid', {
-            defaultMessage: 'Invalid workspace name',
-          }),
-        };
-      }
-      if (!isValidNameOrDescription(formData.description)) {
-        currentFormErrors = {
-          ...currentFormErrors,
-          description: i18n.translate('workspace.form.detail.description.invalid', {
-            defaultMessage: 'Invalid workspace description',
-          }),
-        };
-      }
-      const permissionErrors: string[] = new Array(formData.permissionSettings.length);
-      for (let i = 0; i < formData.permissionSettings.length; i++) {
-        const permission = formData.permissionSettings[i];
-        if (isValidWorkspacePermissionSetting(permission)) {
-          if (
-            isUserOrGroupPermissionSettingDuplicated(
-              formData.permissionSettings.slice(0, i),
-              permission
-            )
-          ) {
-            permissionErrors[i] = i18n.translate('workspace.form.permission.invalidate.group', {
-              defaultMessage: 'Duplicate permission setting',
-            });
-            continue;
-          }
-          continue;
-        }
-        if (!permission.type) {
-          permissionErrors[i] = i18n.translate('workspace.form.permission.invalidate.type', {
-            defaultMessage: 'Invalid type',
-          });
-          continue;
-        }
-        if (!permission.modes || permission.modes.length === 0) {
-          permissionErrors[i] = i18n.translate('workspace.form.permission.invalidate.modes', {
-            defaultMessage: 'Invalid permission modes',
-          });
-          continue;
-        }
-        if (permission.type === WorkspacePermissionItemType.User && !permission.userId) {
-          permissionErrors[i] = i18n.translate('workspace.form.permission.invalidate.userId', {
-            defaultMessage: 'Invalid userId',
-          });
-          continue;
-        }
-        if (permission.type === WorkspacePermissionItemType.Group && !permission.group) {
-          permissionErrors[i] = i18n.translate('workspace.form.permission.invalidate.group', {
-            defaultMessage: 'Invalid user group',
-          });
-          continue; // this line is need for more conditions
-        }
-      }
-      if (permissionErrors.some((error) => !!error)) {
-        currentFormErrors = {
-          ...currentFormErrors,
-          permissions: permissionErrors,
-        };
-      }
-      const currentNumberOfErrors = getNumberOfErrors(currentFormErrors);
+      const currentFormErrors: WorkspaceFormErrors = validateWorkspaceForm(formData);
       setFormErrors(currentFormErrors);
-      setNumberOfErrors(currentNumberOfErrors);
-      if (currentNumberOfErrors > 0) {
+      if (getNumberOfErrors(currentFormErrors) > 0) {
         return;
       }
 
@@ -168,7 +87,7 @@ export const useWorkspaceForm = ({ application, defaultValues, onSubmit }: Works
       onSubmit?.({
         ...formData,
         name: formData.name!,
-        permissionSettings: formData.permissionSettings.filter(isValidWorkspacePermissionSetting),
+        permissionSettings: formData.permissionSettings as WorkspacePermissionSetting[],
       });
     },
     [defaultFeatures, onSubmit, defaultValues?.features]

@@ -11,14 +11,14 @@ import { WorkspaceForm, WorkspaceFormSubmitData, WorkspaceOperationType } from '
 import { WORKSPACE_OVERVIEW_APP_ID } from '../../../common/constants';
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { WorkspaceClient } from '../../workspace_client';
-import { convertPermissionSettingsToPermissions } from '../workspace_form/utils';
+import { convertPermissionSettingsToPermissions } from '../workspace_form';
 
 export const WorkspaceCreator = () => {
   const {
     services: { application, notifications, http, workspaceClient },
   } = useOpenSearchDashboards<{ workspaceClient: WorkspaceClient }>();
-
   const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
+
   const handleWorkspaceFormSubmit = useCallback(
     async (data: WorkspaceFormSubmitData) => {
       let result;
@@ -28,6 +28,29 @@ export const WorkspaceCreator = () => {
           attributes,
           convertPermissionSettingsToPermissions(permissionSettings)
         );
+        if (result?.success) {
+          notifications?.toasts.addSuccess({
+            title: i18n.translate('workspace.create.success', {
+              defaultMessage: 'Create workspace successfully',
+            }),
+          });
+          if (application && http) {
+            const newWorkspaceId = result.result.id;
+            // Redirect page after one second, leave one second time to show create successful toast.
+            window.setTimeout(() => {
+              window.location.href = formatUrlWithWorkspaceId(
+                application.getUrlForApp(WORKSPACE_OVERVIEW_APP_ID, {
+                  absolute: true,
+                }),
+                newWorkspaceId,
+                http.basePath
+              );
+            }, 1000);
+          }
+          return;
+        } else {
+          throw new Error(result?.error ? result?.error : 'create workspace failed');
+        }
       } catch (error) {
         notifications?.toasts.addDanger({
           title: i18n.translate('workspace.create.failed', {
@@ -37,33 +60,6 @@ export const WorkspaceCreator = () => {
         });
         return;
       }
-      if (result?.success) {
-        notifications?.toasts.addSuccess({
-          title: i18n.translate('workspace.create.success', {
-            defaultMessage: 'Create workspace successfully',
-          }),
-        });
-        if (application && http) {
-          const newWorkspaceId = result.result.id;
-          // Redirect page after one second, leave one second time to show create successful toast.
-          window.setTimeout(() => {
-            window.location.href = formatUrlWithWorkspaceId(
-              application.getUrlForApp(WORKSPACE_OVERVIEW_APP_ID, {
-                absolute: true,
-              }),
-              newWorkspaceId,
-              http.basePath
-            );
-          }, 1000);
-        }
-        return;
-      }
-      notifications?.toasts.addDanger({
-        title: i18n.translate('workspace.create.failed', {
-          defaultMessage: 'Failed to create workspace',
-        }),
-        text: result?.error,
-      });
     },
     [notifications?.toasts, http, application, workspaceClient]
   );

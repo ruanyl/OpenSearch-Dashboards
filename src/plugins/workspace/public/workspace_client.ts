@@ -162,7 +162,7 @@ export class WorkspaceClient {
   /**
    * A bypass layer to get current workspace id
    */
-  public getCurrentWorkspaceId(): IResponse<WorkspaceAttribute['id']> {
+  public getCurrentWorkspaceId(): IResponse<WorkspaceAttributeWithPermission['id']> {
     const currentWorkspaceId = this.workspaces.currentWorkspaceId$.getValue();
     if (!currentWorkspaceId) {
       return {
@@ -182,7 +182,7 @@ export class WorkspaceClient {
   /**
    * Do a find in the latest workspace list with current workspace id
    */
-  public async getCurrentWorkspace(): Promise<IResponse<WorkspaceAttribute>> {
+  public async getCurrentWorkspace(): Promise<IResponse<WorkspaceAttributeWithPermission>> {
     const currentWorkspaceIdResp = this.getCurrentWorkspaceId();
     if (currentWorkspaceIdResp.success) {
       const currentWorkspaceResp = await this.get(currentWorkspaceIdResp.result);
@@ -202,10 +202,10 @@ export class WorkspaceClient {
   public async create(
     attributes: Omit<WorkspaceAttribute, 'id'>,
     permissions?: SavedObjectPermissions
-  ): Promise<IResponse<Pick<WorkspaceAttribute, 'id'>>> {
+  ): Promise<IResponse<Pick<WorkspaceAttributeWithPermission, 'id'>>> {
     const path = this.getPath();
 
-    const result = await this.safeFetch<WorkspaceAttribute>(path, {
+    const result = await this.safeFetch<WorkspaceAttributeWithPermission>(path, {
       method: 'POST',
       body: JSON.stringify({
         attributes,

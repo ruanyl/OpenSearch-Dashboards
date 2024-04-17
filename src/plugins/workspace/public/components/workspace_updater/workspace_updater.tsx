@@ -9,15 +9,17 @@ import { i18n } from '@osd/i18n';
 import { useObservable } from 'react-use';
 import { of } from 'rxjs';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { WorkspaceForm, WorkspaceFormSubmitData, WorkspaceOperationType } from '../workspace_form';
 import { WORKSPACE_OVERVIEW_APP_ID } from '../../../common/constants';
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { WorkspaceAttributeWithPermission } from '../../../../../core/types';
 import { WorkspaceClient } from '../../workspace_client';
 import {
-  convertPermissionSettingsToPermissions,
+  WorkspaceForm,
+  WorkspaceFormSubmitData,
+  WorkspaceOperationType,
   convertPermissionsToPermissionSettings,
-} from '../workspace_form/utils';
+  convertPermissionSettingsToPermissions,
+} from '../workspace_form';
 
 function getFormDataFromWorkspace(
   currentWorkspace: WorkspaceAttributeWithPermission | null | undefined
@@ -37,17 +39,12 @@ export const WorkspaceUpdater = () => {
   const {
     services: { application, workspaces, notifications, http, workspaceClient },
   } = useOpenSearchDashboards<{ workspaceClient: WorkspaceClient }>();
-
   const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
 
   const currentWorkspace = useObservable(workspaces ? workspaces.currentWorkspace$ : of(null));
   const [currentWorkspaceFormData, setCurrentWorkspaceFormData] = useState(
     getFormDataFromWorkspace(currentWorkspace)
   );
-
-  useEffect(() => {
-    setCurrentWorkspaceFormData(getFormDataFromWorkspace(currentWorkspace));
-  }, [currentWorkspace]);
 
   const handleWorkspaceFormSubmit = useCallback(
     async (data: WorkspaceFormSubmitData) => {
@@ -68,6 +65,28 @@ export const WorkspaceUpdater = () => {
           attributes,
           convertPermissionSettingsToPermissions(permissionSettings)
         );
+        if (result?.success) {
+          notifications?.toasts.addSuccess({
+            title: i18n.translate('workspace.update.success', {
+              defaultMessage: 'Update workspace successfully',
+            }),
+          });
+          if (application && http) {
+            // Redirect page after one second, leave one second time to show update successful toast.
+            window.setTimeout(() => {
+              window.location.href = formatUrlWithWorkspaceId(
+                application.getUrlForApp(WORKSPACE_OVERVIEW_APP_ID, {
+                  absolute: true,
+                }),
+                currentWorkspace.id,
+                http.basePath
+              );
+            }, 1000);
+          }
+          return;
+        } else {
+          throw new Error(result?.error ? result?.error : 'update workspace failed');
+        }
       } catch (error) {
         notifications?.toasts.addDanger({
           title: i18n.translate('workspace.update.failed', {
@@ -77,35 +96,13 @@ export const WorkspaceUpdater = () => {
         });
         return;
       }
-      if (result?.success) {
-        notifications?.toasts.addSuccess({
-          title: i18n.translate('workspace.update.success', {
-            defaultMessage: 'Update workspace successfully',
-          }),
-        });
-        if (application && http) {
-          // Redirect page after one second, leave one second time to show update successful toast.
-          window.setTimeout(() => {
-            window.location.href = formatUrlWithWorkspaceId(
-              application.getUrlForApp(WORKSPACE_OVERVIEW_APP_ID, {
-                absolute: true,
-              }),
-              currentWorkspace.id,
-              http.basePath
-            );
-          }, 1000);
-        }
-        return;
-      }
-      notifications?.toasts.addDanger({
-        title: i18n.translate('workspace.update.failed', {
-          defaultMessage: 'Failed to update workspace',
-        }),
-        text: result?.error,
-      });
     },
     [notifications?.toasts, currentWorkspace, http, application, workspaceClient]
   );
+
+  useEffect(() => {
+    setCurrentWorkspaceFormData(getFormDataFromWorkspace(currentWorkspace));
+  }, [currentWorkspace]);
 
   if (!currentWorkspaceFormData) {
     return null;
@@ -130,7 +127,7 @@ export const WorkspaceUpdater = () => {
               onSubmit={handleWorkspaceFormSubmit}
               operationType={WorkspaceOperationType.Update}
               permissionEnabled={isPermissionEnabled}
-              permissionLastAdminItemDeletable
+              permissionLastAdminItemDeletable={false}
             />
           )}
         </EuiPageContent>

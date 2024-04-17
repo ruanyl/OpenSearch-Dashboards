@@ -20,11 +20,11 @@ import {
 import { i18n } from '@osd/i18n';
 
 import { WorkspaceBottomBar } from './workspace_bottom_bar';
-import { WorkspacePermissionSettingPanel } from './workspace_permission_setting_panel';
 import { WorkspaceFormProps } from './types';
 import { WorkspaceFormTabs } from './constants';
 import { useWorkspaceForm } from './use_workspace_form';
 import { WorkspaceFeatureSelector } from './workspace_feature_selector';
+import { WorkspacePermissionSettingPanel } from './workspace_permission_setting_panel';
 
 export const WorkspaceForm = (props: WorkspaceFormProps) => {
   const {
@@ -160,15 +160,18 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
           />
         </EuiPanel>
       )}
-
       {selectedTab === WorkspaceFormTabs.UsersAndPermissions && (
         <EuiPanel>
           <EuiTitle size="s">
-            <h2>{usersAndPermissionsTitle}</h2>
+            <h2>
+              {i18n.translate('workspace.form.usersAndPermissions.title', {
+                defaultMessage: 'Users & Permissions',
+              })}
+            </h2>
           </EuiTitle>
           <EuiHorizontalRule margin="xs" />
           <WorkspacePermissionSettingPanel
-            errors={formErrors.permissions}
+            errors={formErrors.permissionSettings}
             onChange={setPermissionSettings}
             permissionSettings={formData.permissionSettings}
             lastAdminItemDeletable={!!permissionLastAdminItemDeletable}

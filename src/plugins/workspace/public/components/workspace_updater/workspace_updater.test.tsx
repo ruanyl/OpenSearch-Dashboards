@@ -130,7 +130,7 @@ describe('WorkspaceUpdater', () => {
   });
 
   it('update workspace successfully', async () => {
-    const { getByTestId, getByText } = render(<WorkspaceUpdater />);
+    const { getByTestId, getByText, getAllByText } = render(<WorkspaceUpdater />);
     const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
     fireEvent.input(nameInput, {
       target: { value: 'test workspace name' },
@@ -153,7 +153,7 @@ describe('WorkspaceUpdater', () => {
 
     fireEvent.click(getByText('Users & Permissions'));
     fireEvent.click(getByTestId('workspaceForm-permissionSettingPanel-user-addNew'));
-    const userIdInput = getByTestId('workspaceForm-permissionSettingPanel-0-userId');
+    const userIdInput = getAllByText('Select')[0];
     fireEvent.click(userIdInput);
     fireEvent.input(getByTestId('comboBoxSearchInput'), {
       target: { value: 'test user id' },

@@ -356,6 +356,32 @@ describe('workspace service api integration test', () => {
       // Global workspace will be created by default after workspace list API called.
       expect(listResult.body.result.total).toEqual(2);
     });
+    it('should able to update workspace with partial attributes', async () => {
+      const result: any = await osdTestServer.request
+        .post(root, `/api/workspaces`)
+        .send({
+          attributes: omitId(testWorkspace),
+        })
+        .expect(200);
+
+      await osdTestServer.request
+        .put(root, `/api/workspaces/${result.body.result.id}`)
+        .send({
+          attributes: {
+            name: 'updated',
+          },
+        })
+        .expect(200);
+
+      const getResult = await osdTestServer.request.get(
+        root,
+        `/api/workspaces/${result.body.result.id}`
+      );
+
+      expect(getResult.body.success).toEqual(true);
+      expect(getResult.body.result.name).toEqual('updated');
+      expect(getResult.body.result.description).toEqual(testWorkspace.description);
+    });
   });
 
   describe('Duplicate saved objects APIs', () => {

@@ -6,6 +6,17 @@
 import { i18n } from '@osd/i18n';
 import { WorkspacePermissionMode } from '../../../common/constants';
 
+export enum WorkspaceOperationType {
+  Create = 'create',
+  Update = 'update',
+}
+
+export enum WorkspaceFormTabs {
+  NotSelected,
+  FeatureVisibility,
+  UsersAndPermissions,
+}
+
 export enum WorkspacePermissionItemType {
   User = 'user',
   Group = 'group',
@@ -51,14 +62,3 @@ export const optionIdToWorkspacePermissionModesMap: {
   ],
   [PermissionModeId.Admin]: [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
 };
-
-export enum WorkspaceOperationType {
-  Create = 'create',
-  Update = 'update',
-}
-
-export enum WorkspaceFormTabs {
-  NotSelected,
-  FeatureVisibility,
-  UsersAndPermissions,
-}

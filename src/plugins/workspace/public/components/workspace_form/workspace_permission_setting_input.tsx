@@ -100,7 +100,6 @@ export const WorkspacePermissionSettingInput = ({
           onChange={handleGroupOrUserIdChange}
           placeholder="Select"
           style={{ width: 200 }}
-          data-test-subj={`workspaceForm-permissionSettingPanel-${index}-userId`}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
