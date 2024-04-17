@@ -13,6 +13,7 @@ import {
   OpenSearchDashboardsRequest,
   SavedObjectsFindOptions,
   SavedObjectsErrorHelpers,
+  SavedObject,
 } from '../../../../core/server';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../../../plugins/data_source/common';
 
@@ -48,11 +49,7 @@ export class WorkspaceIdConsumerWrapper {
 
     return type === DATA_SOURCE_SAVED_OBJECT_TYPE;
   }
-  private isConfigType(type: SavedObjectsFindOptions['type']): boolean {
-    if (Array.isArray(type)) {
-      return type.every((item) => item === UI_SETTINGS_SAVED_OBJECTS_TYPE);
-    }
-
+  private isConfigType(type: SavedObject['type']): boolean {
     return type === UI_SETTINGS_SAVED_OBJECTS_TYPE;
   }
   private formatFindParams(options: SavedObjectsFindOptions): SavedObjectsFindOptions {
