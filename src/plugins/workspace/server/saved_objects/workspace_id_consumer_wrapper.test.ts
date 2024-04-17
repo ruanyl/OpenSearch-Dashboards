@@ -119,7 +119,7 @@ describe('WorkspaceIdConsumerWrapper', () => {
       );
     });
 
-    it(`Should skip the objects when trying to create unallowed type within a workspace`, async () => {
+    it(`Should return error when trying to create unallowed type within a workspace`, async () => {
       mockedClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [] });
       const result = await wrapperClient.bulkCreate([
         getSavedObject({
@@ -182,6 +182,7 @@ describe('WorkspaceIdConsumerWrapper', () => {
     it(`workspaces parameters should be removed when finding data sources`, async () => {
       await wrapperClient.find({
         type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+        workspaces: ['foo'],
       });
       expect(mockedClient.find).toBeCalledWith({
         type: DATA_SOURCE_SAVED_OBJECT_TYPE,
