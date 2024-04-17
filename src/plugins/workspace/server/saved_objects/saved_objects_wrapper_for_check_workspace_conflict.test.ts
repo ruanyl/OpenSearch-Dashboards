@@ -118,7 +118,7 @@ describe('WorkspaceConflictSavedObjectsClientWrapper', () => {
     });
 
     it(`Should throw error when trying to create disallowed types in workspace`, async () => {
-      expect(() =>
+      await expect(
         wrapperClient.create(
           DATA_SOURCE_SAVED_OBJECT_TYPE,
           {
@@ -129,11 +129,11 @@ describe('WorkspaceConflictSavedObjectsClientWrapper', () => {
             workspaces: ['foo'],
           }
         )
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"Unsupported type in workspace: 'data-source' is not allowed to create in workspace."`
+      ).rejects.toMatchInlineSnapshot(
+        `[Error: Unsupported type in workspace: 'data-source' is not allowed to create in workspace.]`
       );
 
-      expect(() =>
+      await expect(
         wrapperClient.create(
           'config',
           {
@@ -144,8 +144,8 @@ describe('WorkspaceConflictSavedObjectsClientWrapper', () => {
             workspaces: ['foo'],
           }
         )
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"Unsupported type in workspace: 'config' is not allowed to create in workspace."`
+      ).rejects.toMatchInlineSnapshot(
+        `[Error: Unsupported type in workspace: 'config' is not allowed to create in workspace.]`
       );
     });
   });
@@ -469,6 +469,7 @@ describe('WorkspaceConflictSavedObjectsClientWrapper', () => {
       });
       expect(mockedClient.find).toBeCalledWith({
         type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+        workspaces: null,
       });
     });
   });
