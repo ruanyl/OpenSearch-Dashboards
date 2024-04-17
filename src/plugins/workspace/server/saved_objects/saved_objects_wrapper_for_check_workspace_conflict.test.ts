@@ -326,16 +326,21 @@ describe('WorkspaceConflictSavedObjectsClientWrapper', () => {
     });
     it(`Should return error when trying to create disallowed types within a workspace`, async () => {
       mockedClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [] });
-      const result = await wrapperClient.bulkCreate([
-        getSavedObject({
-          type: 'config',
-          id: 'foo',
-        }),
-        getSavedObject({
-          type: DATA_SOURCE_SAVED_OBJECT_TYPE,
-          id: 'foo',
-        }),
-      ]);
+      const result = await wrapperClient.bulkCreate(
+        [
+          getSavedObject({
+            type: 'config',
+            id: 'foo',
+          }),
+          getSavedObject({
+            type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+            id: 'foo',
+          }),
+        ],
+        {
+          workspaces: ['foo'],
+        }
+      );
 
       expect(mockedClient.bulkCreate).toBeCalledWith([], {
         workspaces: ['foo'],

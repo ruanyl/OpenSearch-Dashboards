@@ -219,7 +219,7 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
       /**
        * Get all the objects that do not conflict on workspaces
        */
-      const objectsNoWorkspaceConflictError = objects.filter(
+      const objectsNoWorkspaceConflictError = allowedSavedObjects.filter(
         (item) =>
           !objectsConflictWithWorkspace.find(
             (errorItems) =>
