@@ -62,12 +62,23 @@ export class WorkspaceIdConsumerWrapper {
   public wrapperFactory: SavedObjectsClientWrapperFactory = (wrapperOptions) => {
     return {
       ...wrapperOptions.client,
-      create: <T>(type: string, attributes: T, options: SavedObjectsCreateOptions = {}) =>
-        wrapperOptions.client.create(
+      create: <T>(type: string, attributes: T, options: SavedObjectsCreateOptions = {}) => {
+        const { workspaces } = this.formatWorkspaceIdParams(wrapperOptions.request, options);
+        if (workspaces?.length && (this.isDataSourceType(type) || this.isConfigType(type))) {
+          // For 2.14, data source can only be created without workspace info
+          // config can not be created inside a workspace
+          throw SavedObjectsErrorHelpers.decorateBadRequestError(
+            new Error(`'${type}' is not allowed to create in workspace.`),
+            'Unsupport type in workspace'
+          );
+        }
+
+        return wrapperOptions.client.create(
           type,
           attributes,
           this.formatWorkspaceIdParams(wrapperOptions.request, options)
-        ),
+        );
+      },
       bulkCreate: async <T = unknown>(
         objects: Array<SavedObjectsBulkCreateObject<T>>,
         options: SavedObjectsCreateOptions = {}

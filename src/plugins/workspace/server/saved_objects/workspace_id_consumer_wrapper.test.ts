@@ -66,6 +66,38 @@ describe('WorkspaceIdConsumerWrapper', () => {
 
       expect(mockedClient.create.mock.calls[0][2]?.hasOwnProperty('workspaces')).toEqual(false);
     });
+
+    it(`Should throw error when trying to create disallowed type in workspace`, async () => {
+      expect(() =>
+        wrapperClient.create(
+          DATA_SOURCE_SAVED_OBJECT_TYPE,
+          {
+            name: 'foo',
+          },
+
+          {
+            workspaces: ['foo'],
+          }
+        )
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Unsupport type in workspace: 'data-source' is not allowed to create in workspace."`
+      );
+
+      expect(() =>
+        wrapperClient.create(
+          'config',
+          {
+            name: 'foo',
+          },
+
+          {
+            workspaces: ['foo'],
+          }
+        )
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Unsupport type in workspace: 'config' is not allowed to create in workspace."`
+      );
+    });
   });
 
   describe('bulkCreate', () => {

@@ -129,6 +129,38 @@ describe('workspace_id_consumer integration test', () => {
       });
     });
 
+    it('create disallowed types within workspace', async () => {
+      const createDataSourceResult = await osdTestServer.request
+        .post(root, `/w/${createdFooWorkspace.id}/api/saved_objects/${dataSource.type}`)
+        .send({
+          attributes: dataSource.attributes,
+        })
+        .expect(400);
+
+      expect(createDataSourceResult.body).toMatchInlineSnapshot(`
+        Object {
+          "error": "Bad Request",
+          "message": "Unsupport type in workspace: 'data-source' is not allowed to create in workspace.",
+          "statusCode": 400,
+        }
+      `);
+
+      const createConfigResult = await osdTestServer.request
+        .post(root, `/w/${createdFooWorkspace.id}/api/saved_objects/config`)
+        .send({
+          attributes: dataSource.attributes,
+        })
+        .expect(400);
+
+      expect(createConfigResult.body).toMatchInlineSnapshot(`
+        Object {
+          "error": "Bad Request",
+          "message": "Unsupport type in workspace: 'config' is not allowed to create in workspace.",
+          "statusCode": 400,
+        }
+      `);
+    });
+
     it('bulk create', async () => {
       await clearFooAndBar();
       const createResultFoo = await osdTestServer.request
