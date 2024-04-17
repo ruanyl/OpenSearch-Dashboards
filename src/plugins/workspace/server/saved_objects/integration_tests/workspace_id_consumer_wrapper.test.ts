@@ -230,7 +230,7 @@ describe('workspace_id_consumer integration test', () => {
         )
         .expect(404);
 
-      // Advanced settings should not be found within workspace
+      // Advanced settings should not be created within workspace
       const findAdvancedSettings = await osdTestServer.request
         .get(root, `/w/${createdFooWorkspace.id}/api/saved_objects/_find?type=config`)
         .expect(200);
