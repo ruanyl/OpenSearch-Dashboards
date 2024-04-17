@@ -16,6 +16,7 @@ import { Services } from './types';
 import { WorkspaceOverviewApp } from './components/workspace_overview_app';
 import { WorkspaceCreatorProps } from './components/workspace_creator/workspace_creator';
 import { WorkspaceListProps } from './components/workspace_list';
+import { WorkspaceOverviewProps } from './components/workspace_overview/workspace_overview';
 
 export const renderCreatorApp = (
   { element }: AppMountParameters,
@@ -83,10 +84,14 @@ export const renderListApp = (
   };
 };
 
-export const renderOverviewApp = ({ element }: AppMountParameters, services: Services) => {
+export const renderOverviewApp = (
+  { element }: AppMountParameters,
+  services: Services,
+  props: WorkspaceOverviewProps
+) => {
   ReactDOM.render(
     <OpenSearchDashboardsContextProvider services={services}>
-      <WorkspaceOverviewApp />
+      <WorkspaceOverviewApp {...props} />
     </OpenSearchDashboardsContextProvider>,
     element
   );

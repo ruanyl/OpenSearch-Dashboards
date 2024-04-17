@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { i18n } from '@osd/i18n';
 import { SavedObjectsManagementPluginSetup } from 'src/plugins/saved_objects_management/public';
@@ -18,6 +18,7 @@ import {
   AppStatus,
   WorkspaceAccessibility,
   PublicAppInfo,
+  ChromeBreadcrumb,
 } from '../../../core/public';
 import {
   WORKSPACE_FATAL_ERROR_APP_ID,
@@ -48,6 +49,7 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
   private coreStart?: CoreStart;
   private currentWorkspaceIdSubscription?: Subscription;
   private currentWorkspaceSubscription?: Subscription;
+  private chromeSubscription?: Subscription;
   private managementCurrentWorkspaceIdSubscription?: Subscription;
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => undefined);
   private workspaceConfigurableApps$ = new BehaviorSubject<PublicAppInfo[]>([]);
@@ -119,6 +121,42 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
         }
       }
     );
+  }
+
+  /**
+   * Add workspace overview page to breadCrumb
+   * @param core CoreStart
+   * @private
+   */
+  private addWorkspaceToBreadCrumb(core: CoreStart) {
+    this.chromeSubscription = combineLatest([
+      core.workspaces.currentWorkspace$,
+      core.chrome.getBreadcrumbs$(),
+    ]).subscribe(([currentWorkspace, breadCrumbs]) => {
+      if (currentWorkspace && breadCrumbs && breadCrumbs.length > 0) {
+        const workspaceNotInBreadcrumbs =
+          breadCrumbs.findIndex((breadcrumb: ChromeBreadcrumb) => {
+            return breadcrumb.text === currentWorkspace.name;
+          }) === -1;
+        if (workspaceNotInBreadcrumbs) {
+          const workspaceCrumb: ChromeBreadcrumb = {
+            text: currentWorkspace.name,
+            onClick: () => {
+              core.application.navigateToApp(WORKSPACE_OVERVIEW_APP_ID);
+            },
+          };
+          const homeCrumb: ChromeBreadcrumb = {
+            text: 'Home',
+            onClick: () => {
+              core.application.navigateToApp('home');
+            },
+          };
+          breadCrumbs.splice(0, 0, homeCrumb, workspaceCrumb);
+
+          core.chrome.setBreadcrumbs(breadCrumbs);
+        }
+      }
+    });
   }
 
   public async setup(
@@ -213,20 +251,20 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
       workspaceAccessibility: WorkspaceAccessibility.NO,
     });
 
-    // update
+    // workspace fatal error
     core.application.register({
-      id: WORKSPACE_UPDATE_APP_ID,
-      title: i18n.translate('workspace.settings.workspaceUpdate', {
-        defaultMessage: 'Update Workspace',
-      }),
+      id: WORKSPACE_FATAL_ERROR_APP_ID,
+      title: '',
       navLinkStatus: AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
-        const { renderUpdaterApp } = await import('./application');
-        return mountWorkspaceApp(params, renderUpdaterApp);
+        const { renderFatalErrorApp } = await import('./application');
+        return mountWorkspaceApp(params, renderFatalErrorApp);
       },
     });
 
-    // overview
+    /**
+     * register workspace overview page
+     */
     core.application.register({
       id: WORKSPACE_OVERVIEW_APP_ID,
       title: i18n.translate('workspace.settings.workspaceOverview', {
@@ -239,14 +277,18 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
       },
     });
 
-    // workspace fatal error
+    /**
+     * register workspace update page
+     */
     core.application.register({
-      id: WORKSPACE_FATAL_ERROR_APP_ID,
-      title: '',
+      id: WORKSPACE_UPDATE_APP_ID,
+      title: i18n.translate('workspace.settings.workspaceUpdate', {
+        defaultMessage: 'Update Workspace',
+      }),
       navLinkStatus: AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
-        const { renderFatalErrorApp } = await import('./application');
-        return mountWorkspaceApp(params, renderFatalErrorApp);
+        const { renderUpdaterApp } = await import('./application');
+        return mountWorkspaceApp(params, renderUpdaterApp);
       },
     });
 
@@ -278,6 +320,8 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
       this.filterNavLinks(core);
     });
 
+    this.addWorkspaceToBreadCrumb(core);
+
     return {};
   }
 
@@ -285,5 +329,6 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
     this.currentWorkspaceIdSubscription?.unsubscribe();
     this.currentWorkspaceSubscription?.unsubscribe();
     this.managementCurrentWorkspaceIdSubscription?.unsubscribe();
+    this.chromeSubscription?.unsubscribe();
   }
 }

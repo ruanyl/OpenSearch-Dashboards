@@ -5,31 +5,42 @@
 
 import React, { useEffect } from 'react';
 import { I18nProvider } from '@osd/i18n/react';
-import { i18n } from '@osd/i18n';
+import { CoreStart } from 'opensearch-dashboards/public';
+import { useObservable } from 'react-use';
+import { EuiBreadcrumb } from '@elastic/eui';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
-import { WorkspaceOverview } from './workspace_overview/workspace_overview';
+import { WorkspaceOverview, WorkspaceOverviewProps } from './workspace_overview/workspace_overview';
 
-export const WorkspaceOverviewApp = () => {
+export const WorkspaceOverviewApp = (props: WorkspaceOverviewProps) => {
   const {
-    services: { chrome },
-  } = useOpenSearchDashboards();
+    services: { workspaces, chrome, application },
+  } = useOpenSearchDashboards<CoreStart>();
+
+  const currentWorkspace = useObservable(workspaces.currentWorkspace$);
 
   /**
    * set breadcrumbs to chrome
    */
   useEffect(() => {
-    chrome?.setBreadcrumbs([
+    const breadCrumbs: EuiBreadcrumb[] = [
       {
-        text: i18n.translate('workspace.workspaceOverviewTitle', {
-          defaultMessage: 'Workspace overview',
-        }),
+        text: 'Home',
+        onClick: () => {
+          application.navigateToApp('home');
+        },
       },
-    ]);
-  }, [chrome]);
+    ];
+    if (currentWorkspace) {
+      breadCrumbs.concat({
+        text: currentWorkspace.name,
+      });
+    }
+    chrome?.setBreadcrumbs(breadCrumbs);
+  }, [chrome, currentWorkspace, application]);
 
   return (
     <I18nProvider>
-      <WorkspaceOverview />
+      <WorkspaceOverview {...props} />
     </I18nProvider>
   );
 };
