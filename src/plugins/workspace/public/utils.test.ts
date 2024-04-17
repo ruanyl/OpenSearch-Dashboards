@@ -127,18 +127,18 @@ describe('workspace utils: getSelectedFeatureQuantities', () => {
       navLinkStatus: 1,
     },
   ] as PublicAppInfo[];
-  it('should support * rules and exclude management category', () => {
+  it('should support * rules', () => {
     const { total, selected } = getSelectedFeatureQuantities(['*'], defaultApplications);
-    expect(total).toBe(1);
-    expect(selected).toBe(1);
+    expect(total).toBe(2);
+    expect(selected).toBe(2);
   });
 
-  it('should get quantity normally and exclude management category', () => {
+  it('should get quantity of selected app', () => {
     const { total, selected } = getSelectedFeatureQuantities(
       ['dev_tools', '!@management'],
       defaultApplications
     );
-    expect(total).toBe(1);
+    expect(total).toBe(2);
     expect(selected).toBe(0);
   });
 });
