@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
 import React from 'react';
 import { CoreStart } from 'src/core/public';
 
@@ -35,16 +35,12 @@ export const RightNavigationButton = ({
   };
 
   return (
-    <EuiButtonIcon
-      iconType={iconType}
+    <EuiHeaderSectionItemButton
       data-test-subj="rightNavigationButton"
       aria-label={title}
-      title={title}
       onClick={navigateToApp}
-      style={{
-        height: '48px',
-        minWidth: '48px',
-      }}
-    />
+    >
+      <EuiIcon type={iconType} size="m" title={title} color="primary" />
+    </EuiHeaderSectionItemButton>
   );
 };
