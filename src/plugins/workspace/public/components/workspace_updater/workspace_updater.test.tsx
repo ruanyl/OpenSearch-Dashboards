@@ -116,12 +116,21 @@ describe('WorkspaceUpdater', () => {
 
   it('cannot render when the name of the current workspace is empty', async () => {
     const mockedWorkspacesService = workspacesServiceMock.createSetupContract();
-    const { container } = render(<WorkspaceUpdater workspacesService={mockedWorkspacesService} />);
+    const { container } = render(
+      <WorkspaceUpdater
+        workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
+        workspacesService={mockedWorkspacesService}
+      />
+    );
     expect(container).toMatchInlineSnapshot(`<div />`);
   });
 
   it('cannot create workspace with invalid name', async () => {
-    const { getByTestId } = render(<WorkspaceUpdater />);
+    const { getByTestId } = render(
+      <WorkspaceUpdater
+        workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
+      />
+    );
     const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
     fireEvent.input(nameInput, {
       target: { value: '~' },
@@ -130,7 +139,11 @@ describe('WorkspaceUpdater', () => {
   });
 
   it('update workspace successfully', async () => {
-    const { getByTestId, getByText, getAllByText } = render(<WorkspaceUpdater />);
+    const { getByTestId, getByText, getAllByText } = render(
+      <WorkspaceUpdater
+        workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
+      />
+    );
     const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
     fireEvent.input(nameInput, {
       target: { value: 'test workspace name' },
@@ -186,7 +199,11 @@ describe('WorkspaceUpdater', () => {
 
   it('should show danger toasts after update workspace failed', async () => {
     workspaceClientUpdate.mockReturnValue({ result: false, success: false });
-    const { getByTestId } = render(<WorkspaceUpdater />);
+    const { getByTestId } = render(
+      <WorkspaceUpdater
+        workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
+      />
+    );
     const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
     fireEvent.input(nameInput, {
       target: { value: 'test workspace name' },
@@ -203,7 +220,11 @@ describe('WorkspaceUpdater', () => {
     workspaceClientUpdate.mockImplementation(() => {
       throw new Error('update workspace failed');
     });
-    const { getByTestId } = render(<WorkspaceUpdater />);
+    const { getByTestId } = render(
+      <WorkspaceUpdater
+        workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
+      />
+    );
     const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
     fireEvent.input(nameInput, {
       target: { value: 'test workspace name' },

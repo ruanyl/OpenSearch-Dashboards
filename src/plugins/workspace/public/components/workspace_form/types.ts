@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { ApplicationStart } from '../../../../../core/public';
+import type { ApplicationStart, PublicAppInfo } from '../../../../../core/public';
 import type { WorkspacePermissionMode } from '../../../common/constants';
 import type { WorkspaceOperationType, WorkspacePermissionItemType } from './constants';
 
@@ -57,4 +57,5 @@ export interface WorkspaceFormProps {
   operationType?: WorkspaceOperationType;
   permissionEnabled?: boolean;
   permissionLastAdminItemDeletable?: boolean;
+  workspaceConfigurableApps?: PublicAppInfo[];
 }
