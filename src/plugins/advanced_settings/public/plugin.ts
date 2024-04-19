@@ -29,7 +29,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { CoreSetup, Plugin } from '../../../core/public';
+import { CoreSetup, Plugin } from 'opensearch-dashboards/public';
 import { FeatureCatalogueCategory } from '../../home/public';
 import { ComponentRegistry } from './component_registry';
 import { AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup } from './types';
