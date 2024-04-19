@@ -29,10 +29,10 @@
  */
 
 import { i18n } from '@osd/i18n';
+import { CoreSetup, Plugin } from '../../../core/public';
 import { FeatureCatalogueCategory } from '../../home/public';
 import { ComponentRegistry } from './component_registry';
 import { AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup } from './types';
-import { CoreSetup, Plugin, CoreStart } from '../../../core/public';
 
 const component = new ComponentRegistry();
 
@@ -77,15 +77,7 @@ export class AdvancedSettingsPlugin
     };
   }
 
-  public start(core: CoreStart) {
-    core.chrome.navControls.registerRightNavigation({
-      order: 1,
-      appId: 'management/opensearch-dashboards/settings',
-      http: core.http,
-      application: core.application,
-      iconType: 'gear',
-      title,
-    });
+  public start() {
     return {
       component: component.start,
     };
