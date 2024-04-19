@@ -72,7 +72,7 @@ export interface ChromeNavControls {
   registerRight(navControl: ChromeNavControl): void;
   /** Register a nav control to be presented on the top-center side of the chrome header. */
   registerCenter(navControl: ChromeNavControl): void;
-  /** Register a nav control to be presented on the top-right side of the chrome header. The component and style will be maintained in chrome */
+  /** Register a nav control to be presented on the top-right side of the chrome header. The component and style will be uniformly maintained in chrome */
   registerRightNavigation(props: RightNavigationProps): void;
   /** @internal */
   getLeft$(): Observable<ChromeNavControl[]>;

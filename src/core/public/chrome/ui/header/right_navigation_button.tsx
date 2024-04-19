@@ -37,6 +37,7 @@ export const RightNavigationButton = ({
   return (
     <EuiButtonIcon
       iconType={iconType}
+      data-test-subj="rightNavigationButton"
       aria-label={title}
       title={title}
       onClick={navigateToApp}
