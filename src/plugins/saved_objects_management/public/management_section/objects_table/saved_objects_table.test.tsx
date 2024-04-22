@@ -65,7 +65,7 @@ import {
 import { Flyout, Relationships } from './components';
 import { SavedObjectWithMetadata } from '../../types';
 import { WorkspaceObject } from 'opensearch-dashboards/public';
-import { PUBLIC_WORKSPACE_ID } from '../../../../../core/public';
+import { PUBLIC_WORKSPACE_NAME, PUBLIC_WORKSPACE_ID } from '../../../../../core/public';
 import { TableProps } from './components/table';
 
 const allowedTypes = ['index-pattern', 'visualization', 'dashboard', 'search'];
@@ -140,9 +140,7 @@ describe('SavedObjectsTable', () => {
         edit: false,
         delete: false,
       },
-      workspaces: {
-        enabled: false,
-      },
+      workspaces: {},
     };
 
     http.post.mockResolvedValue([]);
@@ -392,7 +390,7 @@ describe('SavedObjectsTable', () => {
         allowedTypes,
         undefined,
         true,
-        {}
+        undefined
       );
       expect(saveAsMock).toHaveBeenCalledWith(blob, 'export.ndjson');
       expect(notifications.toasts.addSuccess).toHaveBeenCalledWith({
@@ -423,7 +421,7 @@ describe('SavedObjectsTable', () => {
         allowedTypes,
         'test*',
         true,
-        {}
+        undefined
       );
       expect(saveAsMock).toHaveBeenCalledWith(blob, 'export.ndjson');
       expect(notifications.toasts.addSuccess).toHaveBeenCalledWith({
@@ -431,35 +429,11 @@ describe('SavedObjectsTable', () => {
       });
     });
 
-    it('should make modules call with workspace', async () => {
-      getSavedObjectCountsMock.mockClear();
-      findObjectsMock.mockClear();
-      // @ts-expect-error
-      defaultProps.applications.capabilities.workspaces.enabled = true;
-      const mockSelectedSavedObjects = [
-        { id: '1', type: 'index-pattern' },
-        { id: '3', type: 'dashboard' },
-      ] as SavedObjectWithMetadata[];
+    it('should export all, accounting for the current workspace criteria', async () => {
+      const component = shallowRender();
 
-      const mockSavedObjects = mockSelectedSavedObjects.map((obj) => ({
-        _id: obj.id,
-        _type: obj.type,
-        _source: {},
-      }));
-
-      const mockSavedObjectsClient = {
-        ...defaultProps.savedObjectsClient,
-        bulkGet: jest.fn().mockImplementation(() => ({
-          savedObjects: mockSavedObjects,
-        })),
-      };
-
-      const workspacesStart = workspacesServiceMock.createStartContract();
-      workspacesStart.currentWorkspaceId$.next('foo');
-
-      const component = shallowRender({
-        savedObjectsClient: mockSavedObjectsClient,
-        workspaces: workspacesStart,
+      component.instance().onQueryChange({
+        query: Query.parse(`test workspaces:("${PUBLIC_WORKSPACE_NAME}")`),
       });
 
       // Ensure all promises resolve
@@ -467,32 +441,23 @@ describe('SavedObjectsTable', () => {
       // Ensure the state changes are reflected
       component.update();
 
-      // Set some as selected
-      component.instance().onSelectionChanged(mockSelectedSavedObjects);
+      // Set up mocks
+      const blob = new Blob([JSON.stringify(allSavedObjects)], { type: 'application/ndjson' });
+      fetchExportByTypeAndSearchMock.mockImplementation(() => blob);
 
-      await component.instance().onExport(true);
       await component.instance().onExportAll();
 
-      expect(fetchExportObjectsMock).toHaveBeenCalledWith(http, mockSelectedSavedObjects, true, {
-        workspaces: ['foo'],
-      });
       expect(fetchExportByTypeAndSearchMock).toHaveBeenCalledWith(
         http,
-        ['index-pattern', 'visualization', 'dashboard', 'search'],
-        undefined,
+        allowedTypes,
+        'test*',
         true,
-        {
-          workspaces: ['foo'],
-        }
+        [PUBLIC_WORKSPACE_ID]
       );
-      expect(
-        getSavedObjectCountsMock.mock.calls.every((item) => item[1].workspaces[0] === 'foo')
-      ).toEqual(true);
-      expect(findObjectsMock.mock.calls.every((item) => item[1].workspaces[0] === 'foo')).toEqual(
-        true
-      );
-      // @ts-expect-error
-      defaultProps.applications.capabilities.workspaces.enabled = false;
+      expect(saveAsMock).toHaveBeenCalledWith(blob, 'export.ndjson');
+      expect(notifications.toasts.addSuccess).toHaveBeenCalledWith({
+        title: 'Your file is downloading in the background',
+      });
     });
   });
 
@@ -668,7 +633,7 @@ describe('SavedObjectsTable', () => {
   });
 
   describe('workspace filter', () => {
-    it('show workspace filter when workspace turn on and not in any workspace', async () => {
+    it('workspace filter include all visible workspaces when not in any workspace', async () => {
       const applications = applicationServiceMock.createStartContract();
       applications.capabilities = {
         navLinks: {},
@@ -713,10 +678,10 @@ describe('SavedObjectsTable', () => {
       expect(filters[1].options.length).toBe(3);
       expect(filters[1].options[0].value).toBe('foo');
       expect(filters[1].options[1].value).toBe('bar');
-      expect(filters[1].options[2].value).toBe(PUBLIC_WORKSPACE_ID);
+      expect(filters[1].options[2].value).toBe(PUBLIC_WORKSPACE_NAME);
     });
 
-    it('show workspace filter when workspace turn on and enter a workspace', async () => {
+    it('workspace filter only include current workspaces when in a workspace', async () => {
       const applications = applicationServiceMock.createStartContract();
       applications.capabilities = {
         navLinks: {},
@@ -761,7 +726,7 @@ describe('SavedObjectsTable', () => {
       expect(wsFilter[0].options[0].value).toBe('foo');
     });
 
-    it('workspace exists in find options when workspace on', async () => {
+    it('current workspace in find options when workspace on', async () => {
       findObjectsMock.mockClear();
       const applications = applicationServiceMock.createStartContract();
       applications.capabilities = {
@@ -809,7 +774,7 @@ describe('SavedObjectsTable', () => {
       });
     });
 
-    it('workspace exists in find options when workspace on and not in any workspace', async () => {
+    it('all visible workspaces in find options when not in any workspace', async () => {
       findObjectsMock.mockClear();
       const applications = applicationServiceMock.createStartContract();
       applications.capabilities = {
@@ -849,8 +814,7 @@ describe('SavedObjectsTable', () => {
         expect(findObjectsMock).toBeCalledWith(
           http,
           expect.objectContaining({
-            workspaces: expect.arrayContaining(['workspace1', PUBLIC_WORKSPACE_ID]),
-            workspacesSearchOperator: expect.stringMatching('OR'),
+            workspaces: expect.arrayContaining(['workspace1', 'workspace2', PUBLIC_WORKSPACE_ID]),
           })
         );
       });

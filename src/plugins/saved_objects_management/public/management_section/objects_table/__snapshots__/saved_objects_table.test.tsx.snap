@@ -812,7 +812,6 @@ exports[`SavedObjectsTable should render normally 1`] = `
     onExportAll={[Function]}
     onImport={[Function]}
     onRefresh={[Function]}
-    showDuplicateAll={false}
   />
   <EuiSpacer
     size="xs"
@@ -838,9 +837,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
             "edit": false,
             "read": true,
           },
-          "workspaces": Object {
-            "enabled": false,
-          },
+          "workspaces": Object {},
         },
         "currentAppId$": Observable {
           "_isScalar": false,
@@ -995,7 +992,6 @@ exports[`SavedObjectsTable should render normally 1`] = `
           "onSelectionChange": [Function],
         }
       }
-      showDuplicate={false}
       totalItemCount={4}
     />
   </RedirectAppLinks>
