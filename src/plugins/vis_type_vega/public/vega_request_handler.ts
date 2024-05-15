@@ -56,7 +56,11 @@ interface VegaRequestHandlerContext {
 }
 
 export function createVegaRequestHandler(
-  { plugins: { data }, core: { uiSettings }, getServiceSettings }: VegaVisualizationDependencies,
+  {
+    plugins: { data },
+    core: { uiSettings, http },
+    getServiceSettings,
+  }: VegaVisualizationDependencies,
   context: VegaRequestHandlerContext = {}
 ) {
   let searchAPI: SearchAPI;
@@ -93,7 +97,14 @@ export function createVegaRequestHandler(
       opensearchQueryConfigs
     );
     const { VegaParser } = await import('./data_model/vega_parser');
-    const vp = new VegaParser(visParams.spec, searchAPI, timeCache, filtersDsl, getServiceSettings);
+    const vp = new VegaParser(
+      visParams.spec,
+      searchAPI,
+      timeCache,
+      filtersDsl,
+      getServiceSettings,
+      http
+    );
 
     return await vp.parseAsync();
   };

@@ -37,10 +37,12 @@ import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 import { i18n } from '@osd/i18n';
 // @ts-ignore
 import { Signal } from 'vega';
+import { HttpSetup } from 'opensearch-dashboards/public';
 import { vega, vegaLite } from '../lib/vega';
 import { OpenSearchQueryParser } from './opensearch_query_parser';
 import { Utils } from './utils';
 import { EmsFileParser } from './ems_file_parser';
+import { PPLQueryParser } from './ppl_parser';
 import { UrlParser } from './url_parser';
 import { SearchAPI } from './search_api';
 import { TimeCache } from './time_cache';
@@ -96,13 +98,15 @@ export class VegaParser {
   timeCache: TimeCache;
   visibleVisLayers: Map<VisLayerTypes, boolean>;
   visAugmenterConfig: VisAugmenterEmbeddableConfig;
+  http: HttpSetup;
 
   constructor(
     spec: VegaSpec | string,
     searchAPI: SearchAPI,
     timeCache: TimeCache,
     filters: Bool,
-    getServiceSettings: () => Promise<IServiceSettings>
+    getServiceSettings: () => Promise<IServiceSettings>,
+    httpClient: HttpSetup
   ) {
     this.spec = spec as VegaSpec;
     this.hideWarnings = false;
@@ -115,6 +119,7 @@ export class VegaParser {
     this.getServiceSettings = getServiceSettings;
     this.filters = filters;
     this.timeCache = timeCache;
+    this.http = httpClient;
   }
 
   async parseAsync() {
@@ -653,6 +658,7 @@ The URL is an identifier only. OpenSearch Dashboards and your browser will never
         opensearch: new OpenSearchQueryParser(this.timeCache, this.searchAPI, this.filters, onWarn),
         emsfile: new EmsFileParser(serviceSettings),
         url: new UrlParser(onWarn),
+        ppl: new PPLQueryParser(this.http),
       };
     }
     const pending: PendingType = {};

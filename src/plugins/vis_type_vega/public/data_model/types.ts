@@ -214,6 +214,10 @@ export type OpenSearchQueryRequest = Requests;
 export type EmsQueryRequest = Requests & {
   obj: UrlObject;
 };
+export type PPLQueryRequest = {
+  dataObject: RequestDataObject;
+  ppl: string;
+};
 
 export interface ContextVarsObject {
   [index: string]: any;
