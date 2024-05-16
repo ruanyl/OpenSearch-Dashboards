@@ -28,10 +28,20 @@
  * under the License.
  */
 
-import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
+import React, { memo, useCallback, useMemo, useState, useEffect, useRef } from 'react';
 
 import { AppMountParameters, OverlayRef } from 'opensearch-dashboards/public';
 import { i18n } from '@osd/i18n';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFieldText,
+  EuiButton,
+  EuiIcon,
+  EuiInputPopover,
+  EuiListGroup,
+  EuiListGroupItem,
+} from '@elastic/eui';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import {
   VisualizeServices,
@@ -42,6 +52,7 @@ import {
 import { APP_NAME } from '../visualize_constants';
 import { getTopNavConfig } from '../utils';
 import type { IndexPattern } from '../../../../data/public';
+import chatLogo from './query_assistant_logo.svg';
 
 interface VisualizeTopNavProps {
   currentAppState: VisualizeAppState;
@@ -57,6 +68,7 @@ interface VisualizeTopNavProps {
   visualizationIdFromUrl?: string;
   embeddableId?: string;
   onAppLeave: AppMountParameters['onAppLeave'];
+  onPPL?: (ppl: string) => void;
 }
 
 const TopNav = ({
@@ -73,6 +85,7 @@ const TopNav = ({
   visualizationIdFromUrl,
   embeddableId,
   onAppLeave,
+  onPPL,
 }: VisualizeTopNavProps) => {
   const { services } = useOpenSearchDashboards<VisualizeServices>();
   const { TopNavMenu } = services.navigation.ui;
@@ -199,6 +212,34 @@ const TopNav = ({
       asyncSetIndexPattern();
     }
   }, [vis.params, vis.type, services.data.indexPatterns, vis.data.indexPattern]);
+  const [value, setValue] = useState('');
+  const [generating, setGenerating] = useState(false);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const HARDCODED_SUGGESTIONS: string[] = [
+    `what's the revenue for past week and group by day?`,
+    'how many orders per day for past week?',
+  ];
+
+  const isVega = vis.type.name === 'vega';
+
+  const indexName = 'opensearch_dashboards_sample_data_ecommerce';
+  const onGenerate = async () => {
+    setGenerating(true);
+    const pplResponse = await services.http.post('/api/observability/query_assist/generate_ppl', {
+      body: JSON.stringify({
+        question: value,
+        index: indexName,
+      }),
+    });
+    // eslint-disable-next-line no-console
+    console.log(pplResponse);
+    setGenerating(false);
+    if (onPPL) {
+      onPPL(pplResponse);
+    }
+  };
 
   return isChromeVisible ? (
     /**
@@ -208,23 +249,76 @@ const TopNav = ({
      * All visualizations also have the timepicker\autorefresh component,
      * it is enabled by default in the TopNavMenu component.
      */
-    <TopNavMenu
-      appName={APP_NAME}
-      config={config}
-      setMenuMountPoint={setHeaderActionMenu}
-      onQuerySubmit={handleRefresh}
-      savedQueryId={currentAppState.savedQuery}
-      onSavedQueryIdChange={stateContainer.transitions.updateSavedQuery}
-      indexPatterns={indexPatterns}
-      screenTitle={vis.title}
-      showAutoRefreshOnly={!showDatePicker()}
-      showDatePicker={showDatePicker()}
-      showFilterBar={showFilterBar}
-      showQueryInput={showQueryInput}
-      showSaveQuery={services.visualizeCapabilities.saveQuery}
-      showSearchBar
-      useDefaultBehaviors
-    />
+    <>
+      {isVega ? (
+        <EuiFlexGroup
+          gutterSize="m"
+          justifyContent="spaceAround"
+          alignItems="center"
+          style={{ maxHeight: '100px' }}
+        >
+          <EuiFlexItem grow={9}>
+            <EuiInputPopover
+              input={
+                <EuiFieldText
+                  inputRef={inputRef}
+                  placeholder={`Ask a natural language question about ${indexName} to generate a vega visualization`}
+                  value={value}
+                  prepend={<EuiIcon type={chatLogo} />}
+                  fullWidth
+                  onChange={(event) => setValue(event.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') onGenerate();
+                  }}
+                />
+              }
+              disableFocusTrap
+              fullWidth={true}
+              isOpen={isPopoverOpen}
+              closePopover={() => {
+                setIsPopoverOpen(false);
+              }}
+            >
+              <EuiListGroup flush={true} bordered={false} wrapText={true} maxWidth={false}>
+                {HARDCODED_SUGGESTIONS?.map((question) => (
+                  <EuiListGroupItem
+                    onClick={() => {
+                      setValue(question);
+                      inputRef.current?.focus();
+                      setIsPopoverOpen(false);
+                    }}
+                    label={question}
+                  />
+                ))}
+              </EuiListGroup>
+            </EuiInputPopover>
+          </EuiFlexItem>
+          <EuiFlexItem grow={1}>
+            <EuiButton size="s" fill onClick={() => onGenerate()} isLoading={generating}>
+              {generating ? 'Generating' : 'Generate'}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        <TopNavMenu
+          appName={APP_NAME}
+          config={config}
+          setMenuMountPoint={setHeaderActionMenu}
+          onQuerySubmit={handleRefresh}
+          savedQueryId={currentAppState.savedQuery}
+          onSavedQueryIdChange={stateContainer.transitions.updateSavedQuery}
+          indexPatterns={indexPatterns}
+          screenTitle={vis.title}
+          showAutoRefreshOnly={!showDatePicker()}
+          showDatePicker={showDatePicker()}
+          showFilterBar={showFilterBar}
+          showQueryInput={showQueryInput}
+          showSaveQuery={services.visualizeCapabilities.saveQuery}
+          showSearchBar
+          useDefaultBehaviors
+        />
+      )}
+    </>
   ) : showFilterBar ? (
     /**
      * The top nav is hidden in embed mode, but the filter bar must still be present so
