@@ -222,6 +222,12 @@ const TopNav = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    window['llmRunning$'].subscribe((running) => {
+      setGenerating(!!running);
+    });
+  }, []);
+
   const HARDCODED_SUGGESTIONS: string[] = [
     `what's the revenue for past week and group by day?`,
     'how many orders per day for past week?',

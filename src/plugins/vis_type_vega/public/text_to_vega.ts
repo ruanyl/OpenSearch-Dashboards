@@ -1,13 +1,5 @@
-import { BehaviorSubject, Observable, of } from 'rxjs';
-import {
-  takeWhile,
-  debounceTime,
-  distinctUntilChanged,
-  switchMap,
-  tap,
-  filter,
-  catchError,
-} from 'rxjs/operators';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap, tap, filter } from 'rxjs/operators';
 import { HttpSetup } from 'opensearch-dashboards/public';
 
 const topN = (ppl: string, n: number) => `${ppl} | head ${n}`;
@@ -33,6 +25,10 @@ Just reply with the json based Vega-Lite object, do not include any other conten
 `;
 };
 
+const llmRunning$ = new BehaviorSubject(false);
+// @ts-ignore
+window['llmRunning$'] = llmRunning$;
+
 export class Text2Vega {
   input$: BehaviorSubject<string>;
   vega$: Observable<string | Error>;
@@ -42,10 +38,10 @@ export class Text2Vega {
     this.http = http;
     this.input$ = new BehaviorSubject('');
     this.vega$ = this.input$.pipe(
-      tap((v) => console.log(v)),
       filter((v) => v.length > 0),
       debounceTime(200),
       distinctUntilChanged(),
+      tap((v) => llmRunning$.next(true)),
       // text to ppl
       switchMap(async (value) => {
         const pplQuestion = value.split('//')[0];
@@ -83,16 +79,23 @@ export class Text2Vega {
           query: value.ppl,
         };
         return result;
-      })
+      }),
+      tap(() => llmRunning$.next(false))
     );
   }
 
   async text2vega(query: string) {
-    const res = await this.http.post('/api/llm/text2vega', {
-      body: JSON.stringify({ query }),
-    });
-    console.log('llm res: ', res);
-    return res;
+    try {
+      const res = await this.http.post('/api/llm/text2vega', {
+        body: JSON.stringify({ query }),
+      });
+      console.log('llm res: ', res);
+      // return res;
+      const result = res.body.inference_results[0].output[0].dataAsMap;
+      return result;
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   async text2ppl(query: string) {
