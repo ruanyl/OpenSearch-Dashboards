@@ -44,6 +44,7 @@ import {
   setInjectedMetadata,
   setDataSourceEnabled,
   setSavedObjectsClient,
+  setText2Vega,
 } from './services';
 
 import { createVegaFn } from './expressions/vega_fn';
@@ -56,6 +57,7 @@ import { getVegaInspectorView } from './vega_inspector';
 import { createLineVegaSpecFn } from './expressions/line_vega_spec_fn';
 import { UiActionsStart } from '../../ui_actions/public';
 import { setUiActions } from './services';
+import { Text2Vega } from './text_to_vega';
 
 /** @internal */
 export interface VegaVisualizationDependencies {
@@ -131,5 +133,6 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
     setSavedObjectsClient(core.savedObjects);
     setUiActions(uiActions);
     setInjectedMetadata(core.injectedMetadata);
+    setText2Vega(new Text2Vega(core.http));
   }
 }

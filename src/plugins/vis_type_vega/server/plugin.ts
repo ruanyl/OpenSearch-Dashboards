@@ -28,6 +28,8 @@
  * under the License.
  */
 
+import { schema } from '@osd/config-schema';
+import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
 import { registerVegaUsageCollector } from './usage_collector';
 import {
@@ -41,6 +43,45 @@ import {
   vegaVisualizationClientWrapper,
 } from './vega_visualization_client_wrapper';
 import { setDataSourceEnabled } from './services';
+
+export const invokeText2Vega = async (
+  prompt: string,
+  modelId = 'anthropic.claude-3-haiku-20240307-v1:0'
+) => {
+  // Create a new Bedrock Runtime client instance.
+  const client = new BedrockRuntimeClient({
+    region: 'us-east-1',
+    credentials: {
+      accessKeyId: process.env.ACCESS_KEY_ID ?? '',
+      secretAccessKey: process.env.SECRET_ACCESS_KEY ?? '',
+    },
+  });
+
+  // Prepare the payload for the model.
+  const payload = {
+    anthropic_version: 'bedrock-2023-05-31',
+    max_tokens: 4000,
+    temperature: 0.0,
+    messages: [
+      {
+        role: 'user',
+        content: [{ type: 'text', text: prompt }],
+      },
+    ],
+  };
+
+  // Invoke Claude with the payload and wait for the response.
+  const command = new InvokeModelCommand({
+    contentType: 'application/json',
+    body: JSON.stringify(payload),
+    modelId,
+  });
+  const apiResponse = await client.send(command);
+
+  const decodedResponseBody = new TextDecoder().decode(apiResponse.body);
+  const responseBody = JSON.parse(decodedResponseBody);
+  return responseBody.content[0].text as string;
+};
 
 export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisTypeVegaPluginStart> {
   private readonly config: ConfigObservable;
@@ -62,6 +103,24 @@ export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisType
       VEGA_VISUALIZATION_CLIENT_WRAPPER_ID,
       vegaVisualizationClientWrapper
     );
+
+    // register router
+    const router = core.http.createRouter();
+    router.post(
+      {
+        path: '/api/llm/text2vega',
+        validate: {
+          body: schema.object({
+            query: schema.string(),
+          }),
+        },
+      },
+      router.handleLegacyErrors(async (context, req, res) => {
+        const result = await invokeText2Vega(req.body.query);
+        return res.ok({ body: result });
+      })
+    );
+
     return {};
   }
 

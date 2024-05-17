@@ -39,6 +39,7 @@ import { DataPublicPluginStart } from '../../data/public';
 import { createGetterSetter } from '../../opensearch_dashboards_utils/public';
 import { MapsLegacyConfig } from '../../maps_legacy/config';
 import { UiActionsStart } from '../../ui_actions/public';
+import { Text2Vega } from './text_to_vega';
 
 export const [getData, setData] = createGetterSetter<DataPublicPluginStart>('Data');
 export const [getDataSourceEnabled, setDataSourceEnabled] = createGetterSetter<{
@@ -68,6 +69,8 @@ export const [getInjectedVars, setInjectedVars] = createGetterSetter<{
 export const [getMapsLegacyConfig, setMapsLegacyConfig] = createGetterSetter<MapsLegacyConfig>(
   'MapsLegacyConfig'
 );
+
+export const [getText2Vega, setText2Vega] = createGetterSetter<Text2Vega>('');
 
 export const getEnableExternalUrls = () => getInjectedVars().enableExternalUrls;
 export const getEmsTileLayerId = () => getMapsLegacyConfig().emsTileLayerId;

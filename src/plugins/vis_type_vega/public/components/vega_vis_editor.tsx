@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { EuiCodeEditor } from '@elastic/eui';
 import compactStringify from 'json-stringify-pretty-compact';
 import hjson from 'hjson';
@@ -36,7 +36,7 @@ import 'brace/mode/hjson';
 import { i18n } from '@osd/i18n';
 
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
-import { getNotifications } from '../services';
+import { getNotifications, getText2Vega } from '../services';
 import { VisParams } from '../expressions/vega_fn';
 import { VegaHelpMenu } from './vega_help_menu';
 import { VegaActionsMenu } from './vega_actions_menu';
@@ -92,6 +92,14 @@ function VegaVisEditor({ stateParams, setValue }: VisOptionsProps<VisParams>) {
     () => setValue('spec', format(stateParams.spec, hjson.stringify, hjsonStringifyOptions)),
     [setValue, stateParams.spec]
   );
+
+  useEffect(() => {
+    const text2vega = getText2Vega();
+    text2vega.getVega$().subscribe((v) => {
+      setValue('spec', JSON.stringify(v, null, 4));
+    });
+    // text2vega.updateInput('find unique visitors and average bytes every 3 hours');
+  }, []);
 
   return (
     <div className="vgaEditor">

@@ -1,6 +1,6 @@
 import { i18n } from '@osd/i18n';
-import { Data, UrlObject, PPLQueryRequest } from './types';
 import { HttpSetup } from 'opensearch-dashboards/public';
+import { Data, UrlObject, PPLQueryRequest } from './types';
 
 export class PPLQueryParser {
   http: HttpSetup;
@@ -9,9 +9,6 @@ export class PPLQueryParser {
     this.http = http;
   }
 
-  /**
-   * TODO: handle time range from context
-   */
   parseUrl(dataObject: Data, url: UrlObject) {
     // data.url.query must be defined
     if (!url.query || typeof url.query !== 'string') {
@@ -24,6 +21,7 @@ export class PPLQueryParser {
         })
       );
     }
+
     return { dataObject, ppl: url.query };
   }
 
