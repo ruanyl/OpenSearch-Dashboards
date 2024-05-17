@@ -35,7 +35,7 @@ export class PPLQueryParser {
       const requestObject = requests.find((r) => r.dataObject.name === data.name);
 
       if (requestObject) {
-        requestObject.dataObject.values = data;
+        requestObject.dataObject.values = data.jsonData;
       }
     });
   }

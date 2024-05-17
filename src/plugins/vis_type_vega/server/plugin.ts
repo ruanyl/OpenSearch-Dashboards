@@ -46,7 +46,8 @@ import { setDataSourceEnabled } from './services';
 
 export const invokeText2Vega = async (
   prompt: string,
-  modelId = 'anthropic.claude-3-haiku-20240307-v1:0'
+  modelId = 'anthropic.claude-3-sonnet-20240229-v1:0'
+  // modelId = 'anthropic.claude-3-haiku-20240307-v1:0'
 ) => {
   // Create a new Bedrock Runtime client instance.
   const client = new BedrockRuntimeClient({
@@ -117,6 +118,31 @@ export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisType
       },
       router.handleLegacyErrors(async (context, req, res) => {
         const result = await invokeText2Vega(req.body.query);
+        return res.ok({ body: result });
+      })
+    );
+
+    router.post(
+      {
+        path: '/api/llm/text2ppl',
+        validate: {
+          body: schema.object({
+            index: schema.string(),
+            question: schema.string(),
+          }),
+        },
+      },
+      router.handleLegacyErrors(async (context, req, res) => {
+        const result = await context.core.opensearch.client.asCurrentUser.transport.request({
+          method: 'POST',
+          path: '/_plugins/_ml/agents/uJmpgI8BGmD7E2dhTm4e/_execute',
+          body: {
+            parameters: {
+              question: req.body.question,
+              index: req.body.index,
+            },
+          },
+        });
         return res.ok({ body: result });
       })
     );

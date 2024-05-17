@@ -96,8 +96,16 @@ function VegaVisEditor({ stateParams, setValue }: VisOptionsProps<VisParams>) {
   useEffect(() => {
     const text2vega = getText2Vega();
     text2vega.getVega$().subscribe((v) => {
-      setValue('spec', JSON.stringify(v, null, 4));
+      if (!(v instanceof Error)) {
+        setValue('spec', JSON.stringify(v, null, 4));
+      }
     });
+
+    if (window['input$']) {
+      window['input$'].subscribe((v: string) => {
+        text2vega.updateInput(v);
+      });
+    }
     // text2vega.updateInput('find unique visitors and average bytes every 3 hours');
   }, []);
 

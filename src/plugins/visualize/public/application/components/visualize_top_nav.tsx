@@ -53,6 +53,7 @@ import { APP_NAME } from '../visualize_constants';
 import { getTopNavConfig } from '../utils';
 import type { IndexPattern } from '../../../../data/public';
 import chatLogo from './query_assistant_logo.svg';
+import { BehaviorSubject } from 'rxjs';
 
 interface VisualizeTopNavProps {
   currentAppState: VisualizeAppState;
@@ -70,6 +71,10 @@ interface VisualizeTopNavProps {
   onAppLeave: AppMountParameters['onAppLeave'];
   onPPL?: (ppl: string) => void;
 }
+
+const input$ = new BehaviorSubject('');
+// @ts-ignore
+window['input$'] = input$;
 
 const TopNav = ({
   currentAppState,
@@ -224,21 +229,9 @@ const TopNav = ({
 
   const isVega = vis.type.name === 'vega';
 
-  const indexName = 'opensearch_dashboards_sample_data_ecommerce';
+  const indexName = 'opensearch_dashboards_sample_data_logs';
   const onGenerate = async () => {
-    setGenerating(true);
-    const pplResponse = await services.http.post('/api/observability/query_assist/generate_ppl', {
-      body: JSON.stringify({
-        question: value,
-        index: indexName,
-      }),
-    });
-    // eslint-disable-next-line no-console
-    console.log(pplResponse);
-    setGenerating(false);
-    if (onPPL) {
-      onPPL(pplResponse);
-    }
+    input$.next(value);
   };
 
   return isChromeVisible ? (
