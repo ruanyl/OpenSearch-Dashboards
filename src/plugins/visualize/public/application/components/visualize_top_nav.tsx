@@ -222,6 +222,18 @@ const TopNav = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const onValueChange = useCallback((value: string) => {
+    setValue(value);
+    localStorage.setItem('text_to_vega_input', value);
+  }, []);
+
+  useEffect(() => {
+    const input = localStorage.getItem('text_to_vega_input');
+    if (input) {
+      setValue(input);
+    }
+  }, []);
+
   useEffect(() => {
     window['llmRunning$'].subscribe((running) => {
       setGenerating(!!running);
@@ -265,7 +277,7 @@ const TopNav = ({
                   value={value}
                   prepend={<EuiIcon type={chatLogo} />}
                   fullWidth
-                  onChange={(event) => setValue(event.target.value)}
+                  onChange={(event) => onValueChange(event.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') onGenerate();
                   }}
@@ -282,7 +294,7 @@ const TopNav = ({
                 {HARDCODED_SUGGESTIONS?.map((question) => (
                   <EuiListGroupItem
                     onClick={() => {
-                      setValue(question);
+                      onValueChange(question);
                       inputRef.current?.focus();
                       setIsPopoverOpen(false);
                     }}

@@ -19,7 +19,6 @@ ${ppl}
 
 The user's instruction is: ${input}
 
-You seem not quite understand how to set y-scales of the different layers, the correct syntax is {"resolve": {"scale": {"y": "independent"}}} please use it when appropriate.
 Just return the chart specification json based on Vega-Lite format.
 Just reply with the json based Vega-Lite object, do not include any other content in the reply.
 `;
