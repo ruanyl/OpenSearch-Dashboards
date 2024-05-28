@@ -44,46 +44,6 @@ import {
 } from './vega_visualization_client_wrapper';
 import { setDataSourceEnabled } from './services';
 
-const invokeText2Vega = async (
-  prompt: string,
-  modelId = 'anthropic.claude-3-sonnet-20240229-v1:0'
-  // modelId = 'anthropic.claude-3-haiku-20240307-v1:0'
-) => {
-  // Create a new Bedrock Runtime client instance.
-  const client = new BedrockRuntimeClient({
-    region: 'us-east-1',
-    credentials: {
-      accessKeyId: process.env.ACCESS_KEY_ID ?? '',
-      secretAccessKey: process.env.SECRET_ACCESS_KEY ?? '',
-    },
-  });
-
-  // Prepare the payload for the model.
-  const payload = {
-    anthropic_version: 'bedrock-2023-05-31',
-    max_tokens: 4000,
-    temperature: 0.0,
-    messages: [
-      {
-        role: 'user',
-        content: [{ type: 'text', text: prompt }],
-      },
-    ],
-  };
-
-  // Invoke Claude with the payload and wait for the response.
-  const command = new InvokeModelCommand({
-    contentType: 'application/json',
-    body: JSON.stringify(payload),
-    modelId,
-  });
-  const apiResponse = await client.send(command);
-
-  const decodedResponseBody = new TextDecoder().decode(apiResponse.body);
-  const responseBody = JSON.parse(decodedResponseBody);
-  return responseBody.content[0].text as string;
-};
-
 export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisTypeVegaPluginStart> {
   private readonly config: ConfigObservable;
 
@@ -117,8 +77,6 @@ export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisType
         },
       },
       router.handleLegacyErrors(async (context, req, res) => {
-        // const result = await invokeText2Vega(req.body.query);
-        // return res.ok({ body: result });
         const result = await context.core.opensearch.client.asCurrentUser.transport.request({
           method: 'POST',
           path: '/_plugins/_ml/models/_yV0hY8B8ef_5QXJp6Xd/_predict',

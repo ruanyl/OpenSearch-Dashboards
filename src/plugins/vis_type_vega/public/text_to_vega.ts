@@ -20,6 +20,9 @@ ${ppl}
 The user's instruction is: ${input}
 
 when a field has a dot(.), you should escape the dot if the field is a single field. For example, if the field is "user.name", but the data is {"user.name": "John"}, the field should be escaped. But it should not be escaped if the data is {"user": {"name": "John"}}
+
+If mark.type = point and shape.field is a field of the data, the definition of the shape should be inside the root "encoding" object, NOT in the "mark" object, for example, {"encoding": {"shape": {"field": "field_name"}}}
+
 Just return the chart specification json based on Vega-Lite format.
 Just reply with the json based Vega-Lite object, do not include any other content in the reply.
 `;
