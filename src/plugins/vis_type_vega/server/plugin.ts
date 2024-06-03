@@ -29,7 +29,6 @@
  */
 
 import { schema } from '@osd/config-schema';
-import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
 import { registerVegaUsageCollector } from './usage_collector';
 import {

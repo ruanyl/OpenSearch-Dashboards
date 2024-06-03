@@ -1,5 +1,12 @@
 import { BehaviorSubject, Observable } from 'rxjs';
-import { debounceTime, distinctUntilChanged, switchMap, tap, filter } from 'rxjs/operators';
+import {
+  debounceTime,
+  distinctUntilChanged,
+  switchMap,
+  tap,
+  filter,
+  finalize,
+} from 'rxjs/operators';
 import { HttpSetup } from 'opensearch-dashboards/public';
 
 const topN = (ppl: string, n: number) => `${ppl} | head ${n}`;
@@ -63,7 +70,7 @@ export class Text2Vega {
         if (value instanceof Error) {
           return value;
         }
-        const ppl = topN(value.ppl, 5);
+        const ppl = topN(value.ppl, 2);
         const sample = await this.http.post('/api/ppl/search', {
           body: JSON.stringify({ query: ppl, format: 'jdbc' }),
         });
@@ -83,7 +90,8 @@ export class Text2Vega {
         };
         return result;
       }),
-      tap(() => llmRunning$.next(false))
+      tap(() => llmRunning$.next(false)),
+      finalize(() => llmRunning$.next(false))
     );
   }
 
