@@ -97,7 +97,15 @@ function VegaVisEditor({ stateParams, setValue }: VisOptionsProps<VisParams>) {
     const text2vega = getText2Vega();
     const subscription = text2vega.getResult$().subscribe((result) => {
       if (result) {
-        setValue('spec', JSON.stringify(result, null, 4));
+        if (result.error) {
+          getNotifications().toasts.addError(result.error, {
+            title: i18n.translate('visTypeVega.editor.llmError', {
+              defaultMessage: 'Error while executing text to vega',
+            }),
+          });
+        } else {
+          setValue('spec', JSON.stringify(result, null, 4));
+        }
       }
     });
 

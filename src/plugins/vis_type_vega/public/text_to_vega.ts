@@ -30,7 +30,7 @@ Just reply with the json based Vega-Lite object, do not include any other conten
 
 export class Text2Vega {
   input$ = new BehaviorSubject({ input: '' });
-  result$: Observable<string | Error>;
+  result$: Observable<Record<string, any> | { error: any }>;
   status$ = new BehaviorSubject<'RUNNING' | 'STOPPED'>('STOPPED');
   http: HttpSetup;
 
