@@ -53,7 +53,6 @@ import { APP_NAME } from '../visualize_constants';
 import { getTopNavConfig } from '../utils';
 import type { IndexPattern } from '../../../../data/public';
 import chatLogo from './query_assistant_logo.svg';
-import { BehaviorSubject } from 'rxjs';
 
 interface VisualizeTopNavProps {
   currentAppState: VisualizeAppState;
@@ -71,10 +70,6 @@ interface VisualizeTopNavProps {
   onAppLeave: AppMountParameters['onAppLeave'];
   onPPL?: (ppl: string) => void;
 }
-
-const input$ = new BehaviorSubject('');
-// @ts-ignore
-window['input$'] = input$;
 
 const TopNav = ({
   currentAppState,
@@ -235,9 +230,19 @@ const TopNav = ({
   }, []);
 
   useEffect(() => {
-    window['llmRunning$'].subscribe((running) => {
-      setGenerating(!!running);
-    });
+    const subscription = (window as any).llm.text2vega
+      .getStatus$()
+      .subscribe((status: 'STOPPED' | 'RUNNING') => {
+        if (status === 'STOPPED') {
+          setGenerating(false);
+        }
+        if (status === 'RUNNING') {
+          setGenerating(true);
+        }
+      });
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const HARDCODED_SUGGESTIONS: string[] = [
@@ -249,7 +254,7 @@ const TopNav = ({
 
   const indexName = 'opensearch_dashboards_sample_data_logs';
   const onGenerate = async () => {
-    input$.next(value);
+    (window as any).llm.text2vega.invoke({ input: value });
   };
 
   return isChromeVisible ? (

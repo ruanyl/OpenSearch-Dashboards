@@ -133,6 +133,11 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
     setSavedObjectsClient(core.savedObjects);
     setUiActions(uiActions);
     setInjectedMetadata(core.injectedMetadata);
-    setText2Vega(new Text2Vega(core.http));
+
+    const text2vega = new Text2Vega(core.http);
+    setText2Vega(text2vega);
+    // quick hack to share llm execution context among plugins
+    // TODO: refactor this to not use window to share context
+    (window as any).llm = { text2vega };
   }
 }
