@@ -45,7 +45,14 @@ export const SourceSelector = ({
       dataSourceOptions.length > 0 &&
       dataSourceOptions[0].options.length > 0
     ) {
-      onChange(dataSourceOptions[0].options[0]);
+      const defaultSelectedSource = dataSourceOptions[0].options.find(
+        (item) => item.label === 'opensearch_dashboards_sample_data_logs'
+      );
+      if (defaultSelectedSource) {
+        onChange(defaultSelectedSource);
+      } else {
+        onChange(dataSourceOptions[0].options[0]);
+      }
     }
   }, [selectedSourceId, dataSourceOptions]);
 
