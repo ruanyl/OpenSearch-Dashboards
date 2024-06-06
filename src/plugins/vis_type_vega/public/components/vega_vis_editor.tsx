@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { EuiCodeEditor } from '@elastic/eui';
 import compactStringify from 'json-stringify-pretty-compact';
 import hjson from 'hjson';
@@ -76,6 +76,9 @@ function format(
 }
 
 function VegaVisEditor({ stateParams, setValue }: VisOptionsProps<VisParams>) {
+  const setValueRef = useRef(setValue);
+  setValueRef.current = setValue;
+
   const onChange = useCallback(
     (value: string) => {
       setValue('spec', value);
@@ -104,7 +107,7 @@ function VegaVisEditor({ stateParams, setValue }: VisOptionsProps<VisParams>) {
             }),
           });
         } else {
-          setValue('spec', JSON.stringify(result, null, 4));
+          setValueRef.current('spec', JSON.stringify(result, null, 4));
         }
       }
     });
@@ -112,7 +115,7 @@ function VegaVisEditor({ stateParams, setValue }: VisOptionsProps<VisParams>) {
     return () => {
       subscription.unsubscribe();
     };
-  }, [setValue]);
+  }, []);
 
   return (
     <div className="vgaEditor">

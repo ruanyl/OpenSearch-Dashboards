@@ -29,7 +29,7 @@ Just reply with the json based Vega-Lite object, do not include any other conten
 };
 
 export class Text2Vega {
-  input$ = new BehaviorSubject({ input: '' });
+  input$ = new BehaviorSubject({ prompt: '', index: '' });
   result$: Observable<Record<string, any> | { error: any }>;
   status$ = new BehaviorSubject<'RUNNING' | 'STOPPED'>('STOPPED');
   http: HttpSetup;
@@ -38,19 +38,19 @@ export class Text2Vega {
     this.http = http;
     this.result$ = this.input$
       .pipe(
-        filter((v) => v.input.length > 0),
+        filter((v) => v.prompt.length > 0),
         debounceTime(200),
         tap(() => this.status$.next('RUNNING'))
       )
       .pipe(
         switchMap((v) =>
-          of(v.input).pipe(
+          of(v).pipe(
             // text to ppl
             switchMap(async (value) => {
-              const pplQuestion = value.split('//')[0];
-              const ppl = await this.text2ppl(pplQuestion);
+              const pplQuestion = value.prompt.split('//')[0];
+              const ppl = await this.text2ppl(pplQuestion, value.index);
               return {
-                input: value,
+                ...value,
                 ppl,
               };
             }),
@@ -64,7 +64,7 @@ export class Text2Vega {
             }),
             // call llm to generate vega
             switchMap(async (value) => {
-              const prompt = createPrompt(value.input, value.ppl, value.sample);
+              const prompt = createPrompt(value.prompt, value.ppl, value.sample);
               const result = await this.text2vega(prompt);
               result.data = {
                 url: {
@@ -89,18 +89,18 @@ export class Text2Vega {
     return result;
   }
 
-  async text2ppl(query: string) {
+  async text2ppl(query: string, index: string) {
     const pplResponse = await this.http.post('/api/llm/text2ppl', {
       body: JSON.stringify({
         question: query,
-        index: 'opensearch_dashboards_sample_data_logs',
+        index: index,
       }),
     });
     const result = JSON.parse(pplResponse.body.inference_results[0].output[0].result);
     return result.ppl;
   }
 
-  invoke(value: { input: string }) {
+  invoke(value: { prompt: string; index: string }) {
     this.input$.next(value);
   }
 

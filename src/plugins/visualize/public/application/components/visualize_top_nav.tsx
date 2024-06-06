@@ -51,8 +51,9 @@ import {
 } from '../types';
 import { APP_NAME } from '../visualize_constants';
 import { getTopNavConfig } from '../utils';
-import type { IndexPattern } from '../../../../data/public';
+import type { IndexPattern, DataSourceOption } from '../../../../data/public';
 import chatLogo from './query_assistant_logo.svg';
+import { SourceSelector } from './source_selector';
 
 interface VisualizeTopNavProps {
   currentAppState: VisualizeAppState;
@@ -145,6 +146,7 @@ const TopNav = ({
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[]>(
     vis.data.indexPattern ? [vis.data.indexPattern] : []
   );
+  const [selectedSource, setSelectedSource] = useState<DataSourceOption>();
   const showDatePicker = () => {
     // tsvb loads without an indexPattern initially (TODO investigate).
     // hide timefilter only if timeFieldName is explicitly undefined.
@@ -254,7 +256,11 @@ const TopNav = ({
 
   const indexName = 'opensearch_dashboards_sample_data_logs';
   const onGenerate = async () => {
-    (window as any).llm.text2vega.invoke({ input: value });
+    if (selectedSource) {
+      (window as any).llm.text2vega.invoke({ prompt: value, index: selectedSource.label });
+    } else {
+      services.notifications.toasts.addWarning('Please select a index');
+    }
   };
 
   return isChromeVisible ? (
@@ -273,6 +279,12 @@ const TopNav = ({
           alignItems="center"
           style={{ maxHeight: '100px' }}
         >
+          <EuiFlexItem grow={3}>
+            <SourceSelector
+              selectedSourceId={selectedSource?.value ?? ''}
+              onChange={(ds) => setSelectedSource(ds)}
+            />
+          </EuiFlexItem>
           <EuiFlexItem grow={9}>
             <EuiInputPopover
               input={
