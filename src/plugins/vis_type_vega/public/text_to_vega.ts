@@ -95,7 +95,12 @@ export class Text2Vega {
     const res = await this.http.post('/api/llm/text2vega', {
       body: JSON.stringify({ query }),
     });
-    const result = res.body.inference_results[0].output[0].dataAsMap;
+    let result = res.body.inference_results[0].output[0].dataAsMap;
+    // sometimes llm returns {response: <schema>} instead of <schema>
+    if (result.response) {
+      result = JSON.parse(result.response);
+    }
+    // need to escape field: geo.city -> field: geo\\.city
     escapeField(result, 'encoding');
     return result;
   }
