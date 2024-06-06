@@ -6,7 +6,7 @@ const topN = (ppl: string, n: number) => `${ppl} | head ${n}`;
 
 const createPrompt = (input: string, ppl: string, sample: any) => {
   return `
-Your task is to generate Vega-Lite chart specifications based on the given data, the data schema, the PPL query to get the data and the user's instruction.
+Your task is to generate Vega-Lite chart specifications based on the given data, the data schema, the PPL query to get the data and the user's instruction
 
 The data is represented in json format:
 ${JSON.stringify(sample.jsonData, null, 4)}
@@ -19,12 +19,10 @@ ${ppl}
 
 The user's instruction is: ${input}
 
-when a field has a dot(.), you should escape the dot if the field is a single field. For example, if the field is "user.name", but the data is {"user.name": "John"}, the field should be escaped. But it should not be escaped if the data is {"user": {"name": "John"}}
-
 If mark.type = point and shape.field is a field of the data, the definition of the shape should be inside the root "encoding" object, NOT in the "mark" object, for example, {"encoding": {"shape": {"field": "field_name"}}}
 
-Just return the chart specification json based on Vega-Lite format.
-Just reply with the json based Vega-Lite object, do not include any other content in the reply.
+Just return the chart specification json based on Vega-Lite format
+Just reply with the json based Vega-Lite object, do not include any other content in the reply
 `;
 };
 
@@ -82,10 +80,23 @@ export class Text2Vega {
   }
 
   async text2vega(query: string) {
+    const escapeField = (json: any, field: string) => {
+      if (json[field]) {
+        if (typeof json[field] === 'string') {
+          json[field] = json[field].replace(/\./g, '\\.');
+        }
+        if (typeof json[field] === 'object') {
+          Object.keys(json[field]).forEach((p) => {
+            escapeField(json[field], p);
+          });
+        }
+      }
+    };
     const res = await this.http.post('/api/llm/text2vega', {
       body: JSON.stringify({ query }),
     });
     const result = res.body.inference_results[0].output[0].dataAsMap;
+    escapeField(result, 'encoding');
     return result;
   }
 
