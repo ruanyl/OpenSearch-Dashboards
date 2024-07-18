@@ -183,3 +183,5 @@ export const WORKSPACE_USE_CASES = Object.freeze({
 });
 
 export const CURRENT_USER_PLACEHOLDER = '%me%';
+export const MAX_WORKSPACE_NAME_LENGTH = 25;
+export const RECENT_WORKSPACES_KEY = 'recentWorkspaces';
