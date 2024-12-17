@@ -57,6 +57,7 @@ export async function createArchive({ opensearchDashboardsVersion, plugin, log }
       cwd: buildDir,
       base: buildDir,
       dot: true,
+      ignore: ['**/.osd-optimizer-cache'],
     }),
     zip(zipName),
     vfs.dest(buildDir)

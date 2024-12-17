@@ -48,17 +48,21 @@ export async function optimize({ log, plugin, sourceDir, buildDir }: BuildContex
   log.indent(2);
 
   // build bundles into target
+  const outputRoot = Path.resolve(REPO_ROOT, 'build/opensearch-dashboards');
   const config = OptimizerConfig.create({
     repoRoot: REPO_ROOT,
     pluginPaths: [sourceDir],
-    cache: false,
+    cache: true,
     dist: true,
-    pluginScanDirs: [],
+    // pluginScanDirs: [Path.resolve(REPO_ROOT, 'build/opensearch-dashboards')],
+    includeCoreBundle: true,
+    outputRoot,
   });
+  const pluginOutputDir = Path.resolve(outputRoot, Path.relative(REPO_ROOT, sourceDir));
 
   await runOptimizer(config).pipe(logOptimizerState(log, config)).toPromise();
 
   // move target into buildDir
-  await asyncRename(Path.resolve(sourceDir, 'target'), Path.resolve(buildDir, 'target'));
+  await asyncRename(Path.resolve(pluginOutputDir, 'target'), Path.resolve(buildDir, 'target'));
   log.indent(-2);
 }

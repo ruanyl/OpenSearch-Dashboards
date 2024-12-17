@@ -58,6 +58,6 @@ export const BuildOpenSearchDashboardsPlatformPlugins: Task = {
       .pipe(reportOptimizerStats(reporter, config, log), logOptimizerState(log, config))
       .toPromise();
 
-    await Promise.all(config.bundles.map((b) => b.cache.clear()));
+    // await Promise.all(config.bundles.map((b) => b.cache.clear()));
   },
 };
