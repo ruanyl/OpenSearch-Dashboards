@@ -148,6 +148,20 @@ export class BundleRefsPlugin {
       return;
     }
 
+    if (isAliasRequest && request.startsWith('opensearch-dashboards/public/utils')) {
+      const refs = this.bundleRefs.filterByExportIds(['entry/core/public/utils']);
+      for (const ref of refs) {
+        return new BundleRefModule(ref);
+      }
+    }
+
+    if (isAliasRequest && request.startsWith('opensearch-dashboards/public')) {
+      const refs = this.bundleRefs.filterByExportIds(['entry/core/public']);
+      for (const ref of refs) {
+        return new BundleRefModule(ref);
+      }
+    }
+
     const requestExt = Path.extname(request);
     if (requestExt && !RESOLVE_EXTENSIONS.includes(requestExt)) {
       return;
