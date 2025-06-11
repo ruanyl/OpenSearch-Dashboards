@@ -39,7 +39,9 @@
 # Set the value of this setting to true to enable plugin CSP handler. By default it is disabled.
 # It requires the application config plugin as its dependency.
 # csp_handler.enabled: false
-
+csp.strict: false
+csp.rules:
+  - "script-src 'self' 'unsafe-eval' http://127.0.0.1:8080"
 # The default application to load.
 #opensearchDashboards.defaultAppId: "home"
 

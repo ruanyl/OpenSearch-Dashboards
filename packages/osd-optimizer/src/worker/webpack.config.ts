@@ -177,20 +177,13 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
                   loader: 'sass-loader',
                   options: {
                     additionalData(content: string, loaderContext: webpack.loader.LoaderContext) {
-                      switch (theme) {
-                        case 'v9dark':
-                          return `@import "@elastic/eui/src/themes/v9/v9_colors_dark";\n@import "@elastic/eui/src/themes/v9/v9_globals";\n${content}`;
-                        case 'v9light':
-                          return `@import "@elastic/eui/src/themes/v9/v9_colors_light";\n@import "@elastic/eui/src/themes/v9/v9_globals";\n${content}`;
-                        case 'v8dark':
-                          return `@import "@elastic/eui/src/themes/eui-next/eui_next_colors_dark";\n@import "@elastic/eui/src/themes/eui-next/eui_next_globals";\n${content}`;
-                        case 'v8light':
-                          return `@import "@elastic/eui/src/themes/eui-next/eui_next_colors_light";\n@import "@elastic/eui/src/themes/eui-next/eui_next_globals";\n${content}`;
-                        case 'v7dark':
-                          return `@import "@elastic/eui/src/themes/eui/eui_colors_dark";\n@import "@elastic/eui/src/themes/eui/eui_globals";\n${content}`;
-                        case 'v7light':
-                          return `@import "@elastic/eui/src/themes/eui/eui_colors_light";\n@import "@elastic/eui/src/themes/eui/eui_globals";\n${content}`;
-                      }
+                      return `@import ${stringifyRequest(
+                        loaderContext,
+                        Path.resolve(
+                          worker.repoRoot,
+                          `src/core/public/core_app/styles/_globals_${theme}.scss`
+                        )
+                      )};\n${content}`;
                     },
                     webpackImporter: false,
                     implementation: require('sass-embedded'),

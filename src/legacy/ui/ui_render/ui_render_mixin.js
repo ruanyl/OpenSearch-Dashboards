@@ -145,6 +145,12 @@ export function uiRenderMixin(osdServer, server, config) {
             continue;
           }
 
+          if (id === 'mlCommonsDashboards') {
+            kpPluginPublicPaths.set(id, `http://127.0.0.1:8080/`);
+            kpPluginBundlePaths.add(`http://127.0.0.1:8080/${id}.plugin.js`);
+            continue;
+          }
+
           kpPluginPublicPaths.set(id, `${regularBundlePath}/plugin/${id}/`);
           kpPluginBundlePaths.add(`${regularBundlePath}/plugin/${id}/${id}.plugin.js`);
           readKpPlugins(kpUiPlugins.internal.get(id).requiredBundles);
