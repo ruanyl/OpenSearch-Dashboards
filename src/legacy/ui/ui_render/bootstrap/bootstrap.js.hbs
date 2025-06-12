@@ -89,14 +89,24 @@ if (window.__osdStrictCsp__ && window.__osdCspNotEnforced__) {
       });
     }
 
-    load([
+    const entries = [
       {{#each jsDependencyPaths}}
         '{{this}}',
       {{/each}}
-    ], function () {
-      __osdBundles__.get('entry/core/public').__osdBootstrap__();
+    ]
 
-      load(styleSheetPaths);
-    });
+    window.fetch('https://d1meqe7juxl41y.cloudfront.net/mfe.json')
+    .then(res => res.json())
+    .then(json => {
+        for (const [key, value] of Object.entries(json.microFrontends)) {
+          window.__osdPublicPath__[key] = value[0].extras.publicPath
+          entries.push(value[0].url)
+        }
+        load(entries, function () {
+          __osdBundles__.get('entry/core/public').__osdBootstrap__();
+
+          load(styleSheetPaths);
+        });
+    })
   }
 }
