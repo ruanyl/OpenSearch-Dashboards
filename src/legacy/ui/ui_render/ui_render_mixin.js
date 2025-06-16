@@ -145,7 +145,12 @@ export function uiRenderMixin(osdServer, server, config) {
             continue;
           }
 
-          if (id === 'mlCommonsDashboards') {
+          if (
+            id === 'mlCommonsDashboards' ||
+            id === 'securityDashboards' ||
+            id === 'observabilityDashboards' ||
+            id === 'assistantDashboards'
+          ) {
             continue;
           }
 
