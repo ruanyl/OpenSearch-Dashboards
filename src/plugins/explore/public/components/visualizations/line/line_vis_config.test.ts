@@ -72,8 +72,8 @@ describe('line_vis_config', () => {
 
       // Verify grid settings
       expect(defaults.grid).toEqual({
-        categoryLines: true,
-        valueLines: true,
+        xLines: true,
+        yLines: true,
       });
 
       // Verify axes

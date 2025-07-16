@@ -10,8 +10,16 @@ import {
   createCategoryAreaChart,
   createStackedAreaChart,
 } from './to_expression';
-import { VisColumn, VisFieldType, VEGASCHEMA, ThresholdLineStyle, Positions } from '../types';
-import { AreaChartStyleControls } from './area_vis_config';
+import {
+  VisColumn,
+  VisFieldType,
+  VEGASCHEMA,
+  ThresholdLineStyle,
+  Positions,
+  AxisRole,
+  AxisColumnMappings,
+} from '../types';
+import { AreaChartStyleControls, AXES_FIELD_MAPPING } from './area_vis_config';
 
 describe('Area Chart to_expression', () => {
   // Mock data for testing
@@ -23,6 +31,40 @@ describe('Area Chart to_expression', () => {
     { date: '2023-01-02', value: 15, category: 'B', category2: 'Y' },
     { date: '2023-01-03', value: 25, category: 'B', category2: 'Y' },
   ];
+
+  // Helper function to create axis column mappings
+  const createAxisColumnMappings = (chartType: number): AxisColumnMappings => {
+    const mapping = AXES_FIELD_MAPPING[chartType].mapping[0];
+    const result: AxisColumnMappings = {};
+
+    // Map each axis role to the corresponding column
+    Object.entries(mapping).forEach(([role, fieldInfo]) => {
+      const axisRole = role as AxisRole;
+      const { type, index } = fieldInfo;
+
+      // Find the column with matching type and index
+      let columns: VisColumn[];
+      switch (type) {
+        case VisFieldType.Numerical:
+          columns = mockNumericalColumns;
+          break;
+        case VisFieldType.Categorical:
+          columns = mockCategoricalColumns;
+          break;
+        case VisFieldType.Date:
+          columns = mockDateColumns;
+          break;
+        default:
+          columns = [];
+      }
+
+      if (columns.length > index) {
+        result[axisRole] = columns[index];
+      }
+    });
+
+    return result;
+  };
 
   const mockNumericalColumns: VisColumn[] = [
     {
@@ -92,11 +134,13 @@ describe('Area Chart to_expression', () => {
 
   describe('createSimpleAreaChart', () => {
     it('should create a simple area chart with one metric and one date', () => {
+      const axisColumnMappings = createAxisColumnMappings(0);
       const result = createSimpleAreaChart(
         mockTransformedData,
         mockNumericalColumns,
         mockDateColumns,
-        mockStyles
+        mockStyles,
+        axisColumnMappings
       );
 
       // Verify the basic structure
@@ -178,12 +222,14 @@ describe('Area Chart to_expression', () => {
 
   describe('createMultiAreaChart', () => {
     it('should create a multi-area chart with one metric, one date, and one categorical column', () => {
+      const axisColumnMappings = createAxisColumnMappings(1);
       const result = createMultiAreaChart(
         mockTransformedData,
         mockNumericalColumns,
         [mockCategoricalColumns[0]],
         mockDateColumns,
-        mockStyles
+        mockStyles,
+        axisColumnMappings
       );
 
       // Verify the basic structure
@@ -210,12 +256,14 @@ describe('Area Chart to_expression', () => {
 
   describe('createFacetedMultiAreaChart', () => {
     it('should create a faceted multi-area chart with one metric, one date, and two categorical columns', () => {
+      const axisColumnMappings = createAxisColumnMappings(2);
       const result = createFacetedMultiAreaChart(
         mockTransformedData,
         mockNumericalColumns,
         mockCategoricalColumns,
         mockDateColumns,
-        mockStyles
+        mockStyles,
+        axisColumnMappings
       );
 
       // Verify the basic structure
@@ -282,12 +330,14 @@ describe('Area Chart to_expression', () => {
 
   describe('createCategoryAreaChart', () => {
     it('should create a category-based area chart with one metric and one category', () => {
+      const axisColumnMappings = createAxisColumnMappings(3);
       const result = createCategoryAreaChart(
         mockTransformedData,
         mockNumericalColumns,
         [mockCategoricalColumns[0]],
         [],
-        mockStyles
+        mockStyles,
+        axisColumnMappings
       );
 
       // Verify the basic structure
@@ -321,12 +371,14 @@ describe('Area Chart to_expression', () => {
 
   describe('createStackedAreaChart', () => {
     it('should create a stacked area chart with one metric and two categorical columns', () => {
+      const axisColumnMappings = createAxisColumnMappings(4);
       const result = createStackedAreaChart(
         mockTransformedData,
         mockNumericalColumns,
         mockCategoricalColumns,
         [],
-        mockStyles
+        mockStyles,
+        axisColumnMappings
       );
 
       // Verify the basic structure
@@ -376,12 +428,14 @@ describe('Area Chart to_expression', () => {
         ],
       };
 
+      const axisColumnMappings = createAxisColumnMappings(4);
       const result = createStackedAreaChart(
         mockTransformedData,
         mockNumericalColumns,
         mockCategoricalColumns,
         [],
-        stylesWithThreshold
+        stylesWithThreshold,
+        axisColumnMappings
       );
 
       // Verify the chart structure has changed to use layers

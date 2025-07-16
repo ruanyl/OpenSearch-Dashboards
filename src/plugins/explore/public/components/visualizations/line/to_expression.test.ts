@@ -10,9 +10,18 @@ import {
   createFacetedMultiLineChart,
   createCategoryLineChart,
 } from './to_expression';
-import { ThresholdLineStyle, VisColumn, VisFieldType, Positions, TooltipOptions } from '../types';
+import {
+  ThresholdLineStyle,
+  VisColumn,
+  VisFieldType,
+  Positions,
+  TooltipOptions,
+  AxisRole,
+  AxisColumnMappings,
+} from '../types';
 import * as lineChartUtils from './line_chart_utils';
 import * as thresholdUtils from '../style_panel/threshold/utils';
+import { AXES_FIELD_MAPPING } from './line_vis_config';
 
 // Mock the line chart utils
 jest.mock('./line_chart_utils', () => ({
@@ -37,6 +46,40 @@ describe('to_expression', () => {
     { 'field-0': '2023-01-01', 'field-1': 100, 'field-2': 'Category A', 'field-3': 'Group 1' },
     { 'field-0': '2023-01-02', 'field-1': 200, 'field-2': 'Category B', 'field-3': 'Group 2' },
   ];
+
+  // Helper function to create axis column mappings
+  const createAxisColumnMappings = (chartType: number): AxisColumnMappings => {
+    const mapping = AXES_FIELD_MAPPING[chartType].mapping[0];
+    const result: AxisColumnMappings = {};
+
+    // Map each axis role to the corresponding column
+    Object.entries(mapping).forEach(([role, fieldInfo]) => {
+      const axisRole = role as AxisRole;
+      const { type, index } = fieldInfo;
+
+      // Find the column with matching type and index
+      let columns: VisColumn[];
+      switch (type) {
+        case VisFieldType.Numerical:
+          columns = [numericColumn1, numericColumn2];
+          break;
+        case VisFieldType.Categorical:
+          columns = [categoricalColumn1, categoricalColumn2];
+          break;
+        case VisFieldType.Date:
+          columns = [dateColumn];
+          break;
+        default:
+          columns = [];
+      }
+
+      if (columns.length > index) {
+        result[axisRole] = columns[index];
+      }
+    });
+
+    return result;
+  };
 
   const dateColumn: VisColumn = {
     id: 0,
@@ -115,11 +158,13 @@ describe('to_expression', () => {
       (thresholdUtils.createThresholdLayer as jest.Mock).mockReturnValueOnce(mockThresholdLayer);
       (lineChartUtils.createTimeMarkerLayer as jest.Mock).mockReturnValueOnce(mockTimeMarkerLayer);
 
+      const axisColumnMappings = createAxisColumnMappings(0);
       const result = createSimpleLineChart(
         transformedData,
         [numericColumn1],
         [dateColumn],
-        styleOptions
+        styleOptions,
+        axisColumnMappings
       );
 
       // Verify the result structure
@@ -147,11 +192,13 @@ describe('to_expression', () => {
 
   describe('createLineBarChart', () => {
     it('should create a combined line and bar chart with two metrics and one date', () => {
+      const axisColumnMappings = createAxisColumnMappings(1);
       const result = createLineBarChart(
         transformedData,
         [numericColumn1, numericColumn2],
         [dateColumn],
-        styleOptions
+        styleOptions,
+        axisColumnMappings
       );
 
       // Verify the result structure
@@ -183,12 +230,14 @@ describe('to_expression', () => {
 
   describe('createMultiLineChart', () => {
     it('should create a multi-line chart with one metric, one date, and one categorical column', () => {
+      const axisColumnMappings = createAxisColumnMappings(2);
       const result = createMultiLineChart(
         transformedData,
         [numericColumn1],
         [categoricalColumn1],
         [dateColumn],
-        styleOptions
+        styleOptions,
+        axisColumnMappings
       );
 
       // Verify the result structure
@@ -215,12 +264,14 @@ describe('to_expression', () => {
       styleOptions.thresholdLines[0].show = true;
       styleOptions.addTimeMarker = true;
 
+      const axisColumnMappings = createAxisColumnMappings(3);
       const result = createFacetedMultiLineChart(
         transformedData,
         [numericColumn1],
         [categoricalColumn1, categoricalColumn2],
         [dateColumn],
-        styleOptions
+        styleOptions,
+        axisColumnMappings
       );
 
       // Verify the result structure
@@ -260,12 +311,14 @@ describe('to_expression', () => {
       const mockThresholdLayer = { mark: { type: 'rule' } };
       (thresholdUtils.createThresholdLayer as jest.Mock).mockReturnValueOnce(mockThresholdLayer);
 
+      const axisColumnMappings = createAxisColumnMappings(4);
       const result = createCategoryLineChart(
         transformedData,
         [numericColumn1],
         [categoricalColumn1],
         [],
-        styleOptions
+        styleOptions,
+        axisColumnMappings
       );
 
       // Verify the result structure

@@ -235,8 +235,8 @@ describe('Line Chart Utils', () => {
           },
         ],
         grid: {
-          categoryLines: true,
-          valueLines: true,
+          xLines: true,
+          yLines: true,
         },
       };
 
@@ -271,8 +271,8 @@ describe('Line Chart Utils', () => {
           },
         ],
         grid: {
-          categoryLines: true,
-          valueLines: true,
+          xLines: true,
+          yLines: true,
         },
       };
 
@@ -305,8 +305,8 @@ describe('Line Chart Utils', () => {
           },
         ],
         grid: {
-          categoryLines: true,
-          valueLines: true,
+          xLines: true,
+          yLines: true,
         },
       };
 
@@ -342,8 +342,8 @@ describe('Line Chart Utils', () => {
           },
         ],
         grid: {
-          categoryLines: true,
-          valueLines: true,
+          xLines: true,
+          yLines: true,
         },
       };
 
@@ -394,8 +394,8 @@ describe('Line Chart Utils', () => {
           },
         ],
         grid: {
-          categoryLines: true,
-          valueLines: true,
+          xLines: true,
+          yLines: true,
         },
       };
 
