@@ -29,7 +29,7 @@ export const createBarSpec = (
     throw new Error('Bar chart requires at least one numerical column and one categorical column');
   }
 
-  const [xAxis, yAxis] = getSwappedAxisRole(styles, axisColumnMappings);
+  const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
 
   const layers: any[] = [];
 
@@ -57,25 +57,25 @@ export const createBarSpec = (
       [categoryAxis]: {
         field: xAxis?.column,
         type: getSchemaByAxis(xAxis),
-        axis: applyAxisStyling(xAxis),
+        axis: applyAxisStyling(xAxis, xAxisStyle),
       },
       // Value axis (Y or X depending on orientation)
       [valueAxis]: {
         field: yAxis?.column,
         type: getSchemaByAxis(yAxis),
-        axis: applyAxisStyling(yAxis),
+        axis: applyAxisStyling(yAxis, yAxisStyle),
       },
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
           {
             field: xAxis?.column,
             type: getSchemaByAxis(xAxis),
-            title: xAxis?.styles?.title?.text || xAxis?.name,
+            title: xAxisStyle?.title?.text || xAxis?.name,
           },
           {
             field: yAxis?.column,
             type: getSchemaByAxis(yAxis),
-            title: yAxis?.styles?.title?.text || yAxis?.name,
+            title: yAxisStyle?.title?.text || yAxis?.name,
           },
         ],
       }),
@@ -132,7 +132,7 @@ export const createTimeBarChart = (
     throw new Error('Time bar chart requires at least one numerical column and one date column');
   }
 
-  const [xAxis, yAxis] = getSwappedAxisRole(styles, axisColumnMappings);
+  const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
 
   const layers: any[] = [];
 
@@ -155,24 +155,24 @@ export const createTimeBarChart = (
       x: {
         field: xAxis?.column,
         type: getSchemaByAxis(xAxis),
-        axis: applyAxisStyling(xAxis),
+        axis: applyAxisStyling(xAxis, xAxisStyle),
       },
       y: {
         field: yAxis?.column,
         type: getSchemaByAxis(yAxis),
-        axis: applyAxisStyling(yAxis),
+        axis: applyAxisStyling(yAxis, yAxisStyle),
       },
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
           {
             field: xAxis?.column,
             type: getSchemaByAxis(xAxis),
-            title: xAxis?.styles?.title?.text || xAxis?.name,
+            title: xAxisStyle?.title?.text || xAxis?.name,
           },
           {
             field: yAxis?.column,
             type: getSchemaByAxis(yAxis),
-            title: yAxis?.styles?.title?.text || yAxis?.name,
+            title: yAxisStyle?.title?.text || yAxis?.name,
           },
         ],
       }),
@@ -236,7 +236,7 @@ export const createGroupedTimeBarChart = (
     );
   }
 
-  const [xAxis, yAxis] = getSwappedAxisRole(styles, axisColumnMappings);
+  const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
 
   const colorColumn = axisColumnMappings?.[AxisRole.COLOR];
   const categoryField = colorColumn?.column;
@@ -266,12 +266,12 @@ export const createGroupedTimeBarChart = (
       x: {
         field: xAxis?.column,
         type: getSchemaByAxis(xAxis),
-        axis: applyAxisStyling(xAxis),
+        axis: applyAxisStyling(xAxis, xAxisStyle),
       },
       y: {
         field: yAxis?.column,
         type: getSchemaByAxis(yAxis),
-        axis: applyAxisStyling(yAxis),
+        axis: applyAxisStyling(yAxis, yAxisStyle),
       },
       color: {
         field: categoryField,
@@ -288,13 +288,13 @@ export const createGroupedTimeBarChart = (
         {
           field: xAxis?.column,
           type: getSchemaByAxis(xAxis),
-          title: xAxis?.styles?.title?.text || xAxis?.name,
+          title: xAxisStyle?.title?.text || xAxis?.name,
         },
         { field: categoryField, type: getSchemaByAxis(colorColumn), title: categoryName },
         {
           field: yAxis?.column,
           type: getSchemaByAxis(yAxis),
-          title: yAxis?.styles?.title?.text || yAxis?.name,
+          title: yAxisStyle?.title?.text || yAxis?.name,
         },
       ],
     },
@@ -340,7 +340,7 @@ export const createFacetedTimeBarChart = (
     );
   }
 
-  const [xAxis, yAxis] = getSwappedAxisRole(styles, axisColumnMappings);
+  const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
   const colorMapping = axisColumnMappings?.[AxisRole.COLOR];
   const facetMapping = axisColumnMappings?.[AxisRole.FACET];
 
@@ -348,8 +348,8 @@ export const createFacetedTimeBarChart = (
   const dateField = xAxis?.column;
   const category1Field = colorMapping?.column;
   const category2Field = facetMapping?.column;
-  const metricName = yAxis?.styles?.title?.text || yAxis?.name;
-  const dateName = xAxis?.styles?.title?.text || xAxis?.name;
+  const metricName = yAxisStyle?.title?.text || yAxis?.name;
+  const dateName = xAxisStyle?.title?.text || xAxis?.name;
   const category1Name = colorMapping?.name;
   const category2Name = facetMapping?.name;
 
@@ -394,12 +394,12 @@ export const createFacetedTimeBarChart = (
             x: {
               field: dateField,
               type: getSchemaByAxis(xAxis),
-              axis: applyAxisStyling(xAxis),
+              axis: applyAxisStyling(xAxis, xAxisStyle),
             },
             y: {
               field: metricField,
               type: getSchemaByAxis(yAxis),
-              axis: applyAxisStyling(yAxis),
+              axis: applyAxisStyling(yAxis, yAxisStyle),
             },
             color: {
               field: category1Field,
@@ -443,7 +443,7 @@ export const createStackedBarSpec = (
     );
   }
 
-  const [xAxis, yAxis] = getSwappedAxisRole(styles, axisColumnMappings);
+  const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
   const colorMapping = axisColumnMappings?.[AxisRole.COLOR];
 
   const categoryField2 = colorMapping?.column;
@@ -478,13 +478,13 @@ export const createStackedBarSpec = (
       [categoryAxis]: {
         field: xAxis?.column,
         type: getSchemaByAxis(xAxis),
-        axis: applyAxisStyling(xAxis),
+        axis: applyAxisStyling(xAxis, xAxisStyle),
       },
       // Value axis (Y or X depending on orientation)
       [valueAxis]: {
         field: yAxis?.column,
         type: getSchemaByAxis(yAxis),
-        axis: applyAxisStyling(yAxis),
+        axis: applyAxisStyling(yAxis, yAxisStyle),
         stack: 'zero', // Can be 'zero', 'normalize', or 'center'
       },
       // Color: Second categorical field (stacking)
