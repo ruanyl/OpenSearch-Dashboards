@@ -64,7 +64,7 @@ export const getSaveButtonRun = (
   }: OnSaveProps): Promise<SaveResult | undefined> => {
     const visualizationBuilder = getVisualizationBuilder();
     const axesMapping = visualizationBuilder.axesMapping$.value;
-    const visConfig = visualizationBuilder.styles$.value;
+    const visConfig = visualizationBuilder.visConfig$.value;
     const savedExploreWithState = saveStateToSavedObject(
       savedExplore,
       saveStateProps.flavorId ?? 'logs',
