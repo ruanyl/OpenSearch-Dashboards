@@ -34,6 +34,7 @@ describe('visualization_container_utils', () => {
       column: 'count',
       validValuesCount: 100,
       uniqueValuesCount: 50,
+      totalValuesCount: 100,
     },
     {
       id: 2,
@@ -42,6 +43,7 @@ describe('visualization_container_utils', () => {
       column: 'category',
       validValuesCount: 100,
       uniqueValuesCount: 10,
+      totalValuesCount: 100,
     },
     {
       id: 3,
@@ -50,6 +52,7 @@ describe('visualization_container_utils', () => {
       column: 'timestamp',
       validValuesCount: 100,
       uniqueValuesCount: 80,
+      totalValuesCount: 100,
     },
   ];
 

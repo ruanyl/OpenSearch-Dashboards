@@ -78,6 +78,7 @@ const mockVisualizationBuilder = {
         column: 'count',
         validValuesCount: 2,
         uniqueValuesCount: 2,
+        totalValuesCount: 2,
       },
     ],
     categoricalColumns: [
@@ -88,6 +89,7 @@ const mockVisualizationBuilder = {
         column: 'field1',
         validValuesCount: 2,
         uniqueValuesCount: 2,
+        totalValuesCount: 2,
       },
     ],
     dateColumns: [],
@@ -160,6 +162,7 @@ describe('VisualizationContainer', () => {
         column: 'field1',
         validValuesCount: 2,
         uniqueValuesCount: 2,
+        totalValuesCount: 2,
       },
       y: {
         id: 1,
@@ -168,6 +171,7 @@ describe('VisualizationContainer', () => {
         column: 'count',
         validValuesCount: 2,
         uniqueValuesCount: 2,
+        totalValuesCount: 2,
       },
     });
 

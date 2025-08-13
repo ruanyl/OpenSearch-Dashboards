@@ -10,7 +10,7 @@ import { VisColumn, VisFieldType } from './types';
 const createMockVisColumns = (
   size: number,
   type: VisFieldType,
-  options = { validValuesCount: 1, uniqueValuesCount: 1 }
+  options = { validValuesCount: 1, uniqueValuesCount: 1, totalValuesCount: 1 }
 ) => {
   const result: VisColumn[] = [];
   for (let i = 0; i < size; i++) {
@@ -311,6 +311,7 @@ describe('VisualizationBuilder', () => {
             numericalColumns: createMockVisColumns(2, VisFieldType.Numerical, {
               validValuesCount: 2,
               uniqueValuesCount: 2,
+              totalValuesCount: 2,
             }),
             categoricalColumns: [],
             dateColumns: [],
@@ -342,6 +343,7 @@ describe('VisualizationBuilder', () => {
             numericalColumns: createMockVisColumns(2, VisFieldType.Numerical, {
               validValuesCount: 2,
               uniqueValuesCount: 2,
+              totalValuesCount: 2,
             }),
             categoricalColumns: [],
             dateColumns: [],
@@ -375,6 +377,7 @@ describe('VisualizationBuilder', () => {
           numericalColumns: createMockVisColumns(2, VisFieldType.Numerical, {
             validValuesCount: 2,
             uniqueValuesCount: 2,
+            totalValuesCount: 2,
           }),
           categoricalColumns: [],
           dateColumns: [],
@@ -429,6 +432,7 @@ describe('VisualizationBuilder', () => {
           schema: 'categorical',
           uniqueValuesCount: 1,
           validValuesCount: 1,
+          totalValuesCount: 1,
         },
       ],
       dateColumns: [],
@@ -440,6 +444,7 @@ describe('VisualizationBuilder', () => {
           schema: 'numerical',
           uniqueValuesCount: 1,
           validValuesCount: 1,
+          totalValuesCount: 1,
         },
       ],
       transformedData: [

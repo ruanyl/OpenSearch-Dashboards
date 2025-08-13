@@ -54,6 +54,7 @@ export interface VisColumn {
   column: string;
   validValuesCount: number;
   uniqueValuesCount: number;
+  totalValuesCount: number;
 }
 
 export enum VisFieldType {

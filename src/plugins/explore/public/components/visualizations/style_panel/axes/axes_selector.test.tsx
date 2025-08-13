@@ -68,6 +68,7 @@ describe('AxesSelectPanel', () => {
       column: 'count',
       validValuesCount: 100,
       uniqueValuesCount: 50,
+      totalValuesCount: 100,
     },
     {
       id: 2,
@@ -76,6 +77,7 @@ describe('AxesSelectPanel', () => {
       column: 'price',
       validValuesCount: 100,
       uniqueValuesCount: 60,
+      totalValuesCount: 100,
     },
   ];
 
@@ -87,6 +89,7 @@ describe('AxesSelectPanel', () => {
       column: 'category',
       validValuesCount: 100,
       uniqueValuesCount: 10,
+      totalValuesCount: 100,
     },
   ];
 
@@ -98,6 +101,7 @@ describe('AxesSelectPanel', () => {
       column: 'timestamp',
       validValuesCount: 100,
       uniqueValuesCount: 80,
+      totalValuesCount: 100,
     },
   ];
 

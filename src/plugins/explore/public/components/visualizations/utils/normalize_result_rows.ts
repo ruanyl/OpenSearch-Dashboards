@@ -19,6 +19,7 @@ export const normalizeResultRows = <T = unknown>(
       column: `field-${index}`,
       validValuesCount: 0,
       uniqueValuesCount: 0,
+      totalValuesCount: 0,
     };
   });
 
@@ -41,6 +42,7 @@ export const normalizeResultRows = <T = unknown>(
       ...column,
       validValuesCount: validValues.length ?? 0,
       uniqueValuesCount: uniqueValues.size ?? 0,
+      totalValuesCount: values.length,
     };
   });
 

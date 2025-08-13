@@ -94,7 +94,9 @@ export const ChartTypeSelector = <T extends ChartType>({
 
           // Special condition for metric type
           if (type === CHART_METADATA.metric.type && numericalColumns.length > 0) {
-            return numericalColumns[0].validValuesCount === 1;
+            return numericalColumns.some(
+              (col) => col.totalValuesCount === 1 && col.validValuesCount === 1
+            );
           }
 
           return (
