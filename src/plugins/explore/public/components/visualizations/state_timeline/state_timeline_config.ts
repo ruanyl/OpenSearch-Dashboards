@@ -17,7 +17,9 @@ import {
   DisconnectValuesOption,
   ConnectNullValuesOption,
   DisableMode,
+  ThresholdOptions,
 } from '../types';
+import { getColors } from '../theme/default_colors';
 
 export interface ExclusiveStateTimeLineConfig {
   showValues?: boolean;
@@ -39,6 +41,8 @@ export interface StateTimeLineChartStyleOptions {
   titleOptions?: TitleOptions;
 
   valueMappingOptions?: ValueMappingOptions;
+  useThresholdColor?: boolean;
+  thresholdOptions?: ThresholdOptions;
 }
 
 export type StateTimeLineChartStyle = Required<StateTimeLineChartStyleOptions>;
@@ -54,7 +58,7 @@ export const defaultStateTimeLineChartStyles: StateTimeLineChartStyle = {
   // exclusive
   exclusive: {
     showValues: false,
-    rowHeight: 1,
+    rowHeight: 0.8,
     disconnectValues: {
       disableMode: DisableMode.Never,
       threshold: '1h',
@@ -67,6 +71,12 @@ export const defaultStateTimeLineChartStyles: StateTimeLineChartStyle = {
 
   valueMappingOptions: {
     valueMappings: [],
+  },
+
+  useThresholdColor: false,
+  thresholdOptions: {
+    thresholds: [],
+    baseColor: getColors().statusGreen,
   },
   // Standard axes
   standardAxes: [
