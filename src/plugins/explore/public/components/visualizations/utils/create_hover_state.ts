@@ -45,7 +45,7 @@ function createPointLayer(xField: Field, yFields: Field[], colorField?: Field) {
 
   let y = null;
   if (yFields.length === 1) {
-    y = { field: yFields[0].name, type: yFields[0].type, stack: yFields[0].stack };
+    y = { field: yFields[0].name, type: yFields[0].type, stack: yFields[0].stack, axis: null };
   }
 
   const pointLayerTransform: any[] = [];
@@ -55,7 +55,7 @@ function createPointLayer(xField: Field, yFields: Field[], colorField?: Field) {
       as: ['key', 'value'],
     });
     color = { field: 'key', type: 'nominal' };
-    y = { field: 'value', type: 'quantitative' };
+    y = { field: 'value', type: 'quantitative', axis: null };
   }
 
   const marks = [
