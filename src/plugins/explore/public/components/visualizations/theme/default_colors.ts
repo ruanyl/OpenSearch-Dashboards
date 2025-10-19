@@ -155,3 +155,12 @@ export const resolveColor = (colorName?: string) => {
 
   return colorName;
 };
+export const getGrey = () => {
+  if (darkMode) return '#d3d3d3';
+  return '#a4a8b3';
+};
+
+export const getUnfilledArea = () => {
+  if (darkMode) return '#27252C';
+  return '#f1f1f1ff';
+};
