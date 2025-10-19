@@ -65,45 +65,64 @@ const connectNullValue = (curr: string, end: string, connectThreshold: string) =
   return end;
 };
 
+const formatDuration = (ms: number) => {
+  const totalSeconds = Math.floor(ms / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  const parts = [];
+  if (hours) parts.push(`${hours}h`);
+  if (minutes) parts.push(`${minutes}m`);
+  if (seconds) parts.push(`${seconds}s`);
+  return parts.join(' ') || '0s';
+};
+
 const mergeRecords = (
   records: Array<Record<string, any>>,
   timestampField: string,
   nextData?: string
 ) => {
+  const endTime = nextData ? nextData : records[records.length - 1][timestampField];
+  const startTime = records[0][timestampField];
+  const duration = new Date(endTime).getTime() - new Date(startTime).getTime();
   return {
     ...records[0],
-    start: records[0][timestampField],
-    end: nextData ? nextData : records[records.length - 1][timestampField],
+    start: startTime,
+    end: endTime,
     mergedCount: records.length,
+    duration: formatDuration(duration),
   };
 };
 
 const mergeNumercialRecord = (
-  records: Array<Record<string, any>>,
+  records: Record<string, any>,
   timestampField: string,
   nextData?: string,
   range?: RangeValue
 ) => {
+  const endTime = nextData ? nextData : records[records.length - 1][timestampField];
+  const startTime = records[0][timestampField];
+  const duration = new Date(endTime).getTime() - new Date(startTime).getTime();
   return {
     ...records[0],
-    start: records[0][timestampField],
-    end: nextData ? nextData : records[records.length - 1][timestampField],
-    ...(range ? { mergedLabel: `[${range?.min},${range?.max})` } : {}),
+    start: startTime,
+    end: endTime,
+    ...(range ? { mergedLabel: `[${range?.min},${range?.max ?? Infinity})` } : {}),
+    duration: formatDuration(duration),
     mergedCount: records.length,
   };
 };
 
 export const convertThresholdsToValueMappings = (thresholds: Threshold[]): ValueMapping[] => {
-  return thresholds.slice(0, -1).map((t, i) => {
-    return {
-      type: 'range',
-      range: {
-        min: t.value,
-        max: thresholds[i + 1].value,
-      },
-      color: t.color,
-    };
-  });
+  return thresholds.map((t, i) => ({
+    type: 'range',
+    range: {
+      min: t.value,
+      max: i === thresholds.length - 1 ? Infinity : thresholds[i + 1].value,
+    },
+    color: t.color,
+  }));
 };
 
 /**
@@ -123,6 +142,7 @@ export const mergeCategoricalData = (
   const sorted = [...data].sort(
     (a, b) => new Date(a[timestampField]).getTime() - new Date(b[timestampField]).getTime()
   );
+
   // Collect all possible values from the secondary categorical field
   const allPossibleOptions = Object.keys(groupBy(sorted, (item) => item[groupField2]));
 
@@ -136,11 +156,7 @@ export const mergeCategoricalData = (
     return [fallbackForCategorical(sorted, timestampField, groupField1, groupField2), []];
   }
 
-  const isEqual = (value: string, lastNotNull: Record<string, any>) => {
-    return lastNotNull[groupField2] === value;
-  };
-
-  const findValue = (value: string) => validValues?.find((v) => v.value === value)?.value;
+  const findValue = (value: string) => validValues?.find((v) => v.value === `${value}`)?.value;
 
   const merged = mergeByGroup<string>({
     sorted,
@@ -151,7 +167,6 @@ export const mergeCategoricalData = (
     connectThreshold,
     findTarget: findValue,
     mergeFn: mergeRecords,
-    isEqual,
   });
 
   return [merged, validValues];
@@ -184,17 +199,12 @@ export const mergeSingleCategoricalData = (
     return [fallbackForSingleCategorical(sorted, timestampField, groupField1), []];
   }
 
-  const isEqual = (value: string, lastNotNull: Record<string, any>) => {
-    return lastNotNull[groupField1] === value;
-  };
-
   const findValue = (value: string) => validValues?.find((v) => v.value === value)?.value;
 
   const merged: Array<Record<string, any>> = [];
 
   const buffer: Array<Record<string, any>> = [];
   let currentValue: string | undefined;
-  let firstInvalidValueTime;
 
   const storeState = { buffer, currentValue };
 
@@ -206,10 +216,8 @@ export const mergeSingleCategoricalData = (
     connectThreshold,
     merged,
     storeState,
-    firstInvalidValueTime,
     findTarget: findValue,
     mergeFn: mergeRecords,
-    isEqual,
   });
 
   // Merge any remaining buffered entries, no need to pass nextTime
@@ -242,16 +250,12 @@ export const mergeNumericalData = (
   // Filter ranges to only include those within data bounds
   const validRanges = mappings?.filter((r) => {
     if (!r.range) return false;
-    if (r?.range?.min === undefined || r?.range?.max === undefined) return false;
-    // if (r.range.max > max) return false;
+    if (r?.range?.min === undefined) return false;
 
     return sorted.some((s) => {
       const value = Number(s[rangeField]);
       return (
-        r.range?.min !== undefined &&
-        r.range?.max !== undefined &&
-        value >= r.range.min &&
-        value < r.range.max
+        r.range?.min !== undefined && value >= r.range.min && value < (r.range.max ?? Infinity)
       );
     });
   });
@@ -266,15 +270,11 @@ export const mergeNumericalData = (
     return validRanges?.find(
       (r) =>
         r?.range?.min !== undefined &&
-        r?.range?.max !== undefined &&
         r.range.min <= numberValue &&
-        r.range.max > numberValue
+        (r.range.max ?? Infinity) > numberValue
     )?.range;
   };
 
-  const isEqual = (range: RangeValue, lastNotNull: Record<string, any>) => {
-    return lastNotNull.mergedLabel === `[${range?.min},${range?.max})`;
-  };
   const merged = mergeByGroup<RangeValue>({
     sorted,
     groupField,
@@ -284,7 +284,6 @@ export const mergeNumericalData = (
     connectThreshold,
     findTarget: findRange,
     mergeFn: mergeNumercialRecord,
-    isEqual,
   });
 
   return [merged, validRanges];
@@ -408,7 +407,6 @@ interface MergeOptions<T extends string | RangeValue> {
   connectThreshold?: string;
   findTarget: (value: string) => T | undefined;
   mergeFn: MergeFn<T>;
-  isEqual: (value: T, lastNotNull: Record<string, any>) => boolean;
 }
 const mergeByGroup = <T extends string | RangeValue>({
   sorted,
@@ -419,7 +417,6 @@ const mergeByGroup = <T extends string | RangeValue>({
   connectThreshold,
   findTarget,
   mergeFn,
-  isEqual,
 }: MergeOptions<T>) => {
   const groups = groupBy(sorted, (item) => item[groupField]);
   const merged: Array<Record<string, any>> = [];
@@ -427,7 +424,6 @@ const mergeByGroup = <T extends string | RangeValue>({
   for (const g1 of Object.values(groups)) {
     const buffer: Array<Record<string, any>> = [];
     let currentValue: T | undefined;
-    let firstInvalidValueTime;
 
     const storeState = { buffer, currentValue };
 
@@ -438,16 +434,14 @@ const mergeByGroup = <T extends string | RangeValue>({
       disableThreshold,
       connectThreshold,
       merged,
-      firstInvalidValueTime,
       storeState,
       findTarget,
       mergeFn,
-      isEqual,
     });
 
     // Merge any remaining buffered entries, no need to pass nextTime
     if (storeState.buffer.length > 0) {
-      const rec = mergeFn(buffer, timestampField, undefined, storeState.currentValue);
+      const rec = mergeFn(storeState.buffer, timestampField, undefined, storeState.currentValue);
       merged.push(rec);
     }
   }
@@ -462,14 +456,12 @@ interface MergeInAGroupOptions<T extends string | RangeValue> {
   disableThreshold?: string;
   connectThreshold?: string;
   merged: Array<Record<string, any>>;
-  firstInvalidValueTime: string | undefined;
   storeState: {
     buffer: Array<Record<string, any>>;
     currentValue: T | undefined;
   };
   findTarget: (value: string) => T | undefined;
   mergeFn: MergeFn<T>;
-  isEqual: (value: T, lastNotNull: Record<string, any>) => boolean;
 }
 
 export const mergeInAGroup = <T extends string | RangeValue>({
@@ -479,77 +471,89 @@ export const mergeInAGroup = <T extends string | RangeValue>({
   disableThreshold,
   connectThreshold,
   merged,
-  firstInvalidValueTime,
   storeState,
   findTarget,
   mergeFn,
-  isEqual,
 }: MergeInAGroupOptions<T>) => {
-  for (let i = 0; i < sorted.length; i++) {
-    const curr = sorted[i];
+  const flushBuffer = (nextTimestamp: string) => {
+    if (storeState.buffer.length === 0) return;
+    const next = disconnectValues(
+      nextTimestamp,
+      storeState.buffer[storeState.buffer.length - 1][timestampField],
+      disableThreshold
+    );
+    const rec = mergeFn(storeState.buffer, timestampField, next, storeState.currentValue);
+    merged.push(rec);
+    storeState.buffer.length = 0;
+    storeState.currentValue = undefined;
+  };
+  let firstNullIndex: number | undefined;
+  let firstNullValueTime: string | undefined;
+  for (const curr of sorted) {
+    const currentMapping = findTarget(curr[valueField]);
 
-    const target = findTarget(curr[valueField]);
+    if (!curr[valueField] && storeState.buffer.length > 0) {
+      firstNullValueTime ??= curr[timestampField];
+      firstNullIndex ??= storeState.buffer.length;
 
-    // If the current data point does not belong to any defined values or ranges
-    if (!target) {
-      if (storeState.buffer.length > 0) {
-        firstInvalidValueTime ??= curr[timestampField];
+      // if connect null values is on, push null data points into buffer
 
-        const next = disconnectValues(
-          curr[timestampField],
-          storeState.buffer[storeState.buffer.length - 1][timestampField],
-          disableThreshold
-        );
-        const rec = mergeFn(storeState.buffer, timestampField, next, storeState.currentValue);
-        merged.push(rec);
-        // clear buffer, but keep the reference
-        storeState.buffer.length = 0;
-        storeState.currentValue = undefined;
+      if (connectThreshold) {
+        storeState.buffer.push(curr);
+        continue;
       }
-
+      flushBuffer(curr[timestampField]);
       continue;
     }
 
-    // first valid record after a lists of invalid records
-    if (
-      !storeState.currentValue &&
-      merged.length > 0 &&
-      firstInvalidValueTime &&
-      connectThreshold
-    ) {
-      const lastNotNull = merged[merged.length - 1];
+    // Handle first non-null value after a series of nulls when connect threshold is enabled
+    if (firstNullValueTime && connectThreshold && storeState.buffer.length > 0) {
+      const thresholdTime = addThresholdTime(firstNullValueTime, connectThreshold);
 
-      if (isEqual(target, lastNotNull)) {
-        const newTime = connectNullValue(curr[timestampField], lastNotNull.end, connectThreshold);
+      // timestamp of the first non-null value should be the end of the last null value
+      // Find the first record whose end time exceeds the threshold
+      // Records after firstNullIndex are null values that need threshold checking
+      const targetIndex = thresholdTime
+        ? [...storeState.buffer, curr].findIndex(
+            (record, idx) =>
+              firstNullIndex &&
+              idx > firstNullIndex &&
+              new Date(record[timestampField]).getTime() >= thresholdTime
+          )
+        : -1;
 
-        merged[merged.length - 1] = {
-          ...lastNotNull,
-          end: newTime,
-        };
+      // Determine where to slice: keep all if no record reach threshold, otherwise slice at break point
+      const sliceIndex = targetIndex === -1 ? storeState.buffer.length : targetIndex;
+
+      // If targetIndex !== -1, threshold was exceeded and should flush the buffer
+      // If targetIndex === -1, all null records are within threshold and should be connected
+      const shouldFlush = targetIndex !== -1;
+
+      // If threshold exceeded, flush the buffer and continue processing
+      if (shouldFlush) {
+        const endTime = storeState.buffer[sliceIndex - 1][timestampField];
+        storeState.buffer = storeState.buffer.slice(0, sliceIndex - 1);
+        flushBuffer(endTime);
       }
 
-      firstInvalidValueTime = undefined;
+      // Reset null tracking variables
+      firstNullValueTime = undefined;
+      firstNullIndex = undefined;
     }
 
-    // If same range as previous or first entry, add to buffer
-    if (storeState.currentValue === target || storeState.currentValue === undefined) {
+    // Handle invalid mappings
+    if (!currentMapping) {
+      flushBuffer(curr[timestampField]);
+      continue;
+    }
+    // Add to buffer or flush and start new
+    if (storeState.currentValue === currentMapping || storeState.currentValue === undefined) {
       storeState.buffer.push(curr);
-      storeState.currentValue = target;
+      storeState.currentValue = currentMapping;
     } else {
-      // Range changed - merge buffered entries and start new buffer
-      if (storeState.buffer.length > 0) {
-        const next = disconnectValues(
-          curr[timestampField],
-          storeState.buffer[storeState.buffer.length - 1][timestampField],
-          disableThreshold
-        );
-        const rec = mergeFn(storeState.buffer, timestampField, next, storeState.currentValue);
-        merged.push(rec);
-      }
-
-      storeState.buffer.length = 0;
+      flushBuffer(curr[timestampField]);
       storeState.buffer.push(curr);
-      storeState.currentValue = target;
+      storeState.currentValue = currentMapping;
     }
   }
 };

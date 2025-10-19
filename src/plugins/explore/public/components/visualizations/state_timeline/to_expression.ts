@@ -43,6 +43,20 @@ export const createNumercialStateTimeline = (
     (mapping) => mapping?.type === 'range'
   );
 
+  const valueMappings = styleOptions?.valueMappingOptions?.valueMappings?.filter(
+    (mapping) => mapping?.type === 'value'
+  );
+
+  if (valueMappings?.length && valueMappings?.length > 0 && !rangeMappings?.length) {
+    return createCategoricalStateTimeline(
+      transformedData,
+      numericalColumns,
+      categoricalColumns,
+      dateColumns,
+      styleOptions,
+      axisColumnMappings
+    );
+  }
   const disableThreshold =
     styleOptions?.exclusive?.disconnectValues?.disableMode === DisableMode.Threshold
       ? styleOptions?.exclusive?.disconnectValues?.threshold || '1h'
@@ -125,7 +139,7 @@ export const createNumercialStateTimeline = (
           : null,
         ...(canUseValueMapping && {
           scale: {
-            domain: validRanges?.map((m) => `[${m.range?.min},${m.range?.max})`),
+            domain: validRanges?.map((m) => `[${m.range?.min},${m.range?.max ?? Infinity})`),
             range: validRanges?.map((m, i) => resolveColor(m.color) || getCategoryNextColor(i)),
           },
         }),
@@ -148,6 +162,11 @@ export const createNumercialStateTimeline = (
             timeUnit: 'yearmonthdatehoursminutesseconds',
             type: 'temporal',
             title: 'end',
+          },
+          {
+            field: 'duration',
+            type: 'nominal',
+            title: 'duration',
           },
           {
             field: 'mergedCount',
@@ -225,6 +244,7 @@ export const createCategoricalStateTimeline = (
   const validMappings = styleOptions?.valueMappingOptions?.valueMappings?.filter(
     (mapping) => mapping?.type === 'value'
   );
+
   const [processedData, validValues] = mergeCategoricalData(
     transformedData,
     xAxis?.column,
@@ -315,6 +335,11 @@ export const createCategoricalStateTimeline = (
             timeUnit: 'yearmonthdatehoursminutesseconds',
             type: 'temporal',
             title: 'end',
+          },
+          {
+            field: 'duration',
+            type: 'nominal',
+            title: 'duration',
           },
           {
             field: canUseValueMapping ? 'mappingValue' : categoryField2,
@@ -496,6 +521,11 @@ export const createSingleCategoricalStateTimeline = (
             timeUnit: 'yearmonthdatehoursminutesseconds',
             type: 'temporal',
             title: 'end',
+          },
+          {
+            field: 'duration',
+            type: 'nominal',
+            title: 'duration',
           },
           {
             field: 'mergedCount',
