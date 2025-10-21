@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 interface ValidationResult {
   expression: string;
   pattern: string;
@@ -5,14 +10,14 @@ interface ValidationResult {
 }
 
 const harmfulPatterns = [
-  /window\s*\./,
-  /event\s*\.view\s*\./,
-  /global\s*\./,
-  /__proto__/,
-  /constructor/,
-  /document\s*\./,
-  /eval\s*\(/,
-  /Function\s*\(/,
+  /window\s*\./i,
+  /event\s*\.view\s*\./i,
+  /global\s*\./i,
+  /__proto__/i,
+  /constructor/i,
+  /document\s*\./i,
+  /eval\s*\(/i,
+  /Function\s*\(/i,
 ];
 
 /**
