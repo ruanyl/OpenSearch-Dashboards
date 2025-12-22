@@ -7,10 +7,24 @@ import { AreaChartStyle } from './area_vis_config';
 import { VisColumn, VEGASCHEMA, AxisColumnMappings, AxisRole } from '../types';
 import { buildMarkConfig, createTimeMarkerLayer, applyAxisStyling } from '../line/line_chart_utils';
 import { createThresholdLayer } from '../style_panel/threshold/threshold_utils';
-import { applyTimeRangeToEncoding, getSwappedAxisRole, getTooltipFormat } from '../utils/utils';
+import {
+  applyTimeRangeToEncoding,
+  getSwappedAxisRole,
+  getTooltipFormat,
+  getChartRender,
+} from '../utils/utils';
 import { DEFAULT_OPACITY } from '../constants';
 import { createCrosshairLayers, createHighlightBarLayers } from '../utils/create_hover_state';
 import { createTimeRangeBrush, createTimeRangeUpdater } from '../utils/time_range_brush';
+import {
+  pipe,
+  deriveAxisConfig,
+  prepareData,
+  createBaseConfig,
+  buildAxisConfigs,
+  assembleSpec,
+} from '../utils/echarts_spec';
+import { createAreaSeries, createFacetedAreaSeries } from './area_chart_utils';
 
 /**
  * Create a simple area chart with one metric and one date
@@ -32,6 +46,23 @@ export const createSimpleAreaChart = (
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
   const metricField = yAxis?.column;
   const dateField = xAxis?.column;
+  // Check if we should use ECharts rendering
+  if (getChartRender() === 'echarts') {
+    const result = pipe(
+      deriveAxisConfig,
+      prepareData,
+      createBaseConfig,
+      buildAxisConfigs,
+      createAreaSeries(styles),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisColumnMappings,
+    });
+
+    return result.spec;
+  }
 
   const metricName = yAxisStyle?.title?.text || yAxis?.name;
   const dateName = xAxisStyle?.title?.text || xAxis?.name;
@@ -161,6 +192,24 @@ export const createMultiAreaChart = (
   axisColumnMappings?: AxisColumnMappings,
   timeRange?: { from: string; to: string }
 ): any => {
+  // Check if we should use ECharts rendering
+  if (getChartRender() === 'echarts') {
+    const result = pipe(
+      deriveAxisConfig,
+      prepareData,
+      createBaseConfig,
+      buildAxisConfigs,
+      createAreaSeries(styles),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisColumnMappings,
+    });
+
+    return result.spec;
+  }
+
   const colorColumn = axisColumnMappings?.[AxisRole.COLOR];
 
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
@@ -309,6 +358,24 @@ export const createFacetedMultiAreaChart = (
   axisColumnMappings?: AxisColumnMappings,
   timeRange?: { from: string; to: string }
 ): any => {
+  // Check if we should use ECharts rendering
+  if (getChartRender() === 'echarts') {
+    const result = pipe(
+      deriveAxisConfig,
+      prepareData,
+      createBaseConfig,
+      buildAxisConfigs,
+      createFacetedAreaSeries(styles),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisColumnMappings,
+    });
+
+    return result.spec;
+  }
+
   const colorMapping = axisColumnMappings?.[AxisRole.COLOR];
   const facetMapping = axisColumnMappings?.[AxisRole.FACET];
 
@@ -489,6 +556,23 @@ export const createCategoryAreaChart = (
   const categoryField = xAxis?.column;
   const metricName = yAxisStyle?.title?.text || yAxis?.name;
   const categoryName = xAxisStyle?.title?.text || xAxis?.name;
+  // Check if we should use ECharts rendering
+  if (getChartRender() === 'echarts') {
+    const result = pipe(
+      deriveAxisConfig,
+      prepareData,
+      createBaseConfig,
+      buildAxisConfigs,
+      createAreaSeries(styles),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisColumnMappings,
+    });
+
+    return result.spec;
+  }
   const layers: any[] = [];
   const showTooltip = styles.tooltipOptions?.mode !== 'hidden';
 
@@ -588,6 +672,24 @@ export const createStackedAreaChart = (
   styles: AreaChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
+  // Check if we should use ECharts rendering
+  if (getChartRender() === 'echarts') {
+    const result = pipe(
+      deriveAxisConfig,
+      prepareData,
+      createBaseConfig,
+      buildAxisConfigs,
+      createAreaSeries(styles),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisColumnMappings,
+    });
+
+    return result.spec;
+  }
+
   const colorMapping = axisColumnMappings?.[AxisRole.COLOR];
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
 
