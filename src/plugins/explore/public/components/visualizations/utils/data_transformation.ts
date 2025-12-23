@@ -6,6 +6,26 @@
 import { AggregationType, TimeUnit } from '../types';
 import { inferTimeIntervals } from '../bar/bar_chart_utils';
 
+const aggregateValues = (aggregationType: AggregationType, values?: number[]) => {
+  if (!values || values.length === 0) return null;
+
+  switch (aggregationType) {
+    case AggregationType.SUM:
+      return values.reduce((a, b) => a + b, 0);
+    case AggregationType.MEAN:
+      return values.reduce((a, b) => a + b, 0) / values.length;
+    case AggregationType.MAX:
+      return Math.max(...values);
+    case AggregationType.MIN:
+      return Math.min(...values);
+    case AggregationType.COUNT:
+      return values.length;
+    case AggregationType.NONE:
+    default:
+      return values[0];
+  }
+};
+
 /**
  * Helper function to aggregate data for ECharts
  * Returns 2D array with header row for use with ECharts dataset
@@ -32,58 +52,86 @@ import { inferTimeIntervals } from '../bar/bar_chart_utils';
  *   ['B', 200]
  * ]
  */
+
 export const aggregate = (
   data: Array<Record<string, any>>,
-  groupBy: string,
+  groupByMe: string,
   field: string,
-  aggregationType: AggregationType
-): Array<[string, string] | [string, number]> => {
-  // Group by category
-  const grouped = data.reduce((acc, row) => {
-    const category = String(row[groupBy] ?? '');
-    if (!acc[category]) {
-      acc[category] = [];
-    }
-    const value = Number(row[field]);
-    if (!isNaN(value)) {
-      acc[category].push(value);
-    }
-    return acc;
-  }, {} as Record<string, number[]>);
-
-  // Apply aggregation
-  const result: Array<[string, number]> = Object.entries(grouped).map(([category, values]) => {
-    let aggregatedValue: number;
-    if (values.length === 0) {
-      aggregatedValue = 0;
-    } else {
-      switch (aggregationType) {
-        case AggregationType.SUM:
-          aggregatedValue = values.reduce((sum: number, v: number) => sum + v, 0);
-          break;
-        case AggregationType.MEAN:
-          aggregatedValue = values.reduce((sum: number, v: number) => sum + v, 0) / values.length;
-          break;
-        case AggregationType.MAX:
-          aggregatedValue = Math.max(...values);
-          break;
-        case AggregationType.MIN:
-          aggregatedValue = Math.min(...values);
-          break;
-        case AggregationType.COUNT:
-          aggregatedValue = values.length;
-          break;
-        case AggregationType.NONE:
-        default:
-          aggregatedValue = values[0];
+  aggregationType: AggregationType,
+  colorColumn?: string | undefined
+): {
+  aggregatedData: Array<Array<string | number | null>>;
+  categorical2Collection?: string[] | undefined;
+} => {
+  if (!colorColumn) {
+    const grouped = data.reduce((acc, row) => {
+      const category = String(row[groupByMe]);
+      if (!acc[category]) {
+        acc[category] = [];
       }
-    }
+      const value = Number(row[field]);
+      if (!isNaN(value)) {
+        acc[category].push(value);
+      }
+      return acc;
+    }, {} as Record<string, number[]>);
 
-    return [category, aggregatedValue];
-  });
+    const aggregatedRes = Object.entries(grouped).map(([category, rows]) => {
+      return [category, aggregateValues(aggregationType, rows) ?? null];
+    });
 
-  // Return 2D array with header row
-  return [[groupBy, field], ...result];
+    return {
+      aggregatedData: [[groupByMe, field], ...aggregatedRes],
+    };
+  } else {
+    // pivot data if there is a color column
+    /**
+     * @example
+     * Input data:
+     * [
+     *   { product: 'A', sales: 100, type: 'cloth'},
+     *   { product: 'A', sales: 150, type: 'food' },
+     *   { product: 'B', sales: 200, type: 'food' }
+     * ]
+     *
+     * Output:
+     * [
+     *   ['product', "cloth", "food"],  // Header row
+     *   ['A', 100, 150],
+     *   ['B', 200, null]
+     * ] */
+    const categorical2Collection = Array.from(new Set(data.map((item) => item[colorColumn])));
+    const grouped = data.reduce((acc, row) => {
+      const group = String(row[groupByMe]);
+      const color = String(row[colorColumn]);
+      const value = Number(row[field]);
+
+      if (isNaN(value)) return acc;
+
+      acc[group] ??= {};
+      acc[group][color] ??= [];
+      acc[group][color].push(value);
+
+      return acc;
+    }, {} as Record<string, Record<string, number[]>>);
+
+    const aggregatedRes = Object.entries(grouped).map(([group, colorValues]) => {
+      return [
+        group,
+        ...categorical2Collection.map(
+          (color) => aggregateValues(aggregationType, colorValues[color]) ?? null
+        ),
+      ];
+    });
+
+    return {
+      aggregatedData: [
+        [groupByMe, ...categorical2Collection.map((c) => String(c))],
+        ...aggregatedRes,
+      ],
+      categorical2Collection,
+    };
+  }
 };
 
 /**
@@ -151,74 +199,98 @@ export const aggregateByTime = (
   timeField: string,
   valueField: string,
   timeUnit: TimeUnit,
-  aggregationType: AggregationType
-): Array<[string, string] | [Date, number]> => {
+  aggregationType: AggregationType,
+  colorColumn?: string | undefined
+): {
+  aggregatedData: Array<Array<string | number | null>>;
+  categorical2Collection?: string[] | undefined;
+} => {
   // Infer time unit if AUTO
   const effectiveTimeUnit =
     timeUnit === TimeUnit.AUTO ? inferTimeIntervals(data, timeField) : timeUnit;
 
-  // Group by time bucket
-  const grouped = data.reduce((acc, row) => {
-    const timestamp = new Date(row[timeField]);
+  if (!colorColumn) {
+    // Group by time bucket
+    const grouped = data.reduce((acc, row) => {
+      const timestamp = new Date(row[timeField]);
 
-    // Skip invalid dates
-    if (isNaN(timestamp.getTime())) {
-      return acc;
-    }
-
-    // Round to time bucket
-    const bucket = roundToTimeUnit(timestamp, effectiveTimeUnit);
-    const bucketKey = bucket.getTime(); // Use timestamp as key for grouping
-
-    if (!acc[bucketKey]) {
-      acc[bucketKey] = {
-        date: bucket,
-        values: [],
-      };
-    }
-
-    const value = Number(row[valueField]);
-    if (!isNaN(value)) {
-      acc[bucketKey].values.push(value);
-    }
-
-    return acc;
-  }, {} as Record<number, { date: Date; values: number[] }>);
-
-  // Apply aggregation
-  const result = Object.values(grouped)
-    .map(({ date, values }): [Date, number] => {
-      let aggregatedValue: number;
-
-      if (values.length === 0) {
-        aggregatedValue = 0;
-      } else {
-        switch (aggregationType) {
-          case AggregationType.SUM:
-            aggregatedValue = values.reduce((sum: number, v: number) => sum + v, 0);
-            break;
-          case AggregationType.MEAN:
-            aggregatedValue = values.reduce((sum: number, v: number) => sum + v, 0) / values.length;
-            break;
-          case AggregationType.MAX:
-            aggregatedValue = Math.max(...values);
-            break;
-          case AggregationType.MIN:
-            aggregatedValue = Math.min(...values);
-            break;
-          case AggregationType.COUNT:
-            aggregatedValue = values.length;
-            break;
-          case AggregationType.NONE:
-          default:
-            aggregatedValue = values[0];
-        }
+      // Skip invalid dates
+      if (isNaN(timestamp.getTime())) {
+        return acc;
       }
 
-      return [date, aggregatedValue];
-    })
-    .sort((a, b) => a[0].getTime() - b[0].getTime()); // Sort by time
+      // Round to time bucket
+      const bucket = roundToTimeUnit(timestamp, effectiveTimeUnit);
+      const bucketKey = bucket.getTime(); // Use timestamp as key for grouping
 
-  // Return 2D array with header row
-  return [[timeField, valueField], ...result];
+      if (!acc[bucketKey]) {
+        acc[bucketKey] = {
+          date: bucket,
+          values: [],
+        };
+      }
+
+      const value = Number(row[valueField]);
+      if (!isNaN(value)) {
+        acc[bucketKey].values.push(value);
+      }
+
+      return acc;
+    }, {} as Record<number, { date: Date; values: number[] }>);
+
+    const aggregatedRes = Object.values(grouped)
+      .map(({ date, values }) => {
+        return [date, aggregateValues(aggregationType, values) ?? null];
+      })
+      .sort((a, b) => a[0].getTime() - b[0].getTime()); // Sort by time;
+
+    return { aggregatedData: [[timeField, valueField], ...aggregatedRes] };
+  } else {
+    const categorical2Collection = Array.from(new Set(data.map((item) => item[colorColumn])));
+
+    const grouped = data.reduce((acc, row) => {
+      const timestamp = new Date(row[timeField]);
+
+      // Skip invalid dates
+      if (isNaN(timestamp.getTime())) {
+        return acc;
+      }
+
+      // Round to time bucket
+      const bucket = roundToTimeUnit(timestamp, effectiveTimeUnit);
+      const bucketKey = bucket.getTime(); // Use timestamp as key for grouping
+
+      // treate colorColumn value as string as it could be boolean and numerical
+      const color = String(row[colorColumn] ?? '');
+      const value = Number(row[valueField]);
+
+      if (isNaN(value)) return acc;
+
+      acc[bucketKey] ??= {};
+      acc[bucketKey].date ??= bucket;
+      acc[bucketKey][color] ??= [];
+      acc[bucketKey][color].push(value);
+
+      return acc;
+    }, {} as Record<string, Record<string, number[]>>);
+
+    const aggregatedRes = Object.entries(grouped)
+      .map(([group, colorValues]) => {
+        return [
+          colorValues.date,
+          ...categorical2Collection.map(
+            (c) => aggregateValues(aggregationType, colorValues[c]) ?? null
+          ),
+        ];
+      })
+      .sort((a, b) => a[0].getTime() - b[0].getTime()); // Sort by time;;
+
+    return {
+      aggregatedData: [
+        [timeField, ...categorical2Collection.map((c) => String(c))],
+        ...aggregatedRes,
+      ],
+      categorical2Collection,
+    };
+  }
 };

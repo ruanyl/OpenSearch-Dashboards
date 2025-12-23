@@ -11,8 +11,9 @@ import {
   TimeUnit,
   BucketOptions,
   AggregationType,
+  ThresholdMode,
 } from '../types';
-import { applyAxisStyling, getSchemaByAxis } from '../utils/utils';
+import { applyAxisStyling, getSchemaByAxis, convertThresholdlineStyle } from '../utils/utils';
 import { BarChartStyle } from './bar_vis_config';
 import { getColors, DEFAULT_GREY } from '../theme/default_colors';
 import { BaseChartStyle, PipelineFn } from '../utils/echarts_spec';
@@ -206,18 +207,31 @@ export const createBarSeries = <T extends BaseChartStyle>(styles: BarChartStyle)
     (axis) => axis?.schema === VisFieldType.Numerical
   );
 
-  const series: BarSeriesOption[] = [
+  const thresholdLineSteps = styles?.thresholdOptions?.thresholds?.map((t) => ({
+    [styles?.switchAxes ? 'xAxis' : 'yAxis']: t.value,
+    itemStyle: { color: t.color },
+  }));
+
+  const series: any[] = [
     {
       type: 'bar',
-      encode: {
-        x: axisConfig.xAxis?.column,
-        y: axisConfig.yAxis?.column,
-      },
       name: numericalAxis?.name || '',
       // TODO: barWidth and barCategoryGap seems are exclusive, we need to revise the current UI for this config
       barWidth: styles.barSizeMode === 'manual' ? `${(styles.barWidth || 0.7) * 100}%` : undefined,
       barCategoryGap:
         styles.barSizeMode === 'manual' ? `${(styles.barPadding || 0.1) * 100}%` : undefined,
+
+      ...(styles?.thresholdOptions?.thresholdStyle !== ThresholdMode.Off && {
+        markLine: {
+          symbol: 'none',
+          animation: false,
+          lineStyle: {
+            width: 2,
+            type: convertThresholdlineStyle(styles?.thresholdOptions?.thresholdStyle),
+          },
+          data: thresholdLineSteps,
+        },
+      }),
     },
   ];
   newState.series = series;
@@ -230,6 +244,62 @@ export const createBarSeries = <T extends BaseChartStyle>(styles: BarChartStyle)
       };
     }
   });
+
+  return newState;
+};
+
+export const createStackBarSeries = <T extends BaseChartStyle>(
+  styles: BarChartStyle
+): PipelineFn<T> => (state) => {
+  const { axisConfig, categorical2Collection } = state;
+  const newState = { ...state };
+
+  if (!axisConfig) {
+    throw new Error('axisConfig must be derived before createBarSeries');
+  }
+
+  const thresholdLineSteps = styles?.thresholdOptions?.thresholds?.map((t) => ({
+    [styles?.switchAxes ? 'xAxis' : 'yAxis']: t.value,
+    itemStyle: { color: t.color },
+  }));
+
+  // create multi-series for each item in categorical2Collection
+
+  const newseries = categorical2Collection?.map((item, index) => ({
+    name: String(item),
+    type: 'bar',
+    stack: 'total',
+    label: {
+      show: true,
+    },
+    emphasis: {
+      focus: 'self',
+    },
+    barWidth: styles.barSizeMode === 'manual' ? `${(styles.barWidth || 0.7) * 100}%` : undefined,
+    barCategoryGap:
+      styles.barSizeMode === 'manual' ? `${(styles.barPadding || 0.1) * 100}%` : undefined,
+    ...(styles.showBarBorder && {
+      itemStyle: {
+        borderWidth: styles.barBorderWidth,
+        borderColor: styles.barBorderColor,
+      },
+    }),
+
+    ...(styles?.thresholdOptions?.thresholdStyle !== ThresholdMode.Off &&
+      index === 0 && {
+        markLine: {
+          symbol: 'none',
+          animation: false,
+          lineStyle: {
+            width: 2,
+            type: convertThresholdlineStyle(styles?.thresholdOptions?.thresholdStyle),
+          },
+          data: thresholdLineSteps,
+        },
+      }),
+  }));
+
+  newState.series = newseries as BarSeriesOption[];
 
   return newState;
 };

@@ -14,6 +14,10 @@ import {
   AxisColumnMappings,
   Threshold,
   AxisConfig,
+  TimeUnit,
+  ValueMapping,
+  ThresholdOptions,
+  ThresholdMode,
 } from '../types';
 import { ChartStyles, StyleOptions } from './use_visualization_types';
 
@@ -428,4 +432,18 @@ export const getChartRender = () => {
   } catch (e) {
     return 'vega';
   }
+};
+
+export const convertThresholds = (thresholds: Threshold[]) => {
+  return thresholds.map((t, i) => ({
+    min: t.value,
+    max: i === thresholds.length - 1 ? Infinity : thresholds[i + 1].value,
+
+    color: t.color,
+  }));
+};
+
+export const convertThresholdlineStyle = (style: ThresholdMode | undefined) => {
+  if (style === ThresholdMode.DotDashed) return 'dotted';
+  return style;
 };

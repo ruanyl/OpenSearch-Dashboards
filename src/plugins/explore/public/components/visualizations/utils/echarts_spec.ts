@@ -18,9 +18,11 @@ import {
   TimeUnit,
   VisColumn,
   VisFieldType,
+  Threshold,
+  ThresholdOptions,
 } from '../types';
 import { aggregate, aggregateByTime } from './data_transformation';
-import { getSwappedAxisRole } from './utils';
+import { getSwappedAxisRole, convertThresholds } from './utils';
 
 /**
  * Base style interface that all chart styles should extend
@@ -39,6 +41,9 @@ export interface BaseChartStyle {
   };
   switchAxes?: boolean;
   standardAxes?: StandardAxes[];
+  thresholdOptions?: ThresholdOptions;
+  useThresholdColor?: boolean;
+  addLegend?: boolean;
 }
 
 /**
@@ -75,6 +80,8 @@ export interface EChartsSpecState<T extends BaseChartStyle = BaseChartStyle>
   xAxisConfig?: any;
   yAxisConfig?: any;
   series?: Array<BarSeriesOption | CustomSeriesOption>;
+  visualMap?: any;
+  categorical2Collection?: any[];
 
   // Final output
   spec?: EChartsOption;
@@ -131,13 +138,12 @@ export const deriveAxisConfig = <T extends BaseChartStyle>(
 export const prepareData = <T extends BaseChartStyle>(
   state: EChartsSpecState<T>
 ): EChartsSpecState<T> => {
-  const { data, axisConfig, styles } = state;
+  const { data, axisConfig, styles, axisColumnMappings } = state;
 
   if (!axisConfig) {
     throw new Error('axisConfig must be derived before prepareData');
   }
 
-  // Detect column types
   const dateColumn = [axisConfig.xAxis, axisConfig.yAxis].find(
     (axis) => axis?.schema === VisFieldType.Date
   );
@@ -148,34 +154,42 @@ export const prepareData = <T extends BaseChartStyle>(
     (axis) => axis?.schema === VisFieldType.Numerical
   );
 
+  const colorColumn = axisColumnMappings?.color;
   let aggregatedData;
+  let categorical2Collection;
 
   // TIME + NUMERICAL: Use time-based aggregation
   if (dateColumn && numericalColumn) {
     const timeUnit = styles.bucket?.bucketTimeUnit ?? TimeUnit.AUTO;
-    aggregatedData = aggregateByTime(
+    const result = (aggregatedData = aggregateByTime(
       data,
       dateColumn.column,
       numericalColumn.column,
       timeUnit,
-      styles.bucket?.aggregationType || AggregationType.SUM
-    );
+      styles.bucket?.aggregationType || AggregationType.SUM,
+      colorColumn?.column
+    ));
+    aggregatedData = result.aggregatedData;
+    categorical2Collection = result.categorical2Collection;
   }
   // CATEGORICAL + NUMERICAL: Use existing aggregation
   else if (categoricalColumn && numericalColumn) {
-    aggregatedData = aggregate(
+    const result = aggregate(
       data,
       categoricalColumn.column,
       numericalColumn.column,
-      styles.bucket?.aggregationType || AggregationType.SUM
+      styles.bucket?.aggregationType || AggregationType.SUM,
+      colorColumn?.column
     );
+    aggregatedData = result.aggregatedData;
+    categorical2Collection = result.categorical2Collection;
   }
   // Fallback: return data as-is
   else {
     aggregatedData = data;
   }
 
-  return { ...state, aggregatedData };
+  return { ...state, aggregatedData, categorical2Collection };
 };
 
 /**
@@ -212,14 +226,17 @@ export const createBaseConfig = <T extends BaseChartStyle>(
 export const buildAxisConfigs = <T extends BaseChartStyle>(
   state: EChartsSpecState<T>
 ): EChartsSpecState<T> => {
-  const { axisConfig } = state;
+  const { axisConfig, categorical2Collection } = state;
 
   if (!axisConfig) {
     throw new Error('axisConfig must be derived before buildAxisConfigs');
   }
 
   const xAxisConfig = {
-    type: getAxisType(axisConfig.xAxis),
+    // TODO for stack time-bar, need to set type as category as it not a continuous time series
+    // TODO temporarily fix, haven't considered switch axes
+    // need investigation
+    type: categorical2Collection ? 'category' : getAxisType(axisConfig.xAxis),
     ...applyAxisStyling({ axisStyle: axisConfig.xAxisStyle }),
   };
 
@@ -237,13 +254,14 @@ export const buildAxisConfigs = <T extends BaseChartStyle>(
 export const assembleSpec = <T extends BaseChartStyle>(
   state: EChartsSpecState<T>
 ): EChartsSpecState<T> => {
-  const { baseConfig, aggregatedData, xAxisConfig, yAxisConfig, series } = state;
+  const { baseConfig, aggregatedData, xAxisConfig, yAxisConfig, series, visualMap } = state;
 
   const spec = {
     ...baseConfig,
     dataset: { source: aggregatedData },
     xAxis: xAxisConfig,
     yAxis: yAxisConfig,
+    visualMap,
     series,
   };
 
@@ -310,4 +328,52 @@ export const applyAxisStyling = ({
   }
 
   return echartsAxisConfig;
+};
+
+export const buildVisMap = <T extends BaseChartStyle>(
+  state: EChartsSpecState<T>
+): EChartsSpecState<T> => {
+  const { categorical2Collection, styles } = state;
+
+  if (!styles.useThresholdColor) return state;
+
+  const completeThreshold =
+    styles.thresholdOptions && styles?.thresholdOptions.thresholds
+      ? [
+          { value: 0, color: styles.thresholdOptions.baseColor } as Threshold,
+          ...styles.thresholdOptions.thresholds,
+        ]
+      : [];
+
+  const convertedThresholds = convertThresholds(completeThreshold);
+  const pieces = convertedThresholds.map((t) => ({
+    gte: t.min,
+    lt: t.max,
+    color: t.color,
+  }));
+
+  let visualMap;
+
+  if (categorical2Collection) {
+    visualMap = categorical2Collection.map((c, index) => ({
+      type: 'piecewise',
+      show: false,
+      seriesIndex: index,
+      dimension: index + 1,
+      pieces,
+    }));
+  } else {
+    visualMap = {
+      type: 'piecewise',
+      show: false,
+      seriesIndex: 0,
+      dimension: 1,
+      pieces,
+    };
+  }
+
+  return {
+    ...state,
+    visualMap,
+  };
 };
