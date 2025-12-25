@@ -455,7 +455,7 @@ export const adjustOppositeSymbol = (switchAxes: boolean, symbol: string) => {
   return symbol;
 };
 
-export const generateThresholdLines = (
+export const generateThresholdSteps = (
   thresholds: Threshold[] | undefined,
   switchAxes?: boolean
 ) => {
@@ -463,4 +463,25 @@ export const generateThresholdLines = (
     [switchAxes ? 'xAxis' : 'yAxis']: t.value,
     itemStyle: { color: t.color },
   }));
+};
+
+export const generateThresholdLines = (
+  thresholdOptions: ThresholdOptions,
+  switchAxes?: boolean
+) => {
+  if (thresholdOptions.thresholdStyle === ThresholdMode.Off) return {};
+
+  const ThresholdSteps = generateThresholdSteps(thresholdOptions.thresholds, switchAxes);
+
+  return {
+    markLine: {
+      symbol: 'none',
+      animation: false,
+      lineStyle: {
+        width: 2,
+        type: convertThresholdlineStyle(thresholdOptions?.thresholdStyle),
+      },
+      data: ThresholdSteps,
+    },
+  };
 };

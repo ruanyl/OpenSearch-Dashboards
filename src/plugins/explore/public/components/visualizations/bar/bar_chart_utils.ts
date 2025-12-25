@@ -11,12 +11,10 @@ import {
   TimeUnit,
   BucketOptions,
   AggregationType,
-  ThresholdMode,
 } from '../types';
 import {
   applyAxisStyling,
   getSchemaByAxis,
-  convertThresholdlineStyle,
   adjustOppositeSymbol,
   generateThresholdLines,
 } from '../utils/utils';
@@ -213,12 +211,8 @@ export const createBarSeries = <T extends BaseChartStyle>(styles: BarChartStyle)
     (axis) => axis?.schema === VisFieldType.Numerical
   );
 
-  const thresholdLineSteps = generateThresholdLines(
-    styles?.thresholdOptions?.thresholds,
-    styles?.switchAxes
-  );
-
-  const series: any[] = [
+  const thresholdLines = generateThresholdLines(styles?.thresholdOptions, styles?.switchAxes);
+  const series = [
     {
       type: 'bar',
       name: numericalAxis?.name || '',
@@ -230,19 +224,7 @@ export const createBarSeries = <T extends BaseChartStyle>(styles: BarChartStyle)
       barWidth: styles.barSizeMode === 'manual' ? `${(styles.barWidth || 0.7) * 100}%` : undefined,
       barCategoryGap:
         styles.barSizeMode === 'manual' ? `${(styles.barPadding || 0.1) * 100}%` : undefined,
-
-      ...(styles?.thresholdOptions?.thresholdStyle !== ThresholdMode.Off && {
-        markLine: {
-          symbol: 'none',
-          animation: false,
-          lineStyle: {
-            width: 2,
-            type: convertThresholdlineStyle(styles?.thresholdOptions?.thresholdStyle),
-          },
-          data: thresholdLineSteps,
-        },
-      }),
-
+      ...thresholdLines,
       ...(styles?.showBarBorder && {
         itemStyle: {
           borderWidth: styles.barBorderWidth,
@@ -250,7 +232,7 @@ export const createBarSeries = <T extends BaseChartStyle>(styles: BarChartStyle)
         },
       }),
     },
-  ];
+  ] as BarSeriesOption[];
   newState.series = series;
 
   return newState;
@@ -266,13 +248,9 @@ export const createStackBarSeries = <T extends BaseChartStyle>(
     throw new Error('axisConfig must be derived before createBarSeries');
   }
 
-  const thresholdLineSteps = generateThresholdLines(
-    styles?.thresholdOptions?.thresholds,
-    styles?.switchAxes
-  );
+  const thresholdLines = generateThresholdLines(styles?.thresholdOptions, styles?.switchAxes);
 
   // create multi-series for each item in categorical2Collection
-
   const newseries = categorical2Collection?.map((item, index) => ({
     name: String(item),
     type: 'bar',
@@ -297,19 +275,7 @@ export const createStackBarSeries = <T extends BaseChartStyle>(
         borderColor: styles.barBorderColor,
       },
     }),
-
-    ...(styles?.thresholdOptions?.thresholdStyle !== ThresholdMode.Off &&
-      index === 0 && {
-        markLine: {
-          symbol: 'none',
-          animation: false,
-          lineStyle: {
-            width: 2,
-            type: convertThresholdlineStyle(styles?.thresholdOptions?.thresholdStyle),
-          },
-          data: thresholdLineSteps,
-        },
-      }),
+    ...(index === 0 && thresholdLines),
   }));
 
   newState.series = newseries as BarSeriesOption[];
