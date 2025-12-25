@@ -103,6 +103,13 @@ export function pipe<T extends BaseChartStyle>(
   return (initialState: EChartsSpecState<T>) => fns.reduce((state, fn) => fn(state), initialState);
 }
 
+export type DataProcessFn<T extends BaseChartStyle = BaseChartStyle> = PipelineFn<T>;
+
+// data processing pipeline
+export const processData = <T extends BaseChartStyle>(
+  ...processors: Array<DataProcessFn<T>>
+): DataProcessFn<T> => pipe(...processors);
+
 /**
  * Get ECharts axis type from VisColumn schema
  */
@@ -138,7 +145,7 @@ export const deriveAxisConfig = <T extends BaseChartStyle>(
 export const prepareData = <T extends BaseChartStyle>(
   state: EChartsSpecState<T>
 ): EChartsSpecState<T> => {
-  const { data, axisConfig, styles, axisColumnMappings } = state;
+  const { data, axisConfig, styles } = state;
 
   if (!axisConfig) {
     throw new Error('axisConfig must be derived before prepareData');
@@ -154,23 +161,20 @@ export const prepareData = <T extends BaseChartStyle>(
     (axis) => axis?.schema === VisFieldType.Numerical
   );
 
-  const colorColumn = axisColumnMappings?.color;
   let aggregatedData;
   let categorical2Collection;
 
   // TIME + NUMERICAL: Use time-based aggregation
   if (dateColumn && numericalColumn) {
     const timeUnit = styles.bucket?.bucketTimeUnit ?? TimeUnit.AUTO;
-    const result = (aggregatedData = aggregateByTime(
+    const result = aggregateByTime(
       data,
       dateColumn.column,
       numericalColumn.column,
       timeUnit,
-      styles.bucket?.aggregationType || AggregationType.SUM,
-      colorColumn?.column
-    ));
+      styles.bucket?.aggregationType || AggregationType.SUM
+    );
     aggregatedData = result.aggregatedData;
-    categorical2Collection = result.categorical2Collection;
   }
   // CATEGORICAL + NUMERICAL: Use existing aggregation
   else if (categoricalColumn && numericalColumn) {
@@ -178,11 +182,9 @@ export const prepareData = <T extends BaseChartStyle>(
       data,
       categoricalColumn.column,
       numericalColumn.column,
-      styles.bucket?.aggregationType || AggregationType.SUM,
-      colorColumn?.column
+      styles.bucket?.aggregationType || AggregationType.SUM
     );
     aggregatedData = result.aggregatedData;
-    categorical2Collection = result.categorical2Collection;
   }
   // Fallback: return data as-is
   else {
@@ -226,17 +228,14 @@ export const createBaseConfig = <T extends BaseChartStyle>(
 export const buildAxisConfigs = <T extends BaseChartStyle>(
   state: EChartsSpecState<T>
 ): EChartsSpecState<T> => {
-  const { axisConfig, categorical2Collection } = state;
+  const { axisConfig } = state;
 
   if (!axisConfig) {
     throw new Error('axisConfig must be derived before buildAxisConfigs');
   }
 
   const xAxisConfig = {
-    // TODO for stack time-bar, need to set type as category as it not a continuous time series
-    // TODO temporarily fix, haven't considered switch axes
-    // need investigation
-    type: categorical2Collection ? 'category' : getAxisType(axisConfig.xAxis),
+    type: getAxisType(axisConfig.xAxis),
     ...applyAxisStyling({ axisStyle: axisConfig.xAxisStyle }),
   };
 

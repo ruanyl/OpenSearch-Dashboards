@@ -39,7 +39,9 @@ import {
   buildAxisConfigs,
   assembleSpec,
   buildVisMap,
+  processData,
 } from '../utils/echarts_spec';
+import { pivot2DCategory, pivotDataWithTime } from '../utils/data_transformation';
 
 // Only set size and binSpacing in manual mode
 const configureBarSizeAndSpacing = (barMark: any, styles: BarChartStyle) => {
@@ -63,7 +65,7 @@ export const createBarSpec = (
 
     const result = pipe(
       deriveAxisConfig,
-      prepareData,
+      processData(prepareData),
       createBaseConfig,
       buildAxisConfigs,
       buildVisMap,
@@ -306,7 +308,12 @@ export const createGroupedTimeBarChart = (
   if (getChartRender() === 'echarts') {
     const result = pipe(
       deriveAxisConfig,
-      prepareData,
+      processData(
+        pivotDataWithTime({
+          aggregationType: styles?.bucket?.aggregationType,
+          timeUnit: styles?.bucket?.bucketTimeUnit,
+        })
+      ),
       createBaseConfig,
       buildAxisConfigs,
       buildVisMap,
@@ -563,7 +570,11 @@ export const createStackedBarSpec = (
   if (getChartRender() === 'echarts') {
     const result = pipe(
       deriveAxisConfig,
-      prepareData,
+      processData(
+        pivot2DCategory({
+          aggregationType: styles?.bucket?.aggregationType,
+        })
+      ),
       createBaseConfig,
       buildAxisConfigs,
       buildVisMap,

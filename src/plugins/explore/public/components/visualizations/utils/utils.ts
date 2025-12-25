@@ -447,3 +447,20 @@ export const convertThresholdlineStyle = (style: ThresholdMode | undefined) => {
   if (style === ThresholdMode.DotDashed) return 'dotted';
   return style;
 };
+
+export const adjustOppositeSymbol = (switchAxes: boolean, symbol: string) => {
+  if (switchAxes) {
+    return symbol === 'x' ? 'y' : 'x';
+  }
+  return symbol;
+};
+
+export const generateThresholdLines = (
+  thresholds: Threshold[] | undefined,
+  switchAxes?: boolean
+) => {
+  return thresholds?.map((t) => ({
+    [switchAxes ? 'xAxis' : 'yAxis']: t.value,
+    itemStyle: { color: t.color },
+  }));
+};
