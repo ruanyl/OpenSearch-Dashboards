@@ -14,8 +14,6 @@ import {
   AxisColumnMappings,
   Threshold,
   AxisConfig,
-  TimeUnit,
-  ValueMapping,
   ThresholdOptions,
   ThresholdMode,
 } from '../types';
@@ -482,6 +480,41 @@ export const generateThresholdLines = (
         type: convertThresholdlineStyle(thresholdOptions?.thresholdStyle),
       },
       data: ThresholdSteps,
+    },
+  };
+};
+
+// return a combined markline with threshold lines and time marker
+export const composeMarkline = (thresholdOptions: ThresholdOptions, addTimeMarker: boolean) => {
+  const hasThresholds = thresholdOptions?.thresholdStyle !== ThresholdMode.Off;
+
+  if (!hasThresholds && !addTimeMarker) return {};
+
+  const data = [];
+
+  if (hasThresholds) {
+    const thresholdSteps = generateThresholdSteps(thresholdOptions?.thresholds) ?? [];
+    data.push(...thresholdSteps);
+  }
+
+  if (addTimeMarker) {
+    data.push({
+      xAxis: new Date(),
+      itemStyle: { color: 'red' },
+      lineStyle: { type: 'dashed' },
+      label: { formatter: new Date().toISOString() },
+    });
+  }
+
+  return {
+    markLine: {
+      symbol: 'none',
+      animation: false,
+      lineStyle: {
+        width: 2,
+        type: convertThresholdlineStyle(thresholdOptions?.thresholdStyle),
+      },
+      data,
     },
   };
 };
