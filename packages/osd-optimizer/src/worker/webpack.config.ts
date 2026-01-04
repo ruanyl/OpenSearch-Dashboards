@@ -98,7 +98,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
   const commonConfig: Configuration = {
     mode: worker.dist ? 'production' : 'development',
     context: Path.normalize(bundle.contextDir),
-    cache: true,
+    cache: false,
     entry: {
       [bundle.id]: ENTRY_CREATOR,
     },
@@ -220,73 +220,18 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
         {
           test: /\.scss$/,
           exclude: /node_modules/,
-          oneOf: [
-            ...worker.themeTags
-              // .filter((t) => t === 'v7dark')
-              .map((theme) => ({
-                resourceQuery: `?${theme}`,
-                use: [
-                  {
-                    loader: 'style-loader',
-                    type: 'javascript/auto',
-                  },
-                  {
-                    loader: 'css-loader',
-                    options: {
-                      sourceMap: !worker.dist,
-                    },
-                    type: 'javascript/auto',
-                  },
-                  {
-                    loader: 'postcss-loader',
-                    options: {
-                      sourceMap: !worker.dist,
-                      postcssOptions: {
-                        config: require.resolve('@osd/optimizer/postcss.config.js'),
-                      },
-                    },
-                    type: 'css',
-                  },
-                  {
-                    loader: 'comment-stripper',
-                    options: {
-                      language: 'css',
-                    },
-                  },
-                  {
-                    loader: 'sass-loader',
-                    type: 'css',
-                    options: {
-                      additionalData(content: string) {
-                        const additional = `@import '${Path.resolve(
-                          worker.repoRoot,
-                          `src/core/public/core_app/styles/_globals_${theme}.scss`
-                        ).replace(/\\/g, '/')}';`;
-                        return `${additional}\n${content}`;
-                      },
-                      api: 'modern',
-                      webpackImporter: false,
-                      implementation: sassCompiler,
-                      sassOptions: {
-                        sourceMap: !worker.dist,
-                        style: worker.dist ? 'compressed' : 'expanded',
-                        quietDeps: true,
-                        loadPaths: [
-                          Path.resolve(worker.repoRoot, 'node_modules'),
-                          Path.resolve(worker.repoRoot),
-                        ],
-                        silenceDeprecations: ['import', 'global-builtin', 'color-functions'],
-                      },
-                    },
-                  },
-                ],
-              })),
+          use: [
             {
-              loader: require.resolve('./theme_loader'),
+              loader: 'style-loader',
+            },
+            {
+              loader: 'css-loader',
               options: {
-                bundleId: bundle.id,
-                themeTags: worker.themeTags,
+                sourceMap: !worker.dist,
               },
+            },
+            {
+              loader: require.resolve('./noop_css_loader'),
             },
           ],
         },
@@ -313,6 +258,13 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
             /node_modules[\\/]core-js/,
           ],
           use: getSwcLoaderConfig({ syntax: 'typescript', jsx: true, targets }),
+        },
+        {
+          test: /\.m?js$/,
+          resolve: {
+            // This allows Rspack to resolve modules without the .js extension
+            fullySpecified: false,
+          },
         },
         {
           test: /\.(html|md|txt|tmpl)$/,
