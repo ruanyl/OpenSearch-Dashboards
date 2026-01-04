@@ -39,19 +39,61 @@ import webpackMerge from 'webpack-merge';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import CompressionPlugin from 'compression-webpack-plugin';
 import * as UiSharedDeps from '@osd/ui-shared-deps';
+import browserlist from 'browserslist';
 
 import { Bundle, BundleRefs, WorkerConfig } from '../common';
 import { BundleRefsPlugin } from './bundle_refs_plugin';
 
 const BABEL_PRESET_PATH = require.resolve('@osd/babel-preset/webpack_preset');
 
+export function getSwcLoaderConfig({
+  targets,
+  jsx,
+  syntax,
+}: {
+  targets?: string[];
+  jsx?: boolean;
+  syntax: string;
+}) {
+  return {
+    loader: 'swc-loader',
+    options: {
+      jsc: {
+        parser: {
+          syntax,
+          ...(syntax === 'ecmascript' && jsx ? { jsx: true } : {}),
+          ...(syntax === 'typescript' && jsx ? { tsx: true } : {}),
+          decorators: true,
+          dynamicImport: true,
+        },
+        externalHelpers: true,
+        transform: {
+          react: {
+            runtime: 'automatic',
+          },
+          useDefineForClassFields: true,
+        },
+      },
+      env: {
+        targets,
+        // This makes sure transform.useDefineForClassFields still work with env.targets
+        forceAllTransforms: true,
+        mode: 'entry',
+        coreJs: '3.2.1',
+      },
+      isModule: 'unknown',
+    },
+  };
+}
+
 export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker: WorkerConfig) {
+  const targets = browserlist.loadConfig({ path: worker.repoRoot });
   const ENTRY_CREATOR = require.resolve('./entry_point_creator');
 
   const commonConfig: webpack.Configuration = {
     node: { fs: 'empty' },
     context: Path.normalize(bundle.contextDir),
-    cache: true,
+    cache: false,
     entry: {
       [bundle.id]: ENTRY_CREATOR,
     },
@@ -145,63 +187,18 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
         {
           test: /\.scss$/,
           exclude: /node_modules/,
-          oneOf: [
-            ...worker.themeTags.map((theme) => ({
-              resourceQuery: `?${theme}`,
-              use: [
-                {
-                  loader: 'style-loader',
-                },
-                {
-                  loader: 'css-loader',
-                  options: {
-                    sourceMap: !worker.dist,
-                  },
-                },
-                {
-                  loader: 'postcss-loader',
-                  options: {
-                    sourceMap: !worker.dist,
-                    postcssOptions: {
-                      config: require.resolve('@osd/optimizer/postcss.config.js'),
-                    },
-                  },
-                },
-                {
-                  loader: 'comment-stripper',
-                  options: {
-                    language: 'css',
-                  },
-                },
-                {
-                  loader: 'sass-loader',
-                  options: {
-                    additionalData(content: string, loaderContext: webpack.loader.LoaderContext) {
-                      return `@import ${stringifyRequest(
-                        loaderContext,
-                        Path.resolve(
-                          worker.repoRoot,
-                          `src/core/public/core_app/styles/_globals_${theme}.scss`
-                        )
-                      )};\n${content}`;
-                    },
-                    webpackImporter: false,
-                    implementation: require('sass-embedded'),
-                    sassOptions: {
-                      outputStyle: 'compressed',
-                      includePaths: [Path.resolve(worker.repoRoot, 'node_modules')],
-                      sourceMapRoot: `/${bundle.type}:${bundle.id}`,
-                    },
-                  },
-                },
-              ],
-            })),
+          use: [
             {
-              loader: require.resolve('./theme_loader'),
+              loader: 'style-loader',
+            },
+            {
+              loader: 'css-loader',
               options: {
-                bundleId: bundle.id,
-                themeTags: worker.themeTags,
+                sourceMap: !worker.dist,
               },
+            },
+            {
+              loader: require.resolve('./noop_css_loader'),
             },
           ],
         },
@@ -227,14 +224,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
             // exclude stories
             /\.stories\.(js|jsx|ts|tsx)$/,
           ],
-          use: {
-            loader: 'babel-loader',
-            options: {
-              babelrc: false,
-              envName: worker.dist ? 'production' : 'development',
-              presets: [BABEL_PRESET_PATH],
-            },
-          },
+          use: getSwcLoaderConfig({ syntax: 'typescript', jsx: true, targets }),
         },
         {
           test: /\.js$/,
@@ -242,14 +232,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
            * so we need to build from source and transpile for webpack v4
            */
           include: /node_modules[\\/]@?reactflow/,
-          use: {
-            loader: 'babel-loader',
-            options: {
-              babelrc: false,
-              envName: worker.dist ? 'production' : 'development',
-              presets: [BABEL_PRESET_PATH],
-            },
-          },
+          use: getSwcLoaderConfig({ syntax: 'ecmascript', jsx: false, targets }),
         },
         {
           test: /\.(html|md|txt|tmpl)$/,
@@ -260,12 +243,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
         {
           test: /\.cjs$/,
           include: /node_modules/,
-          use: {
-            loader: 'babel-loader',
-            options: {
-              presets: [BABEL_PRESET_PATH],
-            },
-          },
+          use: getSwcLoaderConfig({ syntax: 'ecmascript', jsx: false, targets }),
         },
         {
           test: /\.m?js$/,
@@ -275,18 +253,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
             /node_modules[\\/]fast-png/,
             /node_modules[\\/]iobuffer/,
           ],
-          use: {
-            loader: 'babel-loader',
-            options: {
-              presets: [BABEL_PRESET_PATH],
-              plugins: [
-                '@babel/plugin-transform-class-properties',
-                '@babel/plugin-transform-class-static-block',
-                '@babel/plugin-transform-private-methods',
-                '@babel/plugin-transform-private-property-in-object',
-              ],
-            },
-          },
+          use: getSwcLoaderConfig({ syntax: 'ecmascript', jsx: false, targets }),
         },
       ],
     },

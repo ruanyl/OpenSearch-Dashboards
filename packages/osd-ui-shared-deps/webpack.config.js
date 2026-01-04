@@ -39,6 +39,38 @@ const UiSharedDeps = require('./index');
 
 const MOMENT_SRC = require.resolve('moment/min/moment-with-locales.js');
 
+function getSwcLoaderConfig({ targets, jsx, syntax }) {
+  return {
+    loader: 'swc-loader',
+    options: {
+      jsc: {
+        parser: {
+          syntax,
+          ...(syntax === 'ecmascript' && jsx ? { jsx: true } : {}),
+          ...(syntax === 'typescript' && jsx ? { tsx: true } : {}),
+          decorators: true,
+          dynamicImport: true,
+        },
+        externalHelpers: true,
+        transform: {
+          react: {
+            runtime: 'automatic',
+          },
+          useDefineForClassFields: true,
+        },
+      },
+      env: {
+        targets,
+        // This makes sure transform.useDefineForClassFields still work with env.targets
+        forceAllTransforms: true,
+        mode: 'entry',
+        coreJs: '3.2.1',
+      },
+      isModule: 'unknown',
+    },
+  };
+}
+const targets = ['last 2 versions', 'ie >= 11'];
 exports.getWebpackConfig = ({ dev = false } = {}) => ({
   mode: dev ? 'development' : 'production',
   entry: {
@@ -125,112 +157,39 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
       },
       {
         include: [require.resolve('./theme.ts')],
-        use: [
-          {
-            loader: 'babel-loader',
-            options: {
-              presets: [require.resolve('@osd/babel-preset/webpack_preset')],
-            },
-          },
-        ],
+        use: getSwcLoaderConfig({ syntax: 'typescript', targets }),
       },
       {
         test: !dev ? /[\\\/]@elastic[\\\/]eui[\\\/].*\.js$/ : () => false,
-        use: [
-          {
-            loader: 'babel-loader',
-            options: {
-              plugins: [
-                [
-                  require.resolve('babel-plugin-transform-react-remove-prop-types'),
-                  {
-                    mode: 'remove',
-                    removeImport: true,
-                  },
-                ],
-              ],
-            },
-          },
-        ],
+        use: getSwcLoaderConfig({ syntax: 'ecmascript', targets }),
       },
       {
         test: /worker_proxy_service\.js$/,
         exclude: /node_modules/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            babelrc: false,
-            presets: [require.resolve('@osd/babel-preset/webpack_preset')],
-          },
-        },
+        use: getSwcLoaderConfig({ syntax: 'ecmascript', targets }),
       },
       // Add special handling for monaco-editor files to transpile newer JavaScript syntax
       {
         test: /[\/\\]node_modules[\/\\]monaco-editor[\/\\].*\.js$/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            babelrc: false,
-            presets: [require.resolve('@osd/babel-preset/webpack_preset')],
-            plugins: [
-              require.resolve('@babel/plugin-transform-class-static-block'),
-              require.resolve('@babel/plugin-transform-nullish-coalescing-operator'),
-              require.resolve('@babel/plugin-transform-optional-chaining'),
-              require.resolve('@babel/plugin-transform-numeric-separator'),
-            ],
-          },
-        },
+        use: getSwcLoaderConfig({ syntax: 'ecmascript', targets }),
       },
       // Add special handling for ANTLR-generated JavaScript files in osd-monaco
       {
         test: /[\/\\]osd-antlr-grammar[\/\\]target[\/\\].*\.generated[\/\\].*\.js$/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            babelrc: false,
-            presets: [require.resolve('@osd/babel-preset/webpack_preset')],
-            plugins: [
-              require.resolve('@babel/plugin-transform-class-static-block'),
-              require.resolve('@babel/plugin-transform-nullish-coalescing-operator'),
-              require.resolve('@babel/plugin-transform-optional-chaining'),
-              require.resolve('@babel/plugin-transform-numeric-separator'),
-            ],
-          },
-        },
+        use: getSwcLoaderConfig({ syntax: 'ecmascript', targets }),
       },
       // Add special handling for antlr4ng ES module files
+      // type: 'javascript/auto' tells webpack to auto-detect module type instead of
+      // treating .mjs as strict ES modules, which fixes the named export error
       {
         test: /[\/\\]node_modules[\/\\]antlr4ng[\/\\].*\.m?js$/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            babelrc: false,
-            presets: [require.resolve('@osd/babel-preset/webpack_preset')],
-            plugins: [
-              require.resolve('@babel/plugin-transform-class-static-block'),
-              require.resolve('@babel/plugin-transform-nullish-coalescing-operator'),
-              require.resolve('@babel/plugin-transform-optional-chaining'),
-              require.resolve('@babel/plugin-transform-numeric-separator'),
-            ],
-          },
-        },
+        type: 'javascript/auto',
+        use: getSwcLoaderConfig({ syntax: 'ecmascript', targets }),
       },
       // Add special handling for all osd-monaco target JavaScript files
       {
         test: /[\/\\]osd-monaco[\/\\]target[\/\\].*\.js$/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            babelrc: false,
-            presets: [require.resolve('@osd/babel-preset/webpack_preset')],
-            plugins: [
-              require.resolve('@babel/plugin-transform-class-static-block'),
-              require.resolve('@babel/plugin-transform-nullish-coalescing-operator'),
-              require.resolve('@babel/plugin-transform-optional-chaining'),
-              require.resolve('@babel/plugin-transform-numeric-separator'),
-            ],
-          },
-        },
+        use: getSwcLoaderConfig({ syntax: 'ecmascript', targets }),
       },
     ],
   },
