@@ -611,10 +611,10 @@ export class ExplorePlugin
     plugins: ExploreSetupDependencies
   ) {
     const getStartServices = async () => {
-      const [coreStart, deps] = await core.getStartServices();
+      const [coreStart, depsStart] = await core.getStartServices();
       return {
-        executeTriggerActions: deps.uiActions.executeTriggerActions,
         isEditable: () => coreStart.application.capabilities.discover?.save as boolean,
+        dashboard: depsStart.dashboard,
       };
     };
 

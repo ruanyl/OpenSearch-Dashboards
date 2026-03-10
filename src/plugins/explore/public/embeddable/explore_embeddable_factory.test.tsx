@@ -54,9 +54,16 @@ describe('ExploreEmbeddableFactory', () => {
       ]),
     })),
   };
+  const mockAttributeService = {
+    inputIsRefType: jest.fn(),
+    getInputAsRefType: jest.fn(),
+    getExplicitInputFromEmbeddable: jest.fn(),
+  };
   const mockStartServices = {
-    executeTriggerActions: jest.fn(),
     isEditable: jest.fn().mockReturnValue(true),
+    dashboard: {
+      getAttributeService: jest.fn().mockReturnValue(mockAttributeService),
+    },
   };
 
   beforeEach(() => {
@@ -143,7 +150,7 @@ describe('ExploreEmbeddableFactory', () => {
         editable: false,
       }),
       input,
-      mockStartServices.executeTriggerActions,
+      mockAttributeService,
       undefined
     );
   });
@@ -184,7 +191,7 @@ describe('ExploreEmbeddableFactory', () => {
         indexPatterns: [],
       }),
       input,
-      mockStartServices.executeTriggerActions,
+      mockAttributeService,
       undefined
     );
   });
@@ -235,7 +242,7 @@ describe('ExploreEmbeddableFactory', () => {
         editApp: 'explore/logs',
       }),
       input,
-      mockStartServices.executeTriggerActions,
+      mockAttributeService,
       undefined
     );
   });
@@ -328,7 +335,7 @@ describe('ExploreEmbeddableFactory', () => {
         indexPatterns: [],
       }),
       input,
-      mockStartServices.executeTriggerActions,
+      mockAttributeService,
       undefined
     );
   });

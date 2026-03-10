@@ -4,19 +4,24 @@
  */
 
 import { SavedObjectReference } from 'opensearch-dashboards/public';
-import { Embeddable, EmbeddableInput, EmbeddableOutput } from '../../../embeddable/public';
-import { Filter, IIndexPattern, TimeRange } from '../../../data/public';
+import {
+  Embeddable,
+  EmbeddableInput,
+  EmbeddableOutput,
+  SavedObjectEmbeddableInput,
+} from '../../../embeddable/public';
+import { Filter, IIndexPattern, ISearchSource, TimeRange } from '../../../data/public';
 import { QueryState } from '../application/utils/state_management/slices';
 import { SortOrder, SavedExplore } from '../types/saved_explore_types';
+import { ATTRIBUTE_SERVICE_KEY } from '../../../dashboard/public';
 
 export interface ExploreInput extends EmbeddableInput {
-  timeRange: TimeRange;
+  // timeRange: TimeRange;
   query?: QueryState;
-  filters?: Filter[];
-  hidePanelTitles?: boolean;
+  // filters?: Filter[];
+  // hidePanelTitles?: boolean;
   columns?: string[];
   sort?: SortOrder[];
-  // attributes and references are used to create embeddables without storing saved object
   attributes?: ExploreByValueAttributes;
   references?: SavedObjectReference[];
 }
@@ -31,7 +36,7 @@ export interface ExploreEmbeddable extends Embeddable<ExploreInput, ExploreOutpu
   type: string;
 }
 
-type ExploreByValueAttributes = Pick<
+export type ExploreByValueAttributes = Pick<
   SavedExplore,
   | 'title'
   | 'description'
@@ -41,4 +46,12 @@ type ExploreByValueAttributes = Pick<
   | 'visualization'
   | 'uiState'
   | 'kibanaSavedObjectMeta'
->;
+> & {
+  searchSource?: ISearchSource;
+};
+
+export type ExploreByValueInput = {
+  [ATTRIBUTE_SERVICE_KEY]: ExploreByValueAttributes;
+} & ExploreInput;
+
+export type ExploreByReferenceInput = SavedObjectEmbeddableInput & ExploreInput;

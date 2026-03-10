@@ -20,12 +20,22 @@ import {
   UI_SETTINGS,
   IFieldType,
 } from '../../../data/public';
-import { Container, Embeddable, IEmbeddable } from '../../../embeddable/public';
-import { ExploreInput, ExploreOutput } from './types';
+import {
+  Container,
+  Embeddable,
+  IEmbeddable,
+  ReferenceOrValueEmbeddable,
+} from '../../../embeddable/public';
+import {
+  ExploreInput,
+  ExploreOutput,
+  ExploreByValueInput,
+  ExploreByReferenceInput,
+  ExploreByValueAttributes,
+} from './types';
 import {
   getRequestInspectorStats,
   getResponseInspectorStats,
-  getServices,
   IndexPattern,
   ISearchSource,
 } from '../application/legacy/discover/opensearch_dashboards_services';
@@ -34,12 +44,12 @@ import { SortOrder } from '../types/saved_explore_types';
 import { SavedExplore } from '../saved_explore';
 import { ExploreEmbeddableComponent } from './explore_embeddable_component';
 import { ExploreServices } from '../types';
-import { ExpressionRendererEvent, ExpressionRenderError } from '../../../expressions/public';
 import { VisColumn } from '../components/visualizations/types';
 import { DOC_HIDE_TIME_COLUMN_SETTING, SAMPLE_SIZE_SETTING } from '../../common';
 import * as columnActions from '../application/legacy/discover/application/utils/state_management/common';
 import { buildColumns } from '../application/legacy/discover/application/utils/columns';
-import { UiActionsStart, APPLY_FILTER_TRIGGER } from '../../../ui_actions/public';
+import { APPLY_FILTER_TRIGGER } from '../../../ui_actions/public';
+import { TriggerContextMapping } from '../../../ui_actions/public';
 import {
   ChartType,
   StyleOptions,
@@ -53,6 +63,7 @@ import { normalizeResultRows } from '../components/visualizations/utils/normaliz
 import { visualizationRegistry } from '../components/visualizations/visualization_registry';
 import { prepareQueryForLanguage } from '../application/utils/languages';
 import { mergeStyles } from '../components/visualizations/utils/utils';
+import { AttributeService, ATTRIBUTE_SERVICE_KEY } from '../../../dashboard/public';
 
 export interface SearchProps {
   description?: string;
@@ -78,7 +89,6 @@ export interface SearchProps {
   onMoveColumn?: (column: string, index: number) => void;
   onSetColumns?: (columns: string[]) => void;
   onFilter?: (field: IFieldType, value: string[], operator: string) => void;
-  onExpressionEvent?: (e: ExpressionRendererEvent) => void;
   onSelectTimeRange?: (range: TimeRange) => void;
   tableData?: {
     rows: Array<Record<string, any>>;
@@ -99,7 +109,9 @@ interface ExploreEmbeddableConfig {
 
 export class ExploreEmbeddable
   extends Embeddable<ExploreInput, ExploreOutput>
-  implements IEmbeddable<ExploreInput, ExploreOutput> {
+  implements
+    IEmbeddable<ExploreInput, ExploreOutput>,
+    ReferenceOrValueEmbeddable<ExploreByValueInput, ExploreByReferenceInput> {
   private abortController?: AbortController;
   private readonly savedExplore: SavedExplore;
   private inspectorAdaptors: Adapters;
@@ -131,7 +143,11 @@ export class ExploreEmbeddable
       editApp,
     }: ExploreEmbeddableConfig,
     initialInput: ExploreInput,
-    private readonly executeTriggerActions: UiActionsStart['executeTriggerActions'],
+    private readonly attributeService?: AttributeService<
+      ExploreByValueAttributes,
+      ExploreByValueInput,
+      ExploreByReferenceInput
+    >,
     parent?: Container
   ) {
     super(
@@ -156,17 +172,62 @@ export class ExploreEmbeddable
 
     this.subscription = merge(this.getOutput$(), this.getInput$()).subscribe(() => {
       this.panelTitle = this.output.title || '';
-      if (this.searchProps) {
+      if (this.searchProps && this.node) {
         this.updateHandler(this.searchProps);
       }
     });
-    this.autoRefreshFetchSubscription = getServices()
-      .timefilter.getAutoRefreshFetch$()
+    this.autoRefreshFetchSubscription = this.services.timefilter
+      .getAutoRefreshFetch$()
       .subscribe(() => {
-        if (this.searchProps) {
+        if (this.searchProps && this.node) {
           this.updateHandler(this.searchProps, true);
         }
       });
+  }
+
+  public supportedTriggers(): Array<keyof TriggerContextMapping> {
+    return [APPLY_FILTER_TRIGGER];
+  }
+
+  inputIsRefType = (input: ExploreInput): input is ExploreByReferenceInput => {
+    return this.attributeService?.inputIsRefType(input as ExploreByReferenceInput) ?? false;
+  };
+
+  getInputAsValueType = async (): Promise<ExploreByValueInput> => {
+    const searchSource = this.savedExplore.searchSource;
+    const searchSourceJSON = JSON.stringify(searchSource.getSerializedFields());
+
+    const attributes: ExploreByValueAttributes = {
+      title: this.savedExplore.title,
+      description: this.savedExplore.description,
+      columns: this.savedExplore.columns,
+      sort: this.savedExplore.sort,
+      type: this.savedExplore.type,
+      visualization: this.savedExplore.visualization,
+      uiState: this.savedExplore.uiState,
+      kibanaSavedObjectMeta: { searchSourceJSON },
+    };
+    return {
+      id: this.getInput().id,
+      timeRange: this.getInput().timeRange,
+      [ATTRIBUTE_SERVICE_KEY]: attributes,
+    } as ExploreByValueInput;
+  };
+
+  getInputAsRefType = async (): Promise<ExploreByReferenceInput> => {
+    if (!this.attributeService) {
+      throw new Error('AttributeService required for getInputAsRefType');
+    }
+    const input = this.attributeService.getExplicitInputFromEmbeddable(this);
+    return this.attributeService.getInputAsRefType(input, {
+      showSaveModal: true,
+      saveModalTitle: this.getTitle(),
+    }) as Promise<ExploreByReferenceInput>;
+  };
+
+  private updateSearchProps(changes: Partial<SearchProps>): SearchProps {
+    this.searchProps = { ...this.searchProps!, ...changes };
+    return this.searchProps;
   }
 
   private initializeSearchProps() {
@@ -194,7 +255,6 @@ export class ExploreEmbeddable
     const uiState = JSON.parse(this.savedExplore.uiState || '{}');
     const activeTab = uiState.activeTab;
     if (query) {
-      // If the active tab is logs, we need to prepare the query for the logs tab
       if (activeTab === 'logs') {
         query.query = defaultPrepareQueryString(query);
       } else {
@@ -213,9 +273,7 @@ export class ExploreEmbeddable
     };
 
     searchProps.onAddColumn = (columnName: string) => {
-      if (!searchProps.columns) {
-        return;
-      }
+      if (!searchProps.columns) return;
       const updatedColumns = buildColumns(
         columnActions.addColumn(searchProps.columns, { column: columnName })
       );
@@ -223,9 +281,7 @@ export class ExploreEmbeddable
     };
 
     searchProps.onRemoveColumn = (columnName: string) => {
-      if (!searchProps.columns) {
-        return;
-      }
+      if (!searchProps.columns) return;
       const updatedColumns = columnActions.removeColumn(searchProps.columns, columnName);
       const updatedSort =
         searchProps.sort && searchProps.sort.length
@@ -235,9 +291,7 @@ export class ExploreEmbeddable
     };
 
     searchProps.onMoveColumn = (columnName, newIndex: number) => {
-      if (!searchProps.columns) {
-        return;
-      }
+      if (!searchProps.columns) return;
       const oldIndex = searchProps.columns.indexOf(columnName);
       const updatedColumns = columnActions.reorderColumn(searchProps.columns, oldIndex, newIndex);
       this.updateInput({ columns: updatedColumns });
@@ -260,24 +314,16 @@ export class ExploreEmbeddable
         ...filter,
         $state: { store: opensearchFilters.FilterStateStore.APP_STATE },
       }));
-      await this.executeTriggerActions(APPLY_FILTER_TRIGGER, {
+      this.services.uiActions.getTrigger(APPLY_FILTER_TRIGGER).exec({
         embeddable: this,
         filters,
-      });
-    };
-
-    searchProps.onExpressionEvent = async (e: ExpressionRendererEvent) => {
-      if (e.name === 'applyFilter') {
-        await this.executeTriggerActions(APPLY_FILTER_TRIGGER, {
-          embeddable: this,
-          ...e.data,
-        });
-      }
+      } as any);
     };
 
     searchProps.onSelectTimeRange = async (range: TimeRange) => {
-      await this.executeTriggerActions(APPLY_FILTER_TRIGGER, {
+      await this.services.uiActions.getTrigger(APPLY_FILTER_TRIGGER).exec({
         embeddable: this,
+        timeFieldName: '*',
         filters: [
           {
             range: {
@@ -289,11 +335,10 @@ export class ExploreEmbeddable
             },
           },
         ],
-        timeFieldName: '*',
-      });
+      } as any);
     };
 
-    this.updateHandler(searchProps);
+    this.searchProps = searchProps;
   }
 
   private async updateHandler(searchProps: SearchProps, force = false) {
@@ -304,18 +349,18 @@ export class ExploreEmbeddable
       !isEqual(query, this.prevState.query) ||
       !isEqual(timeRange, this.prevState.timeRange);
 
-    // If there is column or sort data on the panel, that means the original columns or sort settings have
-    // been overridden in a dashboard.
-    searchProps.columns = this.input.columns || this.savedExplore.columns;
-    searchProps.sort = this.input.sort || this.savedExplore.sort;
-    searchProps.sharedItemTitle = this.panelTitle;
+    this.updateSearchProps({
+      columns: this.input.columns || this.savedExplore.columns,
+      sort: this.input.sort || this.savedExplore.sort,
+      sharedItemTitle: this.panelTitle,
+    });
 
     if (needFetch) {
       this.prevState = { filters, query, timeRange };
-      this.searchProps = searchProps;
       try {
         await this.fetch();
       } catch (error: any) {
+        this.renderComplete.dispatchError();
         this.updateOutput({
           loading: false,
           error: {
@@ -323,13 +368,10 @@ export class ExploreEmbeddable
             message: error?.body?.message,
           },
         });
-        throw error;
       }
-    } else if (searchProps) {
-      this.searchProps = searchProps;
     }
     if (this.node && this.searchProps) {
-      this.renderComponent(this.node, this.searchProps);
+      this.renderComponent(this.searchProps);
     }
   }
 
@@ -344,7 +386,7 @@ export class ExploreEmbeddable
     const { searchSource } = this.savedExplore;
     if (this.abortController) this.abortController.abort();
     this.abortController = new AbortController();
-    searchSource.setField('size', getServices().uiSettings.get(SAMPLE_SIZE_SETTING));
+    searchSource.setField('size', this.services.uiSettings.get(SAMPLE_SIZE_SETTING));
 
     this.inspectorAdaptors.requests.reset();
     const title = i18n.translate('explore.embeddable.inspectorRequestDataTitle', {
@@ -358,15 +400,18 @@ export class ExploreEmbeddable
     searchSource.getSearchRequestBody().then((body: Record<string, unknown>) => {
       inspectorRequest.json(body);
     });
+
+    this.renderComplete.dispatchInProgress();
     this.updateOutput({ loading: true, error: undefined });
-    this.searchProps.isLoading = true;
+    this.updateSearchProps({ isLoading: true });
+
     const query = searchSource.getField('query');
     const languageConfig = this.services.data.query.queryString
       .getLanguageService()
       .getLanguage(query!.language);
     const resp = await searchSource.fetch({
       abortSignal: this.abortController.signal,
-      withLongNumeralsSupport: await getServices().uiSettings.get(
+      withLongNumeralsSupport: await this.services.uiSettings.get(
         UI_SETTINGS.DATA_WITH_LONG_NUMERALS
       ),
       ...(languageConfig &&
@@ -374,19 +419,23 @@ export class ExploreEmbeddable
           formatter: languageConfig.fields.formatter,
         }),
     });
+
+    if (this.abortController.signal.aborted) return;
+
     const rows = resp.hits.hits;
     const fieldSchema = searchSource.getDataFrame()?.schema;
     const visualizationData = normalizeResultRows(rows, fieldSchema ?? []);
-
-    // TODO: Confirm if tab is in visualization but visualization is null, what to display?
-    // const displayVis = rows?.length > 0 && visualizationData && visualizationData.ruleId;
     const visualization = JSON.parse(this.savedExplore.visualization || '{}');
     const uiState = JSON.parse(this.savedExplore.uiState || '{}');
     const selectedChartType = visualization.chartType ?? 'line';
     const vis = visualizationRegistry.getVisualizationConfig(selectedChartType);
-    this.searchProps.chartType = selectedChartType;
-    this.searchProps.activeTab = uiState.activeTab;
-    this.searchProps.styleOptions = visualization.params;
+
+    const propsUpdate: Partial<SearchProps> = {
+      chartType: selectedChartType,
+      activeTab: uiState.activeTab,
+      styleOptions: visualization.params,
+    };
+
     if (uiState.activeTab !== 'logs' && visualizationData) {
       const { numericalColumns, categoricalColumns, dateColumns } = visualizationData;
       const allColumns = [
@@ -395,10 +444,9 @@ export class ExploreEmbeddable
         ...(dateColumns ?? []),
       ];
 
-      // Check if there's data to visualize
       if (visualizationData.transformedData && visualizationData.transformedData.length > 0) {
         if (selectedChartType === 'table') {
-          this.searchProps.tableData = {
+          propsUpdate.tableData = {
             columns: allColumns,
             rows: visualizationData.transformedData ?? [],
           };
@@ -429,7 +477,7 @@ export class ExploreEmbeddable
           if (vis) {
             styles = mergeStyles(vis.ui.style.defaults, styles);
           }
-          this.searchProps.styleOptions = styles;
+          propsUpdate.styleOptions = styles;
 
           const spec = matchedRule.toSpec(
             visualizationData.transformedData,
@@ -441,22 +489,44 @@ export class ExploreEmbeddable
             axesMapping,
             searchContext.timeRange
           );
-          this.searchProps.spec = spec;
+          propsUpdate.spec = spec;
         }
       }
     }
-    this.updateOutput({ loading: false, error: undefined });
+
     inspectorRequest.stats(getResponseInspectorStats(resp, searchSource)).ok({ json: resp });
-    this.searchProps.rows = rows;
-    // NOTE: PPL response is not the same as OpenSearch response, resp.hits.total here is 0.
-    this.searchProps.hits = resp.hits.hits.length;
-    this.searchProps.isLoading = false;
+    this.updateSearchProps({
+      ...propsUpdate,
+      rows,
+      hits: resp.hits.hits.length,
+      isLoading: false,
+    });
+    this.renderComplete.dispatchComplete();
+    this.updateOutput({ loading: false, error: undefined });
   };
 
-  private renderComponent(node: HTMLElement, searchProps: SearchProps) {
+  private renderComponent(searchProps: SearchProps) {
     if (!this.searchProps || !this.root) return;
-    const MemorizedExploreEmbeddableComponent = React.memo(ExploreEmbeddableComponent);
-    this.root.render(<MemorizedExploreEmbeddableComponent searchProps={searchProps} />);
+    this.root.render(<ExploreEmbeddableComponent searchProps={searchProps} />);
+  }
+
+  public render(node: HTMLElement) {
+    super.render(node);
+    this.node = node;
+    this.node.style.height = '100%';
+    this.node.setAttribute('data-shared-item', '');
+    this.node.setAttribute('data-test-subj', 'exploreLoader');
+
+    if (this.root) {
+      this.root.unmount();
+    }
+    this.root = createRoot(node);
+
+    if (this.searchProps) {
+      this.updateSearchProps({ isLoading: true });
+      this.renderComponent(this.searchProps);
+      this.updateHandler(this.searchProps, true);
+    }
   }
 
   public destroy() {
@@ -464,11 +534,9 @@ export class ExploreEmbeddable
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
-
     if (this.autoRefreshFetchSubscription) {
       this.autoRefreshFetchSubscription.unsubscribe();
     }
-
     if (this.abortController) {
       this.abortController.abort();
     }
@@ -478,26 +546,6 @@ export class ExploreEmbeddable
     if (this.root) {
       this.root.unmount();
     }
-  }
-
-  onContainerError = (error: ExpressionRenderError) => {
-    if (this.abortController) {
-      this.abortController.abort();
-    }
-    this.renderComplete.dispatchError();
-    this.updateOutput({ loading: false, error });
-  };
-
-  public render(node: HTMLElement) {
-    if (!this.searchProps) {
-      throw new Error('Search scope not defined');
-    }
-    if (this.root) {
-      this.root.unmount();
-    }
-    this.node = node;
-    this.node.style.height = '100%';
-    this.root = createRoot(node);
   }
 
   public getInspectorAdapters() {

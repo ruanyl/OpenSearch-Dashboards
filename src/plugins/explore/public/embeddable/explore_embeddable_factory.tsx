@@ -6,8 +6,6 @@
 import { i18n } from '@osd/i18n';
 import { SavedObjectAttributes, SimpleSavedObject } from 'opensearch-dashboards/public';
 
-import { UiActionsStart } from '../../../ui_actions/public';
-// TODO: should not use getServices from legacy any more
 import { getServices } from '../application/legacy/discover/opensearch_dashboards_services';
 import {
   EmbeddableFactoryDefinition,
@@ -19,16 +17,24 @@ import {
   injectSearchSourceReferences,
   parseSearchSourceJSON,
 } from '../../../data/public';
-import { ExploreInput, ExploreOutput } from './types';
+import {
+  ExploreInput,
+  ExploreOutput,
+  ExploreByValueAttributes,
+  ExploreByValueInput,
+  ExploreByReferenceInput,
+} from './types';
 import { EXPLORE_EMBEDDABLE_TYPE } from './constants';
 import { ExploreEmbeddable } from './explore_embeddable';
 import { VisualizationRegistryService } from '../services/visualization_registry_service';
 import { ExploreFlavor } from '../../common';
 import { SavedExplore } from '../saved_explore';
+import { AttributeService, DashboardStart } from '../../../dashboard/public';
+import { OnSaveProps, checkForDuplicateTitle } from '../../../saved_objects/public';
 
 interface StartServices {
-  executeTriggerActions: UiActionsStart['executeTriggerActions'];
   isEditable: () => boolean;
+  dashboard: DashboardStart;
 }
 
 export class ExploreEmbeddableFactory
@@ -58,10 +64,84 @@ export class ExploreEmbeddableFactory
     includeFields: ['kibanaSavedObjectMeta', 'visualization'],
   };
 
+  private attributeService?: AttributeService<
+    ExploreByValueAttributes,
+    ExploreByValueInput,
+    ExploreByReferenceInput
+  >;
+
   constructor(
     private getStartServices: () => Promise<StartServices>,
     private readonly visualizationRegistryService: VisualizationRegistryService
   ) {}
+
+  private async getAttributeService() {
+    if (!this.attributeService) {
+      const { dashboard } = await this.getStartServices();
+      this.attributeService = dashboard.getAttributeService<
+        ExploreByValueAttributes,
+        ExploreByValueInput,
+        ExploreByReferenceInput
+      >(this.type, {
+        saveMethod: this.saveMethod.bind(this),
+        checkForDuplicateTitle: this.checkTitle.bind(this),
+      });
+    }
+    return this.attributeService!;
+  }
+
+  private async saveMethod(
+    attributes: ExploreByValueAttributes,
+    savedObjectId?: string
+  ): Promise<{ id: string }> {
+    const services = getServices();
+    const savedExplore = await services.getSavedExploreById(savedObjectId);
+
+    savedExplore.title = attributes.title;
+    savedExplore.description = attributes.description ?? '';
+    savedExplore.columns = attributes.columns;
+    savedExplore.sort = attributes.sort;
+    savedExplore.visualization = attributes.visualization;
+    savedExplore.uiState = attributes.uiState;
+
+    if (attributes.searchSource) {
+      savedExplore.searchSource = attributes.searchSource;
+    }
+
+    if (attributes.kibanaSavedObjectMeta?.searchSourceJSON) {
+      savedExplore.searchSourceFields = JSON.parse(
+        attributes.kibanaSavedObjectMeta.searchSourceJSON
+      );
+    }
+
+    savedExplore.copyOnSave = false;
+    const id = await savedExplore.save({ confirmOverwrite: false });
+
+    if (!id) {
+      throw new Error('Saving explore object failed');
+    }
+    return { id };
+  }
+
+  private async checkTitle(props: OnSaveProps): Promise<true> {
+    const services = getServices();
+    return checkForDuplicateTitle(
+      {
+        id: '',
+        title: props.newTitle,
+        copyOnSave: false,
+        lastSavedTitle: '',
+        getOpenSearchType: () => this.type,
+        getDisplayName: () => this.getDisplayName(),
+      },
+      props.isTitleDuplicateConfirmed,
+      props.onTitleDuplicate,
+      {
+        savedObjectsClient: services.savedObjects.client,
+        overlays: services.overlays,
+      }
+    );
+  }
 
   public canCreateNew() {
     return false;
@@ -92,7 +172,6 @@ export class ExploreEmbeddableFactory
         throw new Error('Saved object not found');
       }
       const indexPattern = savedObject.searchSource.getField('index');
-      const { executeTriggerActions } = await this.getStartServices();
       const { ExploreEmbeddable: ExploreEmbeddableClass } = await import('./explore_embeddable');
       const flavor = savedObject.type ?? ExploreFlavor.Logs;
       const editUrl = services.addBasePath(`/app/explore/${flavor}/${url}`);
@@ -109,7 +188,7 @@ export class ExploreEmbeddableFactory
           editApp: `explore/${flavor}`,
         },
         input,
-        executeTriggerActions,
+        await this.getAttributeService(),
         parent
       );
     } catch (e) {
@@ -118,9 +197,6 @@ export class ExploreEmbeddableFactory
     }
   };
 
-  /**
-   * Creates a by-value explore embeddable from input without a stored saved object.
-   */
   public async create(
     input: ExploreInput,
     parent?: Container
@@ -146,20 +222,23 @@ export class ExploreEmbeddableFactory
       const searchSource = await services.data.search.searchSource.create(searchSourceValues);
       const indexPattern = searchSource.getField('index');
 
-      const savedExplore = {
-        id: input.id,
-        ...input.attributes,
-        searchSource,
-      } as SavedExplore;
+      const savedExplore = await services.getSavedExploreById();
+      savedExplore.title = input.attributes?.title;
+      savedExplore.description = input.attributes?.description;
+      savedExplore.columns = input.attributes?.columns;
+      savedExplore.sort = input.attributes?.sort;
+      savedExplore.type = input.attributes?.type;
+      savedExplore.visualization = input.attributes?.visualization;
+      savedExplore.uiState = input.attributes?.uiState;
+      savedExplore.searchSource = searchSource;
 
-      const { executeTriggerActions } = await this.getStartServices();
       const { ExploreEmbeddable: ExploreEmbeddableClass } = await import('./explore_embeddable');
       const flavor = savedExplore.type;
 
       return new ExploreEmbeddableClass(
         {
           savedExplore,
-          editUrl: '', // by-value embeddables cannot be edited
+          editUrl: '',
           editPath: '',
           filterManager,
           editable: false,
@@ -168,7 +247,7 @@ export class ExploreEmbeddableFactory
           editApp: `explore/${flavor}`,
         },
         input,
-        executeTriggerActions,
+        await this.getAttributeService(),
         parent
       );
     } catch (e) {

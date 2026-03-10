@@ -85,7 +85,6 @@ describe('ExploreEmbeddable', () => {
   let embeddable: ExploreEmbeddable;
   let mockSavedExplore: any;
   let mockInput: ExploreInput;
-  let mockExecuteTriggerActions: jest.Mock;
   let mockNode: HTMLElement;
 
   beforeEach(() => {
@@ -146,9 +145,6 @@ describe('ExploreEmbeddable', () => {
       query: { query: '', language: 'PPL' },
     };
 
-    // Create mock executeTriggerActions
-    mockExecuteTriggerActions = jest.fn();
-
     // Create mock node
     mockNode = document.createElement('div');
 
@@ -172,6 +168,11 @@ describe('ExploreEmbeddable', () => {
       return 500;
     });
 
+    // Mock uiActions.getTrigger to return an object with exec
+    mockServices.uiActions.getTrigger = jest.fn().mockReturnValue({
+      exec: jest.fn(),
+    });
+
     // Create the embeddable
     embeddable = new ExploreEmbeddable(
       {
@@ -184,8 +185,7 @@ describe('ExploreEmbeddable', () => {
         services: mockServices,
         editApp: 'explore/logs',
       },
-      mockInput,
-      mockExecuteTriggerActions
+      mockInput
     );
   });
 
@@ -269,44 +269,11 @@ describe('ExploreEmbeddable', () => {
     expect(updateHandlerSpy).not.toHaveBeenCalled();
   });
 
-  test('onContainerError aborts and updates output', () => {
-    // @ts-ignore - accessing private property for testing
-    embeddable.abortController = { abort: jest.fn() };
-    // @ts-ignore - accessing private property for testing
-    embeddable.renderComplete = { dispatchError: jest.fn() };
-    // @ts-ignore - accessing private method for testing
-    embeddable.updateOutput = jest.fn();
-    const error = new Error('test error');
-    embeddable.onContainerError(error);
-    // @ts-ignore - accessing private property for testing
-    expect(embeddable.abortController.abort).toHaveBeenCalled();
-    // @ts-ignore - accessing private property for testing
-    expect(embeddable.renderComplete.dispatchError).toHaveBeenCalled();
-    // @ts-ignore - accessing private method for testing
-    expect(embeddable.updateOutput).toHaveBeenCalledWith({ loading: false, error });
-  });
-
-  test('onContainerError works when abortController is undefined', () => {
-    // @ts-ignore - accessing private property for testing
-    embeddable.abortController = undefined;
-    // @ts-ignore - accessing private property for testing
-    embeddable.renderComplete = { dispatchError: jest.fn() };
-    // @ts-ignore - accessing private method for testing
-    embeddable.updateOutput = jest.fn();
-    const error = new Error('test error');
-    // @ts-ignore - accessing private method for testing
-    embeddable.onContainerError(error);
-    // @ts-ignore - accessing private property for testing
-    expect(embeddable.renderComplete.dispatchError).toHaveBeenCalled();
-    // @ts-ignore - accessing private method for testing
-    expect(embeddable.updateOutput).toHaveBeenCalledWith({ loading: false, error });
-  });
-
   test('renderComponent does nothing if searchProps is undefined', () => {
     // @ts-ignore - accessing private property for testing
     embeddable.searchProps = undefined;
     // @ts-ignore - accessing private method for testing
-    expect(() => embeddable.renderComponent(mockNode, undefined)).not.toThrow();
+    expect(() => embeddable.renderComponent(undefined)).not.toThrow();
   });
 
   test('destroy is idempotent (can be called multiple times safely)', () => {
@@ -361,8 +328,10 @@ describe('ExploreEmbeddable', () => {
     // Test onFilter
     await searchProps?.onFilter?.({ name: 'field1' } as any, ['value1'], 'is');
 
-    // Check that executeTriggerActions was called
-    expect(mockExecuteTriggerActions).toHaveBeenCalled();
+    // Check that uiActions trigger was called
+    // @ts-ignore - accessing private property for testing
+    const mockExec = embeddable.services.uiActions.getTrigger().exec;
+    expect(mockExec).toHaveBeenCalled();
   });
 
   test('onFilter returns early when indexPattern is not available', async () => {
@@ -391,7 +360,6 @@ describe('ExploreEmbeddable', () => {
       return 500;
     });
 
-    const mockExecuteTriggerActionsLocal = jest.fn();
     const embeddableNoIndex = new ExploreEmbeddable(
       {
         savedExplore: mockSavedExploreNoIndex,
@@ -403,8 +371,7 @@ describe('ExploreEmbeddable', () => {
         services: mockServices,
         editApp: 'explore/logs',
       },
-      mockInput,
-      mockExecuteTriggerActionsLocal
+      mockInput
     );
 
     // Manually set searchProps to enable onFilter testing
@@ -419,11 +386,12 @@ describe('ExploreEmbeddable', () => {
     // @ts-ignore
     const searchProps = embeddableNoIndex.searchProps;
 
-    // Test onFilter returns early without calling executeTriggerActions
+    // Test onFilter returns early without calling uiActions trigger
     await searchProps?.onFilter?.({ name: 'field1' } as any, ['value1'], 'is');
 
-    // Check that executeTriggerActions was NOT called
-    expect(mockExecuteTriggerActionsLocal).not.toHaveBeenCalled();
+    // Check that uiActions trigger exec was NOT called
+    const mockExec = mockServices.uiActions.getTrigger().exec;
+    expect(mockExec).not.toHaveBeenCalled();
   });
 
   test('renders successfully even without index pattern', () => {
@@ -461,8 +429,7 @@ describe('ExploreEmbeddable', () => {
         services: mockServices,
         editApp: 'explore/logs',
       },
-      mockInput,
-      mockExecuteTriggerActions
+      mockInput
     );
 
     // searchProps should be initialized even without index pattern
@@ -509,8 +476,7 @@ describe('ExploreEmbeddable', () => {
         services: mockServices,
         editApp: 'explore/logs',
       },
-      mockInput,
-      mockExecuteTriggerActions
+      mockInput
     );
     // @ts-ignore - searchProps should now be defined even without indexPattern
     expect(embeddableNoIndex.searchProps).toBeDefined();
