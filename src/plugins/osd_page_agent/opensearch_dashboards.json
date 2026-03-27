@@ -1,0 +1,9 @@
+{
+  "id": "osdPageAgent",
+  "version": "opensearchDashboards",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["data"],
+  "optionalPlugins": ["home", "savedObjects"],
+  "requiredBundles": ["contextProvider"]
+}

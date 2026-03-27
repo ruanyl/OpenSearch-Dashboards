@@ -242,12 +242,12 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
           <EuiFlexItem grow={true} style={{ width: '100%' }}>
             <EuiFormRow
               label={i18n.translate('agentTraces.addtoDashboardModal.saveSearchName', {
-                defaultMessage: 'Save search',
+                defaultMessage: 'Visualization name',
               })}
             >
               <EuiFieldText
                 value={title}
-                placeholder="Enter save search name"
+                placeholder="Enter visualization name"
                 onChange={(e) => {
                   setIsTitleOrDashboardTitleDuplicate(false);
                   setTitle(e.target.value);
