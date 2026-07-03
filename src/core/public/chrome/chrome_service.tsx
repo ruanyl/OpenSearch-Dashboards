@@ -265,11 +265,9 @@ export class ChromeService {
     this.initVisibility(application);
     this.initHeaderVariant(application);
 
-    this.updatedHeaderSubscription = uiSettings
-      .get$('home:useNewHomePage', false)
-      .subscribe((value) => {
-        this.useUpdatedHeader = value;
-      });
+    this.updatedHeaderSubscription = uiSettings.get$('home:useNewHomePage').subscribe((value) => {
+      this.useUpdatedHeader = value;
+    });
 
     const appTitle$ = new BehaviorSubject<string>('Overview');
     const applicationClasses$ = new BehaviorSubject<Set<string>>(new Set());

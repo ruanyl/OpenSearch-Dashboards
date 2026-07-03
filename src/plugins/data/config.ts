@@ -58,7 +58,7 @@ export const configSchema = schema.object({
     }),
   }),
   savedQueriesNewUI: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
+    enabled: schema.boolean({ defaultValue: true }),
   }),
 });
 

@@ -21,7 +21,7 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     name: i18n.translate('home.ui_settings.useNewHomePage.label', {
       defaultMessage: 'Use New Home Page',
     }),
-    value: false,
+    value: true,
     description: i18n.translate('home.ui_settings.useNewHomePage.description', {
       defaultMessage: 'Try the new home page',
     }),

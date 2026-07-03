@@ -727,7 +727,7 @@ export function getUiSettings(
       name: i18n.translate('data.advancedSettings.query.enhancements.enableTitle', {
         defaultMessage: 'Enable query enhancements',
       }),
-      value: false,
+      value: true,
       description: i18n.translate('data.advancedSettings.query.enhancements.enableText', {
         defaultMessage: `
           <strong>Experimental</strong>:

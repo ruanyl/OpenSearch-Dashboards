@@ -303,7 +303,7 @@ export class ChromeNavGroupService {
   }
   setup({ uiSettings }: { uiSettings: IUiSettingsClient }): ChromeNavGroupServiceSetupContract {
     this.navGroupEnabledUiSettingsSubscription = uiSettings
-      .get$('home:useNewHomePage', false)
+      .get$('home:useNewHomePage')
       .subscribe((value) => {
         this.navGroupEnabled = value;
       });
