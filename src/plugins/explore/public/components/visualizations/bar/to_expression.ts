@@ -46,6 +46,36 @@ const alignTimeRangeToBuckets = (
   };
 };
 
+const includeDataInTimeRange = (
+  timeRange: { from: string; to: string } | undefined,
+  data: Array<Record<string, any>>,
+  timeField: string
+) => {
+  if (!timeRange) {
+    return timeRange;
+  }
+
+  const from = new Date(timeRange.from);
+  const to = new Date(timeRange.to);
+  let minTimestamp = Infinity;
+  let maxTimestamp = -Infinity;
+  data.forEach((row) => {
+    const timestamp = new Date(row[timeField]).getTime();
+    if (!isNaN(timestamp)) {
+      minTimestamp = Math.min(minTimestamp, timestamp);
+      maxTimestamp = Math.max(maxTimestamp, timestamp);
+    }
+  });
+  if (isNaN(from.getTime()) || isNaN(to.getTime()) || !isFinite(minTimestamp)) {
+    return timeRange;
+  }
+
+  return {
+    from: new Date(Math.min(from.getTime(), minTimestamp)).toISOString(),
+    to: new Date(Math.max(to.getTime(), maxTimestamp)).toISOString(),
+  };
+};
+
 export const createBarSpec = (
   transformedData: Array<Record<string, any>>,
   styles: BarChartStyle,
@@ -123,9 +153,11 @@ export const createTimeBarChart = (
     : timeUnit === TimeUnit.AUTO
       ? inferTimeIntervals(transformedData, timeField)
       : timeUnit;
-  const bucketAwareTimeRange =
+  const visibleTimeRange =
     styles.showFullTimeRange && transformedData.length > 0
-      ? alignTimeRangeToBuckets(timeRange, effectiveTimeUnit)
+      ? effectiveTimeUnit
+        ? alignTimeRangeToBuckets(timeRange, effectiveTimeUnit)
+        : includeDataInTimeRange(timeRange, transformedData, timeField)
       : timeRange;
   const result = pipe(
     skipBucketing
@@ -162,7 +194,7 @@ export const createTimeBarChart = (
     styles,
     axisConfig,
     axisColumnMappings: axisColumnMappings ?? {},
-    timeRange: bucketAwareTimeRange,
+    timeRange: visibleTimeRange,
   });
 
   return { spec: result.spec, legendItems: result.legendItems ?? [] };
@@ -213,9 +245,11 @@ export const createGroupedTimeBarChart = (
     : timeUnit === TimeUnit.AUTO
       ? inferTimeIntervals(transformedData, timeField)
       : timeUnit;
-  const bucketAwareTimeRange =
+  const visibleTimeRange =
     styles.showFullTimeRange && transformedData.length > 0
-      ? alignTimeRangeToBuckets(timeRange, effectiveTimeUnit)
+      ? effectiveTimeUnit
+        ? alignTimeRangeToBuckets(timeRange, effectiveTimeUnit)
+        : includeDataInTimeRange(timeRange, transformedData, timeField)
       : timeRange;
 
   const result = pipe(
@@ -257,7 +291,7 @@ export const createGroupedTimeBarChart = (
     styles,
     axisConfig,
     axisColumnMappings: axisColumnMappings ?? {},
-    timeRange: bucketAwareTimeRange,
+    timeRange: visibleTimeRange,
   });
 
   return { spec: result.spec, legendItems: result.legendItems ?? [] };
