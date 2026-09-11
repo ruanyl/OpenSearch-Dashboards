@@ -119,11 +119,11 @@ describe('IndexPatterns', () => {
     expect(indexPattern).toBe(await indexPatterns.get(id));
   });
 
-  test('savedObjectCache pre-fetches title and displayName', async () => {
+  test('savedObjectCache pre-fetches fields required for source compatibility filtering', async () => {
     expect(await indexPatterns.getIds()).toEqual(['id']);
     expect(savedObjectsClient.find).toHaveBeenCalledWith({
       type: 'index-pattern',
-      fields: ['title', 'displayName'],
+      fields: ['title', 'displayName', 'type'],
       perPage: 10000,
     });
   });

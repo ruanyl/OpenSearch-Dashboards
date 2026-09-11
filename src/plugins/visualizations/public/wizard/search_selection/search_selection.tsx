@@ -43,7 +43,7 @@ import { ApplicationStart, IUiSettingsClient, SavedObjectsStart } from '../../..
 
 import { SavedObjectFinderUi } from '../../../../saved_objects/public';
 import { VisType } from '../../vis_types';
-import { UNSUPPORTED_ENGINE_TYPES } from '../../../../data/common';
+import { DEFAULT_DATA, UNSUPPORTED_ENGINE_TYPES } from '../../../../data/common';
 
 interface SearchSelectionProps {
   onSearchSelected: (searchId: string, searchType: string) => void;
@@ -56,7 +56,7 @@ interface SearchSelectionProps {
 
 interface SearchSelectionState {
   indexPatternIds: Set<string>;
-  hasAnalyticEngine: boolean;
+  hasUnsupportedSources: boolean;
 }
 
 export class SearchSelection extends React.Component<SearchSelectionProps, SearchSelectionState> {
@@ -66,7 +66,7 @@ export class SearchSelection extends React.Component<SearchSelectionProps, Searc
     super(props);
     this.state = {
       indexPatternIds: new Set(),
-      hasAnalyticEngine: false,
+      hasUnsupportedSources: false,
     };
   }
 
@@ -75,10 +75,16 @@ export class SearchSelection extends React.Component<SearchSelectionProps, Searc
     const indexPatternList = await this.props.data.indexPatterns.getCache({
       excludeEngineTypes: UNSUPPORTED_ENGINE_TYPES,
     });
+    const legacyCompatibleIndexPatterns = indexPatternList?.filter(
+      (indexPattern) => indexPattern.attributes.type !== DEFAULT_DATA.SET_TYPES.INDEX
+    );
 
     this.setState({
-      indexPatternIds: new Set(indexPatternList?.map((indexpattern) => indexpattern.id)),
-      hasAnalyticEngine: (allIndexPatterns?.length ?? 0) > (indexPatternList?.length ?? 0),
+      indexPatternIds: new Set(
+        legacyCompatibleIndexPatterns?.map((indexPattern) => indexPattern.id)
+      ),
+      hasUnsupportedSources:
+        (allIndexPatterns?.length ?? 0) > (legacyCompatibleIndexPatterns?.length ?? 0),
     });
   }
 
@@ -100,16 +106,16 @@ export class SearchSelection extends React.Component<SearchSelectionProps, Searc
           </EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
-          {this.state.hasAnalyticEngine && (
+          {this.state.hasUnsupportedSources && (
             <>
               <EuiCallOut
                 size="s"
                 iconType="iInCircle"
                 title={i18n.translate(
-                  'visualizations.newVisWizard.searchSelection.optimizedEngineNotSupported',
+                  'visualizations.newVisWizard.searchSelection.unsupportedSources',
                   {
                     defaultMessage:
-                      "This visualization type supports only DSL queries. Index patterns and saved searches backed by Optimized engine (AnalyticEngine type) data sources aren't supported and are hidden from the list below.",
+                      "Legacy visualizations support only DSL queries. Optimized engine (AnalyticEngine) index patterns and PPL/SQL-only index datasets, including their saved searches, aren't supported and are hidden from the list below.",
                   }
                 )}
               />

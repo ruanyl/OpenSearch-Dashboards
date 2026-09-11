@@ -64,6 +64,7 @@ const savedObjectType = 'index-pattern';
 export interface IndexPatternSavedObjectAttrs {
   title: string;
   displayName?: string;
+  type?: string;
 }
 
 interface IndexPatternsServiceDeps {
@@ -121,7 +122,7 @@ export class IndexPatternsService {
   private async refreshSavedObjectsCache() {
     this.savedObjectsCache = await this.savedObjectsClient.find<IndexPatternSavedObjectAttrs>({
       type: 'index-pattern',
-      fields: ['title', 'displayName'],
+      fields: ['title', 'displayName', 'type'],
       perPage: 10000,
     });
 
