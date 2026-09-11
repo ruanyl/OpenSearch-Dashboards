@@ -469,6 +469,7 @@ describe('DatasetService', () => {
         attributes: {
           title: 'DataSource',
           dataSourceEngineType: 'OpenSearch',
+          dataSourceVersion: '2.17.0',
         },
       }),
     } as unknown as IndexPatternsContract;
@@ -481,6 +482,8 @@ describe('DatasetService', () => {
         id: 'datasource-id',
         title: 'DataSource',
         type: 'OpenSearch',
+        engineType: 'OpenSearch',
+        version: '2.17.0',
       });
     });
   });

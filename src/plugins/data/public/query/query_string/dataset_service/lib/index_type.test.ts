@@ -242,6 +242,11 @@ describe('indexTypeConfig', () => {
             id: 'datasource1',
             title: 'DataSource 1',
             type: 'OpenSearch',
+            meta: {
+              type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+              dataSourceEngineType: 'OpenSearch',
+              dataSourceVersion: '2.17.0',
+            },
           },
           meta: { timeFieldName: '@timestamp', type: DATA_STRUCTURE_META_TYPES.CUSTOM },
         },
@@ -253,8 +258,8 @@ describe('indexTypeConfig', () => {
         id: 'datasource1',
         title: 'DataSource 1',
         type: 'OpenSearch',
-        engineType: undefined,
-        version: '',
+        engineType: 'OpenSearch',
+        version: '2.17.0',
       });
     });
 

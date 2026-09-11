@@ -72,12 +72,10 @@ export class SearchSelection extends React.Component<SearchSelectionProps, Searc
 
   async componentDidMount() {
     const allIndexPatterns = await this.props.data.indexPatterns.getCache();
-    const indexPatternList = await this.props.data.indexPatterns.getCache({
+    const legacyCompatibleIndexPatterns = await this.props.data.indexPatterns.getCache({
       excludeEngineTypes: UNSUPPORTED_ENGINE_TYPES,
+      excludeDatasetTypes: [DEFAULT_DATA.SET_TYPES.INDEX],
     });
-    const legacyCompatibleIndexPatterns = indexPatternList?.filter(
-      (indexPattern) => indexPattern.attributes.type !== DEFAULT_DATA.SET_TYPES.INDEX
-    );
 
     this.setState({
       indexPatternIds: new Set(

@@ -230,14 +230,32 @@ export class IndexPatternsService {
     }
   };
 
-  getCache = async (options?: { excludeEngineTypes?: readonly string[] }) => {
+  getCache = async (options?: {
+    excludeEngineTypes?: readonly string[];
+    excludeDatasetTypes?: readonly string[];
+  }) => {
     if (!this.savedObjectsCache) {
       await this.refreshSavedObjectsCache();
     }
-    if (!options?.excludeEngineTypes?.length || !this.savedObjectsCache) {
+    if (!this.savedObjectsCache) {
       return this.savedObjectsCache;
     }
-    return this.applyEngineTypeFilter(this.savedObjectsCache, options.excludeEngineTypes);
+
+    let filteredSavedObjects = this.savedObjectsCache;
+    const excludeDatasetTypes = options?.excludeDatasetTypes;
+    if (excludeDatasetTypes?.length) {
+      filteredSavedObjects = filteredSavedObjects.filter(
+        (savedObject) => !excludeDatasetTypes.includes(savedObject.attributes.type ?? '')
+      );
+    }
+    if (options?.excludeEngineTypes?.length) {
+      filteredSavedObjects = await this.applyEngineTypeFilter(
+        filteredSavedObjects,
+        options.excludeEngineTypes
+      );
+    }
+
+    return filteredSavedObjects;
   };
 
   // Excludes saved objects whose backing data source's `dataSourceEngineType` is in
