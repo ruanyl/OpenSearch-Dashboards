@@ -38,6 +38,7 @@ import { httpServiceMock } from '../../../http/http_service.mock';
 import {
   applicationServiceMock,
   chromeServiceMock,
+  coreTelemetryServiceMock,
   keyboardShortcutServiceMock,
 } from '../../../mocks';
 import { ISidecarConfig, SIDECAR_DOCKED_MODE } from '../../../overlays';
@@ -98,6 +99,7 @@ function mockProps() {
     useUpdatedHeader: false,
     globalSearchCommands$: new BehaviorSubject([]),
     navControlsIconSideNavFooter$: new BehaviorSubject([]),
+    telemetryRecorder: coreTelemetryServiceMock.createPluginRecorder(),
   };
 }
 
@@ -369,6 +371,9 @@ describe('Header', () => {
       const component = mountWithIntl(<Header {...props} />);
 
       expect(component.find('GlobalSearchCommandPalette')).toHaveLength(1);
+      expect(component.find('GlobalSearchCommandPalette').prop('telemetryRecorder')).toBe(
+        props.telemetryRecorder
+      );
     });
 
     it('does not register keyboard shortcut when keyboardShortcut service is not provided', () => {

@@ -7,6 +7,7 @@ import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import { KeyboardShortcutStart, ShortcutDefinition } from '../../../../keyboard_shortcut';
 import { GlobalSearchCommand, GlobalSearchResult } from '../../../global_search';
+import { coreTelemetryServiceMock } from '../../../../telemetry/telemetry_service.mock';
 import { GlobalSearchCommandPalette } from './command_palette';
 
 const createResult = (
@@ -51,10 +52,12 @@ describe('<GlobalSearchCommandPalette />', () => {
     const command = createCommand('pages');
     const commands$ = new BehaviorSubject([command]);
     const { keyboardShortcut, shortcuts } = createKeyboardShortcut();
+    const telemetryRecorder = coreTelemetryServiceMock.createPluginRecorder();
     const { getByTestId, queryByTestId } = render(
       <GlobalSearchCommandPalette
         globalSearchCommands$={commands$}
         keyboardShortcut={keyboardShortcut}
+        telemetryRecorder={telemetryRecorder}
       />
     );
 
@@ -81,6 +84,13 @@ describe('<GlobalSearchCommandPalette />', () => {
     expect(queryByTestId('global-search-command-palette-footer')).not.toBeInTheDocument();
     expect(command.run).toHaveBeenCalledWith('', {
       abortSignal: expect.any(AbortSignal),
+    });
+    expect(telemetryRecorder.recordEvent).toHaveBeenCalledWith({
+      name: 'global_search_command_palette_opened',
+      data: {
+        count: 1,
+        types: ['PAGES'],
+      },
     });
   });
 
@@ -147,10 +157,12 @@ describe('<GlobalSearchCommandPalette />', () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     const commands$ = new BehaviorSubject([command]);
     const { keyboardShortcut, shortcuts } = createKeyboardShortcut();
+    const telemetryRecorder = coreTelemetryServiceMock.createPluginRecorder();
     const { getByTestId, getByText, queryByTestId } = render(
       <GlobalSearchCommandPalette
         globalSearchCommands$={commands$}
         keyboardShortcut={keyboardShortcut}
+        telemetryRecorder={telemetryRecorder}
       />
     );
 
@@ -170,6 +182,13 @@ describe('<GlobalSearchCommandPalette />', () => {
     });
     expect(queryByTestId('global-search-command-palette-loading')).not.toBeInTheDocument();
     expect(consoleErrorSpy).toHaveBeenCalledWith('Global search failed', expect.any(Error));
+    expect(telemetryRecorder.recordEvent).toHaveBeenCalledWith({
+      name: 'global_search_command_palette_search_failed',
+      data: {
+        errorType: 'Error',
+        queryLength: 7,
+      },
+    });
 
     fireEvent.change(getByTestId('global-search-command-palette-input'), {
       target: { value: 'page' },
@@ -244,10 +263,12 @@ describe('<GlobalSearchCommandPalette />', () => {
     ]);
     const commands$ = new BehaviorSubject([command]);
     const { keyboardShortcut, shortcuts } = createKeyboardShortcut();
+    const telemetryRecorder = coreTelemetryServiceMock.createPluginRecorder();
     const { getByTestId, getByText, queryByTestId } = render(
       <GlobalSearchCommandPalette
         globalSearchCommands$={commands$}
         keyboardShortcut={keyboardShortcut}
+        telemetryRecorder={telemetryRecorder}
       />
     );
 
@@ -268,6 +289,14 @@ describe('<GlobalSearchCommandPalette />', () => {
 
     expect(secondExecute).toHaveBeenCalledTimes(1);
     expect(firstExecute).not.toHaveBeenCalled();
+    expect(telemetryRecorder.recordEvent).toHaveBeenCalledWith({
+      name: 'global_search_command_palette_result_selected',
+      data: {
+        type: 'PAGES',
+        interactionType: 'mouse',
+        queryLength: 6,
+      },
+    });
     await waitFor(() => {
       expect(queryByTestId('global-search-command-palette')).not.toBeInTheDocument();
     });
@@ -282,10 +311,12 @@ describe('<GlobalSearchCommandPalette />', () => {
     ]);
     const commands$ = new BehaviorSubject([command]);
     const { keyboardShortcut, shortcuts } = createKeyboardShortcut();
+    const telemetryRecorder = coreTelemetryServiceMock.createPluginRecorder();
     const { getByTestId, getByText } = render(
       <GlobalSearchCommandPalette
         globalSearchCommands$={commands$}
         keyboardShortcut={keyboardShortcut}
+        telemetryRecorder={telemetryRecorder}
       />
     );
 
@@ -299,6 +330,14 @@ describe('<GlobalSearchCommandPalette />', () => {
 
     expect(secondExecute).toHaveBeenCalledTimes(1);
     expect(firstExecute).not.toHaveBeenCalled();
+    expect(telemetryRecorder.recordEvent).toHaveBeenCalledWith({
+      name: 'global_search_command_palette_result_selected',
+      data: {
+        type: 'PAGES',
+        interactionType: 'keyboard',
+        queryLength: 6,
+      },
+    });
   });
 
   it('does not wrap keyboard navigation at the first or last item', async () => {

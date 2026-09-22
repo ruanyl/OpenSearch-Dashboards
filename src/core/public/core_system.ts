@@ -275,6 +275,7 @@ export class CoreSystem {
         overlays,
         workspaces,
         keyboardShortcut,
+        telemetry,
       });
 
       this.coreApp.start({ application, http, notifications, uiSettings });

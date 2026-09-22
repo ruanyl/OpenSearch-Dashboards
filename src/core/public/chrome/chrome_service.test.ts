@@ -41,7 +41,7 @@ import { notificationServiceMock } from '../notifications/notifications_service.
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 import { ChromeService } from './chrome_service';
 import { getAppInfo } from '../application/utils';
-import { overlayServiceMock, workspacesServiceMock } from '../mocks';
+import { coreTelemetryServiceMock, overlayServiceMock, workspacesServiceMock } from '../mocks';
 import { HeaderVariant } from './constants';
 import { keyboardShortcutServiceMock } from '../keyboard_shortcut/keyboard_shortcut_service.mock';
 
@@ -82,6 +82,7 @@ function defaultStartDeps(availableApps?: App[]) {
     overlays: overlayServiceMock.createStartContract(),
     workspaces: workspacesServiceMock.createStartContract(),
     keyboardShortcut: keyboardShortcutServiceMock.createStart(),
+    telemetry: coreTelemetryServiceMock.createStartContract(),
     updateApplications: (() => {}) as (applications?: App[]) => void,
   };
 
@@ -213,10 +214,14 @@ describe('start', () => {
     });
 
     it('renders the Header component correctly', async () => {
-      const { chrome } = await start();
+      const { chrome, startDeps } = await start();
       const headerComponent = shallow(React.createElement(() => chrome.getHeaderComponent()));
       // Verify that the Header component renders without errors
       expect(headerComponent).toBeDefined();
+      expect(startDeps.telemetry.getPluginRecorder).toHaveBeenCalledWith('core');
+      expect(headerComponent.prop('telemetryRecorder')).toBe(
+        startDeps.telemetry.getPluginRecorder.mock.results[0].value
+      );
     });
   });
 

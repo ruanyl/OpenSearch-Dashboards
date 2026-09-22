@@ -95,6 +95,7 @@ import { GlobalSearchCommand } from '../../global_search';
 import { HeaderBanner } from './header_banner';
 import { OBSERVABILITY_USE_CASE_ID } from '../../../../../core/utils';
 import { GlobalSearchCommandPalette } from '../global_search/command_palette/command_palette';
+import type { PluginTelemetryRecorder } from '../../../telemetry';
 
 export interface HeaderProps {
   http: HttpStart;
@@ -143,6 +144,7 @@ export interface HeaderProps {
   globalBanner$?: Observable<ChromeGlobalBanner | undefined>;
   keyboardShortcut?: KeyboardShortcutStart;
   globalSearchCommands$: Observable<GlobalSearchCommand[]>;
+  telemetryRecorder: PluginTelemetryRecorder;
 }
 
 const hasValue = (value: any) => {
@@ -170,6 +172,7 @@ export function Header({
   useUpdatedHeader,
   enableIconSideNav: enableIconSideNavSetting,
   keyboardShortcut,
+  telemetryRecorder,
   ...observables
 }: HeaderProps) {
   const isVisible = useObservable(observables.isVisible$, false);
@@ -794,6 +797,7 @@ export function Header({
         <GlobalSearchCommandPalette
           globalSearchCommands$={observables.globalSearchCommands$}
           keyboardShortcut={keyboardShortcut}
+          telemetryRecorder={telemetryRecorder}
         />
       )}
     </>

@@ -75,6 +75,7 @@ import {
 } from './global_search';
 import { searchPages } from './ui/global_search/search_pages_command';
 import { KeyboardShortcutStart } from '../keyboard_shortcut';
+import { TelemetryServiceStart } from '../telemetry';
 
 export { ChromeNavControls, ChromeRecentlyAccessed, ChromeDocTitle };
 
@@ -135,6 +136,7 @@ export interface StartDeps {
   overlays: OverlayStart;
   workspaces: WorkspacesStart;
   keyboardShortcut: KeyboardShortcutStart | undefined;
+  telemetry: TelemetryServiceStart;
 }
 
 type CollapsibleNavHeaderRender = () => JSX.Element | null;
@@ -260,6 +262,7 @@ export class ChromeService {
     overlays,
     workspaces,
     keyboardShortcut,
+    telemetry,
   }: StartDeps): Promise<InternalChromeStart> {
     this.initVisibility(application);
     this.initHeaderVariant(application);
@@ -297,6 +300,7 @@ export class ChromeService {
     this.applicationStart = application;
 
     const globalSearch = this.globalSearch.start();
+    const telemetryRecorder = telemetry.getPluginRecorder('core');
 
     // Track the current app id synchronously so the nav-popover navigateToApp
     // wrapper (below) can tell same-app from cross-app navigation.
@@ -483,6 +487,7 @@ export class ChromeService {
           globalSearchCommands$={globalSearch.getAllSearchCommands$()}
           globalBanner$={this.globalBanner$.pipe(takeUntil(this.stop$))}
           keyboardShortcut={keyboardShortcut}
+          telemetryRecorder={telemetryRecorder}
         />
       ),
 

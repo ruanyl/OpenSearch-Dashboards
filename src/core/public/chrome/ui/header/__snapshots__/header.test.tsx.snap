@@ -2988,6 +2988,13 @@ exports[`Header handles visibility and lock changes 1`] = `
     }
   }
   survey="/"
+  telemetryRecorder={
+    Object {
+      "recordError": [MockFunction],
+      "recordEvent": [MockFunction],
+      "recordMetric": [MockFunction],
+    }
+  }
   useUpdatedHeader={false}
   workspaceList$={
     BehaviorSubject {
@@ -10348,6 +10355,13 @@ exports[`Header renders application header without title 1`] = `
     }
   }
   survey="/"
+  telemetryRecorder={
+    Object {
+      "recordError": [MockFunction],
+      "recordEvent": [MockFunction],
+      "recordMetric": [MockFunction],
+    }
+  }
   useUpdatedHeader={true}
   workspaceList$={
     BehaviorSubject {
@@ -14826,6 +14840,13 @@ exports[`Header renders condensed header 1`] = `
     }
   }
   survey="/"
+  telemetryRecorder={
+    Object {
+      "recordError": [MockFunction],
+      "recordEvent": [MockFunction],
+      "recordMetric": [MockFunction],
+    }
+  }
   useUpdatedHeader={false}
   workspaceList$={
     BehaviorSubject {
@@ -20465,6 +20486,13 @@ exports[`Header renders page header with application title 1`] = `
     }
   }
   survey="/"
+  telemetryRecorder={
+    Object {
+      "recordError": [MockFunction],
+      "recordEvent": [MockFunction],
+      "recordMetric": [MockFunction],
+    }
+  }
   useUpdatedHeader={true}
   workspaceList$={
     BehaviorSubject {
@@ -25147,6 +25175,13 @@ exports[`Header toggles primary navigation menu when clicked 1`] = `
     }
   }
   survey="/"
+  telemetryRecorder={
+    Object {
+      "recordError": [MockFunction],
+      "recordEvent": [MockFunction],
+      "recordMetric": [MockFunction],
+    }
+  }
   useUpdatedHeader={false}
   workspaceList$={
     BehaviorSubject {

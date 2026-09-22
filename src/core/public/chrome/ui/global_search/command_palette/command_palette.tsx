@@ -26,22 +26,27 @@ import { KeyboardShortcutStart } from '../../../../keyboard_shortcut';
 import {
   GlobalSearchCommand,
   GlobalSearchResult,
+  SearchCommandKeyTypes,
   SearchCommandTypes,
 } from '../../../global_search';
 import { GlobalSearchResultGroup, runGlobalSearch } from '../../../global_search/run_global_search';
+import type { PluginTelemetryRecorder } from '../../../../telemetry';
 import './command_palette.scss';
 
 interface GlobalSearchCommandPaletteProps {
   globalSearchCommands$: Observable<GlobalSearchCommand[]>;
   keyboardShortcut: KeyboardShortcutStart;
+  telemetryRecorder?: PluginTelemetryRecorder;
 }
 
 interface CommandPaletteResult {
   commandId: string;
+  type: SearchCommandKeyTypes;
   result: GlobalSearchResult;
 }
 
 type CommandPaletteState = 'closed' | 'open' | 'closing';
+type ResultInteractionType = 'keyboard' | 'mouse';
 
 const resultListId = 'global-search-command-palette-results';
 const closeAnimationDuration = 150;
@@ -49,6 +54,7 @@ const closeAnimationDuration = 150;
 export const GlobalSearchCommandPalette = ({
   globalSearchCommands$,
   keyboardShortcut,
+  telemetryRecorder,
 }: GlobalSearchCommandPaletteProps) => {
   const globalSearchCommands = useObservable(globalSearchCommands$, []);
   const [paletteState, setPaletteState] = useState<CommandPaletteState>('closed');
@@ -82,13 +88,15 @@ export const GlobalSearchCommandPalette = ({
     const sections = orderedResultGroups
       .map((group) => ({
         ...group,
-        results: group.results.filter((result) => {
+        results: group.results.flatMap((result) => {
+          const commandPaletteResult = { ...result, type: group.type };
+
           if (result.result.placement === 'trailing') {
-            trailing.push(result);
-            return false;
+            trailing.push(commandPaletteResult);
+            return [];
           }
 
-          return true;
+          return [commandPaletteResult];
         }),
       }))
       .filter((group) => group.results.length);
@@ -127,43 +135,62 @@ export const GlobalSearchCommandPalette = ({
         defaultMessage: 'Type to search',
       });
 
-  const search = useCallback(async (value: string) => {
-    setQuery(value);
-    activeAbortControllerRef.current?.abort('Superseded by a newer global search');
+  const search = useCallback(
+    async (value: string) => {
+      setQuery(value);
+      activeAbortControllerRef.current?.abort('Superseded by a newer global search');
 
-    const abortController = new AbortController();
-    activeAbortControllerRef.current = abortController;
-    setResultGroups([]);
-    setHasSearchError(false);
-    setIsLoading(true);
+      const abortController = new AbortController();
+      activeAbortControllerRef.current = abortController;
+      setResultGroups([]);
+      setHasSearchError(false);
+      setIsLoading(true);
 
-    try {
-      const groups = await runGlobalSearch({
-        commands: globalSearchCommandsRef.current,
-        value,
-        abortSignal: abortController.signal,
-      });
+      try {
+        const groups = await runGlobalSearch({
+          commands: globalSearchCommandsRef.current,
+          value,
+          abortSignal: abortController.signal,
+        });
 
-      if (abortController.signal.aborted || activeAbortControllerRef.current !== abortController) {
-        return;
+        if (
+          abortController.signal.aborted ||
+          activeAbortControllerRef.current !== abortController
+        ) {
+          return;
+        }
+
+        setResultGroups(groups);
+      } catch (error) {
+        if (
+          abortController.signal.aborted ||
+          activeAbortControllerRef.current !== abortController
+        ) {
+          return;
+        }
+
+        // eslint-disable-next-line no-console
+        console.error('Global search failed', error);
+        telemetryRecorder?.recordEvent({
+          name: 'global_search_command_palette_search_failed',
+          data: {
+            errorType: error instanceof Error ? error.name : 'Unknown',
+            queryLength: value.length,
+          },
+        });
+        setHasSearchError(true);
+      } finally {
+        if (
+          !abortController.signal.aborted &&
+          activeAbortControllerRef.current === abortController
+        ) {
+          activeAbortControllerRef.current = undefined;
+          setIsLoading(false);
+        }
       }
-
-      setResultGroups(groups);
-    } catch (error) {
-      if (abortController.signal.aborted || activeAbortControllerRef.current !== abortController) {
-        return;
-      }
-
-      // eslint-disable-next-line no-console
-      console.error('Global search failed', error);
-      setHasSearchError(true);
-    } finally {
-      if (!abortController.signal.aborted && activeAbortControllerRef.current === abortController) {
-        activeAbortControllerRef.current = undefined;
-        setIsLoading(false);
-      }
-    }
-  }, []);
+    },
+    [telemetryRecorder]
+  );
 
   const clearSearch = useCallback(() => {
     activeAbortControllerRef.current?.abort('Global command palette closed');
@@ -198,9 +225,17 @@ export const GlobalSearchCommandPalette = ({
       clearSearch();
     }
 
+    const commands = globalSearchCommandsRef.current;
+    telemetryRecorder?.recordEvent({
+      name: 'global_search_command_palette_opened',
+      data: {
+        count: commands.length,
+        types: Array.from(new Set(commands.map((command) => command.type))),
+      },
+    });
     updatePaletteState('open');
     search('');
-  }, [clearSearch, search, updatePaletteState]);
+  }, [clearSearch, search, telemetryRecorder, updatePaletteState]);
 
   const toggleCommandPalette = useCallback(() => {
     if (paletteStateRef.current === 'open') {
@@ -257,13 +292,21 @@ export const GlobalSearchCommandPalette = ({
   }, [activeResultIndex]);
 
   const executeResult = useCallback(
-    (result: GlobalSearchResult) => {
+    ({ result, type }: CommandPaletteResult, interactionType: ResultInteractionType) => {
       if (paletteState === 'open') {
+        telemetryRecorder?.recordEvent({
+          name: 'global_search_command_palette_result_selected',
+          data: {
+            type,
+            interactionType,
+            queryLength: query.length,
+          },
+        });
         closeCommandPalette();
         result.execute();
       }
     },
-    [closeCommandPalette, paletteState]
+    [closeCommandPalette, paletteState, query.length, telemetryRecorder]
   );
 
   const onKeyDown = (event: KeyboardEvent) => {
@@ -296,7 +339,7 @@ export const GlobalSearchCommandPalette = ({
     if (event.key === 'Enter' && activeResultIndex >= 0 && !event.nativeEvent.isComposing) {
       event.preventDefault();
       event.stopPropagation();
-      executeResult(results[activeResultIndex].result);
+      executeResult(results[activeResultIndex], 'keyboard');
     }
   };
 
@@ -307,7 +350,8 @@ export const GlobalSearchCommandPalette = ({
   const hasResults = results.length > 0;
   let currentResultIndex = -1;
 
-  const renderResult = ({ commandId, result }: CommandPaletteResult) => {
+  const renderResult = (commandPaletteResult: CommandPaletteResult) => {
+    const { commandId, result } = commandPaletteResult;
     currentResultIndex += 1;
     const resultIndex = currentResultIndex;
     const isActive = resultIndex === activeResultIndex;
@@ -329,7 +373,7 @@ export const GlobalSearchCommandPalette = ({
       },
       onClick: (event: MouseEvent<HTMLElement>) => {
         event.preventDefault();
-        executeResult(result);
+        executeResult(commandPaletteResult, 'mouse');
       },
     };
 
@@ -349,7 +393,7 @@ export const GlobalSearchCommandPalette = ({
           if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault();
             event.stopPropagation();
-            executeResult(result);
+            executeResult(commandPaletteResult, 'keyboard');
           }
         }}
       >
