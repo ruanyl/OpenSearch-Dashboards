@@ -39,7 +39,7 @@ import {
 import { EXPLORE_EMBEDDABLE_TYPE } from './constants';
 import { SortOrder } from '../types/saved_explore_types';
 import { SavedExplore } from '../saved_explore';
-import { ExploreEmbeddableComponent } from './explore_embeddable_component';
+import { MemorizedExploreEmbeddableComponent } from './explore_embeddable_component';
 import { ExploreServices } from '../types';
 import { ExpressionRendererEvent, ExpressionRenderError } from '../../../expressions/public';
 import { AxisColumnMappings, VisColumn } from '../components/visualizations/types';
@@ -329,7 +329,7 @@ export class ExploreEmbeddable
     const variables = this.interpolationService.getVariables();
     let linkVariablesChanged = false;
     if (this.searchProps && !isEqual(variables, this.searchProps.variables)) {
-      this.searchProps = { ...this.searchProps, variables };
+      this.searchProps.variables = variables;
       linkVariablesChanged = true;
     }
 
@@ -771,8 +771,7 @@ export class ExploreEmbeddable
 
   private renderComponent(node: HTMLElement, searchProps: SearchProps) {
     if (!this.searchProps || !this.root) return;
-    const MemorizedExploreEmbeddableComponent = React.memo(ExploreEmbeddableComponent);
-    this.root.render(<MemorizedExploreEmbeddableComponent searchProps={searchProps} />);
+    this.root.render(<MemorizedExploreEmbeddableComponent searchProps={{ ...searchProps }} />);
   }
 
   public destroy() {

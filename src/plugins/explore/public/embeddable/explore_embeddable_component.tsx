@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { SearchProps } from './explore_embeddable';
 import { VisualizationNoResults, VisualizationRequestError } from '../../../visualizations/public';
@@ -146,3 +146,5 @@ export const ExploreEmbeddableComponent = ({ searchProps }: ExploreEmbeddablePro
     </EuiFlexGroup>
   );
 };
+
+export const MemorizedExploreEmbeddableComponent = React.memo(ExploreEmbeddableComponent);

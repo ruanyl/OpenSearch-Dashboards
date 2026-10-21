@@ -26,9 +26,14 @@ jest.mock('react-dom/client', () => ({
 }));
 
 // Mock the ExploreEmbeddableComponent
-jest.mock('./explore_embeddable_component', () => ({
-  ExploreEmbeddableComponent: jest.fn(() => null),
-}));
+jest.mock('./explore_embeddable_component', () => {
+  const react = jest.requireActual('react');
+  const ExploreEmbeddableComponent = jest.fn(() => null);
+  return {
+    ExploreEmbeddableComponent,
+    MemorizedExploreEmbeddableComponent: react.memo(ExploreEmbeddableComponent),
+  };
+});
 
 // Mock the PanelDataService singleton so fetch()/destroy() interactions with the
 // shared panel-data store can be asserted directly, without depending on whether
@@ -815,17 +820,12 @@ describe('ExploreEmbeddable', () => {
 
       // @ts-ignore - private for testing
       expect(emb.searchProps.variables).toEqual([{ name: 'service', value: 'a' }]);
-      // @ts-ignore - private for testing
-      const previousSearchProps = emb.searchProps;
 
       getVariables.mockReturnValue([{ name: 'service', value: 'b' }]);
       parent.variables$.next([{ id: 'service', name: 'service', current: ['b'] }]);
 
       // @ts-ignore - private for testing
       expect(emb.searchProps.variables).toEqual([{ name: 'service', value: 'b' }]);
-      // A new object, so a memoized component re-renders on the prop change.
-      // @ts-ignore - private for testing
-      expect(emb.searchProps).not.toBe(previousSearchProps);
 
       emb.destroy();
       parent.destroy();
