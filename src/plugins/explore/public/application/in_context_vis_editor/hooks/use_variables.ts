@@ -55,11 +55,11 @@ export const useVariables = (containerVariables?: Variable[]) => {
     }
   }, [queryBuilder, interpolationService]);
 
-  // Refresh variable options whenever their queries or the time range change.
+  // Refresh variable options and re-execute the panel once their interpolated values are ready.
   useEffect(() => {
-    if (!variableService) return;
+    if (!variableService || !interpolationService) return;
     const { timefilter } = services.data.query.timefilter;
-    return variableService.startRefreshScheduler({
+    const stopScheduler = variableService.startRefreshScheduler({
       time$: timefilter.getTimeUpdate$().pipe(
         map(() => timefilter.getTime()),
         startWith(timefilter.getTime())
@@ -68,11 +68,6 @@ export const useVariables = (containerVariables?: Variable[]) => {
       // still refresh the variables through time$.
       reload$: EMPTY,
     });
-  }, [variableService, services.data]);
-
-  // Re-execute query when interpolated result changes
-  useEffect(() => {
-    if (!variableService || !interpolationService) return;
 
     const sub = variableService.getVariables$().subscribe((variables: any[]) => {
       if (variables.some((v: any) => 'loading' in v && v.loading)) return;
@@ -87,8 +82,12 @@ export const useVariables = (containerVariables?: Variable[]) => {
       queryBuilder.executeQuery();
     });
 
-    return () => sub.unsubscribe();
-  }, [variableService, interpolationService, queryBuilder]);
+    return () => {
+      // Stopping clears pending flags; the editor must stop consuming snapshots first.
+      sub.unsubscribe();
+      stopScheduler();
+    };
+  }, [variableService, interpolationService, queryBuilder, services.data]);
 
   // Sync variable values to URL
   useEffect(() => {

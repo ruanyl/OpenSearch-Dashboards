@@ -47,6 +47,7 @@ import {
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 import { DashboardContainer, DashboardContainerOptions } from './dashboard_container';
 import { VariableService } from '../../variables/variable_service';
+import { Variable, VariableType } from '../../variables/types';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 import { inspectorPluginMock } from 'src/plugins/inspector/public/mocks';
 import { uiActionsPluginMock } from 'src/plugins/ui_actions/public/mocks';
@@ -655,10 +656,16 @@ test('destroy cleans up variable subscriptions', () => {
 });
 
 test('constructor initializes with variables when provided', () => {
-  const variables = [
-    { id: 'var1', name: 'test', type: 'custom' as const, value: 'hello', options: [] },
+  const variables: Variable[] = [
+    {
+      id: 'var1',
+      name: 'test',
+      type: VariableType.Custom,
+      current: ['hello'],
+      customOptions: ['hello'],
+    },
   ];
-  const initialInput = getSampleDashboardInput({ variables } as any);
+  const initialInput = getSampleDashboardInput({ variables });
 
   const container = new DashboardContainer(initialInput, options);
   expect(container.getInput().variables).toEqual(variables);
